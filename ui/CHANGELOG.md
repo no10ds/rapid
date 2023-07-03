@@ -51,7 +51,7 @@ See [v5.0.1] changes
 
 See [v5.0.0] changes
 
-### Added 
+### Added
 - Initial release of new rAPId UI
 
 [v6.2.0]: https://github.com/no10ds/rapid-ui/compare/v6.0.1...v6.2.0

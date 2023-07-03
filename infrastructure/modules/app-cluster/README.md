@@ -1,4 +1,4 @@
-<!-- BEGIN_TF_DOCS -->
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
 No requirements.
@@ -125,4 +125,4 @@ No modules.
 | <a name="output_rapid_metric_log_error_alarm_arn"></a> [rapid\_metric\_log\_error\_alarm\_arn](#output\_rapid\_metric\_log\_error\_alarm\_arn) | The arn of the log error alarm metric |
 | <a name="output_route_53_validation_record_fqdns"></a> [route\_53\_validation\_record\_fqdns](#output\_route\_53\_validation\_record\_fqdns) | The fqdns of the route53 validation records for the certificate |
 | <a name="output_service_table_arn"></a> [service\_table\_arn](#output\_service\_table\_arn) | The arn of the dynamoDB table that stores the user service |
-<!-- END_TF_DOCS -->
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

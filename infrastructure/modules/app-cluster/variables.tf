@@ -36,9 +36,9 @@ variable "host_port" {
 }
 
 variable "protocol" {
-  type  = string
+  type        = string
   description = "The protocol for the running ECS container"
-  default = "tcp"
+  default     = "tcp"
 }
 
 variable "catalog_disabled" {

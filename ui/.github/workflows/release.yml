@@ -10,7 +10,7 @@ jobs:
     runs-on: self-hosted
     env:
       GH_TOKEN: ${{ github.token }}
-    
+
     steps:
       - uses: actions/checkout@v3
 

@@ -27,7 +27,7 @@ jobs:
       - name: Populate .env with additional vars
         run: |
           cp ./.github/.github.env .env
-        
+
       - name: Install packages
         run: make npm-setup
 
