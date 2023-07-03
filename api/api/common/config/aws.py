@@ -1,0 +1,31 @@
+import os
+
+DATA_BUCKET = os.environ["DATA_BUCKET"]
+AWS_ACCOUNT = os.environ["AWS_ACCOUNT"]
+RESOURCE_PREFIX = os.environ["RESOURCE_PREFIX"]
+DOMAIN_NAME = os.environ["DOMAIN_NAME"]
+AWS_REGION = os.environ["AWS_REGION"]
+
+OUTPUT_QUERY_BUCKET = RESOURCE_PREFIX + "-aws-athena-query-results-" + AWS_ACCOUNT
+GLUE_CATALOGUE_DB_NAME = RESOURCE_PREFIX + "_catalogue_db"
+METADATA_CATALOGUE_DB_NAME = RESOURCE_PREFIX + "_metadata_table"
+ATHENA_DATABASE = GLUE_CATALOGUE_DB_NAME
+ATHENA_WORKGROUP = RESOURCE_PREFIX + "_athena_workgroup"
+GLUE_CRAWLER_ROLE = RESOURCE_PREFIX + "-glue_services_access"
+GLUE_CONNECTION_NAME = RESOURCE_PREFIX + "-s3-network-connection"
+GLUE_CSV_CLASSIFIER = RESOURCE_PREFIX + "-single_column_csv_classifier"
+DYNAMO_PERMISSIONS_TABLE_NAME = RESOURCE_PREFIX + "_users_permissions"
+SERVICE_TABLE_NAME = RESOURCE_PREFIX + "_service_table"
+
+SCHEMAS_LOCATION = "data/schemas"
+
+MAX_CUSTOM_TAG_COUNT = 30
+
+GLUE_CSV_SERIALISATION_LIBRARY = "org.apache.hadoop.hive.serde2.OpenCSVSerde"
+GLUE_QUOTE_CHAR = '"'
+GLUE_TABLE_PRESENCE_CHECK_RETRY_COUNT = 18
+GLUE_TABLE_PRESENCE_CHECK_INTERVAL = 20
+
+INFERRED_UNNAMED_COLUMN_PREFIX = (
+    "unnamed_"  # Pandas infers an empty column name as "unnamed_\d"
+)

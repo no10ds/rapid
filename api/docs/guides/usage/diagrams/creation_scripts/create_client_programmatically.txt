@@ -1,0 +1,9 @@
+title Create Client (Programmatic)
+
+User Admin->rAPId API: POST /client
+rAPId API->Cognito: Create client app
+Cognito->rAPId API: New client app credentials
+rAPId API->DB: Add client with permissions
+rAPId API->User Admin: New client app credentials
+
+#Created using https://www.websequencediagrams.com/

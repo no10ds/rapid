@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "domain": "test_e2e",
+    "dataset": "update",
+    "sensitivity": "PUBLIC",
+    "description": "A test dataset",
+    "key_value_tags": {
+      "test_e2e": "update",
+      "test": "e2e"
+    },
+    "key_only_tags": [],
+    "owners": [
+      {
+        "name": "update",
+        "email": "update@email.com"
+      }
+    ],
+    "update_behaviour": "APPEND"
+  },
+  "columns": [
+    {
+      "name": "year",
+      "data_type": "Int64",
+      "allow_null": true
+    },
+    {
+      "name": "month",
+      "data_type": "Int64",
+      "allow_null": true
+    },
+    {
+      "name": "destination",
+      "data_type": "object",
+      "allow_null": true
+    },
+    {
+      "name": "arrival",
+      "data_type": "object",
+      "allow_null": true
+    },
+    {
+      "name": "type",
+      "data_type": "object",
+      "allow_null": true
+    },
+    {
+      "name": "status",
+      "data_type": "object",
+      "allow_null": true
+    }
+  ]
+}
