@@ -1,0 +1,41 @@
+name: rAPId UI Release
+
+on:
+  release:
+    types: [released]
+
+jobs:
+
+  release:
+    runs-on: self-hosted
+    env:
+      GH_TOKEN: ${{ github.token }}
+    
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 19
+
+      - name: Log tag
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: echo $TAG
+
+      - name: Populate .env with additional vars
+        run: |
+          cp ./.github/.github.env .env
+
+      - name: Install packages
+        run: make npm-setup
+
+      - name: Build static files
+        run: make create-static-out
+
+      - name: Zip and release
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          make zip-contents tag=$TAG
+          make upload-to-release-prod tag=$TAG
