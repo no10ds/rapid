@@ -1,0 +1,10 @@
+title Create User (Programmatic)
+
+User Admin->rAPId API: POST /user
+rAPId API->Cognito: Create user
+Cognito->rAPId API: New user credentials
+rAPId API->DB: Add user with permissions
+rAPId API->User Admin: New user credentials
+Cognito->User: Sends email with username and temporary password
+
+#Created using https://www.websequencediagrams.com/

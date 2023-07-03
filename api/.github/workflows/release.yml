@@ -1,0 +1,30 @@
+name: rAPId Release
+
+on:
+  release:
+    types: [released]
+
+jobs:
+  release:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Export env vars
+        run:
+          cp ./.github/.github.env .env
+
+      - name: Export AWS_ACCOUNT
+        run:
+          echo AWS_ACCOUNT=${{ secrets.AWS_ACCOUNT }} >> .env
+
+      - name: Export AWS_REGION
+        run:
+          echo AWS_REGION=${{ secrets.AWS_REGION }} >> .env
+
+      - name: Build Image
+        run: make create-runtime-env
+
+      - name: Tag and Upload Release Image
+        run: make tag-and-upload-release-image

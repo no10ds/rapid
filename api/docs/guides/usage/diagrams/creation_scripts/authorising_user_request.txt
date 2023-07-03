@@ -1,0 +1,17 @@
+title Authorising User Request
+
+User->UI: GET /login
+UI->Cognito: Authentication Request
+Cognito->UI: User Token
+UI->User: Redirect to the landing page
+
+User->UI: Performs a request
+UI->rAPId API: Request, Header: Bearer <user-token>
+rAPId API->DB: Get user permissions
+DB->rAPId API: Permissions
+rAPId API->rAPId API: Match permissions to requested resource
+rAPId API->rAPId API: Process request
+rAPId API->UI: Response
+UI->User: Display response
+
+#Created using https://www.websequencediagrams.com/

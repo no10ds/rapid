@@ -1,0 +1,51 @@
+name: rAPId Dev Deployment
+
+on:
+  push:
+    branches:
+      - "**"
+
+  workflow_dispatch:
+
+jobs:
+
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Log commit SHA
+        run: echo $GITHUB_SHA
+
+      - name: Populate .env with additional vars
+        run: |
+          cp ./.github/.github.env .env
+          echo DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} >> .env
+          echo DATA_BUCKET=${{ secrets.DATA_BUCKET }} >> .env
+          echo AWS_ACCOUNT=${{ secrets.AWS_ACCOUNT }} >> .env
+          echo AWS_REGION=${{ secrets.AWS_REGION }} >> .env
+          echo AWS_DEFAULT_REGION=${{ secrets.AWS_REGION }} >> .env
+
+      - name: Build Image
+        run: make create-runtime-env
+
+      - name: Security Checks
+        run: make security
+
+      - name: Static Analysis
+        run: make lint
+
+      - name: Run Tests
+        run: make test-coverage
+
+      - name: Tag and Upload
+        run: make tag-and-upload
+
+      - name: Clean Docker context
+        if: always()
+        run: make clean-pipeline-docker-context

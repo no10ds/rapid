@@ -1,0 +1,8 @@
+.github/
+.pytest_cache/
+docs/
+infra/
+test/
+venv/
+.coverage
+*.md

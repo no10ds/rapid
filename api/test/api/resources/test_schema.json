@@ -1,0 +1,26 @@
+{
+  "metadata": {
+    "domain": "test",
+    "dataset": "e2e"
+  },
+  "columns": [
+    {
+      "name": "colname1",
+      "partition_index": null,
+      "data_type": "number",
+      "allow_null": true
+    },
+    {
+      "name": "colname2",
+      "partition_index": 0,
+      "data_type": "number",
+      "allow_null": true
+    },
+    {
+      "name": "colname3",
+      "partition_index": 1,
+      "data_type": "str",
+      "allow_null": false
+    }
+  ]
+}
