@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from typing import List, Dict, Tuple, Optional, TYPE_CHECKING
 
 import boto3
@@ -10,8 +10,10 @@ from api.common.logger import AppLogger
 from api.domain.dataset_filters import DatasetFilters
 from api.domain.storage_metadata import StorageMetaData
 
+
 if TYPE_CHECKING:
     from api.adapter.s3_adapter import S3Adapter
+    from api.adapter.glue_adapter import GlueAdapter
 
 
 class AWSResourceAdapter:
@@ -26,9 +28,13 @@ class AWSResourceAdapter:
     @dataclass(frozen=True)
     class EnrichedDatasetMetaData(StorageMetaData):
         tags: Optional[Dict[str, str]] = None
+        last_updated: Optional[str] = None
 
     def get_datasets_metadata(
-        self, s3_adapter: "S3Adapter", query: DatasetFilters = DatasetFilters()
+        self,
+        s3_adapter: "S3Adapter",
+        glue_adapter: "GlueAdapter",
+        query: DatasetFilters = DatasetFilters(),
     ) -> List[EnrichedDatasetMetaData]:
         try:
             AppLogger.info("Getting datasets info")
@@ -37,7 +43,7 @@ class AWSResourceAdapter:
             )
             resources_prefix = self._filter_for_resource_prefix(aws_resources)
             return [
-                self._to_dataset_metadata(resource, s3_adapter)
+                self._to_dataset_metadata(resource, s3_adapter, glue_adapter)
                 for resource in resources_prefix
             ]
         except KeyError:
@@ -78,7 +84,10 @@ class AWSResourceAdapter:
         )
 
     def _to_dataset_metadata(
-        self, resource_tag_mapping: Dict, s3_adapter: "S3Adapter"
+        self,
+        resource_tag_mapping: Dict,
+        s3_adapter: "S3Adapter",
+        glue_adapter: "GlueAdapter",
     ) -> EnrichedDatasetMetaData:
         domain, dataset = self._infer_domain_and_dataset_from_crawler_arn(
             resource_tag_mapping["ResourceARN"]
@@ -89,7 +98,13 @@ class AWSResourceAdapter:
         description = s3_adapter.get_dataset_description(
             domain, dataset, version, senstivity
         )
-        return self.EnrichedDatasetMetaData(domain, dataset, version, description, tags)
+        metadata = StorageMetaData(domain, dataset, version, description)
+        last_updated = glue_adapter.get_table_last_updated_date(
+            metadata.glue_table_name(), supress_error=True
+        )
+        return self.EnrichedDatasetMetaData(
+            **asdict(metadata), tags=tags, last_updated=last_updated
+        )
 
     def get_version_from_tags(self, resource_tag_mapping):
         version_tag = [

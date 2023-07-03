@@ -152,8 +152,16 @@ class GlueAdapter:
             f"[{table_name}] was not created after {GLUE_TABLE_PRESENCE_CHECK_RETRY_COUNT * GLUE_TABLE_PRESENCE_CHECK_INTERVAL}s"
         )  # noqa: E501
 
-    def get_table_last_updated_date(self, table_name) -> str:
-        table = self._get_table(table_name)
+    def get_table_last_updated_date(
+        self, table_name, supress_error: bool = False
+    ) -> str:
+        try:
+            table = self._get_table(table_name)
+        except TableDoesNotExistError as e:
+            if supress_error:
+                return None
+            else:
+                raise TableDoesNotExistError(e)
         return str(table["Table"]["UpdateTime"])
 
     def get_no_of_rows(self, table_name) -> int:

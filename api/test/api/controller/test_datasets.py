@@ -403,15 +403,13 @@ class TestListDatasets(BaseClientTest):
         self.mock_s3_client = Mock()
         self.s3_adapter = S3Adapter(s3_client=self.mock_s3_client, s3_bucket="dataset")
 
-    @patch("api.controller.datasets.parse_token")
+    @patch("api.controller.datasets.get_subject_id")
     @patch.object(DatasetService, "get_authorised_datasets")
     def test_returns_metadata_for_all_datasets(
-        self, mock_get_authorised_datasets, mock_parse_token
+        self, mock_get_authorised_datasets, mock_get_subject_id
     ):
         subject_id = "123abc"
-        mock_token = Mock()
-        mock_token.subject = subject_id
-        mock_parse_token.return_value = mock_token
+        mock_get_subject_id.return_value = subject_id
 
         metadata_response = [
             AWSResourceAdapter.EnrichedDatasetMetaData(
@@ -419,12 +417,14 @@ class TestListDatasets(BaseClientTest):
                 dataset="dataset1",
                 tags={"tag1": "value1"},
                 description="",
+                last_updated="01/01/2000",
             ),
             AWSResourceAdapter.EnrichedDatasetMetaData(
                 domain="domain2",
                 dataset="dataset2",
                 tags={"tag2": "value2"},
                 description="some test description",
+                last_updated="01/01/2001",
             ),
         ]
 
@@ -437,6 +437,7 @@ class TestListDatasets(BaseClientTest):
                 "version": 1,
                 "description": "",
                 "tags": {"tag1": "value1"},
+                "last_updated": "01/01/2000",
             },
             {
                 "domain": "domain2",
@@ -444,6 +445,7 @@ class TestListDatasets(BaseClientTest):
                 "version": 1,
                 "description": "some test description",
                 "tags": {"tag2": "value2"},
+                "last_updated": "01/01/2001",
             },
         ]
 
@@ -462,15 +464,13 @@ class TestListDatasets(BaseClientTest):
         assert response.status_code == 200
         assert response.json() == expected_response
 
-    @patch("api.controller.datasets.parse_token")
+    @patch("api.controller.datasets.get_subject_id")
     @patch.object(DatasetService, "get_authorised_datasets")
     def test_returns_metadata_for_datasets_with_certain_tags(
-        self, mock_get_authorised_datasets, mock_parse_token
+        self, mock_get_authorised_datasets, mock_get_subject_id
     ):
         subject_id = "123abc"
-        mock_token = Mock()
-        mock_token.subject = subject_id
-        mock_parse_token.return_value = mock_token
+        mock_get_subject_id.return_value = subject_id
 
         metadata_response = [
             AWSResourceAdapter.EnrichedDatasetMetaData(
@@ -479,6 +479,7 @@ class TestListDatasets(BaseClientTest):
                 tags={"tag1": "value1"},
                 version=1,
                 description="",
+                last_updated="01/01/2002",
             ),
             AWSResourceAdapter.EnrichedDatasetMetaData(
                 domain="domain2",
@@ -486,6 +487,7 @@ class TestListDatasets(BaseClientTest):
                 tags={"tag2": "value2"},
                 version=1,
                 description="some test description",
+                last_updated="01/01/2002",
             ),
         ]
 
@@ -498,6 +500,7 @@ class TestListDatasets(BaseClientTest):
                 "version": 1,
                 "tags": {"tag1": "value1"},
                 "description": "",
+                "last_updated": "01/01/2002",
             },
             {
                 "domain": "domain2",
@@ -505,6 +508,7 @@ class TestListDatasets(BaseClientTest):
                 "version": 1,
                 "tags": {"tag2": "value2"},
                 "description": "some test description",
+                "last_updated": "01/01/2002",
             },
         ]
 
@@ -528,15 +532,13 @@ class TestListDatasets(BaseClientTest):
         assert response.status_code == 200
         assert response.json() == expected_response
 
-    @patch("api.controller.datasets.parse_token")
+    @patch("api.controller.datasets.get_subject_id")
     @patch.object(DatasetService, "get_authorised_datasets")
     def test_returns_metadata_for_datasets_with_certain_sensitivity(
-        self, mock_get_authorised_datasets, mock_parse_token
+        self, mock_get_authorised_datasets, mock_get_subject_id
     ):
         subject_id = "123abc"
-        mock_token = Mock()
-        mock_token.subject = subject_id
-        mock_parse_token.return_value = mock_token
+        mock_get_subject_id.return_value = subject_id
 
         metadata_response = [
             AWSResourceAdapter.EnrichedDatasetMetaData(
@@ -544,12 +546,14 @@ class TestListDatasets(BaseClientTest):
                 dataset="dataset1",
                 tags={"sensitivity": "PUBLIC", "tag1": "value1"},
                 description="",
+                last_updated="01/01/1999",
             ),
             AWSResourceAdapter.EnrichedDatasetMetaData(
                 domain="domain2",
                 dataset="dataset2",
                 tags={"sensitivity": "PUBLIC"},
                 description="some test description",
+                last_updated="01/01/1999",
             ),
         ]
 
@@ -562,6 +566,7 @@ class TestListDatasets(BaseClientTest):
                 "version": 1,
                 "tags": {"sensitivity": "PUBLIC", "tag1": "value1"},
                 "description": "",
+                "last_updated": "01/01/1999",
             },
             {
                 "domain": "domain2",
@@ -569,6 +574,7 @@ class TestListDatasets(BaseClientTest):
                 "tags": {"sensitivity": "PUBLIC"},
                 "version": 1,
                 "description": "some test description",
+                "last_updated": "01/01/1999",
             },
         ]
 

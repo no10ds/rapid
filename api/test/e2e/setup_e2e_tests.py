@@ -1,11 +1,7 @@
 import json
 import os
-from dotenv import load_dotenv
-
 import requests
 from requests.auth import HTTPBasicAuth
-
-load_dotenv()
 
 
 PATH = os.path.dirname(os.path.realpath(__file__))
@@ -28,8 +24,6 @@ def fetch_token():
     response = requests.post(
         BASE_URL + "/oauth2/token", auth=auth, headers=headers, json=payload
     )
-
-    print(response.content)
 
     return json.loads(response.content.decode("utf-8"))["access_token"]
 

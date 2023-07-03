@@ -15,9 +15,7 @@ from api.application.services.authorisation.authorisation_service import (
     secure_dataset_endpoint,
     secure_endpoint,
     get_subject_id,
-    RAPID_ACCESS_TOKEN,
 )
-from api.application.services.authorisation.token_utils import parse_token
 from api.application.services.data_service import DataService
 from api.application.services.dataset_service import DatasetService
 from api.application.services.delete_service import DeleteService
@@ -93,7 +91,7 @@ async def list_all_datasets(
     ### Click  `Try it out` to use the endpoint
 
     """
-    subject_id = parse_token(request.cookies.get(RAPID_ACCESS_TOKEN)).subject
+    subject_id = get_subject_id(request)
     return dataset_service.get_authorised_datasets(
         subject_id, Action.READ, tag_filters=tag_filters
     )
@@ -228,7 +226,7 @@ async def list_raw_files(
 
 @datasets_router.delete(
     "/{domain}/{dataset}",
-    dependencies=[Security(secure_endpoint, scopes=[Action.DATA_ADMIN])],
+    dependencies=[Security(secure_endpoint, scopes=[Action.DATA_ADMIN.value])],
 )
 async def delete_dataset(domain: str, dataset: str, response: Response):
     """
