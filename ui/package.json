@@ -10,7 +10,7 @@
     "lint": "next lint",
     "test:watch": "DEBUG_PRINT_LIMIT=1000000 jest --watch",
     "test:all": "next lint && tsc --noemit && jest",
-    "prepare": "husky install"
+    "prepare": "cd .. && husky install ui/.husky"
   },
   "dependencies": {
     "@emotion/cache": "^11.10.5",
