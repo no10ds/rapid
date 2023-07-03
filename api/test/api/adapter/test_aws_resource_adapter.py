@@ -4,6 +4,7 @@ import pytest
 from botocore.exceptions import ClientError
 
 from api.adapter.aws_resource_adapter import AWSResourceAdapter
+from api.adapter.glue_adapter import GlueAdapter
 from api.adapter.s3_adapter import S3Adapter
 from api.common.config.aws import AWS_REGION, RESOURCE_PREFIX
 from api.common.custom_exceptions import UserError, AWSServiceError
@@ -17,8 +18,10 @@ class TestAWSResourceAdapterClientMethods:
     def setup_method(self):
         self.resource_boto_client = Mock()
         self.mock_s3_client = Mock()
+        self.mock_glue_client = Mock()
         self.resource_adapter = AWSResourceAdapter(self.resource_boto_client)
         self.s3_adapter = S3Adapter(s3_client=self.mock_s3_client, s3_bucket="dataset")
+        self.glue_adapter = GlueAdapter(self.mock_glue_client)
         self.aws_return_value = [
             {
                 "PaginationToken": "xxxx",
@@ -99,6 +102,7 @@ class TestAWSResourceAdapterClientMethods:
                 description="",
                 tags={"sensitivity": "PUBLIC", "no_of_versions": "1"},
                 version=1,
+                last_updated="01/01/2000",
             ),
             AWSResourceAdapter.EnrichedDatasetMetaData(
                 domain="domain2",
@@ -106,6 +110,7 @@ class TestAWSResourceAdapterClientMethods:
                 description="",
                 tags={"tag1": "", "sensitivity": "PUBLIC", "no_of_versions": "2"},
                 version=2,
+                last_updated="01/01/2001",
             ),
             AWSResourceAdapter.EnrichedDatasetMetaData(
                 domain="domain3",
@@ -113,6 +118,7 @@ class TestAWSResourceAdapterClientMethods:
                 description="",
                 tags={"tag2": "", "sensitivity": "PRIVATE", "no_of_versions": "3"},
                 version=3,
+                last_updated="01/01/2002",
             ),
             AWSResourceAdapter.EnrichedDatasetMetaData(
                 domain="domain3",
@@ -120,6 +126,7 @@ class TestAWSResourceAdapterClientMethods:
                 description="",
                 tags={"tag5": "", "sensitivity": "PUBLIC", "no_of_versions": "1"},
                 version=1,
+                last_updated="01/01/2003",
             ),
             AWSResourceAdapter.EnrichedDatasetMetaData(
                 domain="domain36",
@@ -127,15 +134,25 @@ class TestAWSResourceAdapterClientMethods:
                 description="",
                 tags={"tag2": "", "sensitivity": "PRIVATE", "no_of_versions": "10"},
                 version=10,
+                last_updated="01/01/2004",
             ),
         ]
+        self.glue_adapter.get_table_last_updated_date = Mock(
+            side_effect=[
+                "01/01/2000",
+                "01/01/2001",
+                "01/01/2002",
+                "01/01/2003",
+                "01/01/2004",
+            ]
+        )
 
         self.resource_boto_client.get_paginator.return_value.paginate.return_value = (
             self.aws_return_value
         )
 
         actual_metadatas = self.resource_adapter.get_datasets_metadata(
-            self.s3_adapter, query
+            self.s3_adapter, self.glue_adapter, query
         )
 
         self.resource_boto_client.get_paginator.assert_called_once_with("get_resources")
@@ -171,7 +188,9 @@ class TestAWSResourceAdapterClientMethods:
 
         self.resource_boto_client.get_paginator.return_value.paginate.return_value = {}
 
-        self.resource_adapter.get_datasets_metadata(self.s3_adapter, query)
+        self.resource_adapter.get_datasets_metadata(
+            self.s3_adapter, self.glue_adapter, query
+        )
 
         self.resource_boto_client.get_paginator.assert_called_once_with("get_resources")
         self.resource_boto_client.get_paginator.return_value.paginate.assert_called_once_with(
@@ -241,7 +260,6 @@ class TestAWSResourceAdapterClientMethods:
         ],
     )
     def test_get_version_from_crawler(self, domain, dataset, expected_version):
-
         self.resource_boto_client.get_paginator.return_value.paginate.return_value = (
             self.aws_return_value
         )

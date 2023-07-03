@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file. This project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v6.2.1 - _2023-05-10_
+
+See [v6.2.1] changes
+
+### Fixed
+
+- An error with the delete dataset endpoint
+
+## v6.2.0 - _2023-05-10_
+
+See [v6.2.0] changes
+
+### Added
+
+- The list datasets endpoint now provides the Last Updated Datetime for each dataset
+
 ## v6.1.0 - _2023-05-03_
 
 See [v6.1.0] changes
