@@ -57,4 +57,3 @@ Unfortunately, Cabinet Office and No10 do not offer a paid bug bounty programme.
 - <https://mojdigital.blog.gov.uk/vulnerability-disclosure-policy/>
 - <https://github.com/Trewaters/security-README>
 - <https://github.com/alphagov/security.txt>
-

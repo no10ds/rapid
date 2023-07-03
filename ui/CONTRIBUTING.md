@@ -22,7 +22,7 @@ To run them all you can use the command `make test`
 
 The product of the rAPId UI is a set of complete static HTML files that using the provided [infrastructure](https://github.com/no10ds/rapid-infrastructure) can be deployed and served alongside the API.
 
-Performing a release requires tagging the repository with the specific version and then building a zip of the static html files that can be served within a GitHub release. 
+Performing a release requires tagging the repository with the specific version and then building a zip of the static html files that can be served within a GitHub release.
 
 ⚠️ When releasing a new version of the service, you must also release a version of
 the [api](https://github.com/no10ds/rapid-api) [infrastructure](https://github.com/no10ds/rapid-infrastructure) and vice versa. All versions should be the same (
