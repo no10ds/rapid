@@ -1,0 +1,41 @@
+{
+  "extends": [
+    "next/core-web-vitals",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:jest-dom/recommended",
+    "prettier"
+  ],
+  "plugins": ["@typescript-eslint", "testing-library", "jest-dom"],
+  "rules": {
+    "prefer-const": 0,
+    "react/jsx-uses-vars": 1,
+    "react/jsx-uses-react": 1,
+    "strict": 0,
+    "no-console": ["warn", { "allow": ["error", "info"] }],
+    "no-unused-vars": "off",
+    "no-debugger": "off",
+    "no-extra-semi": 0,
+    "react/no-unescaped-entities": ["error", { "forbid": [">", "}"] }],
+    "@typescript-eslint/no-extra-semi": 0,
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      { "args": "all", "argsIgnorePattern": "^_" }
+    ]
+  },
+  "ignorePatterns": ["node_modules", "build", "public"],
+  "overrides": [
+    {
+      // only run testling library linting on test files not entire codebase
+      "files": ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"],
+      "extends": ["plugin:testing-library/react"],
+      "rules": {
+        "react/display-name": 0,
+        "testing-library/no-container": "warn",
+        "testing-library/no-node-access": "warn"
+      }
+    }
+  ]
+}

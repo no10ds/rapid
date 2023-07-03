@@ -1,0 +1,36 @@
+name: rAPId UI Dev Deployment
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  deploy:
+    runs-on: self-hosted
+    env:
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 19
+
+      - name: Log commit SHA
+        run: echo $GITHUB_SHA
+
+      - name: Populate .env with additional vars
+        run: |
+          cp ./.github/.github.env .env
+
+      - name: Install packages
+        run: make npm-setup
+
+      - name: Build static files
+        run: make create-static-out
+
+      - name: Zip and Release
+        run: |
+          make zip-contents
+          make upload-to-release
