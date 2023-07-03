@@ -1,0 +1,33 @@
+containers:
+  utility:
+    build_directory: .
+    dockerfile: Dockerfile
+    working_directory: /src
+    volumes:
+      - local: .
+        container: /src
+
+tasks:
+  detect-secrets:
+    description: Detect tracked files for secrets
+    run:
+      container: utility
+      command: sh -c 'git ls-files -z | xargs -0 detect-secrets-hook --baseline .secrets.baseline'
+
+  ignore-secrets:
+    description: Ignore detected secrets (add them to the .secrets.baseline file)
+    run:
+      container: utility
+      command: bash -c 'detect-secrets scan > .secrets.baseline'
+
+  security-scan:
+    description: Scan the terraform stack for security vulnerabilities
+    run:
+      container: utility
+      command: bash -c 'checkov -d ./blocks --quiet'
+
+  generate_latest_changelog:
+    description: Parse the changelog file for the release's changes
+    run:
+      container: utility
+      command: "python get_latest_release_changelog.py"
