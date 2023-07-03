@@ -1,0 +1,10 @@
+deepdiff
+mock
+pandas
+pytest
+python-dotenv
+requests
+requests-mock
+twine
+sphinx
+pydantic
