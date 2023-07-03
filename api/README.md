@@ -1,4 +1,4 @@
-<br>xx
+<br>
 <img src="./logo.png" display=block margin-left=auto margin-right=auto width=60%;/>
 
 # Project rAPId
