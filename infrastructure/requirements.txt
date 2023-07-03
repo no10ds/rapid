@@ -1,0 +1,2 @@
+checkov==2.0.708
+detect-secrets==1.0.3

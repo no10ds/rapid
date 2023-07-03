@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2021-11-08T16:15:09.687Z" agent="5.0 (Macintosh)" etag="8vnGUzrkG53JyqAKsa4S" version="15.7.0" type="device">
+  <diagram id="vffhmGxmnRPBBeW6zOtd" name="Page-1">
+    <mxGraphModel dx="1926" dy="1101" grid="1" gridSize="11" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Kur_g_pgfu_EhN9YEY_0-1" value="VPC" style="sketch=0;outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=12;fontStyle=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_vpc;strokeColor=#879196;fillColor=none;verticalAlign=top;align=left;spacingLeft=30;fontColor=#879196;dashed=0;" vertex="1" parent="1">
+          <mxGeometry x="165" y="209" width="462" height="800" as="geometry" />
+        </mxCell>
+        <mxCell id="Kur_g_pgfu_EhN9YEY_0-4" value="Public Subnet" style="sketch=0;outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=12;fontStyle=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_subnet;strokeColor=#879196;fillColor=none;verticalAlign=top;align=left;spacingLeft=30;fontColor=#879196;dashed=0;" vertex="1" parent="1">
+          <mxGeometry x="238.5" y="390" width="320" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="Kur_g_pgfu_EhN9YEY_0-5" value="Private Subnet" style="sketch=0;outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=12;fontStyle=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_subnet;strokeColor=#879196;fillColor=none;verticalAlign=top;align=left;spacingLeft=30;fontColor=#879196;dashed=0;" vertex="1" parent="1">
+          <mxGeometry x="236" y="836" width="320" height="167" as="geometry" />
+        </mxCell>
+        <mxCell id="Kur_g_pgfu_EhN9YEY_0-6" value="" style="outlineConnect=0;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws3.internet_gateway;fillColor=#F58534;gradientColor=none;" vertex="1" parent="1">
+          <mxGeometry x="364" y="170" width="69" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="Kur_g_pgfu_EhN9YEY_0-7" value="" style="outlineConnect=0;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws3.route_table;fillColor=#F58536;gradientColor=none;" vertex="1" parent="1">
+          <mxGeometry x="361" y="280" width="75" height="69" as="geometry" />
+        </mxCell>
+        <mxCell id="Kur_g_pgfu_EhN9YEY_0-8" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="Kur_g_pgfu_EhN9YEY_0-7" target="Kur_g_pgfu_EhN9YEY_0-6">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="453" y="290" as="sourcePoint" />
+            <mxPoint x="503" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Kur_g_pgfu_EhN9YEY_0-10" value="" style="outlineConnect=0;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws3.route_table;fillColor=#F58536;gradientColor=none;" vertex="1" parent="1">
+          <mxGeometry x="359.25" y="693" width="75" height="69" as="geometry" />
+        </mxCell>
+        <mxCell id="Kur_g_pgfu_EhN9YEY_0-11" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="Kur_g_pgfu_EhN9YEY_0-5" target="Kur_g_pgfu_EhN9YEY_0-10">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="533" y="560" as="sourcePoint" />
+            <mxPoint x="583" y="510" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Kur_g_pgfu_EhN9YEY_0-12" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="Kur_g_pgfu_EhN9YEY_0-10" target="Kur_g_pgfu_EhN9YEY_0-13">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="683" y="621" as="sourcePoint" />
+            <mxPoint x="683" y="540" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Kur_g_pgfu_EhN9YEY_0-13" value="NAT Gateway" style="outlineConnect=0;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws3.vpc_nat_gateway;fillColor=#F58536;gradientColor=none;" vertex="1" parent="1">
+          <mxGeometry x="364" y="439" width="69" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="Kur_g_pgfu_EhN9YEY_0-14" value="Github Action Runner" style="outlineConnect=0;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws3.ec2;fillColor=#F58534;gradientColor=none;" vertex="1" parent="1">
+          <mxGeometry x="357.75" y="880" width="76.5" height="93" as="geometry" />
+        </mxCell>
+        <mxCell id="Kur_g_pgfu_EhN9YEY_0-15" value="" style="shape=image;html=1;verticalAlign=top;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;imageAspect=0;aspect=fixed;image=https://cdn4.iconfinder.com/data/icons/iconsimple-logotypes/512/github-128.png" vertex="1" parent="1">
+          <mxGeometry x="361" width="70" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="Kur_g_pgfu_EhN9YEY_0-17" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=6;fillColor=#d5e8d4;strokeColor=#82b366;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="374" y="160" as="sourcePoint" />
+            <mxPoint x="374" y="80" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Kur_g_pgfu_EhN9YEY_0-18" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=6;fillColor=#f8cecc;strokeColor=#b85450;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="412" y="77" as="sourcePoint" />
+            <mxPoint x="412" y="157" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Kur_g_pgfu_EhN9YEY_0-19" value="&lt;div&gt;outbound requests&lt;/div&gt;&lt;div&gt;(ALLOWED)&lt;br&gt;&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="238.5" y="110" width="115" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="Kur_g_pgfu_EhN9YEY_0-20" value="&lt;div&gt;inbound requests&lt;/div&gt;&lt;div&gt;(BLOCKED)&lt;br&gt;&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="431" y="99" width="115" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="Kur_g_pgfu_EhN9YEY_0-22" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="Kur_g_pgfu_EhN9YEY_0-4" target="Kur_g_pgfu_EhN9YEY_0-7">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="528" y="374" as="sourcePoint" />
+            <mxPoint x="580.4333333333334" y="275" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
