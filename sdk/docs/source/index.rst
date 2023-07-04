@@ -34,9 +34,9 @@ If you do not want to use environment variables (however this is discouraged as 
 values directly to the class as follows.::
 
    rapid_authentication = RapidAuth(
-      client_id="RAPID_CLIENT_ID",
-      client_secret="RAPID_CLIENT_SECRET",
-      url="RAPID_URL"
+      client_id=os.getenv("RAPID_CLIENT_ID"),
+      client_secret=os.getenv("RAPID_CLIENT_SECRET"),
+      url=os.getenv("RAPID_URL")
    )
 
 Generate Schema

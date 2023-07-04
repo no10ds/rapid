@@ -81,7 +81,7 @@ describe('Page: Subject Create', () => {
   describe('on submit', () => {
     const mockData = {
       client_name: 'James Bond',
-      client_secret: 'secret-code-word',
+      client_secret: 'secret-code-word', // pragma: allowlist secret
       client_id: 'id-abc123',
       permissions: ['DATA_ADMIN', 'READ_PRIVATE']
     }
