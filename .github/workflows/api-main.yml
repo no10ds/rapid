@@ -1,92 +1,92 @@
-name: rAPId Deployment
+# name: rAPId Deployment
 
-on:
-  push:
-    branches: [ main ]
-    paths:
-      - "api/**"
+# on:
+#   push:
+#     branches: [ main ]
+#     paths:
+#       - "api/**"
 
-  workflow_dispatch:
+#   workflow_dispatch:
 
-jobs:
+# jobs:
 
-  deploy:
-    runs-on: self-hosted
+#   deploy:
+#     runs-on: self-hosted
 
-    steps:
-      - uses: actions/checkout@v2
+#     steps:
+#       - uses: actions/checkout@v2
 
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
+#       - uses: actions/setup-python@v4
+#         with:
+#           python-version: '3.10'
 
-      - name: Log commit SHA
-        run: echo $GITHUB_SHA
+#       - name: Log commit SHA
+#         run: echo $GITHUB_SHA
 
-#      # Make sure to have a new line in .github.env. Otherwise, it would append the DOMAIN_NAME
-#      # to the last item
-      - name: Populate .env with additional vars
-        run: |
-          cp ./.github/.github.env .env
-          echo DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} >> .env
-          echo DATA_BUCKET=${{ secrets.DATA_BUCKET }} >> .env
-          echo AWS_ACCOUNT=${{ secrets.AWS_ACCOUNT }} >> .env
-          echo AWS_REGION=${{ secrets.AWS_REGION }} >> .env
-          echo AWS_DEFAULT_REGION=${{ secrets.AWS_REGION }} >> .env
+# #      # Make sure to have a new line in .github.env. Otherwise, it would append the DOMAIN_NAME
+# #      # to the last item
+#       - name: Populate .env with additional vars
+#         run: |
+#           cp ./.github/.github.env .env
+#           echo DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} >> .env
+#           echo DATA_BUCKET=${{ secrets.DATA_BUCKET }} >> .env
+#           echo AWS_ACCOUNT=${{ secrets.AWS_ACCOUNT }} >> .env
+#           echo AWS_REGION=${{ secrets.AWS_REGION }} >> .env
+#           echo AWS_DEFAULT_REGION=${{ secrets.AWS_REGION }} >> .env
 
-      - name: Build Image
-        run: make create-runtime-env
+#       - name: Build Image
+#         run: make create-runtime-env
 
-      - name: Security Checks
-        run: make security
+#       - name: Security Checks
+#         run: make security
 
-      - name: Static Analysis
-        run: make lint
+#       - name: Static Analysis
+#         run: make lint
 
-      - name: Run Tests
-        run: make test-coverage
+#       - name: Run Tests
+#         run: make test-coverage
 
-      - name: Tag and Upload
-        run: make tag-and-upload
+#       - name: Tag and Upload
+#         run: make tag-and-upload
 
-      - name: Check image scan for vulnerabitities
-        run: make scan-for-vulns-and-tag
+#       - name: Check image scan for vulnerabitities
+#         run: make scan-for-vulns-and-tag
 
-      - name: Tag PROD candidate
-        run: make tag-prod-candidate
+#       - name: Tag PROD candidate
+#         run: make tag-prod-candidate
 
-      - name: Deploy new image to Prod
-        run: make app-live-in-prod
+#       - name: Deploy new image to Prod
+#         run: make app-live-in-prod
 
-      # Prevent check-app-is-running below from timing out by adding extra time
-      - name: Allow time for the application to start
-        run: sleep 120
+#       # Prevent check-app-is-running below from timing out by adding extra time
+#       - name: Allow time for the application to start
+#         run: sleep 120
 
-      - name: Wait for application to be running
-        id: await-running-app
-        run: make check-app-is-running
+#       - name: Wait for application to be running
+#         id: await-running-app
+#         run: make check-app-is-running
 
-      - name: Install journey requirements
-        id: install-requirements
-        run:  pip install -r requirements.txt
+#       - name: Install journey requirements
+#         id: install-requirements
+#         run:  pip install -r requirements.txt
 
-      - name: Run E2E Tests
-        id: e2e-tests
-        env:
-          DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
-          DATA_BUCKET: ${{ secrets.DATA_BUCKET }}
-          AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
-          COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
-          RESOURCE_PREFIX: ${{ secrets.RESOURCE_PREFIX }}
-          ALLOWED_EMAIL_DOMAINS: ${{ secrets.ALLOWED_EMAIL_DOMAINS }}
-        run: pytest test/e2e -v
+#       - name: Run E2E Tests
+#         id: e2e-tests
+#         env:
+#           DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
+#           DATA_BUCKET: ${{ secrets.DATA_BUCKET }}
+#           AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
+#           AWS_REGION: ${{ secrets.AWS_REGION }}
+#           AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+#           COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
+#           RESOURCE_PREFIX: ${{ secrets.RESOURCE_PREFIX }}
+#           ALLOWED_EMAIL_DOMAINS: ${{ secrets.ALLOWED_EMAIL_DOMAINS }}
+#         run: pytest test/e2e -v
 
-      - name: Tag image as failure
-        if: always() && steps.await-running-app.conclusion == 'failure' || steps.e2e-tests.conclusion == 'failure' || steps.install-requirements.conclusion == 'failure'
-        run: make tag-prod-failure
+#       - name: Tag image as failure
+#         if: always() && steps.await-running-app.conclusion == 'failure' || steps.e2e-tests.conclusion == 'failure' || steps.install-requirements.conclusion == 'failure'
+#         run: make tag-prod-failure
 
-      - name: Clean Docker context
-        if: always()
-        run: make clean-pipeline-docker-context
+#       - name: Clean Docker context
+#         if: always()
+#         run: make clean-pipeline-docker-context

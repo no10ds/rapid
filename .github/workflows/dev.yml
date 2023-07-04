@@ -1,0 +1,119 @@
+name: rAPId Dev Deployment
+
+on:
+    push:
+        branches:
+            - "**"
+
+    workflow_dispatch:
+
+jobs:
+    set-vars:
+        runs-on: self-hosted
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+
+            - name: Setup Python
+              uses: actions/setup-python@v4
+              with:
+                python-version: '3.10'
+
+            - name: Setup Node
+              uses: actions/setup-node@v3
+              with:
+                node-version: 19
+
+            - name: Log commit SHA
+              run: echo $GITHUB_SHA
+
+            - name: Populate .env with additional vars
+              run: |
+                cp ./.github/.github.env .env
+                echo DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} >> .env
+                echo DATA_BUCKET=${{ secrets.DATA_BUCKET }} >> .env
+                echo AWS_ACCOUNT=${{ secrets.AWS_ACCOUNT }} >> .env
+                echo AWS_REGION=${{ secrets.AWS_REGION }} >> .env
+                echo AWS_DEFAULT_REGION=${{ secrets.AWS_REGION }} >> .env
+                echo "TWINE_USERNAME=${{ secrets.TWINE_USERNAME_TEST }}" >> .env
+                echo "TWINE_PASSWORD=${{ secrets.TWINE_PASSWORD_TEST }}" >> .env
+                echo TWINE_NON_INTERACTIVE=${{ secrets.TWINE_NON_INTERACTIVE }} >> .env
+
+    security-check:
+      needs:
+        - set-vars
+      runs-on: self-hosted
+      steps:
+        - name: Run security checks
+          run: make security-check
+
+    api-dev:
+        needs:
+            - set-vars
+            - security-check
+        runs-on: self-hosted
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+
+            - name: Build API Image
+              run: make api-create-image
+
+            - name: API Static Analysis
+              run: make api-lint
+
+            - name: API Tests
+              run: make api-test
+
+            - name: API Tag and Upload
+              run: make api-tag-and-upload
+
+    sdk-dev:
+        needs:
+            - set-vars
+            - security-check
+        runs-on: self-hosted
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+
+            - name: Setup Python Environment
+              run: |
+                make sdk-setup
+                source .venv/bin/activate
+
+            - name: SDK Test
+              run: make sdk-test
+
+            - name: SDK Test Deploy
+              run: make sdk-release-test
+
+    ui-dev:
+        needs:
+            - set-vars
+            - security-check
+        runs-on: self-hosted
+        steps:
+          - name: Checkout
+            uses: actions/checkout@v3
+
+          - name: Install UI Packages
+            run: make ui-setup
+
+          - name: UI Test
+            run: make ui-test
+
+    cleanup:
+        needs:
+            - set-vars
+            - security-check
+            - api-dev
+            - sdk-dev
+        runs-on: self-hosted
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+
+            - name: Clean Docker context
+              if: always()
+              run: make clean-pipeline-docker-context
