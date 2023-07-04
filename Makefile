@@ -1,7 +1,7 @@
 -include .env
 export
 
-.PHONY: help api-test
+.PHONY: help
 
 help: 				## List targets and description
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
@@ -80,3 +80,28 @@ api-tag-and-upload:		## Tag and upload the latest api image
 ##
 clean-pipeline-docker-context:
 	@cd api/; $(MAKE) clean-docker
+
+##
+##----- Infrastructure -----
+##
+
+infra-assume-role:		## Assume role to perform infrastructure tasks
+	@cd infrastructure/; ./scripts/assume_role.sh
+
+infra-backend:			## Create terraform backend for infrastructure
+	@cd infrastructure/; ./scripts/infra_make_helper.sh create_backend
+
+infra-init:			## Terraform init: make infra-init block=<infra-block>
+	@cd infrastructure/; ./scripts/infra_make_helper.sh run_init "${block}"
+
+infra-plan:			## Terraform view infrastructure changes: make infra-plan block=<infra-block>
+	@cd infrastructure/; ./scripts/infra_make_helper.sh run_tf plan "${block}" "${env}"
+
+infra-apply:			## Terraform apply infrastructure changes: make infra-apply block=<infra-block>
+	@cd infrastructure/; ./scripts/infra_make_helper.sh run_tf apply "${block}" "${env}"
+
+infra-destroy:			## Terraform destory entire infrastructure: make infra-destroy block=<infra-block>
+	@cd infrastructure/; ./scripts/infra_make_helper.sh run_tf destroy "${block}" "${env}"
+
+infra-output:			## Print infrastructure output: make infra-output block=<infra-block>
+	@cd infrastructure/: ./scripts/infra_make_helper.sh run_tf output "${block}" "${env}"

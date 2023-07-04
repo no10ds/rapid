@@ -3,10 +3,10 @@
 set -e -ou pipefail
 
 PROJECT_DIR=$(git rev-parse --show-toplevel)
-BLOCKS_DIR=${PROJECT_DIR}/blocks
-CONFIG_DIR="${RAPID_INFRA_CONFIG_ENV:-../rapid-infrastructure-config}"
-ENV_FILE=${PROJECT_DIR}/scripts/env_setup.sh
-BACKEND_SETUP_SCRIPT=${PROJECT_DIR}/scripts/backend_setup.sh
+BLOCKS_DIR=${PROJECT_DIR}/infrastructure/blocks
+CONFIG_DIR="${RAPID_INFRA_CONFIG_ENV:-../../rapid-infrastructure-config}"
+ENV_FILE=${PROJECT_DIR}/infrastructure/scripts/env_setup.sh
+BACKEND_SETUP_SCRIPT=${PROJECT_DIR}/infrastructure/scripts/backend_setup.sh
 TERRAFORM=$(which terraform)
 
 function _set_aws_vars() {
