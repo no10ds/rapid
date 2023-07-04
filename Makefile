@@ -1,10 +1,15 @@
 -include .env
 export
 
+PYTHON_VERSION=3.10.6
+
 .PHONY: help
 
 help: 				## List targets and description
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
+
+precommit:
+	pre-commit install
 
 ##
 ##----- API -----
@@ -104,4 +109,23 @@ infra-destroy:			## Terraform destory entire infrastructure: make infra-destroy 
 	@cd infrastructure/; ./scripts/infra_make_helper.sh run_tf destroy "${block}" "${env}"
 
 infra-output:			## Print infrastructure output: make infra-output block=<infra-block>
-	@cd infrastructure/: ./scripts/infra_make_helper.sh run_tf output "${block}" "${env}"
+	@cd infrastructure/; ./scripts/infra_make_helper.sh run_tf output "${block}" "${env}"
+
+##
+##----- SDK -----
+##
+sdk-setup:			## Setup Python required for the sdk
+	@cd sdk/; $(MAKE) python; $(MAKE) venv;
+
+# SDK Testing --------------------
+##
+sdk-test:			## Run sdk unit tests
+	@cd sdk/; pytest -vv -s
+
+# SDK Release --------------------
+##
+sdk-release-test:		## Build and release sdk to testpypi
+	@cd sdk/; $(MAKE) deploy-test
+
+sdk-release:			## Build and release sdk to pypi
+	@cd sdk/; $(MAKE) deploy
