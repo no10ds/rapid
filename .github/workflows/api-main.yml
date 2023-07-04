@@ -3,6 +3,8 @@ name: rAPId Deployment
 on:
   push:
     branches: [ main ]
+    paths:
+      - "api/**"
 
   workflow_dispatch:
 

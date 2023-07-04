@@ -1,9 +1,11 @@
-name: rAPId UI Tests
+name: rAPId UI Dev Deployment
 
 on:
   push:
     branches:
       - "**"
+    paths:
+      - "ui/**"
 
   workflow_dispatch:
 
@@ -31,5 +33,10 @@ jobs:
       - name: Install packages
         run: make npm-setup
 
-      - name: Run tests
-        run: make test
+      - name: Build static files
+        run: make create-static-out
+
+      - name: Zip and Release
+        run: |
+          make zip-contents
+          make upload-to-release
