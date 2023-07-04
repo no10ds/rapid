@@ -1,2 +1,2 @@
-bandit==1.7.1
-detect-secrets==1.1.0
+bandit==1.7.5
+detect-secrets==1.4.0
