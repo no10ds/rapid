@@ -1,6 +1,3 @@
--include .env
-export
-
 IMAGE_NAME=ui-f1-registry
 LATEST_COMMIT_HASH=$(shell git rev-parse --short HEAD)
 ZIP_PATH=$(IMAGE_NAME)-$(LATEST_COMMIT_HASH)

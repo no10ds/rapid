@@ -1,6 +1,3 @@
--include .env
-export
-
 ECS_SERVICE=rapid-ecs-service
 ECS_CLUSTER=rapid-cluster
 LATEST_COMMIT_HASH=$(shell git rev-parse --short HEAD)

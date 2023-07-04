@@ -1,6 +1,3 @@
--include .env
-export
-
 python:
 	pyenv install --skip-existing $(PYTHON_VERSION)
 	echo 'eval "$(pyenv init --path)"' >> ~/.bashrc
