@@ -11,7 +11,7 @@ DATA_COLUMN = "data"
 DATA_TYPE_COLUMN = "data_type"
 
 # fmt: off
-METADATA_QUERY = Template(  # nosec
+METADATA_QUERY = Template(
     f"""
 SELECT * FROM (
     SELECT
@@ -40,7 +40,7 @@ SELECT * FROM (
     FROM "{GLUE_CATALOGUE_DB_NAME}"."{METADATA_CATALOGUE_DB_NAME}"
 )
 WHERE {{{{ where_clause }}}}
-"""
+"""  # nosec B608
 )
 # fmt: on
 

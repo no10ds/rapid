@@ -109,7 +109,7 @@ class GlueAdapter:
 
         except ClientError:
             raise CrawlerUpdateError(
-                f"Failed to update crawler version tag for domain = {domain} dataset = {dataset} version = {new_version}"
+                f"Failed to update crawler version tag for domain = {domain} dataset = {dataset} version = {new_version}"  # nosec B608
             )
 
     def check_crawler_is_ready(self, domain: str, dataset: str) -> None:
