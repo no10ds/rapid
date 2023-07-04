@@ -103,24 +103,6 @@ tasks:
       container: service-image
       command: "pytest --durations=5 --cov=api --cov-report term-missing test/api"
 
-  detect-secrets:
-    description: Detect tracked files for secrets
-    run:
-      container: service-image
-      command: sh -c 'git ls-files -z -- . ':!:*.drawio' | xargs -0 detect-secrets-hook --baseline .secrets.baseline'
-
-  ignore-secrets:
-    description: Ignore detected secrets (add them to the .secrets.baseline file)
-    run:
-      container: service-image
-      command: bash -c 'detect-secrets scan > .secrets.baseline'
-
-  detect-vulnerabilities:
-    description: Detect common vulnerabilities
-    run:
-      container: service-image
-      command: "bandit -qr api"
-
   lint:
     description: Lint the source and test code
     run:

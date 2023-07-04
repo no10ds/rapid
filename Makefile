@@ -11,6 +11,15 @@ help: 				## List targets and description
 precommit:
 	pre-commit install
 
+detect-secrets:
+	@git ls-files -z | xargs -0 detect-secrets-hook --baseline .secrets.baseline
+
+ignore-secrets:
+	detect-secrets scan > .secrets.baseline
+
+detect-vulnerabilities:
+	bandit -qr api/api sdk/rapid
+
 ##
 ##----- API -----
 ##
@@ -33,19 +42,6 @@ api-test-e2e-focus:		## Run api python e2e tests marked with `@pytest.mark.focus
 
 # API Security --------------------
 ##
-api-security:			## Run api security checks
-	@$(MAKE) api-detect-secrets
-	@$(MAKE) api-detect-vulns
-
-api-detect-secrets:		## Check api source code for possible secrets
-	@cd api/; ./batect detect-secrets
-
-api-ignore-secrets:		## Mark api detected non-secrets as ignored
-	@cd api/; ./batect ignore-secrets
-
-api-detect-vulns:		## Check api source code for common vulnerabilities
-	@cd api/; ./batect detect-vulnerabilities
-
 api-scan-for-vulns-and-tag:	## Scan api ecr for latest image and tag as vulnerable
 	@cd api/; ./image-utils.sh "pipeline_post_scanning_processing"
 

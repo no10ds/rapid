@@ -8,18 +8,6 @@ containers:
         container: /src
 
 tasks:
-  detect-secrets:
-    description: Detect tracked files for secrets
-    run:
-      container: utility
-      command: sh -c 'git ls-files -z | xargs -0 detect-secrets-hook --baseline .secrets.baseline'
-
-  ignore-secrets:
-    description: Ignore detected secrets (add them to the .secrets.baseline file)
-    run:
-      container: utility
-      command: bash -c 'detect-secrets scan > .secrets.baseline'
-
   security-scan:
     description: Scan the terraform stack for security vulnerabilities
     run:
