@@ -1,16 +1,10 @@
 -include .env
 export
-PYTHON_VERSION=3.10.6
-
-# Setup commands
 
 python:
 	pyenv install --skip-existing $(PYTHON_VERSION)
 	echo 'eval "$(pyenv init --path)"' >> ~/.bashrc
 	pyenv local $(PYTHON_VERSION)
-
-precommit:
-	pre-commit install
 
 venv:
 	python3 -m venv .venv
@@ -19,13 +13,10 @@ venv:
 
 reqs:
 	pip install -r requirements.txt
+	@echo "========================"
+	@echo "Virtual environment successfully created. To activate the venv:"
+	@echo "	\033[0;32msource sdk/.venv/bin/activate"
 
-setup: python precommit venv
-
-test:
-	pytest -vv -s
-
-# Deploy the package
 release:
 	git checkout ${commit}
 	git tag -a "${version}" -m "Release tag for version ${version}"
@@ -35,14 +26,20 @@ release:
 	@gh release create ${version} -F latest_release_changelog.md
 	rm -rf latest_release_changelog.md
 
-deploy/pypi:
+cleanup:
 	rm -rf ./dist
+
+build:
 	python3 setup.py sdist
+
+deploy:
+	$(MAKE) cleanup
+	$(MAKE) build
 	twine upload dist/*
 
-deploy/test:
-	rm -rf ./dist
-	python3 setup.py sdist
+deploy-test:
+	$(MAKE) cleanup
+	$(MAKE) build
 	twine upload --repository testpypi dist/*
 
 documentation/build:
