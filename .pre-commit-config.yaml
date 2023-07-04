@@ -30,7 +30,7 @@ repos:
     rev: 4.0.1
     hooks:
     -   id: flake8
-        args: ['--config', '.flake8']
+        args: ['--config', 'api/.flake8']
         exclude: (docs/|get_latest_release_changelog.py)
 # -   repo: https://github.com/PyCQA/pylint
 #     rev: v2.15.5

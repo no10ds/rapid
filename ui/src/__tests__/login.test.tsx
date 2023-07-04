@@ -1,6 +1,6 @@
 import { screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react'
 import fetchMock from 'jest-fetch-mock'
-import { renderWithProviders } from '@/lib/test-utils'
+import { renderWithProviders } from '@/utils/test-utils'
 import LoginPage from '@/pages/login'
 import { AuthResponse, GetLoginResponse } from '@/service/types'
 

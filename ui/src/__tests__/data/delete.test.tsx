@@ -8,7 +8,7 @@ import {
 import userEvent from '@testing-library/user-event'
 import fetchMock from 'jest-fetch-mock'
 import DeletePage from '@/pages/data/delete'
-import { mockDataSetsList, renderWithProviders } from '@/lib/test-utils'
+import { mockDataSetsList, renderWithProviders } from '@/utils/test-utils'
 import { DeleteDatasetResponse } from '@/service/types'
 
 describe('Page: Delete page', () => {

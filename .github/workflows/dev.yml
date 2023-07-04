@@ -84,7 +84,7 @@ jobs:
       - name: Setup Python Environment
         run: |
           make sdk-setup
-          source .venv/bin/activate
+          source sdk/.venv/bin/activate
 
       - name: SDK Test
         run: make sdk-test
