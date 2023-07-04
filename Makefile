@@ -96,6 +96,8 @@ infra-assume-role:		## Assume role to perform infrastructure tasks
 infra-backend:			## Create terraform backend for infrastructure
 	@cd infrastructure/; ./scripts/infra_make_helper.sh create_backend
 
+##
+
 infra-init:			## Terraform init: make infra-init block=<infra-block>
 	@cd infrastructure/; ./scripts/infra_make_helper.sh run_init "${block}"
 
@@ -129,3 +131,29 @@ sdk-release-test:		## Build and release sdk to testpypi
 
 sdk-release:			## Build and release sdk to pypi
 	@cd sdk/; $(MAKE) deploy
+
+##
+##----- UI -----
+##
+ui-setup:			## Setup npm required for the sdk
+	@cd ui/; npm i -g next; npm ci
+
+# UI Running --------------------
+##
+ui-run:				## Run the ui application
+	@cd ui/; npm run
+
+ui-run-dev:			## Run the ui application with hot reload
+	@cd ui/; npm run dev
+
+# UI Testing --------------------
+##
+ui-test:			## Test ui site
+	@cd ui/; npm run test:all
+
+# UI Release --------------------
+##
+ui-zip-and-release:		## Zip and release static ui site
+	@cd ui/; $(MAKE) zip-contents; $(MAKE) upload-to-release
+
+##

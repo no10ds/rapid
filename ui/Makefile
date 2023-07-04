@@ -1,8 +1,6 @@
 -include .env
 export
 
-.PHONY: help test
-
 IMAGE_NAME=ui-f1-registry
 LATEST_COMMIT_HASH=$(shell git rev-parse --short HEAD)
 ZIP_PATH=$(IMAGE_NAME)-$(LATEST_COMMIT_HASH)
@@ -17,8 +15,6 @@ endif
 help:	## List targets and description
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
 
-# Deployment -------------------------
-##
 zip-contents:		## Zip contents of the built static html files
 ifdef tag
 	@zip -r "${tag}.zip" ./out
@@ -39,8 +35,6 @@ upload-to-release-prod:	## Upload the zipped built static files to a production 
 create-static-out: 	## Manually create the static files
 	@npm run build:static
 
-# Release -------------------------
-##
 release:
 	@git checkout ${commit}
 	@git tag -a "${version}" -m "Release tag for version ${version}"
@@ -49,22 +43,3 @@ release:
 	@node ./generate_latest_changelog.js
 	@gh release create ${version} -F latest_release_changelog.md
 	@rm -rf latest_release_changelog.md
-
-zip-and-release-ui:
-	@$(MAKE) zip-contents
-	@$(MAKE) upload-to-release
-
-# Setup and config -------------------------
-##
-npm-setup:	## Setup project
-	@npm i -g next
-	@npm ci
-	@npm run prepare
-
-# Running -------------------------
-##
-dev:	## Run development server
-	@npm run dev
-
-test:	## Run all UI tests
-	@npm run test:all
