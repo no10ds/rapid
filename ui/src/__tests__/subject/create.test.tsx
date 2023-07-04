@@ -1,7 +1,7 @@
 import { screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import fetchMock from 'jest-fetch-mock'
-import { renderWithProviders } from '@/lib/test-utils'
+import { renderWithProviders } from '@/utils/test-utils'
 import SubjectCreatePage from '@/pages/subject/create/index'
 
 const mockUiData: { [key: string]: { [key: string]: string }[] } = {

@@ -6,7 +6,7 @@ import {
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import fetchMock from 'jest-fetch-mock'
-import { mockDataSetsList, renderWithProviders } from '@/lib/test-utils'
+import { mockDataSetsList, renderWithProviders } from '@/utils/test-utils'
 import DownloadPage from '@/pages/data/download/'
 
 const pushSpy = jest.fn()

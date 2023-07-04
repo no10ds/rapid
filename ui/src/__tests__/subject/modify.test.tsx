@@ -6,7 +6,7 @@ import {
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import fetchMock from 'jest-fetch-mock'
-import { renderWithProviders } from '@/lib/test-utils'
+import { renderWithProviders } from '@/utils/test-utils'
 import SubjectModifyPage from '@/pages/subject/modify/index'
 
 const mockData: Array<Record<string, string | undefined>> = [

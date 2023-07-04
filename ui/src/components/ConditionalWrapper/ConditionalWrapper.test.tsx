@@ -1,6 +1,6 @@
 import { screen } from '@testing-library/react'
 import ConditionalWrapper from './ConditionalWrapper'
-import { renderWithProviders } from '@/lib/test-utils'
+import { renderWithProviders } from '@/utils/test-utils'
 import { FC } from 'react'
 
 const Content: FC = () => <div data-testid="content">test</div>

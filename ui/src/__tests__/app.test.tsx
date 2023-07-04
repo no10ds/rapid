@@ -1,5 +1,5 @@
 import fetchMock from 'jest-fetch-mock'
-import { renderWithProviders } from '@/lib/test-utils'
+import { renderWithProviders } from '@/utils/test-utils'
 import AppPage from '@/pages/_app'
 
 jest.useFakeTimers()

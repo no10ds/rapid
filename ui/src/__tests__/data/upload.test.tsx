@@ -7,7 +7,7 @@ import {
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import fetchMock from 'jest-fetch-mock'
-import { mockDataSetsList, renderWithProviders } from '@/lib/test-utils'
+import { mockDataSetsList, renderWithProviders } from '@/utils/test-utils'
 import UploadPage from '@/pages/data/upload'
 import { UploadDatasetResponse } from '@/service/types'
 
@@ -106,7 +106,7 @@ describe('Page: Upload page', () => {
       fetchMock.mockResponses(
         [JSON.stringify(mockDataSetsList), { status: 200 }],
         [JSON.stringify(mockSuccess), { status: 200 }],
-        [JSON.stringify({ status: "FAILED" }), { status: 200 }]
+        [JSON.stringify({ status: 'FAILED' }), { status: 200 }]
       )
       renderWithProviders(<UploadPage />)
       await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
@@ -141,7 +141,7 @@ describe('Page: Upload page', () => {
       fetchMock.mockResponses(
         [JSON.stringify(mockDataSetsList), { status: 200 }],
         [JSON.stringify(mockSuccess), { status: 200 }],
-        [JSON.stringify({ status: "SUCCESS" }), { status: 200 }]
+        [JSON.stringify({ status: 'SUCCESS' }), { status: 200 }]
       )
       renderWithProviders(<UploadPage />)
       await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
@@ -176,7 +176,7 @@ describe('Page: Upload page', () => {
       fetchMock.mockResponses(
         [JSON.stringify(mockDataSetsList), { status: 200 }],
         [JSON.stringify(mockSuccess), { status: 200 }],
-        [JSON.stringify({ status: "IN PROGRESS" }), { status: 200 }]
+        [JSON.stringify({ status: 'IN PROGRESS' }), { status: 200 }]
       )
       renderWithProviders(<UploadPage />)
       await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
@@ -195,7 +195,6 @@ describe('Page: Upload page', () => {
         expect(screen.getByText('Status: Data processing')).toBeInTheDocument()
       })
     })
-
 
     it('api error', async () => {
       fetchMock.mockResponseOnce(JSON.stringify(mockDataSetsList), { status: 200 })
