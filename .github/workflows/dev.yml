@@ -7,6 +7,13 @@ on:
 
   workflow_dispatch:
 
+env:
+  AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+  DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
+  DATA_BUCKET: ${{ secrets.DATA_BUCKET }}
+
 jobs:
   set-vars:
     runs-on: self-hosted
@@ -45,11 +52,6 @@ jobs:
       - name: Populate .env with additional vars
         run: |
           cp ./.github/.github.env .env
-          echo DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} >> .env
-          echo DATA_BUCKET=${{ secrets.DATA_BUCKET }} >> .env
-          echo AWS_ACCOUNT=${{ secrets.AWS_ACCOUNT }} >> .env
-          echo AWS_REGION=${{ secrets.AWS_REGION }} >> .env
-          echo AWS_DEFAULT_REGION=${{ secrets.AWS_REGION }} >> .env
 
       - name: Build API Image
         run: make api-create-image
