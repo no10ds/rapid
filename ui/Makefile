@@ -31,12 +31,3 @@ upload-to-release-prod:	## Upload the zipped built static files to a production 
 
 create-static-out: 	## Manually create the static files
 	@npm run build:static
-
-release:
-	@git checkout ${commit}
-	@git tag -a "${version}" -m "Release tag for version ${version}"
-	@git checkout -
-	@git push origin ${version}
-	@node ./generate_latest_changelog.js
-	@gh release create ${version} -F latest_release_changelog.md
-	@rm -rf latest_release_changelog.md
