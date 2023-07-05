@@ -1,0 +1,105 @@
+name: rAPId Deployment
+
+on:
+  push:
+    branches: [main]
+
+  workflow_dispatch:
+
+jobs:
+  setup:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Log commit SHA
+        run: echo $GITHUB_SHA
+
+  security-check:
+    needs:
+      - setup
+    runs-on: self-hosted
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+          cache: "pip"
+
+      - run: pip install -r requirements.txt
+
+      - name: Run security checks
+        run: make security-check
+
+  api-deployment:
+    needs:
+      - setup
+      - security-check
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Populate .env with additional vars
+        run: |
+          cp ./.github/.github.env .env
+          echo DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} >> .env
+          echo DATA_BUCKET=${{ secrets.DATA_BUCKET }} >> .env
+          echo AWS_ACCOUNT=${{ secrets.AWS_ACCOUNT }} >> .env
+          echo AWS_REGION=${{ secrets.AWS_REGION }} >> .env
+          echo AWS_DEFAULT_REGION=${{ secrets.AWS_REGION }} >> .env
+
+      - name: Build API Image
+        run: make api-create-image
+
+      - name: API Static Analysis
+        run: make api-lint
+
+      - name: API Tests
+        run: make api-test
+
+      - name: API Tag and Upload
+        run: make api-tag-and-upload
+
+      - name: API Check Image Scan for Vulnerabilities
+        run: make api-scan-for-vulns-and-tag
+
+      - name: API Tag PROD Candidate
+        run: make api-tag-prod-candidate
+
+      - name: API Deploy Image to Prod
+        run: make api-tag-live-in-prod
+
+      - name: API Allow for Application to Start
+        run: sleep 120
+
+      - name: API Wait for Running Application
+        id: await-running-app
+        run: make api-check-app-is-running
+
+      - name: API E2E Tests
+        id: e2e-tests
+        env:
+          COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
+          RESOURCE_PREFIX: ${{ secrets.RESOURCE_PREFIX }}
+          ALLOWED_EMAIL_DOMAINS: ${{ secrets.ALLOWED_EMAIL_DOMAINS }}
+        run: make api-test-e2e
+
+      - name: API Tag Image as Failure
+        if: always() && steps.await-running-app.conclusion == 'failure' || steps.e2e-tests.conclusion == 'failure'
+        run: make
+
+  cleanup:
+    needs:
+      - setup
+      - security-check
+      - api-deployment
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Clean Docker Context
+        if: always()
+        run: make clean-pipeline-docker-context
