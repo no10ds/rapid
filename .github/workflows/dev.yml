@@ -7,15 +7,8 @@ on:
 
   workflow_dispatch:
 
-env:
-  AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
-  AWS_REGION: ${{ secrets.AWS_REGION }}
-  AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-  DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
-  DATA_BUCKET: ${{ secrets.DATA_BUCKET }}
-
 jobs:
-  set-vars:
+  setup:
     runs-on: self-hosted
     steps:
       - name: Checkout
@@ -26,7 +19,7 @@ jobs:
 
   security-check:
     needs:
-      - set-vars
+      - setup
     runs-on: self-hosted
     steps:
       - name: Setup Python
@@ -42,7 +35,7 @@ jobs:
 
   api-dev:
     needs:
-      - set-vars
+      - setup
       - security-check
     runs-on: self-hosted
     steps:
@@ -52,6 +45,11 @@ jobs:
       - name: Populate .env with additional vars
         run: |
           cp ./.github/.github.env .env
+          echo DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} >> .env
+          echo DATA_BUCKET=${{ secrets.DATA_BUCKET }} >> .env
+          echo AWS_ACCOUNT=${{ secrets.AWS_ACCOUNT }} >> .env
+          echo AWS_REGION=${{ secrets.AWS_REGION }} >> .env
+          echo AWS_DEFAULT_REGION=${{ secrets.AWS_REGION }} >> .env
 
       - name: Build API Image
         run: make api-create-image
@@ -67,7 +65,7 @@ jobs:
 
   sdk-dev:
     needs:
-      - set-vars
+      - setup
       - security-check
     runs-on: self-hosted
     steps:
@@ -99,7 +97,7 @@ jobs:
 
   ui-dev:
     needs:
-      - set-vars
+      - setup
       - security-check
     runs-on: self-hosted
     steps:
@@ -119,7 +117,7 @@ jobs:
 
   cleanup:
     needs:
-      - set-vars
+      - setup
       - security-check
       - api-dev
       - sdk-dev
@@ -129,6 +127,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Clean Docker context
+      - name: Clean Docker Context
         if: always()
         run: make clean-pipeline-docker-context

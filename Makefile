@@ -82,6 +82,15 @@ api-format:			## Run the api code format with black
 api-tag-and-upload:		## Tag and upload the latest api image
 	@cd api/; $(MAKE) tag-and-upload
 
+api-tag-prod-candidate:		## Tag the uploaded api image as a candidate for PROD deployment
+	@cd api/; $(MAKE) tag-prod-candidate
+
+api-tag-live-in-prod:		## Deploy the latest version of the api
+	@cd api/; $(MAKE) tag-live-in-prod
+
+api-check-app-is-running:
+	@cd api/; $(MAKE) check-app-is-running
+
 ##
 clean-pipeline-docker-context:
 	@cd api/; $(MAKE) clean-docker
