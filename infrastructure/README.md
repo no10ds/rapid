@@ -1,5 +1,5 @@
 # rAPId infrastructure
-xx
+
 <img src="https://github.com/no10ds/rapid-api/blob/main/logo.png?raw=true" display=block margin-left= auto margin-right=auto width=80%;/>
 
 The rAPId service allows users to ingest, validate and query data via an API. This repo provides a self-service
