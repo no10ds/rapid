@@ -82,6 +82,9 @@ api-format:			## Run the api code format with black
 api-tag-and-upload:		## Tag and upload the latest api image
 	@cd api/; $(MAKE) tag-and-upload
 
+api-tag-and-upload-release-image:## Tag and upload the api release image
+	@cd api/; $(MAKE) tag-and-upload-release-image
+
 api-tag-prod-candidate:		## Tag the uploaded api image as a candidate for PROD deployment
 	@cd api/; $(MAKE) tag-prod-candidate
 
@@ -162,7 +165,10 @@ ui-test:			## Test ui site
 
 # UI Release --------------------
 ##
-ui-zip-and-release:		## Zip and release static ui site
-	@cd ui/; $(MAKE) zip-contents; $(MAKE) upload-to-release
+ui-create-static-out:
+	@cd ui/; $(MAKE) create-static-out
+
+ui-zip-and-release:		## Zip and release prod static ui site
+	@cd ui/; $(MAKE) zip-contents tag=${tag}; $(MAKE) upload-to-release-prod tag=${tag}
 
 ##
