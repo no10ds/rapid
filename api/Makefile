@@ -31,16 +31,6 @@ check-app-is-running:
 	@aws ecs wait services-stable --region $(AWS_REGION) --services $(ECS_SERVICE) --cluster $(ECS_CLUSTER)
 	@echo "finished waiting for services to be stable"
 
-# Release -------------------------
-release:
-	@git checkout ${commit}
-	@git tag -a "${version}" -m "Release tag for version ${version}"
-	@git checkout -
-	@git push origin ${version}
-	@./batect generate_latest_changelog
-	@gh release create ${version} -F latest_release_changelog.md
-	@rm -rf latest_release_changelog.md
-
 tag-release-image:			## Tag the image with the tag name
 	@docker tag rapid-api-service-image:latest $(PUBLIC_URI)/$(PUBLIC_IMAGE):${GITHUB_REF_NAME}
 

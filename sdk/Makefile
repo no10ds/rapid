@@ -14,15 +14,6 @@ reqs:
 	@echo "Virtual environment successfully created. To activate the venv:"
 	@echo "	\033[0;32msource sdk/.venv/bin/activate"
 
-release:
-	git checkout ${commit}
-	git tag -a "${version}" -m "Release tag for version ${version}"
-	git checkout -
-	git push origin ${version}
-	python get_latest_release_changelog.py
-	@gh release create ${version} -F latest_release_changelog.md
-	rm -rf latest_release_changelog.md
-
 cleanup:
 	rm -rf ./dist
 
