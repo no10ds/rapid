@@ -20,7 +20,7 @@ client_router = APIRouter(
 @client_router.post(
     "",
     status_code=http_status.HTTP_201_CREATED,
-    dependencies=[Security(secure_endpoint, scopes=[Action.USER_ADMIN.value])],
+    dependencies=[Security(secure_endpoint, scopes=[Action.USER_ADMIN])],
 )
 async def create_client(client_request: ClientRequest):
     """
@@ -76,7 +76,7 @@ async def create_client(client_request: ClientRequest):
 @client_router.delete(
     "/{client_id}",
     status_code=http_status.HTTP_200_OK,
-    dependencies=[Security(secure_endpoint, scopes=[Action.USER_ADMIN.value])],
+    dependencies=[Security(secure_endpoint, scopes=[Action.USER_ADMIN])],
 )
 async def delete_client(client_id: str):
     """

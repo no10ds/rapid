@@ -8,6 +8,7 @@ as a user you can either create the schema [from scratch](#from-scratch-) or use
 The schema will have the following structure:
 
 - `metadata` - General information of the schema.
+  - `layer` - String value, this is the name of the layer within rAPId that you wish to place the dataset within. The possible values of this are unique to the rAPId instance and specified on creation. If none are provided, it will default to `default`.
   - `domain` - String value, is the name of the domain that owns the dataset, it could be for example the name of the department that handles the data.
   - `dataset` - String value, is the name of the dataset. e.g.: "receipts" or "address".
   - `sensitivity` - String value, is the sensitivity level of the dataset. e.g.: "PUBLIC", "PRIVATE", "PROTECTED"
@@ -67,13 +68,11 @@ Column heading names should follow a strict format. The [requirements](https://d
 
 
 ### Accepted data types 🐼
+The data accepted data types for a rAPId instance can be found detailed [here](https://docs.aws.amazon.com/athena/latest/ug/data-types.html). The only Athena types that are currently unsupported are array, map and struct types.
 
-The data accepted data types for a rAPId instance can be found in [DataTypes.py](/api/domain/data_types.py), they are string values with the name of a
-pandas' data type.
-
-- `Int64` - Use it to define integer values, the string *must* start with a capital letter, this allows the [int columns to be nullable for pandas' dataframes](https://pandas.pydata.org/pandas-docs/stable/user_guide/integer_na.html).
-- `Float64` - Use it to define float values, the string *must* start with a capital letter.
-- `object` - Use it to define string.
+- `integer` - Use it to define integer values.
+- `double` - Use it to define float values.
+- `string` - Use it to define string.
 - `date` - Use it to define date objects, then in the format key specify the desired [date-format](#date-formats-).
 - `boolean` - Use it to define boolean values (see Booleans section below).
 
@@ -168,13 +167,13 @@ To create a schema manually from scratch, just create a json file filling all th
     {
       "name": "object_column_name",
       "partition_index": null,
-      "data_type": "object",
+      "data_type": "string",
       "allow_null": false
     },
     {
       "name": "int_column_name",
       "partition_index": null,
-      "data_type": "Int64",
+      "data_type": "integer",
       "allow_null": true
     },
     {
@@ -197,8 +196,8 @@ Consider the following:
 - The domain and dataset names will be taken from the url, but can be changed manually afterwards.
 - It will not set any [partition columns](#partitions-), ensure you add them after the schema has been generated.
 - It might not infer the `date` type and its format, ensure you add this information if required.
-- It might infer `Float64` instead of `Int64` due to the way pandas works.
-- Numbers that are formatted with comma separators should be wrapped in double quotation marks if you wish to retain the commas. If not, remove the commas, and they will be inferred as `Int64` or `Float64`.
+- It might infer `double` instead of `integer` due to the way pandas works.
+- Numbers that are formatted with comma separators should be wrapped in double quotation marks if you wish to retain the commas. If not, remove the commas, and they will be inferred as `integer` or `double`.
 - Text that contains commas should be wrapped in double quotation marks.
 
 If we try to get a dataset generated from a csv file `(my_file.csv)` with the following values:
@@ -231,28 +230,28 @@ After calling POST `/schema/my_domain_name/my_datase_name/generate` with `my_fil
     {
       "name": "date_column_name",
       "partition_index": null,
-      "data_type": "object",
+      "data_type": "string",
       "allow_null": true,
       "format": null
     },
     {
       "name": "object_column_name",
       "partition_index": null,
-      "data_type": "object",
+      "data_type": "string",
       "allow_null": true,
       "format": null
     },
     {
       "name": "int_column_name",
       "partition_index": null,
-      "data_type": "Float64",
+      "data_type": "double",
       "allow_null": true,
       "format": null
     },
     {
       "name": "bool_column_name",
       "partition_index": null,
-      "data_type": "object",
+      "data_type": "string",
       "allow_null": true,
       "format": null
     }
@@ -291,13 +290,13 @@ You might then change the values that fit your data and come with something like
     {
       "name": "object_column_name",
       "partition_index": null,
-      "data_type": "object",
+      "data_type": "string",
       "allow_null": true
     },
     {
       "name": "int_column_name",
       "partition_index": 1,
-      "data_type": "Int64",
+      "data_type": "integer",
       "allow_null": false
     },
     {

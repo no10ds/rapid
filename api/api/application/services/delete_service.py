@@ -2,45 +2,62 @@ import re
 
 from api.adapter.glue_adapter import GlueAdapter
 from api.adapter.s3_adapter import S3Adapter
+from api.application.services.schema_service import SchemaService
 from api.common.config.constants import FILENAME_WITH_TIMESTAMP_REGEX
-from api.common.custom_exceptions import UserError
+from api.common.custom_exceptions import AWSServiceError, UserError
+from api.common.logger import AppLogger
+from api.domain.dataset_metadata import DatasetMetadata
 
 
 class DeleteService:
-    def __init__(self, persistence_adapter=S3Adapter(), glue_adapter=GlueAdapter()):
-        self.persistence_adapter = persistence_adapter
-        self.glue_adapter = glue_adapter
-
-    def delete_schema(self, domain: str, dataset: str, sensitivity: str, version: int):
-        self.persistence_adapter.delete_schema(domain, dataset, sensitivity, version)
-
-    def delete_dataset_file(
-        self, domain: str, dataset: str, version: int, filename: str
+    def __init__(
+        self,
+        s3_adapter=S3Adapter(),
+        glue_adapter=GlueAdapter(),
+        schema_service=SchemaService(),
     ):
-        self._validate_filename(filename)
-        self.persistence_adapter.find_raw_file(domain, dataset, version, filename)
-        self.glue_adapter.check_crawler_is_ready(domain, dataset)
-        self.persistence_adapter.delete_dataset_files(
-            domain, dataset, version, filename
-        )
-        self.glue_adapter.start_crawler(domain, dataset)
+        self.s3_adapter = s3_adapter
+        self.glue_adapter = glue_adapter
+        self.schema_service = schema_service
 
-    def delete_dataset(self, domain: str, dataset: str):
+    def delete_schemas(self, metadata: type[DatasetMetadata]):
+        self.schema_service.delete_schemas(metadata)
+
+    def delete_schema_upload(self, metadata: type[DatasetMetadata]):
+        """Deletes the resources associated with a schema upload or update"""
+        try:
+            self.delete_table(metadata)
+        except AWSServiceError as error:
+            AppLogger.error(
+                f"Failed to delete table for schema upload: {error.message}"
+            )
+
+        try:
+            self.schema_service.delete_schema(metadata)
+        except AWSServiceError as error:
+            AppLogger.error(f"Failed to delete uploaded schema: {error.message}")
+
+    def delete_dataset_file(self, dataset: DatasetMetadata, filename: str):
+        self._validate_filename(filename)
+        self.s3_adapter.find_raw_file(dataset, filename)
+        self.s3_adapter.delete_dataset_files(dataset, filename)
+
+    def delete_table(self, dataset: DatasetMetadata):
+        self.glue_adapter.delete_tables([dataset.glue_table_name()])
+
+    def delete_dataset(self, dataset: DatasetMetadata):
         # Given a domain and a dataset, delete all rAPId contents for this domain & dataset
-        # 1. Generate a list of file keys from S3 to delete, raw_data, data & schemas
+        # 1. Generate a list of file keys from S3 to delete, raw_data & data
         # 2. Remove keys
         # 3. Delete Glue Tables
-        # 4. Delete crawler
-        sensitivity = self.persistence_adapter.get_dataset_sensitivity(domain, dataset)
-        dataset_files = self.persistence_adapter.list_dataset_files(
-            domain, dataset, sensitivity.value
+        # 4. Delete Schemas
+        dataset_files = self.s3_adapter.list_dataset_files(dataset)
+        self.s3_adapter.delete_dataset_files_using_key(
+            dataset_files, f"{dataset.layer}/{dataset.domain}/{dataset.dataset}"
         )
-        self.persistence_adapter.delete_dataset_files_using_key(
-            dataset_files, f"{domain}/{dataset}"
-        )
-        tables = self.glue_adapter.get_tables_for_dataset(domain, dataset)
+        tables = self.glue_adapter.get_tables_for_dataset(dataset)
         self.glue_adapter.delete_tables(tables)
-        self.glue_adapter.delete_crawler(domain, dataset)
+        self.schema_service.delete_schemas(dataset)
 
     def _validate_filename(self, filename: str):
         if not re.match(FILENAME_WITH_TIMESTAMP_REGEX, filename):
