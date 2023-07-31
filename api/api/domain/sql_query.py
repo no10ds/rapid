@@ -1,12 +1,12 @@
-from enum import Enum
 from typing import Optional, List
+from strenum import StrEnum
 
 from pydantic import BaseModel, Extra
 
 from api.common.logger import AppLogger
 
 
-class SortDirection(Enum):
+class SortDirection(StrEnum):
     ASC = "ASC"
     DESC = "DESC"
 
@@ -70,7 +70,7 @@ class SQLQuery(BaseModel):
             return ""
         columns = ",".join(
             [
-                f"{order_by.column} {order_by.direction.value}"
+                f"{order_by.column} {order_by.direction}"
                 for order_by in self.order_by_columns
                 if order_by is not None and order_by.column != ""
             ]

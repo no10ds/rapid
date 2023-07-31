@@ -1,6 +1,6 @@
 import re
 from time import sleep
-from typing import Callable, Optional, Dict
+from typing import Callable, Dict
 
 import awswrangler as wr
 import boto3
@@ -8,12 +8,11 @@ from awswrangler.exceptions import QueryFailed
 from botocore.exceptions import ClientError
 from pandas import DataFrame
 
-from api.common.config.aws import ATHENA_DATABASE, OUTPUT_QUERY_BUCKET, ATHENA_WORKGROUP
-from api.common.custom_exceptions import UserError, AWSServiceError, QueryExecutionError
+from api.common.config.aws import ATHENA_DATABASE, ATHENA_WORKGROUP, OUTPUT_QUERY_BUCKET
+from api.common.custom_exceptions import AWSServiceError, QueryExecutionError, UserError
 from api.common.logger import AppLogger
-from api.common.utilities import handle_version_retrieval
+from api.domain.dataset_metadata import DatasetMetadata
 from api.domain.sql_query import SQLQuery
-from api.domain.storage_metadata import StorageMetaData
 
 
 class AthenaAdapter:
@@ -32,13 +31,13 @@ class AthenaAdapter:
         self.__s3_output = s3_output
         self.__athena_read_sql_query = athena_read_sql_query
         self.__athena_client = athena_client
-        self.__default_end_date = "9999-12-01"
 
     def query(
-        self, domain: str, dataset: str, version: Optional[int], query: SQLQuery
+        self,
+        dataset: DatasetMetadata,
+        query: SQLQuery,
     ) -> DataFrame:
-        version = handle_version_retrieval(domain, dataset, version)
-        table_name = StorageMetaData(domain, dataset, version).glue_table_name()
+        table_name = dataset.glue_table_name()
         return self.query_sql(query.to_sql(table_name))
 
     def query_sql(self, query_string: str) -> DataFrame:
@@ -55,17 +54,20 @@ class AthenaAdapter:
         except ClientError as error:
             self._handle_client_error(error)
 
-    def query_async(
-        self, domain: str, dataset: str, version: Optional[int], query: SQLQuery
-    ) -> Dict[str, str]:
+    def query_async(self, dataset: DatasetMetadata, query: SQLQuery) -> Dict[str, str]:
         """
         :return: QueryExecutionId from Athena
         """
-        version = handle_version_retrieval(domain, dataset, version)
-        table_name = StorageMetaData(domain, dataset, version).glue_table_name()
+        table_name = dataset.glue_table_name()
+        return self.query_sql_async(query.to_sql(table_name))
+
+    def query_sql_async(self, query_string: str) -> Dict[str, str]:
+        """
+        :return: QueryExecutionId from Athena
+        """
         try:
             return self.__athena_client.start_query_execution(
-                QueryString=query.to_sql(table_name),
+                QueryString=query_string,
                 WorkGroup=self.__workgroup,
                 QueryExecutionContext={"Database": self.__database},
                 ResultConfiguration={"OutputLocation": self.__s3_output},

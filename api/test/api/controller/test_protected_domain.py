@@ -42,7 +42,9 @@ class TestDeleteProtectedDomains(BaseClientTest):
     @patch.object(ProtectedDomainService, "delete_protected_domain_permission")
     @patch.object(SubjectService, "list_subjects")
     def test_returns_202_when_protected_domain_is_deleted(
-        self, mock_list_subjects, mock_delete_protected_domain_permission
+        self,
+        mock_list_subjects,
+        mock_delete_protected_domain_permission,
     ):
         mock_list_subjects.return_value = [
             {"subject_id": "xxx-yyy-zzz", "type": "USER"},

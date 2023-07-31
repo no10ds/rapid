@@ -63,10 +63,6 @@ class UnprocessableDatasetError(UserError):
     pass
 
 
-class InvalidFileUploadError(UserError):
-    pass
-
-
 # Specifically handled in global handler ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -81,19 +77,11 @@ class NotAuthorisedToViewPageError(Exception):
 # Handled in code to modify behaviour and improve readability ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-class CrawlerAlreadyExistsError(ConflictError):
+class TableAlreadyExistsError(ConflictError):
     pass
 
 
-class CrawlerCreationError(AWSServiceError):
-    pass
-
-
-class CrawlerUpdateError(AWSServiceError):
-    pass
-
-
-class CrawlerIsNotReadyError(TooManyRequestsError):
+class TableCreationError(AWSServiceError):
     pass
 
 
@@ -101,5 +89,5 @@ class TableDoesNotExistError(Exception):
     pass
 
 
-class CrawlerStartFailsError(Exception):
+class UnsupportedTypeError(Exception):
     pass

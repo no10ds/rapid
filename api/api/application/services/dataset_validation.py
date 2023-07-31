@@ -8,7 +8,12 @@ from api.common.custom_exceptions import (
     UnprocessableDatasetError,
 )
 from api.common.value_transformers import clean_column_name
-from api.domain.data_types import DataTypes
+from api.domain.data_types import (
+    extract_athena_types,
+    AthenaDataType,
+    StringType,
+    DateType,
+)
 from api.domain.schema import Schema
 from api.domain.validation_context import ValidationContext
 
@@ -23,7 +28,6 @@ def transform_and_validate(schema: Schema, data: pd.DataFrame) -> pd.DataFrame:
         .pipe(remove_empty_rows)
         .pipe(clean_column_headers)
         .pipe(dataset_has_correct_columns, schema)
-        .pipe(set_data_types, schema)
         .pipe(convert_dates_to_ymd, schema)
         .pipe(dataset_has_acceptable_null_values, schema)
         .pipe(dataset_has_correct_data_types, schema)
@@ -34,20 +38,6 @@ def transform_and_validate(schema: Schema, data: pd.DataFrame) -> pd.DataFrame:
         raise DatasetValidationError(validation_context.errors())
 
     return validation_context.get_dataframe()
-
-
-def set_data_types(df: pd.DataFrame, schema: Schema) -> Tuple[pd.DataFrame, list[str]]:
-    error_list = []
-    columns_to_cast = schema.get_column_dtypes_to_cast()
-    if columns_to_cast:
-        for column, column_type in columns_to_cast.items():
-            try:
-                df = df.astype({column: column_type})
-            except (TypeError, ValueError):
-                error_list.append(
-                    f"Failed to convert column [{column}] to type [{column_type}]"
-                )
-    return df, error_list
 
 
 def dataset_has_correct_columns(
@@ -85,15 +75,18 @@ def dataset_has_correct_data_types(
     data_frame: pd.DataFrame, schema: Schema
 ) -> Tuple[pd.DataFrame, list[str]]:
     error_list = []
+    column_types = extract_athena_types(
+        data_frame,
+    )
     for column in schema.columns:
-        actual_type = data_frame[column.name].dtype
+        actual_type = column_types[column.name]
         expected_type = column.data_type
 
-        types_match = actual_type == expected_type
+        types_match = isinstance(AthenaDataType(expected_type).value, type(actual_type))
 
         if not types_match and not is_valid_custom_dtype(actual_type, expected_type):
             error_list.append(
-                f"Column [{column.name}] has an incorrect data type. Expected {expected_type}, received {actual_type}"
+                f"Column [{column.name}] has an incorrect data type. Expected {expected_type}, received {AthenaDataType(actual_type).value}"
                 # noqa: E501
             )
 
@@ -106,7 +99,7 @@ def dataset_has_no_illegal_characters_in_partition_columns(
     error_list = []
     for column in schema.get_partition_columns():
         series = data_frame[column.name]
-        if not column.data_type == DataTypes.DATE and series.dtype == object:
+        if not column.is_of_data_type(DateType) and series.dtype == object:
             any_illegal_characters = any(
                 [value is True for value in series.str.contains("/")]
             )
@@ -122,7 +115,7 @@ def convert_dates_to_ymd(
     df: pd.DataFrame, schema: Schema
 ) -> Tuple[pd.DataFrame, list[str]]:
     error_list = []
-    for column in schema.get_columns_by_type(DataTypes.DATE):
+    for column in schema.get_columns_by_type(DateType):
         df[column.name], error = convert_date_column_to_ymd(
             column.name, df[column.name], column.format
         )
@@ -167,5 +160,5 @@ def format_timestamp_as_ymd(timestamp: Timestamp) -> str:
 
 
 def is_valid_custom_dtype(actual_type: str, expected_type: str) -> bool:
-    is_custom_dtype = expected_type in DataTypes.custom_data_types()
-    return is_custom_dtype and actual_type == DataTypes.OBJECT
+    is_custom_dtype = expected_type in list(DateType)
+    return is_custom_dtype and actual_type in list(StringType)

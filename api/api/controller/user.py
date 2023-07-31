@@ -20,7 +20,7 @@ user_router = APIRouter(
 @user_router.post(
     "",
     status_code=http_status.HTTP_201_CREATED,
-    dependencies=[Security(secure_endpoint, scopes=[Action.USER_ADMIN.value])],
+    dependencies=[Security(secure_endpoint, scopes=[Action.USER_ADMIN])],
 )
 async def create_user(user_request: UserRequest):
     """
@@ -77,7 +77,7 @@ async def create_user(user_request: UserRequest):
 @user_router.delete(
     "",
     status_code=http_status.HTTP_200_OK,
-    dependencies=[Security(secure_endpoint, scopes=[Action.USER_ADMIN.value])],
+    dependencies=[Security(secure_endpoint, scopes=[Action.USER_ADMIN])],
 )
 async def delete_user(delete_request: UserDeleteRequest):
     """

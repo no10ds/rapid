@@ -34,6 +34,7 @@ def set_encoded_content(string_content: str) -> bytes:
 def mock_schema_response():
     body_json = {
         "metadata": {
+            "layer": "raw",
             "domain": "test_domain",
             "dataset": "test_dataset",
             "sensitivity": "PUBLIC",
@@ -44,7 +45,7 @@ def mock_schema_response():
             {
                 "name": "colname1",
                 "partition_index": 0,
-                "data_type": "Int64",
+                "data_type": "integer",
                 "allow_null": True,
             }
         ],
@@ -57,6 +58,7 @@ def mock_schema_response():
 
 
 def mock_list_schemas_response(
+    layer: str = "raw",
     domain: str = "test_domain",
     dataset: str = "test_dataset",
     sensitivity: str = "PUBLIC",
@@ -66,14 +68,15 @@ def mock_list_schemas_response(
             "NextToken": "xxx",
             "ResponseMetadata": {"key": "value"},
             "Contents": [
-                {"Key": "data/schemas/"},
-                {"Key": f"data/schemas/{sensitivity}/"},
+                {"Key": "schemas"},
+                {"Key": f"schemas/{layer}/"},
+                {"Key": f"schemas/{layer}/{sensitivity}/"},
                 {
-                    "Key": f"data/schemas/{sensitivity}/{domain}/{dataset}/1/schema.json",
+                    "Key": f"schemas/{layer}/{sensitivity}/{domain}/{dataset}/1/schema.json",
                 },
             ],
             "Name": "bucket-name",
-            "Prefix": "data/schemas",
+            "Prefix": "schemas",
             "EncodingType": "url",
         }
     ]
