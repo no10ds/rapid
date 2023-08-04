@@ -1,0 +1,40 @@
+site_name: rAPId
+
+theme:
+  name: 'material'
+
+nav:
+  - Welcome to rAPId: index.md
+  - Getting Started:
+    - getting_started/deployment.md
+  - API:
+    - api/getting_started.md
+    - api/usage.md
+    - api/schema.md
+    - api/data_access.md
+    - Routes:
+      - api/routes/schema.md
+      - api/routes/dataset.md
+      - api/routes/protected_domain.md
+      - api/routes/user.md
+      - api/routes/client.md
+      - api/routes/permissions.md
+      - api/routes/subject.md
+  - Infrastructure:
+    - infrastructure/getting_started.md
+    - Deployment:
+      - infrastructure/deployment/existing.md
+      - infrastructure/deployment/full_stack.md
+    - infrastructure/alerting_monitoring.md
+    - infrastructure/certificates.md
+    - infrastructure/domains_subdomains.md
+  - UI: ui.md
+  - SDK: sdk.md
+  - Releases: releases.md
+  - Contributing: contributing.md
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.extra
+  - pymdownx.tabbed:
+      alternate_style: true
