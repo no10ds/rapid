@@ -29,9 +29,29 @@ nav:
     - infrastructure/certificates.md
     - infrastructure/domains_subdomains.md
   - UI: ui.md
-  - SDK: sdk.md
+  - SDK:
+    - sdk/usage.md
+    - sdk/useful_patterns.md
+    - API Documentation:
+      - sdk/api/rapid.md
+      - sdk/api/auth.md
+      - Items:
+        - sdk/api/items/query.md
+        - sdk/api/items/schema.md
+      - Patterns:
+        - sdk/api/patterns/data.md
   - Releases: releases.md
   - Contributing: contributing.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: false
+            show_basis: true
+          paths: [sdk]
 
 markdown_extensions:
   - pymdownx.highlight

@@ -236,7 +236,6 @@ class Rapid:
     def generate_schema(
         self, df: DataFrame, domain: str, dataset: str, sensitivity: str
     ) -> Schema:
-
         """
         Generates a schema for a pandas DataFrame and a specified dataset in the API.
 

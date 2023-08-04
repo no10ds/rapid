@@ -86,7 +86,6 @@ class Schema(BaseModel):
     def are_columns_the_same(
         self, new_columns: Union[List[Column], List[dict]]
     ) -> bool:
-
         """
         Checks that for a given Schema, does it's columns match the columns being passed
         into this function.
