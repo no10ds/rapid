@@ -2,11 +2,17 @@ site_name: rAPId
 
 theme:
   name: 'material'
+  palette:
+      scheme: default
+      primary: pink
+      accent: pink
+
+repo_name: no10ds/rapid
+repo_url: https://github.com/no10ds/rapid
 
 nav:
   - Welcome to rAPId: index.md
-  - Getting Started:
-    - getting_started/deployment.md
+  - Getting Started: getting_started.md
   - API:
     - api/getting_started.md
     - api/usage.md
@@ -28,7 +34,8 @@ nav:
     - infrastructure/alerting_monitoring.md
     - infrastructure/certificates.md
     - infrastructure/domains_subdomains.md
-  - UI: ui.md
+  - UI:
+    - ui/getting_started.md
   - SDK:
     - sdk/usage.md
     - sdk/useful_patterns.md
