@@ -29,9 +29,3 @@ deploy-test:
 	$(MAKE) cleanup
 	$(MAKE) build
 	twine upload --repository testpypi dist/*
-
-documentation/build:
-	cd ./docs && $(MAKE) html
-
-documentation/serve:
-	python -m http.server --directory ./docs/build/html

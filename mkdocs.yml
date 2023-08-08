@@ -14,7 +14,6 @@ nav:
   - Welcome to rAPId: index.md
   - Getting Started: getting_started.md
   - API:
-    - api/getting_started.md
     - api/usage.md
     - api/schema.md
     - api/data_access.md
