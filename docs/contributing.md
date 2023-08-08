@@ -82,4 +82,26 @@ The secret detection step is run as part of the `make precommit` target.
 
 ## Releasing
 
-TODO
+The product of rAPId is a set of three different packages:
+
+1. A service image that departments can pull and run from within their own infrastructure.
+2. A zip package containing the built UI that can interact with the rAPId image and hosted on your infrastructures CDN.
+3. A public pypi package of the built rAPId-sdk that provides an easy and pythonic way to interact with the hosted rAPId image.
+
+Performing a release involves tagging the repository with a new version number so that the api image, ui and sdk packages get published.
+
+### Prerequisites
+
+- Download the GitHub CLI with `brew install gh`
+- Then run `gh auth login` and follow the steps
+
+### Steps
+
+1. Decide on the new version number following the [semantic versioning approach](https://semver.org/)
+2. Update and commit the Changelog (you can follow
+   the [template](https://github.com/no10ds/rapid/blob/main/changelog_release_template/md))
+3. Run `make release commit=<commit_hash> version=vX.X.X`
+
+> Ensure the version number follows the format `vX.X.X` with full-stops in the same places
+
+Now the reelase pipeline will run automatically, build all images and packages off that version of the code and tag it within GitHub.
