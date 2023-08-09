@@ -94,10 +94,10 @@ class Schema(BaseModel):
             new_columns (Union[List[Column], List[dict]]): The new columns can be passed as either
                 a list of Column defined classes or as a list of Python dictionaries representing
                 the values. If the later is chosen and there is an incorrect value passed the function
-                will raise a :class:`rapid.exceptions.ColumnNotDifferentException`.
+                will raise a `rapid.exceptions.ColumnNotDifferentException`.
 
         Returns:
-            bool: If the new columns match the columns in the Schema
+            bool: True If the new columns match the columns in the Schema otherwise False
         """
         if all(isinstance(col, dict) for col in new_columns):
             new_columns = [Column(**col) for col in new_columns]
