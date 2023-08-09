@@ -22,7 +22,7 @@ def upload_and_create_dataframe(
         upgrade_schema_on_fail (bool, optional): Whether to upgrade the schema if the DataFrame's schema is incorrect. Defaults to False.
 
     Raises:
-        :class:`rapid.exceptions.DataFrameUploadValidationException`: If the DataFrame's schema is incorrect and upgrade_schema_on_fail is False.
+        rapid.exceptions.DataFrameUploadValidationException: If the DataFrame's schema is incorrect and upgrade_schema_on_fail is False.
         Exception: If an error occurs while generating the schema, creating the schema, or uploading the DataFrame.
     """
     schema = rapid.generate_schema(
@@ -56,7 +56,7 @@ def update_schema_dataframe(
         new_columns (Union[List[Column], List[dict]]): The new schema columns to update the schema with.
 
     Raises:
-        :class:`rapid.exceptions.ColumnNotDifferentException`: If the new schema columns are the same as the existing schema columns.
+        rapid.exceptions.ColumnNotDifferentException: If the new schema columns are the same as the existing schema columns.
         Exception: If an error occurs while generating the schema information, updating the schema, or comparing the schema columns.
     """
     info = rapid.generate_info(df, metadata.domain, metadata.dataset)

@@ -69,7 +69,7 @@ class RapidAuth:
         Tests authentication to the rAPId API.
 
         Raises:
-            :class:`rapid.exceptions.AuthenticationErrorException`: If no authorisation can be created.
+            rapid.exceptions.AuthenticationErrorException: If no authorisation can be created.
 
         Returns:
             None: If authentication was successful.

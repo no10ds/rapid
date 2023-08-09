@@ -16,7 +16,7 @@ class SQLQueryOrderBy(BaseModel):
 class Query(BaseModel):
     """
     A Query is a Pydantic class representing a rAPId compatible data query. It allows for programmatic definition
-    of data queries. See the rAPId specific `documentation <https://github.com/no10ds/rapid-api/blob/main/docs/guides/usage/usage.md#how-to-construct-a-query-object>`_
+    of data queries. See the rAPId specific [documentation](<https://github.com/no10ds/rapid-api/blob/main/docs/guides/usage/usage.md#how-to-construct-a-query-object>)
     on how to write a valid query.
 
     Example:
