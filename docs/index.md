@@ -1,4 +1,4 @@
-# Welcome to rAPId
+<img src="./logo.png" display=block margin-left=auto margin-right=auto width=100%;/>
 
 Project rAPId aims to create consistent, secure, interoperable data storage and sharing interfaces (APIs) that enable departments to discover, manage and share data and metadata amongst themselves.
 
