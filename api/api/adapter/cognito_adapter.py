@@ -8,7 +8,7 @@ from api.common.config.auth import (
     COGNITO_USER_POOL_ID,
     COGNITO_EXPLICIT_AUTH_FLOWS,
     COGNITO_ALLOWED_FLOWS,
-    SensitivityLevel,
+    Sensitivity,
 )
 from api.common.config.aws import AWS_REGION
 from api.common.custom_exceptions import AWSServiceError, UserError
@@ -25,7 +25,6 @@ class CognitoAdapter:
         self.placeholder_client_name = "string"
 
     def create_client_app(self, client_request: ClientRequest) -> ClientResponse:
-
         try:
             AppLogger.info(
                 f"Creating Client App with name: {client_request.client_name}"
@@ -78,7 +77,7 @@ class CognitoAdapter:
             return [
                 item["ScopeName"]
                 for item in response
-                if SensitivityLevel.PROTECTED.value in item["ScopeName"]
+                if Sensitivity.PROTECTED in item["ScopeName"]
             ]
         except ClientError as error:
             AppLogger.error(f"Unable to retrieve resource server information {error})")

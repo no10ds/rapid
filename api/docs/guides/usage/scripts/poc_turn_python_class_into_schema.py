@@ -39,7 +39,7 @@ BASE_SCHEMA = {
 BASE_COLUMN = {
     "name": "",
     "partition_index": "null",
-    "data_type": "object",
+    "data_type": "string",
     "allow_null": "true",
     "format": "null",
 }

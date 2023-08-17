@@ -20,10 +20,7 @@ The first step is to create a dataset by uploading a schema that describes the m
 tags, partition columns, data types, auto-generated version, etc..
 
 Then the data (currently only `.csv` files are supported) can be uploaded to the dataset. During the upload process, the
-service checks if the data matches the previously uploaded dataset schema definition and transforms it into `.parquet`.
-
-During upload, a data 'crawler' is started which looks at the persisted data and infers some metadata about it. Once the
-crawler has finished running (usually around 4-5 minutes) the data can be queried.
+service checks if the data matches the previously uploaded dataset schema definition and transforms it into `.parquet`. The data can then be queried.
 
 The application can be used by both human and programmatic clients (see more below)
 
@@ -108,6 +105,7 @@ output of this endpoint in the Schema Upload endpoint.
 
 | Parameters    | Usage                                   | Example values               | Definition                 |
 |---------------|-----------------------------------------|------------------------------|----------------------------|
+| `layer`       | URL parameter                           | `default`                    | layer of the dataset       |
 | `sensitivity` | URL parameter                           | `PUBLIC, PRIVATE, PROTECTED` | sensitivity of the dataset |
 | `domain`      | URL parameter                           | `land`                       | domain of the dataset      |
 | `dataset`     | URL parameter                           | `train_journeys`             | dataset title              |
@@ -120,6 +118,7 @@ Schema in json format in the response body:
 ```json
 {
   "metadata": {
+    "layer": "default",
     "domain": "land",
     "dataset": "train_journeys",
     "sensitivity": "PUBLIC",
@@ -144,7 +143,7 @@ Schema in json format in the response body:
     {
       "name": "num_journeys",
       "partition_index": null,
-      "data_type": "Int64",
+      "data_type": "integer",
       "allow_null": false
     }
   ]
@@ -159,12 +158,12 @@ In order to use this endpoint you don't need any permission.
 
 #### Example 1:
 
-- Request url: `/schema/PRIVATE/land/train_journeys/generate`
+- Request url: `/schema/default/PRIVATE/land/train_journeys/generate`
 - Form data: `file=train_journeys.csv`
 
 #### Example 2:
 
-- Request url: `/schema/PUBLIC/sea/ferry_crossings/generate`
+- Request url: `/schema/default/PUBLIC/sea/ferry_crossings/generate`
 - Form data: `file=ferry_crossings.csv`
 
 ## Upload schema
@@ -190,6 +189,7 @@ Example schema JSON body:
 ```json
 {
   "metadata": {
+    "layer": "default",
     "domain": "land",
     "dataset": "train_journeys",
     "sensitivity": "PUBLIC",
@@ -218,7 +218,7 @@ Example schema JSON body:
     {
       "name": "num_journeys",
       "partition_index": null,
-      "data_type": "Int64",
+      "data_type": "integer",
       "allow_null": false
     }
   ]
@@ -257,6 +257,7 @@ Example schema JSON body:
 ```json
 {
   "metadata": {
+    "layer": "layer",
     "domain": "land",
     "dataset": "train_journeys",
     "key_value_tags": {
@@ -284,7 +285,7 @@ Example schema JSON body:
     {
       "name": "num_journeys",
       "partition_index": null,
-      "data_type": "Int64",
+      "data_type": "integer",
       "allow_null": false
     }
   ]
@@ -313,12 +314,13 @@ you fixing the issues.
 
 ### General structure
 
-`POST /datasets/{domain}/{dataset}`
+`POST /datasets/{layer}/{domain}/{dataset}`
 
 ### Inputs
 
 | Parameters | Required | Usage                                   | Example values              | Definition              |
 |------------|----------|-----------------------------------------|-----------------------------|-------------------------|
+| `layer`    | True     | URL parameter                           | `default`                   | layer of the dataset    |
 | `domain`   | True     | URL parameter                           | `air`                       | domain of the dataset   |
 | `dataset`  | True     | URL parameter                           | `passengers_by_airport`     | dataset title           |
 | `version`  | False    | Query parameter                         | `3`                         | dataset version         |
@@ -349,12 +351,12 @@ e.g.: `WRITE_ALL`, `WRITE_PUBLIC`, `WRITE_PRIVATE`, `WRITE_PROTECTED_{DOMAIN}`
 
 #### Example 1:
 
-- Request url: `/datasets/land/train_journeys?version=3`
+- Request url: `/datasets/default/land/train_journeys?version=3`
 - Form data: `file=train_journeys.csv`
 
 #### Example 2:
 
-- Request url: `/datasets/air/passengers_by_airport?version=2`
+- Request url: `/datasets/default/air/passengers_by_airport?version=2`
 - Form data: `file=passengers_by_airport.csv`
 
 ## List datasets
@@ -417,6 +419,7 @@ Returns a list of datasets matching the query request, e.g.:
 ```json
 [
   {
+    "layer": "layer",
     "domain": "military",
     "dataset": "purchases",
     "version": 1,
@@ -532,12 +535,13 @@ When a valid dataset is retrieved the available data will be the schema definiti
 
 ### General structure
 
-`GET /datasets/{domain}/{dataset}/info`
+`GET /datasets/{layer}/{domain}/{dataset}/info`
 
 ### Inputs
 
 | Parameters | Required | Usage             | Example values   | Definition            |
 |------------|----------|-------------------|------------------|-----------------------|
+| `layer`   | True      | URL parameter     | `default`        | layer of the dataset  |
 | `domain`   | True     | URL parameter     | `land`           | domain of the dataset |
 | `dataset`  | True     | URL parameter     | `train_journeys` | dataset title         |
 | `version`  | False    | Query parameter   | `3`              | dataset version       |
@@ -549,6 +553,7 @@ Schema in json format in the response body:
 ```json
 {
   "metadata": {
+    "layer": "default",
     "domain": "dot",
     "dataset": "trains_departures",
     "sensitivity": "PUBLIC",
@@ -580,7 +585,7 @@ Schema in json format in the response body:
     {
       "name": "num_journeys",
       "partition_index": null,
-      "data_type": "Int64",
+      "data_type": "integer",
       "allow_null": false,
       "statistics": null
     }
@@ -597,7 +602,7 @@ a `READ` permission, e.g.: `READ_ALL`, `READ_PUBLIC`, `READ_PRIVATE`, `READ_PROT
 
 #### Example 1:
 
-- Request url: `/datasets/land/train_journeys/info`
+- Request url: `/datasets/default/land/train_journeys/info`
 
 ## List Raw Files
 
@@ -608,12 +613,13 @@ When a valid domain/dataset/version is retrieved the available raw file uploads 
 
 ### General structure
 
-`GET /datasets/{domain}/{dataset}/{version}/files`
+`GET /datasets/{layer}/{domain}/{dataset}/{version}/files`
 
 ### Inputs
 
 | Parameters    | Required  | Usage                                   | Example values               | Definition            |
 |---------------|-----------|-----------------------------------------|------------------------------|-----------------------|
+| `layer`       | True      | URL parameter                           | `default`                    | layer of the dataset  |
 | `domain`      | True      | URL parameter                           | `land`                       | domain of the dataset |
 | `dataset`     | True      | URL parameter                           | `train_journeys`             | dataset title         |
 | `version`     | True      | URL parameter                           | `3`                          | dataset version       |
@@ -638,23 +644,24 @@ a `READ` permission, e.g.: `READ_ALL`, `READ_PUBLIC`, `READ_PRIVATE`, `READ_PROT
 
 #### Example 1:
 
-- Request url: `/datasets/land/train_journeys/3/files`
+- Request url: `/datasets/default/land/train_journeys/3/files`
 
 ## Delete Data File
 
-Use this endpoint to delete raw files linked to a specific domain/dataset/version, if there is no data stored for the
+Use this endpoint to delete raw files linked to a specific layer/domain/dataset/version, if there is no data stored for the
 domain/dataset/version or the file name is invalid an error will be thrown.
 
 When a valid file in the domain/dataset/version is deleted success message will be displayed
 
 ### General structure
 
-`GET /datasets/{domain}/{dataset}/{version}/{filename}`
+`GET /datasets/{layer}/{domain}/{dataset}/{version}/{filename}`
 
 ### Inputs
 
 | Parameters | Required | Usage         | Example values                  | Definition                    |
 |------------|----------|---------------|---------------------------------|-------------------------------|
+| `layer`    | True     | URL parameter | `default`                       | layer of the dataset          |
 | `domain`   | True     | URL parameter | `land`                          | domain of the dataset         |
 | `dataset`  | True     | URL parameter | `train_journeys`                | dataset title                 |
 | `version`  | True     | URL parameter | `3`                             | dataset version               |
@@ -669,20 +676,21 @@ e.g.: `WRITE_ALL`, `WRITE_PUBLIC`, `WRITE_PUBLIC`, `WRITE_PROTECTED_{DOMAIN}`
 
 #### Example 1:
 
-- Request url: `/datasets/land/train_journeys/3/2022-01-21T17:12:31-file1.csv`
+- Request url: `/datasets/default/land/train_journeys/3/2022-01-21T17:12:31-file1.csv`
 
 ## Query dataset
 
-Data can be queried provided data has been uploaded at some point in the past and the 'crawler' has completed its run.
+Data can be queried provided data has been uploaded at some point in the past.
 
 ### General structure
 
-`POST /datasets/{domain}/{dataset}/query`
+`POST /datasets/{layer}/{domain}/{dataset}/query`
 
 ### Inputs
 
 | Parameters | Required | Usage             | Example values   | Definition            |
 |------------|----------|-------------------|------------------|-----------------------|
+| `layer`    | True     | URL parameter     | `default`        | layer of the dataset  |
 | `domain`   | True     | URL parameter     | `space`          | domain of the dataset |
 | `dataset`  | True     | URL parameter     | `rocket_lauches` | dataset title         |
 | `version`  | False    | Query parameter   | `3`              | dataset version       |
@@ -790,16 +798,16 @@ e.g.: `READ_PRIVATE`.
 
 #### Example 1 - Full dataset - JSON:
 
-- Request url: `/datasets/land/train_journeys/query`
+- Request url: `/datasets/default/land/train_journeys/query`
 
 #### Example 2 - Full dataset - CSV:
 
-- Request url: `/datasets/land/train_journeys/query`
+- Request url: `/datasets/default/land/train_journeys/query`
 - Request headers: `"Accept":"text/csv"`
 
 #### Example 3 - Dataset filtered by date and ordered by column:
 
-- Request url: `/datasets/space/rocket_lauches/query`
+- Request url: `/datasets/default/space/rocket_lauches/query`
 - Request Body:
 
 ```json
@@ -818,7 +826,7 @@ e.g.: `READ_PRIVATE`.
 In this example we get the average rocket payload for rockets in a certain class where that average payload is heavier
 than 5000kg.
 
-- Request url: `/datasets/space/rocket_launches/query`
+- Request url: `/datasets/default/space/rocket_launches/query`
 - Request Body:
 
 ```json
@@ -838,8 +846,7 @@ than 5000kg.
 
 ## Query Large dataset
 
-Large datasets (> 100,000 rows) can be queried asynchronously, provided data has been uploaded at some point in the past
-and the 'crawler' has completed its run.
+Large datasets (> 100,000 rows) can be queried asynchronously, provided data has been uploaded at some point in the past.
 
 When using this endpoint, a Job ID is returned. This can be used to track the progress of the query and subsequently
 retrieve the results from a URL.
@@ -851,12 +858,13 @@ relevant Job ID.
 
 ### General structure
 
-`POST /datasets/{domain}/{dataset}/query/large`
+`POST /datasets/{layer}/{domain}/{dataset}/query/large`
 
 ### Inputs
 
 | Parameters | Required | Usage             | Example values   | Definition            |
 |------------|----------|-------------------|------------------|-----------------------|
+| `layer`    | True     | URL parameter     | `default`        | layer of the dataset  |
 | `domain`   | True     | URL parameter     | `space`          | domain of the dataset |
 | `dataset`  | True     | URL parameter     | `rocket_lauches` | dataset title         |
 | `version`  | False    | Query parameter   | `3`              | dataset version       |
@@ -1285,6 +1293,30 @@ List of subjects:
 ### Accepted permissions
 
 In order to use this endpoint you need the `USER_ADMIN` permission
+
+## List layers
+
+Use this endpoint to retrieve list of layers for this rAPId instance.
+
+### General structure
+
+`GET /layers`
+
+### Outputs
+
+List of layers:
+
+```json
+[
+  "raw",
+  "staging",
+  "presentation"
+]
+```
+
+### Accepted permissions
+
+Any level of permission will grant you access to this endpoint.
 
 [//]: # (Job management)
 

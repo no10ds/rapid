@@ -21,6 +21,7 @@ containers:
       DOMAIN_NAME: ${DOMAIN_NAME:-}
       ALLOWED_EMAIL_DOMAINS: ${ALLOWED_EMAIL_DOMAINS:-}
       RESOURCE_PREFIX: ${RESOURCE_PREFIX:-prefix}
+      LAYERS: ${LAYERS:-}
 
 tasks:
   runtime-environment:
@@ -69,7 +70,7 @@ tasks:
     description: Run unit tests
     run:
       container: service-image
-      command: "pytest test/api -v"
+      command: "pytest test/api -vv -s"
 
   test-unit-focus:
     description: Run unit tests

@@ -1,11 +1,13 @@
 from unittest.mock import patch, Mock
 
 import pytest
-from api.adapter.aws_resource_adapter import AWSResourceAdapter
-from api.application.services.dataset_service import DatasetService
+from api.application.services.authorisation.dataset_access_evaluator import (
+    DatasetAccessEvaluator,
+)
 from api.common.config.auth import Action
 from api.common.config.constants import BASE_API_PATH
 from api.common.custom_exceptions import AWSServiceError, UserError
+from api.domain.dataset_metadata import DatasetMetadata
 from api.entry import _determine_user_ui_actions
 
 from test.api.common.controller_test_utils import BaseClientTest
@@ -50,7 +52,7 @@ class TestStatus(BaseClientTest):
 
 class TestDatasetsUI(BaseClientTest):
     @patch("api.entry.parse_token")
-    @patch.object(DatasetService, "get_authorised_datasets")
+    @patch.object(DatasetAccessEvaluator, "get_authorised_datasets")
     def test_gets_datasets_for_ui_write(
         self, mock_get_authorised_datasets, mock_parse_token
     ):
@@ -60,15 +62,9 @@ class TestDatasetsUI(BaseClientTest):
         mock_parse_token.return_value = mock_token
 
         mock_get_authorised_datasets.return_value = [
-            AWSResourceAdapter.EnrichedDatasetMetaData(
-                domain="domain1", dataset="dataset1", version=1, description=""
-            ),
-            AWSResourceAdapter.EnrichedDatasetMetaData(
-                domain="domain1", dataset="dataset2", version=1, description=""
-            ),
-            AWSResourceAdapter.EnrichedDatasetMetaData(
-                domain="domain2", dataset="dataset3", version=1, description=""
-            ),
+            DatasetMetadata("layer", "domain1", "datset1", 1),
+            DatasetMetadata("layer", "domain1", "datset2", 1),
+            DatasetMetadata("layer", "domain2", "dataset3", 1),
         ]
 
         response = self.client.get(
@@ -79,7 +75,7 @@ class TestDatasetsUI(BaseClientTest):
         assert response.status_code == 200
 
     @patch("api.entry.parse_token")
-    @patch.object(DatasetService, "get_authorised_datasets")
+    @patch.object(DatasetAccessEvaluator, "get_authorised_datasets")
     def test_gets_datasets_for_ui_read(
         self, mock_get_authorised_datasets, mock_parse_token
     ):
@@ -89,15 +85,9 @@ class TestDatasetsUI(BaseClientTest):
         mock_parse_token.return_value = mock_token
 
         mock_get_authorised_datasets.return_value = [
-            AWSResourceAdapter.EnrichedDatasetMetaData(
-                domain="domain1", dataset="dataset1", version=1, description=""
-            ),
-            AWSResourceAdapter.EnrichedDatasetMetaData(
-                domain="domain1", dataset="dataset2", version=1, description=""
-            ),
-            AWSResourceAdapter.EnrichedDatasetMetaData(
-                domain="domain2", dataset="dataset3", version=1, description=""
-            ),
+            DatasetMetadata("layer", "domain1", "datset1", 1),
+            DatasetMetadata("layer", "domain1", "datset2", 1),
+            DatasetMetadata("layer", "domain2", "dataset3", 1),
         ]
 
         response = self.client.get(
@@ -156,7 +146,7 @@ class TestMethodsUI(BaseClientTest):
         mock_token.subject = "123abc"
         mock_parse_token.return_value = mock_token
 
-        mock_permissions_service.get_subject_permissions.return_value = [
+        mock_permissions_service.get_subject_permission_keys.return_value = [
             "READ_ALL",
             "WRITE_ALL",
             "USER_ADMIN",
@@ -186,7 +176,7 @@ class TestMethodsUI(BaseClientTest):
         mock_token.subject = "123abc"
         mock_parse_token.return_value = mock_token
 
-        mock_permissions_service.get_subject_permissions.side_effect = UserError(
+        mock_permissions_service.get_subject_permission_keys.side_effect = UserError(
             "a message"
         )
 
@@ -208,8 +198,8 @@ class TestMethodsUI(BaseClientTest):
         mock_token.subject = "123abc"
         mock_parse_token.return_value = mock_token
 
-        mock_permissions_service.get_subject_permissions.side_effect = AWSServiceError(
-            "a custom message"
+        mock_permissions_service.get_subject_permission_keys.side_effect = (
+            AWSServiceError("a custom message")
         )
 
         response = self.client.get(

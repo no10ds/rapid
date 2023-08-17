@@ -10,7 +10,7 @@ class ValidationContext:
 
     def pipe(
         self,
-        function: Callable[[pd.DataFrame, ...], Tuple[pd.DataFrame, List[str]]],
+        function: Callable[[pd.DataFrame], Tuple[pd.DataFrame, List[str]]],
         *args,
         **kwargs
     ):

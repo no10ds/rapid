@@ -17,7 +17,9 @@ from api.application.services.authorisation.authorisation_service import (
 )
 from api.application.services.authorisation.token_utils import parse_token
 from api.application.services.permissions_service import PermissionsService
-from api.application.services.dataset_service import DatasetService
+from api.application.services.authorisation.dataset_access_evaluator import (
+    DatasetAccessEvaluator,
+)
 from api.common.config.auth import IDENTITY_PROVIDER_BASE_URL, Action
 from api.common.config.docs import custom_openapi_docs_generator, COMMIT_SHA, VERSION
 from api.common.config.constants import BASE_API_PATH
@@ -28,11 +30,11 @@ from api.controller.auth import auth_router
 from api.controller.client import client_router
 from api.controller.datasets import datasets_router
 from api.controller.jobs import jobs_router
+from api.controller.layers import layers_router
 from api.controller.permissions import permissions_router
 from api.controller.protected_domain import protected_domain_router
 from api.controller.schema import schema_router
 from api.controller.subjects import subjects_router
-from api.controller.table import table_router
 from api.controller.user import user_router
 from api.exception_handler import add_exception_handlers
 
@@ -49,7 +51,7 @@ PROJECT_ORGANISATION = os.environ.get("PROJECT_ORGANISATION", None)
 CATALOG_DISABLED = strtobool(os.environ.get("CATALOG_DISABLED", "False"))
 
 permissions_service = PermissionsService()
-upload_service = DatasetService()
+upload_service = DatasetAccessEvaluator()
 
 app = FastAPI(
     openapi_url=f"{BASE_API_PATH}/openapi.json", docs_url=f"{BASE_API_PATH}/docs"
@@ -66,7 +68,7 @@ app.include_router(user_router)
 app.include_router(protected_domain_router)
 app.include_router(subjects_router)
 app.include_router(jobs_router)
-app.include_router(table_router)
+app.include_router(layers_router)
 
 
 @app.on_event("startup")
@@ -151,7 +153,9 @@ async def methods(request: Request):
 
     try:
         subject_id = parse_token(request.cookies.get(RAPID_ACCESS_TOKEN)).subject
-        subject_permissions = permissions_service.get_subject_permissions(subject_id)
+        subject_permissions = permissions_service.get_subject_permission_keys(
+            subject_id
+        )
         allowed_actions = _determine_user_ui_actions(subject_permissions)
         if not any([action_allowed for action_allowed in allowed_actions.values()]):
             error_message = default_error_message
@@ -166,7 +170,7 @@ async def methods(request: Request):
 @app.get(
     f"{BASE_API_PATH}/permissions_ui",
     status_code=HTTP_200_OK,
-    dependencies=[Security(secure_endpoint, scopes=[Action.USER_ADMIN.value])],
+    dependencies=[Security(secure_endpoint, scopes=[Action.USER_ADMIN])],
     include_in_schema=False,
 )
 async def get_permissions_ui():
@@ -176,36 +180,18 @@ async def get_permissions_ui():
 @app.get(
     f"{BASE_API_PATH}/datasets_ui/{{action}}",
     status_code=HTTP_200_OK,
-    dependencies=[
-        Security(secure_endpoint, scopes=[Action.WRITE.value, Action.READ.value])
-    ],
+    dependencies=[Security(secure_endpoint, scopes=[Action.WRITE, Action.READ])],
     include_in_schema=False,
 )
 async def get_datasets_ui(action: Action, request: Request):
     subject_id = parse_token(request.cookies.get(RAPID_ACCESS_TOKEN)).subject
-    datasets = [
-        dataset.get_ui_upload_path()
-        for dataset in upload_service.get_authorised_datasets(subject_id, action)
-    ]
-
-    return _group_datasets_by_domain(datasets)
+    datasets = upload_service.get_authorised_datasets(subject_id, action)
+    return [dataset.to_dict() for dataset in datasets]
 
 
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
     return FileResponse("static/favicon.ico")
-
-
-def _group_datasets_by_domain(datasets: List[str]):
-    grouped_datasets = {}
-    for dataset in datasets:
-        dataset_data = dataset.split("/")
-        domain, dataset, version = dataset_data[0], dataset_data[1], dataset_data[2]
-        if domain not in grouped_datasets:
-            grouped_datasets[domain] = [{"dataset": dataset, "version": version}]
-        else:
-            grouped_datasets[domain].append({"dataset": dataset, "version": version})
-    return grouped_datasets
 
 
 def _get_subject_id(request: Request):
@@ -217,32 +203,23 @@ def _get_subject_id(request: Request):
 
 def _determine_user_ui_actions(subject_permissions: List[str]) -> Dict[str, bool]:
     return {
-        "can_manage_users": Action.USER_ADMIN.value in subject_permissions,
+        "can_manage_users": Action.USER_ADMIN in subject_permissions,
         "can_upload": any(
-            (
-                permission.startswith(Action.WRITE.value)
-                for permission in subject_permissions
-            )
+            (permission.startswith(Action.WRITE) for permission in subject_permissions)
         ),
         "can_download": any(
-            (
-                permission.startswith(Action.READ.value)
-                for permission in subject_permissions
-            )
+            (permission.startswith(Action.READ) for permission in subject_permissions)
         ),
         "can_create_schema": any(
             (
-                permission.startswith(Action.DATA_ADMIN.value)
+                permission.startswith(Action.DATA_ADMIN)
                 for permission in subject_permissions
             )
         ),
         "can_search_catalog": False
         if CATALOG_DISABLED
         else any(
-            (
-                permission.startswith(Action.READ.value)
-                for permission in subject_permissions
-            )
+            (permission.startswith(Action.READ) for permission in subject_permissions)
         ),
     }
 

@@ -1,6 +1,9 @@
+from typing import List
+
 import pandas as pd
 
 from api.application.services.partitioning_service import (
+    Partition,
     generate_path,
     drop_columns,
     generate_partitioned_data,
@@ -44,6 +47,7 @@ class TestPartitioning:
 
         schema = Schema(
             metadata=SchemaMetadata(
+                layer="raw",
                 domain="test_domain",
                 dataset="test_dataset",
                 sensitivity="PUBLIC",
@@ -81,18 +85,30 @@ class TestPartitioning:
         )
 
         expected = [
-            ("col1=1/col3=7", pd.DataFrame({"col2": [4]}, dtype=column_dtype)),
-            ("col1=1/col3=8", pd.DataFrame({"col2": [5]}, dtype=column_dtype)),
-            ("col1=2/col3=2", pd.DataFrame({"col2": [pd.NA]}, dtype=column_dtype)),
-            ("col1=2/col3=9", pd.DataFrame({"col2": [6]}, dtype=column_dtype)),
+            Partition(
+                keys=[1, 7],
+                path="col1=1/col3=7",
+                df=pd.DataFrame({"col2": [4]}, dtype=column_dtype),
+            ),
+            Partition(
+                keys=[1, 8],
+                path="col1=1/col3=8",
+                df=pd.DataFrame({"col2": [5]}, dtype=column_dtype),
+            ),
+            Partition(
+                keys=[2, 2],
+                path="col1=2/col3=2",
+                df=pd.DataFrame({"col2": [pd.NA]}, dtype=column_dtype),
+            ),
+            Partition(
+                keys=[2, 9],
+                path="col1=2/col3=9",
+                df=pd.DataFrame({"col2": [6]}, dtype=column_dtype),
+            ),
         ]
 
-        result = generate_partitioned_data(schema, df)
-
-        test_combos = zip(result, expected)
-        for (result_path, result_df), (expected_path, expected_df) in test_combos:
-            assert result_path == expected_path
-            assert result_df.equals(expected_df)
+        actual = generate_partitioned_data(schema, df)
+        self.assert_partitions_are_the_same(expected, actual)
 
     def test_handles_one_partition(self):
         # Forcing Int64 for testing purposes as parsing & validation should occur before partitioning # noqa E501
@@ -100,6 +116,7 @@ class TestPartitioning:
 
         schema = Schema(
             metadata=SchemaMetadata(
+                layer="raw",
                 domain="test_domain",
                 dataset="test_dataset",
                 sensitivity="PUBLIC",
@@ -127,23 +144,20 @@ class TestPartitioning:
         df2 = pd.DataFrame({"col2": [6, 2]})
 
         expected = [
-            ("col1=1", df1),
-            ("col1=2", df2),
+            Partition(keys=[1], path="col1=1", df=df1),
+            Partition(keys=[2], path="col1=2", df=df2),
         ]
 
-        result = generate_partitioned_data(schema, df)
-
-        test_combos = zip(result, expected)
-        for (result_path, result_df), (expected_path, expected_df) in test_combos:
-            assert result_path == expected_path
-            assert result_df.equals(expected_df)
+        actual = generate_partitioned_data(schema, df)
+        self.assert_partitions_are_the_same(expected, actual)
 
     def test_handles_no_partitions(self):
         # Forcing Int64 for testing purposes as parsing & validation should occur before partitioning # noqa E501
-        column_dtype = "Int64"
+        column_dtype = "integer"
 
         schema = Schema(
             metadata=SchemaMetadata(
+                layer="raw",
                 domain="test_domain",
                 dataset="test_dataset",
                 sensitivity="PUBLIC",
@@ -167,13 +181,15 @@ class TestPartitioning:
 
         df = pd.DataFrame({"col1": [1, 1, 2, 2], "col2": [4, 5, 6, 2]})
 
-        expected = [
-            ("", df),
-        ]
+        expected = [Partition(df=df)]
+        actual = generate_partitioned_data(schema, df)
+        self.assert_partitions_are_the_same(expected, actual)
 
-        result = generate_partitioned_data(schema, df)
-
-        test_combos = zip(result, expected)
-        for (result_path, result_df), (expected_path, expected_df) in test_combos:
-            assert result_path == expected_path
-            assert result_df.equals(expected_df)
+    def assert_partitions_are_the_same(
+        self, expected: List[Partition], actual: List[Partition]
+    ):
+        test_combos = zip(actual, expected)
+        for actual_partition, expected_partition in test_combos:
+            assert actual_partition.df.to_dict() == expected_partition.df.to_dict()
+            assert actual_partition.path == expected_partition.path
+            assert actual_partition.keys == expected_partition.keys

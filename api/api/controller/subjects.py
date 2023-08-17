@@ -20,7 +20,7 @@ subjects_router = APIRouter(
 @subjects_router.get(
     "",
     status_code=http_status.HTTP_200_OK,
-    dependencies=[Security(secure_endpoint, scopes=[Action.USER_ADMIN.value])],
+    dependencies=[Security(secure_endpoint, scopes=[Action.USER_ADMIN])],
 )
 async def list_subjects():
     """
@@ -35,7 +35,7 @@ async def list_subjects():
 @subjects_router.put(
     path="/permissions",
     status_code=http_status.HTTP_200_OK,
-    dependencies=[Security(secure_endpoint, scopes=[Action.USER_ADMIN.value])],
+    dependencies=[Security(secure_endpoint, scopes=[Action.USER_ADMIN])],
 )
 async def update_subject_permissions(subject_permissions: SubjectPermissions):
     """
