@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Union
 
 from fastapi import Depends, HTTPException
 from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
@@ -9,25 +9,27 @@ from jwt import InvalidTokenError
 from starlette.requests import Request
 from starlette.status import HTTP_401_UNAUTHORIZED
 
-from api.adapter.dynamodb_adapter import DynamoDBAdapter
 from api.adapter.s3_adapter import S3Adapter
-from api.application.services.authorisation.acceptable_permissions import (
-    generate_acceptable_scopes,
-)
 from api.application.services.authorisation.token_utils import parse_token
+from api.application.services.authorisation.dataset_access_evaluator import (
+    DatasetAccessEvaluator,
+)
+from api.application.services.permissions_service import PermissionsService
 from api.common.config.auth import (
     IDENTITY_PROVIDER_TOKEN_URL,
     RAPID_ACCESS_TOKEN,
+    Action,
 )
+from api.common.config.layers import Layer
 from api.common.custom_exceptions import (
     AuthorisationError,
     UserCredentialsUnavailableError,
-    UserError,
     NotAuthorisedToViewPageError,
     AuthenticationError,
 )
 from api.common.logger import AppLogger
 from api.domain.token import Token
+from api.domain.dataset_metadata import DatasetMetadata
 
 
 class OAuth2ClientCredentials(OAuth2):
@@ -57,7 +59,8 @@ class OAuth2UserCredentials:
 oauth2_scheme = OAuth2ClientCredentials(token_url=IDENTITY_PROVIDER_TOKEN_URL)
 oauth2_user_scheme = OAuth2UserCredentials()
 s3_adapter = S3Adapter()
-db_adapter = DynamoDBAdapter()
+permission_service = PermissionsService()
+dataset_access_evaluator = DatasetAccessEvaluator()
 
 
 def is_browser_request(request: Request) -> bool:
@@ -70,13 +73,39 @@ def user_logged_in(request: Request) -> bool:
     return token is not None
 
 
+def validate_token(
+    browser_request: bool = Depends(is_browser_request),
+    client_token: Optional[str] = Depends(oauth2_scheme),
+    user_token: Optional[str] = Depends(oauth2_user_scheme),
+) -> Token:
+    check_credentials_availability(browser_request, client_token, user_token)
+    token = client_token if client_token else user_token
+    return parse_token(token)
+
+
+def handle_authorisation_error(
+    user_token: Optional[str], error: Union[AuthorisationError, InvalidTokenError]
+):
+    if isinstance(error, InvalidTokenError):
+        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail=str(error))
+    else:
+        if user_token:
+            raise NotAuthorisedToViewPageError()
+        else:
+            raise error
+
+
 def secure_endpoint(
     security_scopes: SecurityScopes,
     browser_request: bool = Depends(is_browser_request),
     client_token: Optional[str] = Depends(oauth2_scheme),
     user_token: Optional[str] = Depends(oauth2_user_scheme),
 ):
-    secure_dataset_endpoint(security_scopes, browser_request, client_token, user_token)
+    try:
+        token = validate_token(browser_request, client_token, user_token)
+        check_permissions(token.subject, security_scopes.scopes)
+    except (InvalidTokenError, AuthorisationError) as error:
+        handle_authorisation_error(user_token, error)
 
 
 def secure_dataset_endpoint(
@@ -84,22 +113,28 @@ def secure_dataset_endpoint(
     browser_request: bool = Depends(is_browser_request),
     client_token: Optional[str] = Depends(oauth2_scheme),
     user_token: Optional[str] = Depends(oauth2_user_scheme),
+    layer: Optional[Layer] = None,
     domain: Optional[str] = None,
     dataset: Optional[str] = None,
 ):
-    check_credentials_availability(browser_request, user_token, client_token)
-
     try:
-        token = client_token if client_token else user_token
-        token = parse_token(token)
-        check_permissions(token, security_scopes.scopes, domain, dataset)
-    except InvalidTokenError as error:
-        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail=str(error))
-    except AuthorisationError as error:
-        if user_token:
-            raise NotAuthorisedToViewPageError()
-        else:
-            raise error
+        token = validate_token(browser_request, client_token, user_token)
+        metadata = process_dataset_metadata(layer, domain, dataset)
+        dataset_access_evaluator.can_access_dataset(
+            metadata, token.subject, security_scopes.scopes
+        )
+    except (InvalidTokenError, AuthorisationError) as error:
+        handle_authorisation_error(user_token, error)
+
+
+def process_dataset_metadata(layer, domain, dataset) -> DatasetMetadata:
+    if all([layer, domain, dataset]):
+        return DatasetMetadata(layer, domain, dataset)
+    else:
+        AppLogger.info(
+            "Cannot retrieve dataset metadata if all values are not provided"
+        )
+        raise AuthenticationError("You are not authorised to perform this action")
 
 
 def get_subject_id(request: Request):
@@ -123,7 +158,9 @@ def get_user_token(request: Request) -> Optional[str]:
 
 
 def check_credentials_availability(
-    browser_request: bool, user_token: Optional[str], client_token: Optional[str]
+    browser_request: bool,
+    client_token: Optional[str],
+    user_token: Optional[str],
 ) -> None:
     if not have_credentials(client_token, user_token):
         if browser_request:
@@ -142,33 +179,18 @@ def have_credentials(client_token: str, user_token: str) -> bool:
     return bool(user_token or client_token)
 
 
-def check_permissions(
-    token: Token,
-    endpoint_scopes: List[str],
-    domain: Optional[str],
-    dataset: Optional[str],
-):
-    subject_permissions = retrieve_permissions(token)
-    match_permissions(subject_permissions, endpoint_scopes, domain, dataset)
+def check_permissions(subject_id: str, endpoint_scopes: List[Action]):
+    """
+    Ensure that at least one of the endpoint_scopes exists in the users permissions.
+    Raising an AuthorisationError if not.
+    """
+    if not endpoint_scopes:
+        return True
 
+    permissions = permission_service.get_subject_permissions(subject_id)
+    if any([permission.type in endpoint_scopes for permission in permissions]):
+        return True
 
-def retrieve_permissions(token: Token) -> List[str]:
-    try:
-        return db_adapter.get_permissions_for_subject(token.subject)
-    except UserError:
-        return []
-
-
-def match_permissions(
-    permissions: list,
-    endpoint_scopes: list[str],
-    domain: str = None,
-    dataset: str = None,
-):
-    sensitivity = s3_adapter.get_dataset_sensitivity(domain, dataset)
-    acceptable_scopes = generate_acceptable_scopes(endpoint_scopes, sensitivity, domain)
-    if not acceptable_scopes.satisfied_by(permissions):
-        AppLogger.info(
-            f"Users list of permissions: {permissions} do not match endpoint permissions: {acceptable_scopes}."
-        )
-        raise AuthorisationError("Not enough permissions to access endpoint")
+    raise AuthorisationError(
+        f"User {subject_id} does not have permissions that grant access to the endpoint scopes {endpoint_scopes}"
+    )

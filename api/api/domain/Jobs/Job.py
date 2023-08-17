@@ -1,23 +1,23 @@
+from strenum import StrEnum
 import time
-import uuid
 from typing import Optional, Set
+import uuid
 
 from api.common.config.constants import DEFAULT_JOB_EXPIRY_DAYS
-from api.common.utilities import BaseEnum
 
 
-class JobStatus(BaseEnum):
+class JobStatus(StrEnum):
     SUCCESS = "SUCCESS"
     FAILED = "FAILED"
     IN_PROGRESS = "IN PROGRESS"
 
 
-class JobType(BaseEnum):
+class JobType(StrEnum):
     QUERY = "QUERY"
     UPLOAD = "UPLOAD"
 
 
-class JobStep(BaseEnum):
+class JobStep(StrEnum):
     pass
 
 

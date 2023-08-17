@@ -65,6 +65,7 @@ You will need to add some environment variables to your run configuration templa
 - `DOMAIN_NAME=example.com`
 - `COGNITO_USER_POOL_ID=11111111`
 - `ALLOWED_EMAIL_DOMAINS=example1.com,example2.com`
+- `LAYERS=raw,layer`
 
 We use pytest as our test runner. This can be run by calling
 
@@ -254,7 +255,7 @@ endpoint annotation as listed in the examples below:
 * For endpoints **without** ```domain``` and ```dataset``` in the url path, use the dependency ```secure_endpoint```:
 
 ```
-@app.post("/schema", dependencies=[Security(secure_endpoint, scopes=[Action.READ.value])])
+@app.post("/schema", dependencies=[Security(secure_endpoint, scopes=[Action.READ])])
 ```
 
 or
@@ -264,7 +265,7 @@ or
 
 ```
 @app.get("/{domain}/{dataset}/info",
-                     dependencies=[Security(secure_dataset_endpoint, scopes=[Action.READ.value])])
+                     dependencies=[Security(secure_dataset_endpoint, scopes=[Action.READ])])
 ```
 
 ### How to add security to the endpoint - Front End Layer

@@ -1,10 +1,13 @@
 import os
 import urllib.parse
+from strenum import StrEnum
 from typing import List
 
 from api.common.config.aws import DOMAIN_NAME, RESOURCE_PREFIX, AWS_REGION
 from api.common.config.constants import BASE_API_PATH
-from api.common.utilities import BaseEnum
+from api.common.config.layers import Layer
+
+ALL = "ALL"
 
 RAPID_ACCESS_TOKEN = "rat"  # nosec B105
 COOKIE_MAX_AGE_IN_SECONDS = 3600
@@ -57,41 +60,50 @@ def construct_logout_url(client_id: str):
     )
 
 
-class Action(BaseEnum):
+class Action(StrEnum):
     READ = "READ"
     WRITE = "WRITE"
     USER_ADMIN = "USER_ADMIN"
     DATA_ADMIN = "DATA_ADMIN"
 
     @staticmethod
-    def standalone_actions() -> List:
+    def admin_actions() -> List[str]:
         return [Action.USER_ADMIN, Action.DATA_ADMIN]
 
     @staticmethod
-    def standalone_action_values() -> List:
-        return [Action.USER_ADMIN.value, Action.DATA_ADMIN.value]
+    def data_actions() -> List[str]:
+        return [Action.READ, Action.WRITE]
 
 
 # Classifications
-class SensitivityLevel(BaseEnum):
+class Sensitivity(StrEnum):
     PUBLIC = "PUBLIC"
     PRIVATE = "PRIVATE"
     PROTECTED = "PROTECTED"
 
-    @classmethod
-    def get_all_values(cls) -> List[str]:
-        return [cls.PUBLIC.value, cls.PRIVATE.value, cls.PROTECTED.value]
+
+# Creates the possible Sensitivity Level Permissions from the existing Layer Enum
+SensitivityPermisisons = StrEnum(
+    "SensitivityPermisisons",
+    dict([(sensitivity, sensitivity) for sensitivity in [*list(Sensitivity), ALL]]),
+)
+
+# Creates the possible Layer Permissions from the existing Layer Enum
+LayerPermissions = StrEnum(
+    "LayerPermissions",
+    dict([(layer.upper(), layer.upper()) for layer in [*list(Layer), ALL]]),
+)
 
 
-class SubjectType(BaseEnum):
+class SubjectType(StrEnum):
     CLIENT = "CLIENT"
     USER = "USER"
 
 
-class PermissionsTableItem(BaseEnum):
+class PermissionsTableItem(StrEnum):
     SUBJECT = "SUBJECT"
     PERMISSION = "PERMISSION"
 
 
-class ServiceTableItem(BaseEnum):
+class ServiceTableItem(StrEnum):
     JOB = "JOB"

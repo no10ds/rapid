@@ -18,7 +18,7 @@ permissions_router = APIRouter(
 @permissions_router.get(
     "",
     status_code=http_status.HTTP_200_OK,
-    dependencies=[Security(secure_endpoint, scopes=[Action.USER_ADMIN.value])],
+    dependencies=[Security(secure_endpoint, scopes=[Action.USER_ADMIN])],
 )
 async def get_permissions():
     """
@@ -36,7 +36,7 @@ async def get_permissions():
 @permissions_router.get(
     "/{subject_id}",
     status_code=http_status.HTTP_200_OK,
-    dependencies=[Security(secure_endpoint, scopes=[Action.USER_ADMIN.value])],
+    dependencies=[Security(secure_endpoint, scopes=[Action.USER_ADMIN])],
 )
 async def get_subject_permissions(subject_id: str):
     """
@@ -48,4 +48,7 @@ async def get_subject_permissions(subject_id: str):
 
     ### Click  `Try it out` to use the endpoint
     """
-    return permissions_service.get_subject_permissions(subject_id)
+    return [
+        permission.dict()
+        for permission in permissions_service.get_subject_permissions(subject_id)
+    ]

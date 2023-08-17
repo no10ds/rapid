@@ -25,8 +25,7 @@ to clarify the overarching structure and where to look when things go wrong.
 3. Client app uploads schema to define the first dataset
 4. User logs in to the UI
 5. User uploads dataset file
-6. AWS Glue Crawler runs to look at the data and construct table in the Glue Catalog
-7. The data is available to be queried
+6. The data is available to be queried
 
 ## Authorisation flows
 

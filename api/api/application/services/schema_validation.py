@@ -1,7 +1,7 @@
 import re
 from typing import List, Union, Any, Optional
 
-from api.common.config.auth import SensitivityLevel
+from api.common.config.auth import Sensitivity
 from api.common.config.aws import INFERRED_UNNAMED_COLUMN_PREFIX, MAX_CUSTOM_TAG_COUNT
 from api.common.config.constants import (
     TAG_VALUES_REGEX,
@@ -10,7 +10,7 @@ from api.common.config.constants import (
     COLUMN_NAME_REGEX,
 )
 from api.common.custom_exceptions import SchemaValidationError
-from api.domain.data_types import DataTypes
+from api.domain.data_types import AthenaDataType, is_date_type
 from api.domain.schema import Schema
 from api.domain.schema_metadata import UpdateBehaviour, Owner
 
@@ -162,27 +162,25 @@ def has_allow_null_false_on_partitioned_columns(schema):
 
 def has_only_accepted_data_types(schema: Schema):
     data_types = schema.get_data_types()
-    if any(
-        (
-            data_type.lower() not in map(str.lower, DataTypes.accepted_data_types())
-            for data_type in data_types
-        )
-    ):
+    try:
+        for data_type in data_types:
+            AthenaDataType(data_type)
+    except ValueError:
         raise SchemaValidationError(
-            "You are specifying one or more unaccepted data types"
+            "You are specifying one or more unaccepted data types",
         )
 
 
 def has_valid_date_column_definition(schema: Schema):
     for column in schema.columns:
-        if column.data_type == DataTypes.DATE and __has_value_for(column.format):
+        if is_date_type(column.data_type) and __has_value_for(column.format):
             __has_valid_date_format(column.format)
 
 
 def has_valid_sensitivity_level(schema: Schema):
-    if schema.get_sensitivity() not in SensitivityLevel.values():
+    if schema.get_sensitivity() not in list(Sensitivity):
         raise SchemaValidationError(
-            f"You must specify a valid sensitivity level. Accepted values: {SensitivityLevel.values()}"
+            f"You must specify a valid sensitivity level. Accepted values: {Sensitivity._member_names_}"
         )
 
 
@@ -201,9 +199,9 @@ def _owner_email_is_changed(owner: Owner):
 
 
 def has_valid_update_behaviour(schema: Schema):
-    if schema.get_update_behaviour() not in UpdateBehaviour.values():
+    if schema.get_update_behaviour() not in list(UpdateBehaviour):
         raise SchemaValidationError(
-            f"You must specify a valid update behaviour. Accepted values: {UpdateBehaviour.values()}"
+            f"You must specify a valid update behaviour. Accepted values: {UpdateBehaviour._member_names_}"
         )
 
 
@@ -228,6 +226,7 @@ def __has_valid_date_format(date_format: str):
     duplicate_format_codes = any(
         date_format.count(letter) > 1 for letter in accepted_date_format_codes
     )
+    print(duplicate_format_codes)
 
     if duplicate_format_codes or not matches_accepted_format:
         raise SchemaValidationError(

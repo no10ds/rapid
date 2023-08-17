@@ -1,29 +1,33 @@
 import time
 from abc import ABC, abstractmethod
 from functools import reduce
-from typing import List, Dict, Any
+from typing import Any, Callable, Dict, List, Optional, Type
 
 import boto3
-from boto3.dynamodb.conditions import Key, Attr, Or
+from boto3.dynamodb.conditions import Attr, Key, Or
 from botocore.exceptions import ClientError
 
 from api.common.config.auth import (
     PermissionsTableItem,
-    SubjectType,
-    SensitivityLevel,
+    Sensitivity,
     ServiceTableItem,
+    SubjectType,
 )
 from api.common.config.aws import (
     AWS_REGION,
     DYNAMO_PERMISSIONS_TABLE_NAME,
+    SCHEMA_TABLE_NAME,
     SERVICE_TABLE_NAME,
 )
-from api.common.custom_exceptions import UserError, AWSServiceError
+from api.common.custom_exceptions import AWSServiceError, UserError
 from api.common.logger import AppLogger
+from api.domain.dataset_filters import DatasetFilters
+from api.domain.dataset_metadata import DatasetMetadata
 from api.domain.Jobs.Job import Job
 from api.domain.Jobs.QueryJob import QueryJob
 from api.domain.Jobs.UploadJob import UploadJob
 from api.domain.permission_item import PermissionItem
+from api.domain.schema import Schema
 from api.domain.subject_permissions import SubjectPermissions
 
 
@@ -34,6 +38,7 @@ class DatabaseAdapter(ABC):
     ) -> None:
         pass
 
+    @abstractmethod
     def store_protected_permissions(
         self, permissions: List[PermissionItem], domain: str
     ) -> None:
@@ -48,7 +53,7 @@ class DatabaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def get_permissions_for_subject(self, subject_id: str) -> List[str]:
+    def get_permission_keys_for_subject(self, subject_id: str) -> List[str]:
         pass
 
     @abstractmethod
@@ -77,21 +82,42 @@ class DatabaseAdapter(ABC):
     def update_job(self, job: Job) -> None:
         pass
 
+    @abstractmethod
+    def store_schema(self, schema: Schema) -> None:
+        pass
+
+    @abstractmethod
+    def get_latest_schemas(self, dataset: Type[DatasetMetadata]) -> List[dict]:
+        pass
+
+    @abstractmethod
+    def get_schema(self, dataset: Type[DatasetMetadata]) -> Dict:
+        pass
+
+    @abstractmethod
+    def delete_schema(self, metadata: Type[DatasetMetadata]) -> None:
+        pass
+
+    @abstractmethod
+    def deprecate_schema(self, metadata: Type[DatasetMetadata]) -> None:
+        pass
+
 
 class DynamoDBAdapter(DatabaseAdapter):
     def __init__(self, data_source=boto3.resource("dynamodb", region_name=AWS_REGION)):
         self.permissions_table = data_source.Table(DYNAMO_PERMISSIONS_TABLE_NAME)
         self.service_table = data_source.Table(SERVICE_TABLE_NAME)
+        self.schema_table = data_source.Table(SCHEMA_TABLE_NAME)
 
     def store_subject_permissions(
         self, subject_type: SubjectType, subject_id: str, permissions: List[str]
     ) -> None:
-        subject_type = subject_type.value
+        subject_type = subject_type
         try:
             AppLogger.info(f"Storing permissions for {subject_type}: {subject_id}")
             self.permissions_table.put_item(
                 Item={
-                    "PK": PermissionsTableItem.SUBJECT.value,
+                    "PK": PermissionsTableItem.SUBJECT,
                     "SK": subject_id,
                     "Id": subject_id,
                     "Type": subject_type,
@@ -112,12 +138,13 @@ class DynamoDBAdapter(DatabaseAdapter):
                 for permission in permissions:
                     batch.put_item(
                         Item={
-                            "PK": PermissionsTableItem.PERMISSION.value,
+                            "PK": PermissionsTableItem.PERMISSION,
                             "SK": permission.id,
                             "Id": permission.id,
                             "Type": permission.type,
                             "Sensitivity": permission.sensitivity,
                             "Domain": permission.domain,
+                            "Layer": permission.layer,
                         }
                     )
         except ClientError as error:
@@ -125,24 +152,69 @@ class DynamoDBAdapter(DatabaseAdapter):
                 f"Error storing the protected domain permission for {domain}", error
             )
 
+    def store_schema(self, schema: Schema) -> None:
+        try:
+            AppLogger.info(
+                f"Storing schema for {schema.metadata.string_representation()}"
+            )
+            self.schema_table.put_item(
+                Item={
+                    "PK": schema.metadata.dataset_identifier(with_version=False),
+                    "SK": schema.metadata.get_version(),
+                    "Layer": schema.get_layer(),
+                    "Domain": schema.get_domain(),
+                    "Dataset": schema.get_dataset(),
+                    "Version": schema.get_version(),
+                    "Sensitivity": schema.get_sensitivity(),
+                    "Description": schema.get_description(),
+                    "UpdateBehaviour": schema.get_update_behaviour(),
+                    "KeyValueTags": schema.metadata.key_value_tags,
+                    "KeyOnlyTags": schema.metadata.key_only_tags,
+                    "Owners": [dict(owner) for owner in schema.get_owners()],
+                    "IsLatestVersion": schema.metadata.get_is_latest_version(),
+                    "Columns": [dict(col) for col in schema.columns],
+                }
+            )
+        except ClientError as error:
+            self._handle_client_error(
+                f"Error storing schema for {schema.metadata.string_representation()}",
+                error,
+            )
+
     def validate_permissions(self, subject_permissions: List[str]) -> None:
         if not subject_permissions:
             raise UserError("At least one permission must be provided")
         permissions_response = self._find_permissions(subject_permissions)
-        if not permissions_response["Count"] == len(subject_permissions):
+        if not len(permissions_response) == len(subject_permissions):
             AppLogger.info(f"Invalid permission in {subject_permissions}")
             raise UserError(
                 "One or more of the provided permissions is invalid or duplicated"
             )
 
-    def get_all_permissions(self) -> List[str]:
+    def get_all_permissions(self) -> List[PermissionItem]:
         try:
-            permissions = self.permissions_table.query(
-                KeyConditionExpression=Key("PK").eq(
-                    PermissionsTableItem.PERMISSION.value
-                ),
+            permissions = self.collect_all_items(
+                self.permissions_table.query,
+                KeyConditionExpression=Key("PK").eq(PermissionsTableItem.PERMISSION),
             )
-            return [permission["SK"] for permission in permissions["Items"]]
+            return [
+                PermissionItem(
+                    id=permission["SK"],
+                    type=permission["Type"],
+                    layer=permission.get("Layer"),
+                    sensitivity=permission.get("Sensitivity"),
+                    domain=permission.get("Domain"),
+                )
+                for permission in permissions
+            ]
+
+        except KeyError as error:
+            AppLogger.info(
+                f"Error retrieving the permissions, one has an empty key: {error}"
+            )
+            raise AWSServiceError(
+                "Error fetching permissions, one of them is incorrectly formatted, please contact your system administrator"
+            )
 
         except ClientError as error:
             AppLogger.info(f"Error retrieving all permissions: {error}")
@@ -152,32 +224,25 @@ class DynamoDBAdapter(DatabaseAdapter):
 
     def get_all_protected_permissions(self) -> List[PermissionItem]:
         try:
-            list_of_items = self.permissions_table.query(
-                KeyConditionExpression=Key("PK").eq(
-                    PermissionsTableItem.PERMISSION.value
-                ),
-                FilterExpression=Attr("Sensitivity").eq(
-                    SensitivityLevel.PROTECTED.value
-                ),
-            )["Items"]
-            return [
-                self._generate_protected_permission_item(item) for item in list_of_items
-            ]
+            items = self.collect_all_items(
+                self.permissions_table.query,
+                KeyConditionExpression=Key("PK").eq(PermissionsTableItem.PERMISSION),
+                FilterExpression=Attr("Sensitivity").eq(Sensitivity.PROTECTED),
+            )
+            return [self._generate_protected_permission_item(item) for item in items]
         except ClientError as error:
             AppLogger.info(f"Error retrieving all protected permissions: {error}")
             raise AWSServiceError(
                 "Error fetching protected permissions, please contact your system administrator"
             )
 
-    def get_permissions_for_subject(self, subject_id: str) -> List[str]:
+    def get_permission_keys_for_subject(self, subject_id: str) -> List[str]:
         AppLogger.info(f"Getting permissions for: {subject_id}")
         try:
             return [
                 permission
                 for permission in self.permissions_table.query(
-                    KeyConditionExpression=Key("PK").eq(
-                        PermissionsTableItem.SUBJECT.value
-                    ),
+                    KeyConditionExpression=Key("PK").eq(PermissionsTableItem.SUBJECT),
                     FilterExpression=Attr("Id").eq(subject_id),
                 )["Items"][0]["Permissions"]
                 if permission is not None and permission != ""
@@ -200,7 +265,7 @@ class DynamoDBAdapter(DatabaseAdapter):
             unique_permissions = set(subject_permissions.permissions)
             self.permissions_table.update_item(
                 Key={
-                    "PK": PermissionsTableItem.SUBJECT.value,
+                    "PK": PermissionsTableItem.SUBJECT,
                     "SK": subject_permissions.subject_id,
                 },
                 ConditionExpression="SK = :sid",
@@ -235,17 +300,31 @@ class DynamoDBAdapter(DatabaseAdapter):
             Key={"PK": "PERMISSION", "SK": permission_id}
         )
 
+    def delete_schema(self, metadata: Type[DatasetMetadata]) -> None:
+        try:
+            self.schema_table.delete_item(
+                Key={
+                    "PK": metadata.dataset_identifier(with_version=False),
+                    "SK": metadata.get_version(),
+                }
+            )
+        except ClientError as error:
+            self._handle_client_error(
+                f"Error deleting the schema {metadata.string_representation()}", error
+            )
+
     def store_upload_job(self, upload_job: UploadJob) -> None:
         item_config = {
             "PK": "JOB",
             "SK": upload_job.job_id,
             "SK2": upload_job.subject_id,
-            "Type": upload_job.job_type.value,
-            "Status": upload_job.status.value,
-            "Step": upload_job.step.value,
+            "Type": upload_job.job_type,
+            "Status": upload_job.status,
+            "Step": upload_job.step,
             "Errors": upload_job.errors if upload_job.errors else None,
             "Filename": upload_job.filename,
             "RawFileIdentifier": upload_job.raw_file_identifier,
+            "Layer": upload_job.layer,
             "Domain": upload_job.domain,
             "Dataset": upload_job.dataset,
             "Version": upload_job.version,
@@ -258,10 +337,11 @@ class DynamoDBAdapter(DatabaseAdapter):
             "PK": "JOB",
             "SK": query_job.job_id,
             "SK2": query_job.subject_id,
-            "Type": query_job.job_type.value,
-            "Status": query_job.status.value,
-            "Step": query_job.step.value,
+            "Type": query_job.job_type,
+            "Status": query_job.status,
+            "Step": query_job.step,
             "Errors": query_job.errors if query_job.errors else None,
+            "Layer": query_job.layer,
             "Domain": query_job.domain,
             "Dataset": query_job.dataset,
             "Version": query_job.version,
@@ -274,12 +354,13 @@ class DynamoDBAdapter(DatabaseAdapter):
         try:
             return [
                 self._map_job(job)
-                for job in self.service_table.query(
-                    KeyConditionExpression=Key("PK").eq(ServiceTableItem.JOB.value)
+                for job in self.collect_all_items(
+                    self.service_table.query,
+                    KeyConditionExpression=Key("PK").eq(ServiceTableItem.JOB)
                     & Key("SK2").eq(subject_id),
                     FilterExpression=Attr("TTL").gt(int(time.time())),
                     IndexName="JOB_SUBJECT_ID",
-                )["Items"]
+                )
             ]
         except ClientError as error:
             self._handle_client_error("Error fetching jobs from the database", error)
@@ -296,6 +377,70 @@ class DynamoDBAdapter(DatabaseAdapter):
         except ClientError as error:
             self._handle_client_error("Error fetching job from the database", error)
 
+    def get_schema(self, dataset: Type[DatasetMetadata]) -> Optional[dict]:
+        try:
+            return self.schema_table.query(
+                KeyConditionExpression=Key("PK").eq(
+                    dataset.dataset_identifier(with_version=False)
+                )
+                & Key("SK").eq(dataset.get_version())
+            )["Items"][0]
+        except IndexError:
+            return None
+        except ClientError as error:
+            self._handle_client_error("Error fetching schema from the database", error)
+
+    def get_latest_schemas(self, query: DatasetFilters) -> Optional[List[dict]]:
+        try:
+            query_arguments = query.format_resource_query()
+            if query_arguments:
+                filter_expression = Attr("IsLatestVersion").eq(True) & query_arguments
+            else:
+                filter_expression = Attr("IsLatestVersion").eq(True)
+
+            return self.collect_all_items(
+                self.schema_table.scan, FilterExpression=filter_expression
+            )
+        except KeyError:
+            return None
+        except ClientError as error:
+            self._handle_client_error(
+                "Error fetching the latest schemas from the database", error
+            )
+
+    def get_latest_schema(self, dataset: Type[DatasetMetadata]) -> Optional[dict]:
+        try:
+            return self.schema_table.query(
+                KeyConditionExpression=Key("PK").eq(
+                    dataset.dataset_identifier(with_version=False)
+                ),
+                FilterExpression=Attr("IsLatestVersion").eq(True),
+            )["Items"][0]
+        except IndexError:
+            return None
+        except ClientError as error:
+            self._handle_client_error(
+                "Error fetching latest schema from the database", error
+            )
+
+    def deprecate_schema(self, dataset: Type[DatasetMetadata]) -> None:
+        try:
+            self.schema_table.update_item(
+                Key={
+                    "PK": dataset.dataset_identifier(with_version=False),
+                    "SK": dataset.get_version(),
+                },
+                UpdateExpression="set #A = :a",
+                ExpressionAttributeNames={
+                    "#A": "IsLatestVersion",
+                },
+                ExpressionAttributeValues={
+                    ":a": False,
+                },
+            )
+        except ClientError as error:
+            self._handle_client_error("There was an deprecating the schema", error)
+
     def update_job(self, job: Job) -> None:
         try:
             self.service_table.update_item(
@@ -311,8 +456,8 @@ class DynamoDBAdapter(DatabaseAdapter):
                     "#C": "Errors",
                 },
                 ExpressionAttributeValues={
-                    ":a": job.step.value,
-                    ":b": job.status.value,
+                    ":a": job.step,
+                    ":b": job.status,
                     ":c": job.errors if job.errors else None,
                     ":jid": job.job_id,
                 },
@@ -336,8 +481,8 @@ class DynamoDBAdapter(DatabaseAdapter):
                     "#D": "ResultsURL",
                 },
                 ExpressionAttributeValues={
-                    ":a": job.step.value,
-                    ":b": job.status.value,
+                    ":a": job.step,
+                    ":b": job.status,
                     ":c": job.errors if job.errors else None,
                     ":d": job.results_url if job.results_url else None,
                     ":jid": job.job_id,
@@ -363,10 +508,9 @@ class DynamoDBAdapter(DatabaseAdapter):
 
     def _find_permissions(self, permissions: List[str]) -> Dict[str, Any]:
         try:
-            return self.permissions_table.query(
-                KeyConditionExpression=Key("PK").eq(
-                    PermissionsTableItem.PERMISSION.value
-                ),
+            return self.collect_all_items(
+                self.permissions_table.query,
+                KeyConditionExpression=Key("PK").eq(PermissionsTableItem.PERMISSION),
                 FilterExpression=reduce(
                     Or, ([Attr("Id").eq(value) for value in permissions])
                 ),
@@ -392,4 +536,13 @@ class DynamoDBAdapter(DatabaseAdapter):
             sensitivity=item["Sensitivity"],
             type=item["Type"],
             domain=item["Domain"],
+            layer=item["Layer"],
         )
+
+    def collect_all_items(self, method: Callable, **kwargs) -> List[Dict]:
+        response = method(**kwargs)
+        items = response["Items"]
+        while response.get("LastEvaluatedKey"):
+            response = method(ExclusiveStartKey=response["LastEvaluatedKey"], **kwargs)
+            items.extend(response["Items"])
+        return items
