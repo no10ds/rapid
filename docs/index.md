@@ -1,5 +1,7 @@
 <img src="./logo.png" display=block margin-left=auto margin-right=auto width=100%;/>
 
+<a href="https://ukgovernmentdigital.slack.com/archives/C03E5GV2LQM" style="display: flex; justify-content: center;"><img src="https://user-images.githubusercontent.com/609349/63558739-f60a7e00-c502-11e9-8434-c8a95b03ce62.png" width=180px; /></a>
+
 Project rAPId aims to create consistent, secure, interoperable data storage and sharing interfaces (APIs) that enable departments to discover, manage and share data and metadata amongst themselves.
 
 Pioneered by 10 Downing Street rAPId aims to improve the government's use of data by making it more scalable, secure, and resilient, helping to match the rising demand for good-quality evidence in the design, delivery, and evaluation of public policy.
