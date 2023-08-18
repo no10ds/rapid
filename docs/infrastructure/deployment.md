@@ -1,6 +1,71 @@
+# Deployment
+
+## rAPId Module
+
+For departments that already have an existing infrastructure, we have extracted the top level infrastructure into a single Terraform [module](https://github.com/no10ds/rapid/tree/main/infrastructure/modules/rapid).
+
+### Usage
+
+```
+module "rapid" {
+  source  = "git@github.com:no10ds/rapid.git//infrastructure/modules/rapid"
+
+  # Account details
+  aws_account = ""
+  aws_region  = ""
+
+  # Application hosting
+  domain_name = ""
+  ip_whitelist = ""
+  public_subnet_ids_list = [""]
+  private_subnet_ids_list = [""]
+  vpc_id = ""
+
+  # Resource naming - must be unique
+  resource-name-prefix = "rapid-${your-team-name}"
+
+  # Support
+  support_emails_for_cloudwatch_alerts = [""]
+
+  # ..... etc.
+}
+```
+
+Provide the required inputs as described:
+
+- `aws_account` - AWS account where the application will be hosted
+- `aws_region` - AWS region where the application will be hosted
+- `domain_name` - Application hostname ([can be a domain or a subdomain](/infrastructure/domains_subdomains/))
+- `ip_whitelist` - A list of IP addresses that are allowed to access the service.
+- `public_subnet_ids_list` - List of public subnets for the load balancer
+- `private_subnet_ids_list` - List of private subnets for the ECS service
+- `vpc_id` - VPC id
+- `resource-name-prefix` - The prefix that will be given to all of these rAPId resources, it needs to be unique so to not conflict with any other instance e.g `rapid-<your-team/project/dept>`
+- `support_emails_for_cloudwatch_alerts` - List of engineer emails that should receive alert notifications
+
+There are also these optional inputs:
+
+- `application_version` - The service's image version
+- `ui_version` - The static UI version
+- `hosted_zone_id` - If provided, will add an alias for the application load balancer to use the provided domain using that HZ. Otherwise, it will create a HZ and the alias
+- `certificate_validation_arn` - If provided, will link the certificate to the load-balancer https-listener. Otherwise, will create a new certificate and link it. ([managing certificates](/infrastructure/certificates/))
+- `app-replica-count-desired` - if provided, will set the number of desired running instances for a service. Otherwise,
+  it will default the count to 1
+- `app-replica-count-max` - if provided, will set the number of maximum running instances for a service. Otherwise, it
+  will default the count to 2
+- `catalog_disabled` - if set to `true` it will disable the rAPId internal data catalogue
+- `tags` - if provided, it will tag the resources with the defined value. Otherwise, it will default to "Resource = '
+  data-f1-rapid'"
+
+Once you apply the Terraform, a new instance of the application should be created.
+
+
+
+## rAPId Full Stack
+
 For teams with no existing infrastructure and just a blank AWS Account, we have ```make``` commands that will set up the necessary infrastructure from scratch with sensible defaults.
 
-## Pre-requisites
+### Pre-requisites
 
 Most of the infrastructure is managed by Terraform, to be able to run these blocks, please [install Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli).
 
@@ -15,7 +80,7 @@ After setting up the named profile, the current session can be checked by runnin
 
 We use `jq` in our scripts to help the `make` targets work correctly, please [Install jq](https://stedolan.github.io/jq/download/) before running any make command.
 
-## Infrastructure Configuration
+### Infrastructure Configuration
 
 There are two config files needed to instantiate the rAPId service, they are `input-params.tfvars` and `backend.hcl`. Please create these with the templates provided, we will add the content shortly.
 
@@ -76,7 +141,7 @@ export RAPID_INFRA_CONFIG_ENV=../my/relative/location/to/rapid/infrastructure
 
 If you want to share your infrastructure values across your team then you can turn `rapid-infrastructure-config` into a private repo.
 
-## First time, one-off setup (backend)
+### First time, one-off setup (backend)
 
 The first step is to set up an S3 backend so that we can store the infra-blocks' state in S3 and rely on the DynamoDB lock
 mechanism to ensure infrastructure changes are applied atomically.
@@ -86,7 +151,7 @@ To set up the S3 backend follow these steps:
 - Replace the values in `backend.hcl` with your custom values (these can be any value you would like). They will be referenced to create the Terraform state components and used going forwards as the backend config.
 - In the root folder run ```make infra-backend```, this will initialise Terraform by creating both the state bucket and dynamodb table in AWS.
 
-## IAM User Setup (Optional)
+### IAM User Setup (Optional)
 
 This module is used to set the admin and user roles for the AWS account. It ensures a good level of security by expiring credentials quickly and ensuring that MFA is always needed to refresh them.
 
@@ -113,7 +178,7 @@ manual_users = {
 }
 ```
 
-## Assume role
+### Assume role
 
 In order to gain the admin privileges necessary for infrastructure changes one needs to assume admin role. This will be
 enabled only for user's defined in `input-params.tfvars`, only after logging into the AWS console for the first time as an
@@ -121,7 +186,7 @@ IAM user and enabling MFA.
 
 Then, to assume the role, set up the profile (`scripts/env_setup.sh`), run ```make infra-assume-role``` and follow the prompts.
 
-## Deploying remaining infra-blocks
+### Deploying remaining infra-blocks
 
 Once the state backend has been configured, provide/change the following inputs in `input-params.tfvars`.
 

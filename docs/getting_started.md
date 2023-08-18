@@ -2,12 +2,17 @@
 
 We provide two options for deploying rAPId within an AWS environment:
 
-1. If you already have infrastructure deployed you can deploy the [single rAPId module](/infrastructure/deployment/existing/) passing in specific variables relating to your aws account.
-2. The other option is if you do not have any exisiting infrastructure and an empty aws environment, you can deploy the [entire rAPId stack](/infrastructure/deployment/full_stack/) creating all the relevent infrastructure needed.
+1. If you have existing infrastructure (e.g a VPC) that you would like to deploy rAPId within, then you can use the [rAPId module](/infrastructure/deployment/existing/), passing in specific variables relating to your AWS account.
+2. If you do not have any exisiting infrastructure, you can instead deploy the [entire rAPId stack](/infrastructure/deployment/full_stack/) creating all the relevant infrastructure.
+
+
+<!-- TODO: I think getting started should be just about spinning it up, not developing   -->
 
 # Developing
 
-Alternatively you can rAPId locally for development. For greater details please see the [contributing section](/contributing/).
+
+<!-- TODO: This should not be here -->
+<!-- Alternatively you can run rAPId locally for development. For more details, please see the [contributing section](/contributing/). -->
 
 ## Prerequisites
 
