@@ -28,10 +28,7 @@ nav:
       - api/routes/permissions.md
       - api/routes/subject.md
   - Infrastructure:
-    - infrastructure/getting_started.md
-    - Deployment:
-      - infrastructure/deployment/existing.md
-      - infrastructure/deployment/full_stack.md
+    - infrastructure/deployment.md
     - infrastructure/alerting_monitoring.md
     - infrastructure/certificates.md
     - infrastructure/domains_subdomains.md
