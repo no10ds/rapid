@@ -307,8 +307,9 @@ resource "aws_iam_role_policy_attachment" "role_dynamodb_access_policy_attachmen
 }
 
 resource "aws_ecs_cluster" "aws-ecs-cluster" {
-  name = "${var.resource-name-prefix}-cluster"
-  tags = var.tags
+  count = var.ecs_cluster_id == null ? 1 : 0
+  name  = "${var.resource-name-prefix}-cluster"
+  tags  = var.tags
   setting {
     name  = "containerInsights"
     value = "enabled"
@@ -380,7 +381,7 @@ data "aws_ecs_task_definition" "main" {
 
 resource "aws_ecs_service" "aws-ecs-service" {
   name                 = "${var.resource-name-prefix}-ecs-service"
-  cluster              = aws_ecs_cluster.aws-ecs-cluster.id
+  cluster              = var.ecs_cluster_id != null ? var.ecs_cluster_id : aws_ecs_cluster.aws-ecs-cluster[0].id
   task_definition      = "${aws_ecs_task_definition.aws-ecs-task.family}:${max(aws_ecs_task_definition.aws-ecs-task.revision, data.aws_ecs_task_definition.main.revision)}"
   launch_type          = "FARGATE"
   scheduling_strategy  = "REPLICA"

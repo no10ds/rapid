@@ -1,7 +1,7 @@
 resource "aws_appautoscaling_target" "ecs_target" {
   max_capacity       = var.app-replica-count-max
   min_capacity       = var.app-replica-count-desired
-  resource_id        = "service/${aws_ecs_cluster.aws-ecs-cluster.name}/${aws_ecs_service.aws-ecs-service.name}"
+  resource_id        = "service/${var.ecs_cluster_name != null ? var.ecs_cluster_name : aws_ecs_cluster.aws-ecs-cluster[0].name}/${aws_ecs_service.aws-ecs-service.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
 }
