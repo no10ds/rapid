@@ -41,7 +41,7 @@ class TestGlueAdapterTableMethods:
                 Column(
                     name="colname1",
                     partition_index=0,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=True,
                 ),
                 Column(
@@ -74,7 +74,7 @@ class TestGlueAdapterTableMethods:
                     "StoredAsSubDirectories": False,
                 },
                 "PartitionKeys": [
-                    {"Name": "colname1", "Type": "integer"},
+                    {"Name": "colname1", "Type": "int"},
                 ],
                 "TableType": "EXTERNAL_TABLE",
                 "Parameters": {

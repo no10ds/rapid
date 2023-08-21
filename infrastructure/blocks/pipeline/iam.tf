@@ -204,19 +204,11 @@ resource "aws_iam_policy" "pipeline_glue_access" {
       {
         "Effect" : "Allow",
         "Action" : [
-          "glue:DeleteCrawler",
           "glue:DeleteTable",
           "glue:TagResource",
         ],
         "Resource" : "*"
       },
-      {
-        "Effect" : "Allow",
-        "Action" : [
-          "glue:GetTags",
-        ],
-        "Resource" : "arn:aws:glue:${var.aws_region}:${var.aws_account}:crawler/*"
-      }
     ],
     "Version" : "2012-10-17"
   })

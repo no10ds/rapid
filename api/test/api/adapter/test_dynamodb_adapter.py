@@ -1015,7 +1015,7 @@ class TestDynamoDBAdapterSchemaTable:
                 Column(
                     name="colname1",
                     partition_index=0,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=False,
                 ),
                 Column(
@@ -1049,7 +1049,7 @@ class TestDynamoDBAdapterSchemaTable:
                     {
                         "name": "colname1",
                         "partition_index": 0,
-                        "data_type": "integer",
+                        "data_type": "int",
                         "allow_null": False,
                         "format": None,
                     },
@@ -1154,7 +1154,7 @@ class TestDynamoDBAdapterSchemaTable:
 
         self.schema_table.query.assert_called_once_with(
             KeyConditionExpression=Key("PK").eq("raw/domain/dataset"),
-            FilterExpression=Attr("IsLatestVersion").eq(True),
+            ScanIndexForward=False,
         )
 
         assert res == expected

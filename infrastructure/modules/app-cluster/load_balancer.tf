@@ -90,6 +90,10 @@ resource "aws_security_group" "load_balancer_security_group" {
     description      = "Allow all egress"
   }
   tags = var.tags
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_lb_target_group" "target_group" {

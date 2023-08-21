@@ -1,8 +1,6 @@
 import os
-from pathlib import Path
 from typing import Optional
 
-import psutil
 from fastapi import APIRouter, Request
 from fastapi import UploadFile, File, Response, Security
 from fastapi import status as http_status
@@ -16,26 +14,35 @@ from api.application.services.authorisation.authorisation_service import (
     secure_endpoint,
     get_subject_id,
 )
+from api.application.services.authorisation.dataset_access_evaluator import (
+    DatasetAccessEvaluator,
+)
 from api.application.services.data_service import DataService
+
 from api.application.services.delete_service import DeleteService
 from api.application.services.format_service import FormatService
 from api.application.services.schema_service import SchemaService
+from api.common.data_handlers import store_file_to_disk
 from api.common.utilities import strtobool
 from api.common.config.auth import Action
 from api.common.config.constants import (
     BASE_API_PATH,
     LOWERCASE_ROUTE_DESCRIPTION,
     LOWERCASE_REGEX,
+    VALID_FILE_MIME_TYPES,
+    VALID_FILE_EXTENSIONS,
 )
 from api.common.config.layers import Layer
 from api.common.custom_exceptions import (
     SchemaNotFoundError,
     UserError,
+    InvalidFileUploadError,
 )
 from api.common.logger import AppLogger
 from api.common.utilities import construct_dataset_metadata
 from api.domain.dataset_filters import DatasetFilters
 from api.domain.dataset_metadata import DatasetMetadata
+from api.domain.schema_metadata import SchemaMetadata
 from api.domain.metadata_search import metadata_search_query
 from api.domain.mime_type import MimeType
 from api.domain.sql_query import SQLQuery
@@ -48,6 +55,7 @@ athena_adapter = AthenaAdapter()
 data_service = DataService()
 delete_service = DeleteService()
 schema_service = SchemaService()
+data_access_evaluator = DatasetAccessEvaluator()
 
 
 datasets_router = APIRouter(
@@ -63,7 +71,9 @@ datasets_router = APIRouter(
     status_code=http_status.HTTP_200_OK,
 )
 async def list_all_datasets(
-    tag_filters: DatasetFilters = DatasetFilters(), enriched: Optional[bool] = False
+    request: Request,
+    tag_filters: DatasetFilters = DatasetFilters(),
+    enriched: Optional[bool] = False,
 ):
     """
     ## List datasets
@@ -88,9 +98,25 @@ async def list_all_datasets(
     a `READ` permission, e.g.: `READ_ALL`, `READ_PUBLIC`, `READ_PRIVATE`, `READ_PROTECTED_{DOMAIN}`
 
     ### Click  `Try it out` to use the endpoint
-
     """
-    return data_service.list_datasets(query=tag_filters, enriched=enriched)
+    subject_id = get_subject_id(request)
+    datasets = data_access_evaluator.get_authorised_datasets(
+        subject_id, Action.READ, tag_filters
+    )
+
+    class EnrichedMetadata(SchemaMetadata):
+        last_updated_date: str
+
+    if enriched:
+        return [
+            EnrichedMetadata(
+                **metadata.dict(),
+                last_updated_date=data_service.get_last_updated_time(metadata),
+            )
+            for metadata in datasets
+        ]
+    else:
+        return datasets
 
 
 if not CATALOG_DISABLED:
@@ -348,7 +374,7 @@ def upload_data(
     """
     ## Upload dataset
 
-    Given a schema has been uploaded you can upload data which matches that schema. Uploading a CSV file via this endpoint
+    Given a schema has been uploaded you can upload data which matches that schema. Uploading a CSV or Parquet file via this endpoint
     ensures that the data matches the schema and that it is consistent and sanitised. Should any errors be detected during
     upload, these are sent back in the response to facilitate you fixing the issues.
 
@@ -394,9 +420,18 @@ def upload_data(
 
     """
     try:
+        extension = file.filename.split(".")[-1].lower()
+        if (
+            file.content_type not in VALID_FILE_MIME_TYPES
+            and extension not in VALID_FILE_EXTENSIONS
+        ):
+            raise InvalidFileUploadError(
+                f"This file type {extension}, is not supported."
+            )
+
         subject_id = get_subject_id(request)
         job_id = generate_uuid()
-        incoming_file_path = store_file_to_disk(job_id, file)
+        incoming_file_path = store_file_to_disk(extension, job_id, file)
         raw_filename, version, job_id = data_service.upload_dataset(
             subject_id,
             job_id,
@@ -418,24 +453,6 @@ def upload_data(
         raise UserError(message=error.args[0])
 
 
-def store_file_to_disk(id: str, file: UploadFile = File(...)) -> Path:
-    file_path = Path(f"{id}-{file.filename}")
-    chunk_size_mb = 50
-    mb_1 = 1024 * 1024
-
-    with open(file_path, "wb") as incoming_file:
-        while contents := file.file.read(mb_1 * chunk_size_mb):
-            AppLogger.info(
-                f"Writing incoming file chunk ({chunk_size_mb}MB) to disk [{file.filename}]"
-            )
-            AppLogger.info(
-                f"Available disk space: {psutil.disk_usage('/').free / (2 ** 30)}GB"
-            )
-            incoming_file.write(contents)
-
-    return file_path
-
-
 @datasets_router.post(
     "/{layer}/{domain}/{dataset}/query",
     dependencies=[Security(secure_dataset_endpoint, scopes=[Action.READ])],
@@ -451,6 +468,7 @@ def store_file_to_disk(id: str, file: UploadFile = File(...)) -> Path:
                 "text/csv": {
                     "example": 'col1;col2;col3\n"123","something","500"\n"456","something else","600"'
                 },
+                "application/octet-stream": {},
             }
         }
     },
@@ -518,6 +536,13 @@ async def query_dataset(
     0,"value1","value2"
     ...
     ```
+
+    ### Parquet
+
+    To get a Parquet response, the `Accept` Header has to be set to `application/octet-stream`, this can be set below. The response will be the raw Parquet
+    binary result.
+
+    We recommend using this in a programmatic sense.
 
     ### Accepted permissions
 
@@ -600,7 +625,7 @@ async def query_large_dataset(
 
 def _format_query_output(df: DataFrame, mime_type: MimeType) -> Response:
     formatted_output = FormatService.from_df_to_mimetype(df, mime_type)
-    if mime_type == MimeType.TEXT_CSV:
+    if mime_type in [MimeType.TEXT_CSV, MimeType.BINARY]:
         return PlainTextResponse(status_code=200, content=formatted_output)
     else:
         return formatted_output

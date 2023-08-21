@@ -29,7 +29,7 @@ class TestSchemaValidation:
                 Column(
                     name="colname1",
                     partition_index=0,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=False,
                 ),
                 Column(
@@ -87,7 +87,7 @@ class TestSchemaValidation:
                 Column(
                     name="colname1",
                     partition_index=None,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=True,
                 )
             ],
@@ -110,7 +110,7 @@ class TestSchemaValidation:
                 Column(
                     name="colname1",
                     partition_index=None,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=True,
                 )
             ],
@@ -177,7 +177,7 @@ class TestSchemaValidation:
                 Column(
                     name="colname1",
                     partition_index=0,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=False,
                 ),
                 Column(
@@ -206,7 +206,7 @@ class TestSchemaValidation:
                     Column(
                         name="colname1",
                         partition_index=0,
-                        data_type="integer",
+                        data_type="int",
                         allow_null=False,
                     ),
                     Column(
@@ -231,7 +231,7 @@ class TestSchemaValidation:
                     Column(
                         name="colname1",
                         partition_index=0,
-                        data_type="integer",
+                        data_type="int",
                         allow_null=False,
                     ),
                     Column(
@@ -293,7 +293,7 @@ class TestSchemaValidation:
                 Column(
                     name=col_name,
                     partition_index=0,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=False,
                 )
             ],
@@ -315,7 +315,7 @@ class TestSchemaValidation:
                 Column(
                     name="colname1",
                     partition_index=0,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=False,
                 ),
                 Column(
@@ -343,7 +343,7 @@ class TestSchemaValidation:
                 Column(
                     name="colname1",
                     partition_index=-1,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=False,
                 ),
                 Column(
@@ -373,7 +373,7 @@ class TestSchemaValidation:
                 Column(
                     name="colname1",
                     partition_index=2,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=False,
                 ),
                 Column(
@@ -408,7 +408,7 @@ class TestSchemaValidation:
                 Column(
                     name="colname1",
                     partition_index=1,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=False,
                 ),
                 Column(
@@ -436,7 +436,7 @@ class TestSchemaValidation:
                 Column(
                     name="colname1",
                     partition_index=1,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=False,
                 ),
                 Column(
@@ -1014,7 +1014,7 @@ class TestSchemaValidation:
                 Column(
                     name="colname1",
                     partition_index=0,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=False,
                 ),
                 Column(
@@ -1052,7 +1052,7 @@ class TestSchemaValidation:
                 Column(
                     name="colname1",
                     partition_index=0,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=False,
                 ),
                 Column(
@@ -1095,7 +1095,7 @@ class TestSchemaValidation:
                 Column(
                     name="colname1",
                     partition_index=0,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=False,
                 ),
                 Column(
@@ -1140,7 +1140,7 @@ class TestSchemaValidation:
                 Column(
                     name="colname1",
                     partition_index=0,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=False,
                 ),
                 Column(

@@ -39,6 +39,7 @@ function StatusPage() {
         list={data.map((job) => {
           return [
             { children: <>{job.type}</> },
+            { children: <>{job.layer}</> },
             { children: <>{job.domain}</> },
             { children: <>{job.dataset}</> },
             { children: <>{job.version}</> },
@@ -63,6 +64,7 @@ function StatusPage() {
         })}
         headers={[
           { children: 'Type' },
+          { children: 'Layer' },
           { children: 'Domain' },
           { children: 'Dataset' },
           { children: 'Version' },

@@ -91,39 +91,6 @@ resource "aws_iam_policy" "app_athena_query_access" {
         ]
       },
       {
-        "Sid" : "Glue",
-        "Effect" : "Allow",
-        "Action" : [
-          "glue:GetTable",
-          "glue:GetTables",
-          "glue:GetPartitions",
-          "glue:GetDatabase",
-          "glue:GetDatabases",
-          "glue:UpdateTable",
-          "glue:BatchDeleteTable"
-        ],
-        "Resource" : [
-          "arn:aws:glue:${var.aws_region}:${var.aws_account}:catalog",
-          "arn:aws:glue:${var.aws_region}:${var.aws_account}:database/${var.resource-name-prefix}_catalogue_db",
-          "arn:aws:glue:${var.aws_region}:${var.aws_account}:table/${var.resource-name-prefix}_catalogue_db/*"
-        ]
-      },
-      {
-        "Sid" : "GlueCrawler",
-        "Effect" : "Allow",
-        "Action" : [
-          "glue:CreateCrawler",
-          "glue:DeleteCrawler",
-          "glue:GetCrawler",
-          "glue:GetCrawlers",
-          "glue:StartCrawler",
-          "glue:TagResource",
-          "iam:GetRole",
-          "iam:PassRole"
-        ],
-        "Resource" : "arn:aws:glue:${var.aws_region}:${var.aws_account}:crawler/${var.resource-name-prefix}_crawler/*"
-      },
-      {
         "Sid" : "DataBucket",
         "Effect" : "Allow",
         "Action" : [
@@ -149,6 +116,34 @@ resource "aws_iam_policy" "app_athena_query_access" {
           "${var.athena_query_output_bucket_arn}/*"
         ]
       }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "app_glue_access" {
+  name        = "${var.resource-name-prefix}-app_glue_access"
+  description = "Allow application instance to access Glue"
+  tags        = var.tags
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "glue:GetTable",
+          "glue:GetTables",
+          "glue:GetPartitions",
+          "glue:GetDatabase",
+          "glue:GetDatabases",
+          "glue:UpdateTable",
+          "glue:BatchDeleteTable",
+          "glue:CreateTable"
+        ],
+        "Resource" : [
+          "*"
+        ]
+      },
     ]
   })
 }
@@ -204,7 +199,8 @@ resource "aws_iam_policy" "app_dynamodb_access" {
           "dynamodb:UpdateItem"
         ],
         Resource : [
-          "arn:aws:dynamodb:${var.aws_region}:${var.aws_account}:table/${var.permissions_table}",
+          var.permissions_table_arn,
+          var.schema_table_arn,
           aws_dynamodb_table.service_table.arn,
           "${aws_dynamodb_table.service_table.arn}/index/*"
         ]
@@ -254,27 +250,6 @@ resource "aws_iam_policy" "app_tags_access" {
   })
 }
 
-resource "aws_iam_policy" "app_glue_services_passrole" {
-  name        = "${var.resource-name-prefix}-app-glue-services-passrole"
-  description = "Allow application instance to passrole to glue access"
-  tags        = var.tags
-
-  policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
-      {
-        Effect : "Allow",
-        Action : ["iam:PassRole"],
-        Resource : "arn:aws:iam::${var.aws_account}:role/${var.resource-name-prefix}-glue_services_access"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "role_app_glue_services_passrole_policy_attachment" {
-  role       = aws_iam_role.ecsTaskExecutionRole.name
-  policy_arn = aws_iam_policy.app_glue_services_passrole.arn
-}
 
 resource "aws_iam_role_policy_attachment" "role_s3_access_policy_attachment" {
   role       = aws_iam_role.ecsTaskExecutionRole.name
@@ -294,6 +269,11 @@ resource "aws_iam_role_policy_attachment" "role_secrets_manager_access_policy_at
 resource "aws_iam_role_policy_attachment" "role_athena_access_policy_attachment" {
   role       = aws_iam_role.ecsTaskExecutionRole.name
   policy_arn = aws_iam_policy.app_athena_query_access.arn
+}
+
+resource "aws_iam_role_policy_attachment" "role_glue_access_policy_attachment" {
+  role       = aws_iam_role.ecsTaskExecutionRole.name
+  policy_arn = aws_iam_policy.app_glue_access.arn
 }
 
 resource "aws_iam_role_policy_attachment" "role_tags_access_policy_attachment" {
