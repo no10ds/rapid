@@ -173,3 +173,21 @@ variable "project_information" {
     project_organisation = ""
   }
 }
+
+variable "ecs_cluster_id" {
+  type        = string
+  default     = null
+  description = "ECS cluster id to attach the rAPId api to"
+}
+
+variable "ecs_cluster_arn" {
+  type        = string
+  default     = null
+  description = "ECS cliuster arn to attach the rAPId api to"
+}
+
+variable "ecs_cluster_name" {
+  type        = string
+  default     = null
+  description = "ECS cluster name to attach the rAPId api to"
+}
