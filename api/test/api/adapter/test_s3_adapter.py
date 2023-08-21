@@ -144,8 +144,9 @@ class TestS3AdapterDataRetrieval:
 
     def setup_method(self):
         self.mock_s3_client = Mock()
+        self.s3_bucket = "bucket"
         self.persistence_adapter = S3Adapter(
-            s3_client=self.mock_s3_client, s3_bucket="dataset"
+            s3_client=self.mock_s3_client, s3_bucket=self.s3_bucket
         )
 
     def test_retrieve_data(self):
@@ -157,7 +158,7 @@ class TestS3AdapterDataRetrieval:
             DatasetMetadata("raw", "domain", "dataset", 1), "filename.csv"
         )
         self.mock_s3_client.get_object.assert_called_once_with(
-            Bucket="dataset", Key="raw_data/raw/domain/dataset/1/filename.csv"
+            Bucket=self.s3_bucket, Key="raw_data/raw/domain/dataset/1/filename.csv"
         )
 
     def test_throws_error_for_find_raw_file_when_file_does_not_exist(self):
@@ -174,7 +175,66 @@ class TestS3AdapterDataRetrieval:
             )
 
         self.mock_s3_client.get_object.assert_called_once_with(
-            Bucket="dataset", Key="raw_data/raw/domain/dataset/2/bad_file"
+            Bucket=self.s3_bucket, Key="raw_data/raw/domain/dataset/2/bad_file"
+        )
+
+    def test_get_last_updated_time_success(self):
+        self.mock_s3_client.get_paginator.return_value.paginate.return_value = [
+            {
+                "NextToken": "xxx",
+                "ResponseMetadata": {"key": "value"},
+                "Contents": [
+                    {
+                        "Key": "data/layer/domain/dataset/1/123-456-789_111-222-333.parquet",
+                        "LastModified": "2020-01-03",
+                    },
+                    {
+                        "Key": "data/layer/domain/dataset/1/123-456-789_444-555-666.parquet",
+                        "LastModified": "2020-01-03",
+                    },
+                    {
+                        "Key": "data/layer/domain/dataset/1/123-456-789_777-888-999.parquet",
+                        "LastModified": "2020-01-03",
+                    },
+                    {
+                        "Key": "data/layer/domain/dataset/1/999-999-999_111-888-999.parquet",
+                        "LastModified": "2020-01-03",
+                    },
+                    {
+                        "Key": "data/layer/domain/dataset/2/888-888-888_777-888-999.parquet",
+                        "LastModified": "2020-01-28",
+                    },
+                ],
+                "Name": "data-bucket",
+                "Prefix": "data/layer/domain/dataset",
+                "EncodingType": "url",
+            }
+        ]
+
+        res = self.persistence_adapter.get_last_updated_time("path")
+        assert res == "2020-01-28"
+        self.mock_s3_client.get_paginator.assert_called_once_with("list_objects_v2")
+        self.mock_s3_client.get_paginator.return_value.paginate.assert_called_once_with(
+            Bucket=self.s3_bucket, Prefix="path"
+        )
+
+    def test_get_last_updated_time_when_empty(self):
+        self.mock_s3_client.get_paginator.return_value.paginate.return_value = [
+            {
+                "NextToken": "xxx",
+                "ResponseMetadata": {"key": "value"},
+                "KeyCount": 0,
+                "Name": "data-bucket",
+                "Prefix": "data/layer/domain/dataset",
+                "EncodingType": "url",
+            }
+        ]
+
+        res = self.persistence_adapter.get_last_updated_time("path")
+        assert res is None
+        self.mock_s3_client.get_paginator.assert_called_once_with("list_objects_v2")
+        self.mock_s3_client.get_paginator.return_value.paginate.assert_called_once_with(
+            Bucket=self.s3_bucket, Prefix="path"
         )
 
 
@@ -238,7 +298,7 @@ class TestS3Deletion:
             ),
             "123-456-789.csv",
         )
-        self.mock_s3_client.get_paginator.assert_called_once_with("list_objects")
+        self.mock_s3_client.get_paginator.assert_called_once_with("list_objects_v2")
         self.mock_s3_client.get_paginator.return_value.paginate.assert_called_once_with(
             Bucket="data-bucket", Prefix="data/layer/domain/dataset/1"
         )
@@ -304,7 +364,7 @@ class TestS3Deletion:
         self.persistence_adapter.delete_dataset_files(
             DatasetMetadata("layer", "domain", "dataset", 1), "123-456-789.csv"
         )
-        self.mock_s3_client.get_paginator.assert_called_once_with("list_objects")
+        self.mock_s3_client.get_paginator.assert_called_once_with("list_objects_v2")
         self.mock_s3_client.get_paginator.return_value.paginate.assert_called_once_with(
             Bucket="data-bucket", Prefix="data/layer/domain/dataset/1"
         )
@@ -327,8 +387,6 @@ class TestS3Deletion:
         )
 
     def test_deletion_of_dataset_files_when_error_is_thrown(self):
-        self.mock_s3_client.get_paginator.return_value.paginate.return_value = {}
-
         self.mock_s3_client.delete_objects.return_value = {
             "Errors": [
                 {
@@ -346,16 +404,30 @@ class TestS3Deletion:
             ]
         }
         msg = "The item \\[123-456-789.csv\\] could not be deleted. Please contact your administrator."
-
+        self.persistence_adapter.list_files_from_path = Mock(
+            return_value=["data/123-456-789.csv"]
+        )
         with pytest.raises(AWSServiceError, match=msg):
             self.persistence_adapter.delete_dataset_files(
                 DatasetMetadata("layer", "domain", "dataset", 3), "123-456-789.csv"
             )
 
-        self.mock_s3_client.get_paginator.assert_called_once_with("list_objects")
-        self.mock_s3_client.get_paginator.return_value.paginate.assert_called_once_with(
-            Bucket="data-bucket", Prefix="data/layer/domain/dataset/3"
+        self.persistence_adapter.list_files_from_path.assert_called_once_with(
+            "data/layer/domain/dataset/3"
         )
+
+    def test_no_deletion_is_attempted_if_there_are_no_files(self):
+        self.persistence_adapter.list_files_from_path = Mock(return_value=[""])
+        self.persistence_adapter._delete_objects = Mock()
+
+        self.persistence_adapter.delete_dataset_files(
+            DatasetMetadata("layer", "domain", "dataset", 3), "123-456-789.csv"
+        )
+
+        self.persistence_adapter.list_files_from_path.assert_called_once_with(
+            "data/layer/domain/dataset/3"
+        )
+        self.mock_s3_client.delete_objects.assert_not_called()
 
     def test_deletion_of_raw_files(self):
         self.mock_s3_client.list_objects.return_value = {
@@ -489,7 +561,7 @@ class TestS3FileList:
             "2020-11-15T16:00:00-file3.csv",
         ]
 
-        self.mock_s3_client.get_paginator.assert_called_once_with("list_objects")
+        self.mock_s3_client.get_paginator.assert_called_once_with("list_objects_v2")
         self.mock_s3_client.get_paginator.return_value.paginate.assert_called_once_with(
             Bucket="my-bucket", Prefix="raw_data/layer/my_domain/my_dataset/1"
         )
@@ -510,7 +582,7 @@ class TestS3FileList:
         )
         assert raw_files == []
 
-        self.mock_s3_client.get_paginator.assert_called_once_with("list_objects")
+        self.mock_s3_client.get_paginator.assert_called_once_with("list_objects_v2")
         self.mock_s3_client.get_paginator.return_value.paginate.assert_called_once_with(
             Bucket="my-bucket", Prefix="raw_data/layer/my_domain/my_dataset/2"
         )
@@ -523,7 +595,7 @@ class TestS3FileList:
         )
         assert raw_files == []
 
-        self.mock_s3_client.get_paginator.assert_called_once_with("list_objects")
+        self.mock_s3_client.get_paginator.assert_called_once_with("list_objects_v2")
         self.mock_s3_client.get_paginator.return_value.paginate.assert_called_once_with(
             Bucket="my-bucket", Prefix="raw_data/layer/my_domain/my_dataset/1"
         )

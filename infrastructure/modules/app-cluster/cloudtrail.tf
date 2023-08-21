@@ -86,7 +86,7 @@ resource "aws_kms_key" "access_logs_key" {
   description         = "This key is used to encrypt the access log objects"
   policy              = data.aws_iam_policy_document.access_logs_key_policy.json
   tags                = var.tags
-  enable_key_rotation = true
+  enable_key_rotation = false
 }
 
 resource "aws_cloudwatch_log_group" "access_logs_log_group" {
@@ -295,7 +295,8 @@ resource "aws_cloudtrail" "access_logs_trail" {
 
       values = [
         aws_dynamodb_table.service_table.arn,
-        var.permissions_table_arn
+        var.permissions_table_arn,
+        var.schema_table_arn,
       ]
     }
   }

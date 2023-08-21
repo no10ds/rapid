@@ -16,10 +16,14 @@ class BaseClientTest(ABC):
     @classmethod
     def setup_class(cls):
         cls.client = TestClient(app, raise_server_exceptions=False)
+
         app.dependency_overrides[
             secure_dataset_endpoint
         ] = mock_secure_dataset_endpoint()
         app.dependency_overrides[secure_endpoint] = mock_secure_endpoint()
+
+        app.user_middleware.clear()
+        app.middleware_stack = app.build_middleware_stack()
 
     @classmethod
     def teardown_class(cls):
