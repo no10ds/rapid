@@ -153,7 +153,7 @@ class TestPartitioning:
 
     def test_handles_no_partitions(self):
         # Forcing Int64 for testing purposes as parsing & validation should occur before partitioning # noqa E501
-        column_dtype = "integer"
+        column_dtype = "int"
 
         schema = Schema(
             metadata=SchemaMetadata(

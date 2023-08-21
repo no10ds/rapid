@@ -34,18 +34,21 @@ class DatasetAccessEvaluator:
         self.permission_serivice = permission_service
 
     def get_authorised_datasets(
-        self, subject_id: str, action: Action
+        self,
+        subject_id: str,
+        action: Action,
+        filters: DatasetFilters = DatasetFilters(),
     ) -> List[DatasetMetadata]:
         """
         This function does the following:
         1. Get the permissions of the subject
         2. Filters the permission by the relevant action e.g READ/WRITE
-        3. Queries the datasets to find those that match these permissions
+        3. Queries the datasets to find those that match these permissions and tags
         4. Returns them
         """
         permissions = self.permission_serivice.get_subject_permissions(subject_id)
         permissions = self.filter_permissions_by_action(permissions, action)
-        return self.fetch_datasets(permissions)
+        return self.fetch_datasets(permissions, filters)
 
     def can_access_dataset(
         self, dataset: DatasetMetadata, subject_id: str, actions: List[Action]
@@ -98,21 +101,35 @@ class DatasetAccessEvaluator:
         return [permission for permission in permissions if permission.type == action]
 
     def fetch_datasets(
-        self, permissions: List[PermissionItem]
-    ) -> List[DatasetMetadata]:
+        self,
+        permissions: List[PermissionItem],
+        filters: DatasetFilters = DatasetFilters(),
+    ) -> List[SchemaMetadata]:
         authorised_datasets = set()
         for permission in permissions:
             authorised_datasets.update(
-                self.extract_datasets_from_permission(permission)
+                self.extract_datasets_from_permission(permission, filters)
             )
         return sorted(authorised_datasets)
 
     def extract_datasets_from_permission(
-        self, permission: PermissionItem
-    ) -> List[DatasetMetadata]:
+        self, permission: PermissionItem, filters: DatasetFilters = DatasetFilters()
+    ) -> List[SchemaMetadata]:
+        """
+        Extracts the datasets from the permission, while combining with the filters argument.
+        The permission filters overwrite the filters argument to stop any injection of permissions via the filters.
+        """
         query = DatasetFilters(
-            sensitivity=SensitivityPermissionConverter[permission.sensitivity].value,
-            layer=LayerPermissionConverter[permission.layer].value,
-            domain=permission.domain,
+            **(
+                # If there are overlapping keys, the permission values will overwrite the others
+                dict(filters)
+                | {
+                    "sensitivity": SensitivityPermissionConverter[
+                        permission.sensitivity
+                    ].value,
+                    "layer": LayerPermissionConverter[permission.layer].value,
+                    "domain": permission.domain,
+                }
+            )
         )
         return self.schema_service.get_schema_metadatas(query)

@@ -1,5 +1,6 @@
 {
   "metadata": {
+    "layer": "default",
     "domain": "test_e2e",
     "dataset": "update",
     "sensitivity": "PRIVATE",
@@ -21,49 +22,49 @@
     {
       "name": "year",
       "partition_index": null,
-      "data_type": "Int64",
+      "data_type": "int",
       "allow_null": true,
       "format": null
     },
     {
       "name": "month",
       "partition_index": null,
-      "data_type": "Float64",
+      "data_type": "double",
       "allow_null": true,
       "format": null
     },
     {
       "name": "destination",
       "partition_index": null,
-      "data_type": "object",
+      "data_type": "string",
       "allow_null": true,
       "format": null
     },
     {
       "name": "arrival",
       "partition_index": null,
-      "data_type": "object",
+      "data_type": "string",
       "allow_null": true,
       "format": null
     },
     {
       "name": "type",
       "partition_index": null,
-      "data_type": "object",
+      "data_type": "string",
       "allow_null": true,
       "format": null
     },
     {
       "name": "status",
       "partition_index": null,
-      "data_type": "object",
+      "data_type": "string",
       "allow_null": true,
       "format": null
     },
     {
       "name": "newcolumn",
       "partition_index": null,
-      "data_type": "Int64",
+      "data_type": "int",
       "allow_null": true,
       "format": null
     }

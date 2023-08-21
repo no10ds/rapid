@@ -46,3 +46,7 @@ output "service_table_arn" {
   value       = aws_dynamodb_table.service_table.arn
   description = "The arn of the dynamoDB table that stores the user service"
 }
+
+output "application_version" {
+  value = var.application_version
+}

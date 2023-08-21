@@ -64,7 +64,8 @@ data "template_file" "initialise-runner" {
 }
 
 data "terraform_remote_state" "vpc-state" {
-  backend = "s3"
+  backend   = "s3"
+  workspace = "prod"
 
   config = {
     key    = "vpc/terraform.tfstate"

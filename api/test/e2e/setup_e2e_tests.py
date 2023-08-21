@@ -1,5 +1,6 @@
 import json
 import os
+
 import requests
 from requests.auth import HTTPBasicAuth
 
@@ -42,8 +43,8 @@ def create_protected_domain(token: str, domain: str):
     return response.status_code, json.loads(response.content.decode("utf-8"))
 
 
-def upload_dataset(token: str, file_path: str, domain: str, dataset: str):
-    post_url = f"{BASE_URL}/datasets/{domain}/{dataset}"
+def upload_dataset(token: str, file_path: str, layer: str, domain: str, dataset: str):
+    post_url = f"{BASE_URL}/datasets/{layer}/{domain}/{dataset}"
     headers = {"Authorization": "Bearer " + token}
     filename = os.path.basename(file_path)
     files = {"file": (filename, open(file_path, "rb"))}
@@ -59,13 +60,16 @@ print(create_protected_domain(token, "test_e2e_protected"))
 for file in files:
     with open(os.path.join(SCHEMA_PATH, file), "r") as f:
         schema = json.load(f)
-        print(f)
         res = upload_schema(token, schema)
         print(res)
 
 print(
     upload_dataset(
-        token, os.path.join(PATH, "test_journey_file.csv"), "test_e2e", "query"
+        token,
+        os.path.join(PATH, "test_journey_file.csv"),
+        "default",
+        "test_e2e",
+        "query",
     )
 )
 
@@ -73,6 +77,7 @@ print(
     upload_dataset(
         token,
         os.path.join(PATH, "test_journey_file.csv"),
+        "default",
         "test_e2e_protected",
         "do_not_delete",
     )

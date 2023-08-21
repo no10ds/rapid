@@ -6,6 +6,7 @@ from api.common.custom_exceptions import UserError
 class MimeType(StrEnum):
     APPLICATION_JSON = "application/json"
     TEXT_CSV = "text/csv"
+    BINARY = "application/octet-stream"
 
     @staticmethod
     def to_mimetype(mime_type: str):
