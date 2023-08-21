@@ -1,5 +1,5 @@
 output "ecs_cluster_arn" {
-  value       = aws_ecs_cluster.aws-ecs-cluster.arn
+  value       = var.ecs_cluster_arn != null ? var.ecs_cluster_arn : aws_ecs_cluster.aws-ecs-cluster[0].arn
   description = "Cluster identifier"
 }
 
