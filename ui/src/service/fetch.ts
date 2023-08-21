@@ -2,6 +2,7 @@ import {
   ClientCreateBody,
   DataFormats,
   DatasetInfoResponse,
+  Dataset,
   AllJobsResponse,
   UpdateSubjectPermissionsBody,
   UpdateSubjectPermissionsResponse,
@@ -12,9 +13,11 @@ import {
   MetadataSearchResponse,
   AuthResponse,
   GetLoginResponse,
-  MethodsResponse
+  MethodsResponse,
+  PermissionUiResponse,
+  SubjectPermission
 } from './types'
-import { api } from '@/utils/data-utils'
+import { api } from '@/lib/data-utils'
 
 export const getAuthStatus = async (): Promise<AuthResponse> => {
   const res = await api(`/api/auth`, { method: 'GET' })
@@ -36,10 +39,12 @@ export const getMethods = async (): Promise<MethodsResponse> => {
   return res.json()
 }
 
-// TODO Move these to the types file
-export const getPermissionsListUi = async (): Promise<{
-  [key: string]: { [key: string]: string }[]
-}> => {
+export const getLayers = async (): Promise<string[]> => {
+  const res = await api('/api/layers', { method: 'GET' })
+  return res.json()
+}
+
+export const getPermissionsListUi = async (): Promise<PermissionUiResponse> => {
   const res = await api(`/api/permissions_ui`, {
     method: 'GET'
   })
@@ -58,9 +63,7 @@ export const getSubjectsListUi = async (): Promise<
 
 export const getDatasetsUi = async ({
   queryKey
-}): Promise<{
-  [key: string]: { dataset: string; version: string }[]
-}> => {
+}): Promise<Dataset[]> => {
   const [, action] = queryKey
   const res = await api(`/api/datasets_ui/${action}`, {
     method: 'GET'
@@ -83,7 +86,7 @@ export const getJob = async ({ queryKey }): Promise<JobResponse> => {
   return res.json()
 }
 
-export const getSubjectPermissions = async ({ queryKey }): Promise<string[]> => {
+export const getSubjectPermissions = async ({ queryKey }): Promise<SubjectPermission[]> => {
   const [, subjectId] = queryKey
   const res = await api(`/api/permissions/${subjectId}`, {
     method: 'GET'
@@ -143,8 +146,8 @@ export const deleteDataset = async ({ path }: { path: string }) => {
 }
 
 export const getDatasetInfo = async ({ queryKey }): Promise<DatasetInfoResponse> => {
-  const [, domain, dataset, version] = queryKey
-  const res = await api(`/api/datasets/${domain}/${dataset}/info?version=${version}`, {
+  const [, layer, domain, dataset, version] = queryKey
+  const res = await api(`/api/datasets/${layer}/${domain}/${dataset}/info?version=${version}`, {
     method: 'GET'
   })
   return res.json()

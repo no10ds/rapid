@@ -1,6 +1,6 @@
-output "tags" {
-  value       = var.tags
-  description = "The tags used in the project"
+output "athena_query_result_output_bucket_arn" {
+  value       = aws_s3_bucket.rapid_athena_query_results_bucket.arn
+  description = "Output S3 bucket ARN for Athena query results"
 }
 
 output "athena_workgroup_arn" {
@@ -8,12 +8,12 @@ output "athena_workgroup_arn" {
   description = "Query workgroup for Athena"
 }
 
-output "athena_query_result_output_bucket_arn" {
-  value       = aws_s3_bucket.rapid_athena_query_results_bucket.arn
-  description = "Output S3 bucket ARN for Athena query results"
+output "schema_table_arn" {
+  value       = aws_dynamodb_table.schema_table.arn
+  description = "The ARN of the DynamoDB schema table"
 }
 
-output "glue_catalog_arn" {
-  value       = aws_glue_catalog_database.catalogue_db.arn
-  description = "Catalog database arn"
+output "tags" {
+  value       = var.tags
+  description = "The tags used in the project"
 }

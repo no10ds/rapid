@@ -10,7 +10,7 @@ import {
   Alert
 } from '@/components'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
-import { asVerticalTableList } from '@/utils'
+import { asVerticalTableList } from '@/lib'
 import { getDatasetInfo, queryDataset } from '@/service'
 import { DataFormats } from '@/service/types'
 import { Typography, LinearProgress } from '@mui/material'
@@ -20,7 +20,7 @@ import { useState } from 'react'
 
 function DownloadDataset() {
   const router = useRouter()
-  const { domain, dataset } = router.query
+  const { layer, domain, dataset } = router.query
   const version = router.query.version ? router.query.version : 0
   const [dataFormat, setDataFormat] = useState<DataFormats>('csv')
   const [queryBody, setQueryBody] = useState({
@@ -35,7 +35,7 @@ function DownloadDataset() {
     isLoading: isDatasetInfoLoading,
     data: datasetInfoData,
     error: datasetInfoError
-  } = useQuery(['datasetInfo', domain, dataset, version ? version : 0], getDatasetInfo)
+  } = useQuery(['datasetInfo', layer, domain, dataset, version ? version : 0], getDatasetInfo)
 
   const { isLoading, mutate, error } = useMutation<
     Response,
@@ -49,7 +49,7 @@ function DownloadDataset() {
       const a = document.createElement('a')
       a.style.display = 'none'
       a.href = url
-      a.download = `${domain}_${dataset}_${version}.${dataFormat}`
+      a.download = `${layer}_${domain}_${dataset}_${version}.${dataFormat}`
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
@@ -97,7 +97,7 @@ function DownloadDataset() {
           color="primary"
           onClick={() =>
             mutate({
-              path: `${domain}/${dataset}/query?version=${version}`,
+              path: `${layer}/${domain}/${dataset}/query?version=${version}`,
               dataFormat,
               data: createQueryBodyData()
             })

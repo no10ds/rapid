@@ -1,13 +1,14 @@
-import { AccountLayout, Alert, Button, Card, Row, Select } from '@/components'
+import { AccountLayout, Alert, Button, Card } from '@/components'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
+import DatasetSelector from '@/components/DatasetSelector/DatasetSelector'
 import { deleteDataset, getDatasetsUi } from '@/service'
-import { DeleteDatasetResponse } from '@/service/types'
-import { FormControl, LinearProgress, Typography } from '@mui/material'
+import { Dataset, DeleteDatasetResponse } from '@/service/types'
+import { LinearProgress, Typography } from '@mui/material'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
-function DeleteDataset() {
-  const [dataset, setDataset] = useState<string>('')
+function DeleteDataset({ datasetInput = null }: { datasetInput?: Dataset }) {
+  const [dataset, setDataset] = useState<Dataset>(datasetInput)
   const [deleteDatasetSuccessDetails, setDeleteDatasetSuccessDetails] = useState<
     string | undefined
   >()
@@ -32,13 +33,6 @@ function DeleteDataset() {
     }
   })
 
-  useEffect(() => {
-    if (datasetsList && Object.keys(datasetsList).length > 0) {
-      const firstKey = Object.keys(datasetsList)[0]
-      setDataset(`${firstKey}/${datasetsList[firstKey][0].dataset}`)
-    }
-  }, [datasetsList])
-
   if (isDatasetsListLoading) {
     return <LinearProgress />
   }
@@ -51,7 +45,7 @@ function DeleteDataset() {
     <form
       onSubmit={async (event) => {
         event.preventDefault()
-        await mutate({ path: dataset })
+        await mutate({ path: `${dataset.layer}/${dataset.domain}/${dataset.dataset}` })
       }}
     >
       <Card
@@ -67,30 +61,11 @@ function DeleteDataset() {
           dataset and the underlying crawlers and raw data.
         </Typography>
 
-        <Row>
-          <FormControl fullWidth size="small">
-            <Select
-              label="Select a dataset"
-              onChange={(event) => setDataset(event.target.value as string)}
-              native
-              inputProps={{ 'data-testid': 'select-dataset' }}
-            >
-              {Object.keys(datasetsList).map((key) => (
-                <optgroup label={key} key={key}>
-                  {datasetsList[key].map((item) => (
-                    <option value={`${key}/${item.dataset}`} key={item.dataset}>
-                      {item.dataset}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-            </Select>
-          </FormControl>
-        </Row>
+        <DatasetSelector datasetsList={datasetsList} setParentDataset={setDataset} enableVersionSelector={false}></DatasetSelector>
 
         {deleteDatasetSuccessDetails ? (
           <Alert
-            title={`Dataset deleted: ${dataset}`}
+            title={`Dataset deleted: ${dataset.layer}/${dataset.domain}/${dataset.dataset}`}
             data-testid="delete-status"
           ></Alert>
         ) : null}

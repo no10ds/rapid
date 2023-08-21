@@ -1,6 +1,6 @@
 import { screen, waitForElementToBeRemoved } from '@testing-library/react'
 import fetchMock from 'jest-fetch-mock'
-import { renderWithProviders } from '@/utils/test-utils'
+import { renderWithProviders } from '@/lib/test-utils'
 import TasksPage from '@/pages/tasks/index'
 import { AllJobsResponse } from '@/service/types'
 

@@ -10,7 +10,7 @@ import {
 } from '@/components'
 import { Typography } from '@mui/material'
 import { useRouter } from 'next/router'
-import { asVerticalTableList } from '@/utils'
+import { asVerticalTableList } from '@/lib'
 
 function FilePage() {
   const router = useRouter()

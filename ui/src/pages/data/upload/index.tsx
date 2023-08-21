@@ -1,17 +1,19 @@
-import { Card, Row, Button, Select, Alert } from '@/components'
+import { Card, Row, Button, Select, Alert, Link } from '@/components'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import AccountLayout from '@/components/Layout/AccountLayout'
 import UploadProgress from '@/components/UploadProgress/UploadProgress'
+import DatasetSelector from '@/components/DatasetSelector/DatasetSelector'
 import { getDatasetsUi, uploadDataset } from '@/service'
-import { UploadDatasetResponse, UploadDatasetResponseDetails } from '@/service/types'
-import { FormControl, Typography, LinearProgress } from '@mui/material'
+import { Dataset, UploadDatasetResponse, UploadDatasetResponseDetails } from '@/service/types'
+import { Typography, LinearProgress } from '@mui/material'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
-function UserModifyPage() {
+
+function UploadDataset({ datasetInput = null }: { datasetInput?: Dataset }) {
   const [file, setFile] = useState<File | undefined>()
+  const [dataset, setDataset] = useState<Dataset>(datasetInput)
   const [disable, setDisable] = useState<boolean>(false)
-  const [dataset, setDataset] = useState<string>('')
   const [uploadSuccessDetails, setUploadSuccessDetails] = useState<
     UploadDatasetResponseDetails | undefined
   >()
@@ -37,13 +39,6 @@ function UserModifyPage() {
     }
   })
 
-  useEffect(() => {
-    if (datasetsList) {
-      const firstKey = Object.keys(datasetsList)[0]
-      setDataset(`${firstKey}/${datasetsList[firstKey][0].dataset}`)
-    }
-  }, [datasetsList])
-
   if (isDatasetsListLoading) {
     return <LinearProgress />
   }
@@ -58,7 +53,7 @@ function UserModifyPage() {
         event.preventDefault()
         const formData = new FormData()
         formData.append('file', file)
-        await mutate({ path: dataset, data: formData })
+        await mutate({ path: `${dataset.layer}/${dataset.domain}/${dataset.dataset}?version=${dataset.version}`, data: formData })
       }}
     >
       <Card
@@ -73,31 +68,7 @@ function UserModifyPage() {
           been uploaded for the data source and the data to upload matches this schema.
         </Typography>
 
-        <Typography variant="h2" gutterBottom>
-          Select dataset
-        </Typography>
-
-        <Row>
-          <FormControl fullWidth size="small">
-            <Select
-              label="Select dataset"
-              onChange={(event) => setDataset(event.target.value as string)}
-              native
-              disabled={disable}
-              inputProps={{ 'data-testid': 'select-dataset' }}
-            >
-              {Object.keys(datasetsList).map((key) => (
-                <optgroup label={key} key={key}>
-                  {datasetsList[key].map((item) => (
-                    <option value={`${key}/${item.dataset}`} key={item.dataset}>
-                      {item.dataset}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-            </Select>
-          </FormControl>
-        </Row>
+        <DatasetSelector datasetsList={datasetsList} setParentDataset={setDataset}></DatasetSelector>
 
         <Row>
           {!disable &&
@@ -122,10 +93,10 @@ function UserModifyPage() {
           </Alert>
         )}
       </Card>
-    </form>
+    </form >
   )
 }
 
-export default UserModifyPage
+export default UploadDataset
 
-UserModifyPage.getLayout = (page) => <AccountLayout title="Upload">{page}</AccountLayout>
+UploadDataset.getLayout = (page) => <AccountLayout title="Upload">{page}</AccountLayout>
