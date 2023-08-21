@@ -56,6 +56,14 @@ repos:
         exclude: '^(?!infrastructure/).*'
 -   repo: local
     hooks:
+    -   id: sdk_test
+        name: sdk_test
+        language: system
+        entry: bash -c 'make sdk-test'
+        files: sdk/*.
+        pass_filenames: false
+-   repo: local
+    hooks:
     -   id: ui_test
         name: ui_test
         language: system
