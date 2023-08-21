@@ -1,7 +1,7 @@
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import AccountLayout from '@/components/Layout/AccountLayout'
 import SimpleTable from '@/components/SimpleTable/SimpleTable'
-import { asVerticalTableList } from '@/utils'
+import { asVerticalTableList } from '@/lib'
 import { getJob } from '@/service'
 import { Card, Typography, LinearProgress } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
@@ -56,6 +56,7 @@ function GetJob() {
           { name: 'Step', value: data.step as string },
           { name: 'Filename', value: data.filename as string },
           { name: 'Raw Filename	', value: data.raw_file_identifier as string },
+          { name: 'Layer	', value: data.layer as string },
           { name: 'Domain	', value: data.domain as string },
           { name: 'Dataset	', value: data.dataset as string },
           { name: 'Version	', value: data.version.toString() }

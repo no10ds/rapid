@@ -414,7 +414,8 @@ class DynamoDBAdapter(DatabaseAdapter):
                 KeyConditionExpression=Key("PK").eq(
                     dataset.dataset_identifier(with_version=False)
                 ),
-                FilterExpression=Attr("IsLatestVersion").eq(True),
+                # Sort by SK in descending order to get the latest version
+                ScanIndexForward=False,
             )["Items"][0]
         except IndexError:
             return None

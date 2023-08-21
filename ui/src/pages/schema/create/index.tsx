@@ -8,16 +8,24 @@ import {
   Alert,
   CreateSchema as CreateSchemaComponent
 } from '@/components'
-import { generateSchema, schemaGenerateSchema } from '@/service'
+import ErrorCard from '@/components/ErrorCard/ErrorCard'
+import { generateSchema, schemaGenerateSchema, GlobalSensitivities, ProtectedSensitivity } from '@/service'
+import { getLayers } from '@/service/fetch'
 import { GenerateSchemaResponse, SchemaGenerate } from '@/service/types'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Typography } from '@mui/material'
+import { LinearProgress, Typography } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
+import { useQuery } from '@tanstack/react-query'
 
 function CreateSchema() {
   const [file, setFile] = useState<File | undefined>()
+
+  const { isLoading: isLayersLoading, data: layersData, error: layersError } = useQuery(
+    ['layers'],
+    getLayers,
+  )
 
   const { control, handleSubmit } = useForm<SchemaGenerate>({
     resolver: zodResolver(schemaGenerateSchema)
@@ -33,15 +41,24 @@ function CreateSchema() {
   })
 
   if (schemaData) {
-    return <CreateSchemaComponent schemaData={schemaData} />
+    return <CreateSchemaComponent schemaData={schemaData} layersData={layersData} />
   }
+
+  if (isLayersLoading) {
+    return <LinearProgress />
+  }
+
+  if (layersError) {
+    return <ErrorCard error={layersError as Error} />
+  }
+
 
   return (
     <form
       onSubmit={handleSubmit(async (data) => {
         const formData = new FormData()
         formData.append('file', file)
-        const path = `${data.sensitivity}/${data.domain}/${data.title}/generate`
+        const path = `${data.layer}/${data.sensitivity}/${data.domain}/${data.title}/generate`
         await mutate({ path, data: formData })
       })}
     >
@@ -74,7 +91,33 @@ function CreateSchema() {
                   <option value="" disabled>
                     Please select
                   </option>
-                  {['PUBLIC', 'PRIVATE', 'PROTECTED'].map((value) => (
+                  {[...GlobalSensitivities, ProtectedSensitivity].map((value) => (
+                    <option key={value}>{value}</option>
+                  ))}
+                </Select>
+              </>
+            )}
+          />
+        </Row>
+        <Row>
+          <Controller
+            name="layer"
+            control={control}
+            defaultValue={layersData.length === 1 ? layersData[0] : ""}
+            render={({ field, fieldState: { error } }) => (
+              <>
+                <Typography variant="caption">Dataset Layer</Typography>
+                <Select
+                  {...field}
+                  native
+                  error={!!error}
+                  helperText={error?.message}
+                  inputProps={{ 'data-testid': 'field-layer' }}
+                >
+                  <option value="" disabled>
+                    Please select
+                  </option>
+                  {layersData.map((value) => (
                     <option key={value}>{value}</option>
                   ))}
                 </Select>

@@ -1,7 +1,7 @@
-import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import fetchMock from 'jest-fetch-mock'
-import { renderWithProviders } from '@/utils/test-utils'
+import { renderWithProviders } from '@/lib/test-utils'
 import SchemaCreatePage from '@/pages/schema/create'
 
 const mockProps = jest.fn()
@@ -44,25 +44,31 @@ describe('Page: Upload page', () => {
   })
 
   it('renders', async () => {
+    fetchMock.mockResponseOnce(JSON.stringify(['default']), { status: 200 })
     renderWithProviders(<SchemaCreatePage />)
+
+    await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
 
     expect(screen.getByTestId('submit')).toBeInTheDocument()
     expect(screen.getByTestId('field-level')).toBeInTheDocument()
+    expect(screen.getByTestId('field-layer')).toBeInTheDocument()
     expect(screen.getByTestId('field-domain')).toBeInTheDocument()
     expect(screen.getByTestId('field-title')).toBeInTheDocument()
     expect(screen.getByTestId('field-file')).toBeInTheDocument()
   })
 
   describe('on submit', () => {
+
     const file = new File(['test'], 'testfile.txt', { type: 'text/plain' })
     const formData = new FormData()
     formData.append('file', file)
 
     it('errors', async () => {
+      fetchMock.mockResponseOnce(JSON.stringify(['default']), { status: 200 })
       renderWithProviders(<SchemaCreatePage />)
-      await userEvent.click(screen.getByTestId('submit'))
+      await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
 
-      // expect(screen.queryByText('Required')).toHaveLength(2)
+      await userEvent.click(screen.getByTestId('submit'))
 
       await waitFor(async () => {
         expect(screen.queryAllByText('Required')).toHaveLength(3)
@@ -74,10 +80,14 @@ describe('Page: Upload page', () => {
     })
 
     it('success', async () => {
+      fetchMock.mockResponseOnce(JSON.stringify(['default']), { status: 200 })
       fetchMock.mockResponseOnce(JSON.stringify(mockGenerate))
       renderWithProviders(<SchemaCreatePage />)
 
+      await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
+
       userEvent.selectOptions(screen.getByTestId('field-level'), 'PUBLIC')
+      userEvent.selectOptions(screen.getByTestId('field-layer'), 'default')
       await userEvent.type(screen.getByTestId('field-domain'), 'my-domain')
       await userEvent.type(screen.getByTestId('field-title'), 'my-title')
       await fireEvent.change(screen.getByTestId('field-file'), {
@@ -88,7 +98,7 @@ describe('Page: Upload page', () => {
 
       await waitFor(async () => {
         expect(fetchMock).toHaveBeenCalledWith(
-          '/api/schema/PUBLIC/my-domain/my-title/generate',
+          '/api/schema/default/PUBLIC/my-domain/my-title/generate',
           {
             body: formData,
             credentials: 'include',

@@ -1,11 +1,11 @@
-import { useState } from 'react'
-import { Card, Row, Chip, Button, TextField, Select, Alert } from '@/components'
+import { Card, Row, Button, TextField, Select, Alert } from '@/components'
 import AccountLayout from '@/components/Layout/AccountLayout'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Stack, Typography, LinearProgress } from '@mui/material'
-import { Controller, useForm } from 'react-hook-form'
+import { Typography, LinearProgress } from '@mui/material'
+import { Controller, useForm, useFieldArray } from 'react-hook-form'
 import { z } from 'zod'
 import { createClient, SubjectCreate } from '@/service'
+import { extractPermissionNames } from '@/service/permissions'
 import { getPermissionsListUi } from '@/service/fetch'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/router'
@@ -16,22 +16,15 @@ import {
   UserCreateResponse
 } from '@/service/types'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
+import PermissionsTable from '@/components/PermissionsTable/PermissionsTable'
+
 
 const userType = ['User', 'Client']
 
 type UserCreate = z.infer<typeof SubjectCreate>
 
-const permissionListKeyMapping = {
-  ADMIN: 'Management Permissions',
-  GLOBAL_READ: 'Global Read Permissions',
-  GLOBAL_WRITE: 'Global Write Permissions',
-  PROTECTED_READ: 'Read Protected Permissions',
-  PROTECTED_WRITE: 'Write Protected Permissions'
-}
-
 function CreateUserPage() {
   const router = useRouter()
-  const [selectedPermissions, setSelectedPermissions] = useState<string[]>([])
 
   const {
     isLoading: isPermissionsListLoading,
@@ -42,6 +35,11 @@ function CreateUserPage() {
   const { control, handleSubmit, watch } = useForm<UserCreate>({
     resolver: zodResolver(SubjectCreate)
   })
+
+  const fieldArrayReturn = useFieldArray({
+    control,
+    name: 'permissions'
+  });
 
   const { isLoading, mutate, error } = useMutation<
     ClientCreateResponse | UserCreateResponse,
@@ -82,12 +80,12 @@ function CreateUserPage() {
     return (
       <form
         onSubmit={handleSubmit(async (data) => {
-          const baseData = { permissions: selectedPermissions }
+          const permissions = data.permissions.map((permission) => extractPermissionNames(permission, permissionsListData))
           if (data.type === 'User') {
             await mutate({
               path: 'user',
               data: {
-                ...baseData,
+                permissions: permissions,
                 username: data.name,
                 email: data.email
               }
@@ -96,7 +94,7 @@ function CreateUserPage() {
             await mutate({
               path: 'client',
               data: {
-                ...baseData,
+                permissions: permissions,
                 client_name: data.name
               }
             })
@@ -215,37 +213,9 @@ function CreateUserPage() {
           <Typography variant="h2" gutterBottom>
             Select Permissions
           </Typography>
-
-          {Object.keys(permissionsListData).map((key, index) => {
-            return (
-              <Row key={index}>
-                <Typography variant="caption" component="label" gutterBottom>
-                  {permissionListKeyMapping[key]}
-                </Typography>
-                <Stack direction="row" spacing={2}>
-                  {permissionsListData[key].map((item) => {
-                    return (
-                      <Chip
-                        label={item.display_name}
-                        key={item.display_name_full}
-                        onToggle={(_e, active) => {
-                          if (active) {
-                            setSelectedPermissions([...selectedPermissions, item.name])
-                          } else {
-                            setSelectedPermissions(
-                              selectedPermissions.filter((_item) => _item !== item.name)
-                            )
-                          }
-                        }}
-                        toggle
-                      />
-                    )
-                  })}
-                </Stack>
-              </Row>
-            )
-          })}
-
+          <Row>
+            <PermissionsTable permissionsListData={permissionsListData} fieldArrayReturn={fieldArrayReturn} />
+          </Row>
           {error && (
             <Alert severity="error" sx={{ mb: 3 }}>
               {error?.message}

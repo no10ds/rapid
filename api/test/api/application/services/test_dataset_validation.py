@@ -39,7 +39,7 @@ class TestDatasetValidation:
                 Column(
                     name="colname1",
                     partition_index=0,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=True,
                 ),
                 Column(
@@ -136,7 +136,7 @@ class TestDatasetValidation:
                 Column(
                     name="colname1",
                     partition_index=0,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=True,
                 ),
                 Column(
@@ -221,7 +221,7 @@ class TestDatasetValidation:
                 Column(
                     name="col1",
                     partition_index=None,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=False,
                 ),
                 Column(
@@ -419,7 +419,7 @@ class TestDatasetValidation:
                 Column(
                     name="col3",
                     partition_index=None,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=False,
                 ),
             ],
@@ -461,7 +461,7 @@ class TestDatasetValidation:
                 Column(
                     name="col3",
                     partition_index=None,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=False,
                 ),
                 Column(
@@ -484,7 +484,7 @@ class TestDatasetValidation:
         except DatasetValidationError as error:
             assert error.message == [
                 "Column [col2] has an incorrect data type. Expected boolean, received string",
-                "Column [col3] has an incorrect data type. Expected integer, received string",
+                "Column [col3] has an incorrect data type. Expected int, received string",
                 "Column [col4] has an incorrect data type. Expected double, received string",
             ]
 
@@ -530,7 +530,7 @@ class TestDatasetValidation:
                 Column(
                     name="col5",
                     partition_index=4,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=False,
                 ),
             ],
@@ -586,7 +586,7 @@ class TestDatasetValidation:
                 Column(
                     name="col5",
                     partition_index=None,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=False,
                 ),
             ],
@@ -598,7 +598,7 @@ class TestDatasetValidation:
             assert error.message == [
                 "Column [col4] does not match specified date format in at least one row",
                 "Column [col3] does not allow null values",
-                "Column [col5] has an incorrect data type. Expected integer, received string",
+                "Column [col5] has an incorrect data type. Expected int, received string",
                 "Partition column [col1] has values with illegal characters '/'",
                 "Partition column [col2] has values with illegal characters '/'",
             ]
@@ -738,7 +738,7 @@ class TestDatasetTransformation:
                 Column(
                     name="value",
                     partition_index=None,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=False,
                 ),
             ],
