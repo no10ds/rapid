@@ -26,6 +26,9 @@ module "app_cluster" {
   athena_query_output_bucket_arn                  = module.data_workflow.athena_query_result_output_bucket_arn
   ip_whitelist                                    = var.ip_whitelist
   enable_cloudtrail                               = var.enable_cloudtrail
+  ecs_cluster_arn                                 = var.ecs_cluster_arn
+  ecs_cluster_name                                = var.ecs_cluster_name
+  ecs_cluster_id                                  = var.ecs_cluster_id
 }
 
 module "auth" {
