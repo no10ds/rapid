@@ -19,6 +19,7 @@ nav:
     - api/usage.md
     - api/schema.md
     - api/data_access.md
+    - api/query.md
     - Routes:
       - api/routes/schema.md
       - api/routes/dataset.md
