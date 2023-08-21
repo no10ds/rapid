@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Dict, List, Type, Union
+from typing import Dict, List, Optional, Type, Union
 
 import boto3
 from botocore.exceptions import ClientError
@@ -90,19 +90,22 @@ class S3Adapter:
             *self.list_files_from_path(dataset.dataset_location(with_version=False)),
         ]
 
-    def get_last_updated_time(self, file_path: str) -> int:
+    def get_last_updated_time(self, file_path: str) -> Optional[str]:
         """
         :return: Returns the last updated time for the dataset
         """
         paginator = self.__s3_client.get_paginator("list_objects_v2")
         page_iterator = paginator.paginate(Bucket=self.__s3_bucket, Prefix=file_path)
-        return max(
-            [
-                item["LastModified"]
-                for page in page_iterator
-                for item in page["Contents"]
-            ]
-        )
+        try:
+            return max(
+                [
+                    item["LastModified"]
+                    for page in page_iterator
+                    for item in page["Contents"]
+                ]
+            )
+        except KeyError:
+            return None
 
     def get_folder_size(self, file_path: str) -> int:
         """
@@ -148,7 +151,7 @@ class S3Adapter:
         for file in files_to_delete:
             self._delete_data(file)
 
-    def delete_dataset_files_using_key(self, keys: List[Dict], filename: str):
+    def delete_dataset_files_using_key(self, keys: List[str], filename: str):
         files_to_delete = [{"Key": key} for key in keys]
         self._delete_objects(files_to_delete, filename)
 
@@ -187,10 +190,13 @@ class S3Adapter:
         return os.path.join(dataset.dataset_location(), partition_path, filename)
 
     def _delete_objects(self, files_to_delete: List[Dict], filename: str):
-        response = self.__s3_client.delete_objects(
-            Bucket=self.__s3_bucket, Delete={"Objects": files_to_delete}
-        )
-        self._handle_deletion_response(filename, response)
+        if files_to_delete:
+            response = self.__s3_client.delete_objects(
+                Bucket=self.__s3_bucket, Delete={"Objects": files_to_delete}
+            )
+            self._handle_deletion_response(filename, response)
+        else:
+            AppLogger.info(f"No files to delete for: {filename}")
 
     def _handle_deletion_response(self, filename, response):
         if "Deleted" in response:
@@ -206,7 +212,7 @@ class S3Adapter:
 
     def list_files_from_path(self, file_path: str) -> List[Dict]:
         try:
-            paginator = self.__s3_client.get_paginator("list_objects")
+            paginator = self.__s3_client.get_paginator("list_objects_v2")
             page_iterator = paginator.paginate(
                 Bucket=self.__s3_bucket, Prefix=file_path
             )

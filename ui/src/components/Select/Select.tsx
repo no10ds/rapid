@@ -1,5 +1,4 @@
 import {
-  FormControl,
   FormHelperText,
   InputLabel,
   MenuItem,
@@ -8,9 +7,11 @@ import {
 } from '@mui/material'
 import { ComponentProps, FC, forwardRef, useId } from 'react'
 import SelectCheckbox from './SelectCheckbox'
+import FormControl from '../FormControl/FormControl'
 import { Props } from './types'
 
-const StyledBasicSelect = styled(BasicSelect)<ComponentProps<typeof BasicSelect>>`
+
+const StyledBasicSelect = styled(BasicSelect) <ComponentProps<typeof BasicSelect>>`
   .MuiInputBase-input {
     padding: 4px 15px 0px 15px;
     height: 100%;
@@ -18,14 +19,6 @@ const StyledBasicSelect = styled(BasicSelect)<ComponentProps<typeof BasicSelect>
     font-size: 13px;
     font-weight: 400;
     color: ${(p) => p.theme.colors.dark1};
-  }
-`
-
-const StyledFormControl = styled(FormControl)<ComponentProps<typeof FormControl>>`
-  .MuiInputBase-root {
-    margin-bottom: 4px;
-    height: 32px !important;
-    padding: 0px;
   }
 `
 
@@ -45,7 +38,7 @@ const Select: FC<Props> = forwardRef<FC, Props>(
     }
 
     return (
-      <StyledFormControl error={!!error} fullWidth={fullWidth}>
+      <FormControl error={!!error} fullWidth={fullWidth}>
         <InputLabel id={labelId} />
 
         {checkboxes ? (
@@ -61,7 +54,7 @@ const Select: FC<Props> = forwardRef<FC, Props>(
           </StyledBasicSelect>
         )}
         {!!helperText && <FormHelperText>{helperText}</FormHelperText>}
-      </StyledFormControl>
+      </FormControl>
     )
   }
 )

@@ -30,12 +30,13 @@ class TestDatasetAccessEvaluator:
         assert actual == expected
 
     @pytest.mark.parametrize(
-        "permission, expected_filters",
+        "permission, input_filters, expected_filters",
         [
             (
                 PermissionItem(
                     id="READ_ALL_ALL", layer="ALL", sensitivity="ALL", type="READ"
                 ),
+                DatasetFilters(),
                 DatasetFilters(
                     sensitivity=["PUBLIC", "PRIVATE", "PROTECTED"],
                     layer=["raw", "layer"],
@@ -48,6 +49,7 @@ class TestDatasetAccessEvaluator:
                     sensitivity="ALL",
                     type="WRITE",
                 ),
+                DatasetFilters(),
                 DatasetFilters(
                     sensitivity=["PUBLIC", "PRIVATE", "PROTECTED"], layer=["raw"]
                 ),
@@ -59,6 +61,7 @@ class TestDatasetAccessEvaluator:
                     sensitivity="PUBLIC",
                     type="WRITE",
                 ),
+                DatasetFilters(),
                 DatasetFilters(sensitivity=["PUBLIC"], layer=["raw", "layer"]),
             ),
             (
@@ -69,15 +72,39 @@ class TestDatasetAccessEvaluator:
                     type="READ",
                     domain="TEST",
                 ),
+                DatasetFilters(),
                 DatasetFilters(sensitivity=["PROTECTED"], layer=["raw"], domain="TEST"),
+            ),
+            (
+                PermissionItem(
+                    id="READ_ALL_ALL", layer="ALL", sensitivity="ALL", type="READ"
+                ),
+                DatasetFilters(key_only_tags=["tag1"]),
+                DatasetFilters(
+                    sensitivity=["PUBLIC", "PRIVATE", "PROTECTED"],
+                    layer=["raw", "layer"],
+                    key_only_tags=["tag1"],
+                ),
+            ),
+            (
+                PermissionItem(
+                    id="WRITE_ALL_PUBLIC",
+                    layer="ALL",
+                    sensitivity="PUBLIC",
+                    type="WRITE",
+                ),
+                DatasetFilters(sensitivity="ALL"),
+                DatasetFilters(sensitivity=["PUBLIC"], layer=["raw", "layer"]),
             ),
         ],
     )
-    def test_extract_datasets_from_permission(self, permission, expected_filters):
+    def test_extract_datasets_from_permission(
+        self, permission, input_filters, expected_filters
+    ):
         self.schema_service.get_schema_metadatas = Mock()
         self.schema_service.get_schema_metadatas.return_value = "dataset"
 
-        res = self.evaluator.extract_datasets_from_permission(permission)
+        res = self.evaluator.extract_datasets_from_permission(permission, input_filters)
 
         self.schema_service.get_schema_metadatas.assert_called_once_with(
             expected_filters
@@ -265,13 +292,15 @@ class TestDatasetAccessEvaluator:
         self.permission_service.get_subject_permissions = Mock(return_value=permissions)
         self.evaluator.fetch_datasets = Mock(return_value=["dataset"])
 
-        res = self.evaluator.get_authorised_datasets(subject_id, action)
+        res = self.evaluator.get_authorised_datasets(
+            subject_id, action, "dataset_filter"
+        )
         assert res == ["dataset"]
         self.permission_service.get_subject_permissions.assert_called_once_with(
             subject_id
         )
         self.evaluator.fetch_datasets.assert_called_once_with(
-            list(compress(permissions, permission_mask))
+            list(compress(permissions, permission_mask)), "dataset_filter"
         )
 
     def test_can_access_dataset_success(self):

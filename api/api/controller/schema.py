@@ -12,12 +12,17 @@ from api.common.config.constants import (
     BASE_API_PATH,
     LOWERCASE_REGEX,
     LOWERCASE_ROUTE_DESCRIPTION,
+    VALID_FILE_MIME_TYPES,
+    VALID_FILE_EXTENSIONS,
 )
 from api.common.config.layers import Layer
 from api.common.custom_exceptions import (
     AWSServiceError,
+    InvalidFileUploadError,
 )
+from api.common.data_handlers import store_file_to_disk
 from api.common.logger import AppLogger
+from api.domain.Jobs.Job import generate_uuid
 from api.domain.schema import Schema
 
 delete_service = DeleteService()
@@ -50,7 +55,7 @@ async def generate_schema(
     output of this endpoint in the Schema Upload endpoint.
 
     ⚠️ WARNING:
-    - The first 50MB of the uploaded file (regardless of size) are used to infer the schema
+    - The first 50MB if the file is of type csv or the first 10,000 rows if Parquet, of the uploaded file (regardless of size) are used to infer the schema
     - Consider uploading a representative sample of your dataset (e.g.: the first 10,000 rows) instead of uploading the entire large file which could take a long time
 
     ### Inputs
@@ -79,15 +84,18 @@ async def generate_schema(
     ### Click  `Try it out` to use the endpoint
 
     """
-    infer_contents = get_first_mb_of_file(file)
+    extension = file.filename.split(".")[-1].lower()
+    if (
+        file.content_type not in VALID_FILE_MIME_TYPES
+        and extension not in VALID_FILE_EXTENSIONS
+    ):
+        raise InvalidFileUploadError(f"This file type {extension}, is not supported.")
+
+    job_id = generate_uuid()
+    incoming_file_path = store_file_to_disk(extension, job_id, file, to_chunk=True)
     return schema_infer_service.infer_schema(
-        layer, domain, dataset, sensitivity, infer_contents
+        layer, domain, dataset, sensitivity, incoming_file_path
     )
-
-
-def get_first_mb_of_file(file: UploadFile, chunk_size_mb: int = 50) -> bytes:
-    mb_1 = 1024 * 1024
-    return file.file.read(mb_1 * chunk_size_mb)
 
 
 @schema_router.post(

@@ -9,6 +9,7 @@ from api.common.custom_exceptions import UnsupportedTypeError
 
 class NumericType(StrEnum):
     INTEGER = "integer"
+    INT = "int"
     MIXED_INTEGER_FLOAT = "mixed-integer-float"
     FLOATING = "floating"
     TINYINT = "tinyint"
@@ -63,7 +64,7 @@ class AthenaDataType(Enum):
     DECIMAL = NumericType.DECIMAL
     DOUBLE = NumericType.DOUBLE
     FLOAT = NumericType.FLOAT
-    INTEGER = NumericType.INTEGER
+    INT = NumericType.INT
     SMALLINT = NumericType.SMALLINT
     STRING = StringType.STRING
     TIMESTAMP = TimestampType.TIMESTAMP
@@ -76,7 +77,7 @@ PANDAS_TO_ATHENA_CONVERTER = {
     PandasDataType.DATE: AthenaDataType.DATE,
     PandasDataType.DATETIME: AthenaDataType.DATE,
     PandasDataType.DECIMAL: AthenaDataType.DECIMAL,
-    PandasDataType.INTEGER: AthenaDataType.INTEGER,
+    PandasDataType.INTEGER: AthenaDataType.INT,
     PandasDataType.FLOATING: AthenaDataType.DOUBLE,
     PandasDataType.MIXED: AthenaDataType.STRING,
     PandasDataType.MIXED_INTEGER: AthenaDataType.STRING,

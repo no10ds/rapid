@@ -8,9 +8,7 @@ import pytest
 
 from api.application.services.data_service import (
     DataService,
-    construct_chunked_dataframe,
 )
-from api.common.config.constants import CONTENT_ENCODING
 from api.common.custom_exceptions import (
     UserError,
     AWSServiceError,
@@ -57,7 +55,7 @@ class TestUploadDataset:
                 Column(
                     name="colname1",
                     partition_index=0,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=True,
                 ),
                 Column(
@@ -80,16 +78,6 @@ class TestUploadDataset:
         mock_construct_chunked_dataframe.return_value = mock_test_file_reader
         mock_test_file_reader.__iter__.return_value = dataframes
         return mock_test_file_reader
-
-    # Dataset chunking -------------------------------
-    @patch("api.application.services.data_service.pd")
-    def test_construct_chunked_dataframe(self, mock_pd):
-        path = Path("file/path")
-
-        construct_chunked_dataframe(path)
-        mock_pd.read_csv.assert_called_once_with(
-            path, encoding=CONTENT_ENCODING, sep=",", chunksize=200_000
-        )
 
     # Upload Dataset  -------------------------------------
 
@@ -160,7 +148,7 @@ class TestUploadDataset:
     # Process Upload
     @patch.object(DataService, "validate_incoming_data")
     @patch.object(DataService, "process_chunks")
-    @patch.object(DataService, "delete_incoming_raw_file")
+    @patch("api.application.services.data_service.delete_incoming_raw_file")
     @patch.object(DataService, "load_partitions")
     def test_process_upload_calls_relevant_methods(
         self,
@@ -205,7 +193,7 @@ class TestUploadDataset:
         self.job_service.update_step.assert_has_calls(expected_update_step_calls)
         self.job_service.succeed.assert_called_once_with(upload_job)
 
-    @patch.object(DataService, "delete_incoming_raw_file")
+    @patch("api.application.services.data_service.delete_incoming_raw_file")
     @patch.object(DataService, "validate_incoming_data")
     def test_deletes_incoming_file_from_disk_and_fails_job_if_any_error_during_processing(
         self,
@@ -417,7 +405,7 @@ class TestUploadDataset:
                 Column(
                     name="colname1",
                     partition_index=0,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=True,
                 ),
                 Column(
@@ -592,7 +580,7 @@ class TestDatasetInfoRetrieval:
                 Column(
                     name="colname1",
                     partition_index=0,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=False,
                 ),
                 Column(
@@ -619,6 +607,29 @@ class TestDatasetInfoRetrieval:
         )
         self.s3_adapter.get_last_updated_time.return_value = "2022-03-01 11:03:49+00:00"
 
+    def test_get_last_updated_time(self):
+        time = "2022-03-01 11:03:49+00:00"
+        self.s3_adapter.get_last_updated_time.return_value = time
+
+        last_updated_time = self.data_service.get_last_updated_time(
+            self.valid_schema.metadata
+        )
+        assert last_updated_time == "2022-03-01 11:03:49+00:00"
+        self.s3_adapter.get_last_updated_time.assert_called_once_with(
+            self.valid_schema.metadata.s3_file_location()
+        )
+
+    def test_get_last_updated_time_empty(self):
+        self.s3_adapter.get_last_updated_time.return_value = None
+
+        last_updated_time = self.data_service.get_last_updated_time(
+            self.valid_schema.metadata
+        )
+        assert last_updated_time == "Never updated"
+        self.s3_adapter.get_last_updated_time.assert_called_once_with(
+            self.valid_schema.metadata.s3_file_location()
+        )
+
     def test_get_schema_information(self):
         expected_schema = EnrichedSchema(
             metadata=EnrichedSchemaMetadata(
@@ -636,7 +647,7 @@ class TestDatasetInfoRetrieval:
                 EnrichedColumn(
                     name="colname1",
                     partition_index=0,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=False,
                 ),
                 EnrichedColumn(
@@ -677,9 +688,6 @@ class TestDatasetInfoRetrieval:
             ),
         )
         assert actual_schema == expected_schema
-        self.s3_adapter.get_last_updated_time.assert_called_once_with(
-            dataset_metadata.s3_file_location()
-        )
 
     def test_get_schema_information_for_multiple_dates(self):
         valid_schema = Schema(
@@ -695,7 +703,7 @@ class TestDatasetInfoRetrieval:
                 Column(
                     name="colname1",
                     partition_index=0,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=False,
                 ),
                 Column(
@@ -731,7 +739,7 @@ class TestDatasetInfoRetrieval:
                 EnrichedColumn(
                     name="colname1",
                     partition_index=0,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=False,
                 ),
                 EnrichedColumn(
@@ -797,7 +805,7 @@ class TestDatasetInfoRetrieval:
                 Column(
                     name="colname1",
                     partition_index=0,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=False,
                 )
             ],
@@ -818,7 +826,7 @@ class TestDatasetInfoRetrieval:
                 EnrichedColumn(
                     name="colname1",
                     partition_index=0,
-                    data_type="integer",
+                    data_type="int",
                     allow_null=False,
                 )
             ],
@@ -1040,137 +1048,3 @@ class TestQueryLargeDataset:
         self.job_service.update_step.assert_has_calls(expected_job_calls)
         self.job_service.set_results_url.assert_not_called()
         self.job_service.fail.assert_called_once_with(query_job, ["the error message"])
-
-
-class TestListDatasets:
-    def setup_method(self):
-        self.s3_adapter = Mock()
-        self.schema_service = Mock()
-        self.data_service = DataService(
-            self.s3_adapter,
-            None,
-            None,
-            None,
-            self.schema_service,
-        )
-
-    def test_list_datasets_not_enriched_success(self):
-        mock_schemas = [
-            SchemaMetadata(
-                layer="raw",
-                domain="domain1",
-                dataset="dataset1",
-                version=2,
-                sensitivity="PUBLIC",
-            ),
-            SchemaMetadata(
-                layer="raw",
-                domain="domain12",
-                dataset="dataset_c",
-                version=4,
-                sensitivity="PRIVATE",
-            ),
-        ]
-        expected = [
-            {
-                "dataset": "dataset1",
-                "description": "",
-                "domain": "domain1",
-                "is_latest_version": True,
-                "key_only_tags": [],
-                "key_value_tags": {},
-                "layer": "raw",
-                "owners": None,
-                "sensitivity": "PUBLIC",
-                "update_behaviour": "APPEND",
-                "version": 2,
-            },
-            {
-                "dataset": "dataset_c",
-                "description": "",
-                "domain": "domain12",
-                "is_latest_version": True,
-                "key_only_tags": [],
-                "key_value_tags": {},
-                "layer": "raw",
-                "owners": None,
-                "sensitivity": "PRIVATE",
-                "update_behaviour": "APPEND",
-                "version": 4,
-            },
-        ]
-
-        self.schema_service.get_schema_metadatas.return_value = mock_schemas
-
-        response = self.data_service.list_datasets("query")
-        assert response == expected
-
-    def test_list_datasets_not_enriched_empty(self):
-        mock_schemas = []
-
-        self.schema_service.get_schema_metadatas.return_value = mock_schemas
-
-        response = self.data_service.list_datasets("query")
-        assert response == []
-
-    def test_list_datasets_enriched_success(self):
-        mock_schemas = [
-            SchemaMetadata(
-                layer="raw",
-                domain="domain1",
-                dataset="dataset1",
-                version=2,
-                sensitivity="PUBLIC",
-            ),
-            SchemaMetadata(
-                layer="raw",
-                domain="domain12",
-                dataset="dataset_c",
-                version=4,
-                sensitivity="PRIVATE",
-            ),
-        ]
-        expected = [
-            {
-                "dataset": "dataset1",
-                "description": "",
-                "domain": "domain1",
-                "is_latest_version": True,
-                "key_only_tags": [],
-                "key_value_tags": {},
-                "layer": "raw",
-                "owners": None,
-                "sensitivity": "PUBLIC",
-                "update_behaviour": "APPEND",
-                "version": 2,
-                "last_updated_date": "date1",
-            },
-            {
-                "dataset": "dataset_c",
-                "description": "",
-                "domain": "domain12",
-                "is_latest_version": True,
-                "key_only_tags": [],
-                "key_value_tags": {},
-                "layer": "raw",
-                "owners": None,
-                "sensitivity": "PRIVATE",
-                "update_behaviour": "APPEND",
-                "version": 4,
-                "last_updated_date": "date2",
-            },
-        ]
-
-        self.s3_adapter.get_last_updated_time.side_effect = ["date1", "date2"]
-        self.schema_service.get_schema_metadatas.return_value = mock_schemas
-
-        response = self.data_service.list_datasets("query", enriched=True)
-        assert response == expected
-
-    def test_list_datasets_enriched_empty(self):
-        mock_schemas = []
-
-        self.schema_service.get_schema_metadatas.return_value = mock_schemas
-
-        response = self.data_service.list_datasets("query", enriched=True)
-        assert response == []

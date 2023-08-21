@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "next lint",
     "test:watch": "DEBUG_PRINT_LIMIT=1000000 jest --watch",
-    "test:all": "next lint && tsc --noemit && jest"
+    "test:all": "next lint && tsc --noemit && jest",
+    "test:debug": "jest --watch --runInBand --slient=false --collectCoverage --testTimeout=30000"
   },
   "dependencies": {
     "@emotion/cache": "^11.10.5",
