@@ -1,2 +1,5 @@
 bandit==1.7.5
 detect-secrets==1.4.0
+mkdocs==1.5.1
+mkdocs-material==9.1.21
+mkdocstrings[python]==1.2.1

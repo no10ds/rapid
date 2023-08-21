@@ -6,5 +6,4 @@ python-dotenv
 requests
 requests-mock
 twine
-sphinx
 pydantic

@@ -32,7 +32,7 @@ class Rapid:
         API endpoints, providing a simple and intuitive programmatic interface.
 
         Args:
-            auth (:class:`rapid.auth.RapidAuth`, optional): An instance of the rAPId auth class, which is used for authentication and authorization with the API. Defaults to None.
+            auth (int, optional): An instance of the rAPId auth class, which is used for authentication and authorization with the API. Defaults to None.
         """
         self.auth = auth if auth else RapidAuth()
 
@@ -45,9 +45,6 @@ class Rapid:
 
         Returns:
             A JSON response of the API's response.
-
-        For more details on the response structure, see the API documentation:
-        https://getrapid.link/api/docs#/Datasets/list_all_datasets_datasets_post
         """
         response = requests.post(
             f"{self.auth.url}/datasets",
@@ -65,9 +62,6 @@ class Rapid:
 
         Returns:
             A JSON response of the API's response.
-
-        For more details on the response structure, see the API documentation:
-        https://getrapid.link/api/docs#/Jobs/get_job_jobs__job_id__get
         """
         url = f"{self.auth.url}/jobs/{_id}"
         response = requests.get(
@@ -90,7 +84,7 @@ class Rapid:
             None if the job is successful.
 
         Raises:
-            :class:`rapid.exceptions.JobFailedException`: If the job outcome failed.
+            rapid.exceptions.JobFailedException: If the job outcome failed.
         """
         while True:
             progress = self.fetch_job_progress(_id)
@@ -115,10 +109,10 @@ class Rapid:
             domain (str): The domain of the dataset to download the DataFrame from.
             dataset (str): The dataset from the domain to download the DataFrame from.
             version (int, optional): Version of the dataset to download.
-            query (:class:`rapid.items.query.Query`, optional): An optional query type to provide when downloading data. Defaults to empty.
+            query (rapid.items.query.Query, optional): An optional query type to provide when downloading data. Defaults to empty.
 
         Raises:
-            DatasetNotFoundException: :class:`rapid.exceptions.DatasetNotFoundException`: If the
+            DatasetNotFoundException: rapid.exceptions.DatasetNotFoundException: If the
                 specificed domain, dataset and version to download does not exist in the rAPId instance
                 we throw the dataset not found exception.
 
@@ -155,8 +149,8 @@ class Rapid:
             wait_to_complete (bool, optional): Whether to wait for the upload job to complete before returning. Defaults to True.
 
         Raises:
-        :class:`rapid.exceptions.DataFrameUploadValidationException`: If the DataFrame's schema is incorrect.
-        :class:`rapid.exceptions.DataFrameUploadFailedException`: If an unexpected error occurs while uploading the DataFrame.
+        rapid.exceptions.DataFrameUploadValidationException: If the DataFrame's schema is incorrect.
+        rapid.exceptions.DataFrameUploadFailedException: If an unexpected error occurs while uploading the DataFrame.
 
         Returns:
             If wait_to_complete is True, returns "Success" if the upload is successful.
@@ -196,7 +190,7 @@ class Rapid:
             dataset (str): The name of the dataset to generate metadata for.
 
         Raises:
-            :class:`rapid.exceptions.DatasetInfoFailedException`: If an error occurs while generating the metadata information.
+            rapid.exceptions.DatasetInfoFailedException: If an error occurs while generating the metadata information.
 
         Returns:
             A dictionary containing the metadata information for the DataFrame and dataset.
@@ -236,7 +230,6 @@ class Rapid:
     def generate_schema(
         self, df: DataFrame, domain: str, dataset: str, sensitivity: str
     ) -> Schema:
-
         """
         Generates a schema for a pandas DataFrame and a specified dataset in the API.
 
@@ -247,10 +240,10 @@ class Rapid:
             sensitivity (str): The sensitivity level of the schema to generate.
 
         Raises:
-            :class:`rapid.exceptions.SchemaGenerationFailedException`: If an error occurs while generating the schema.
+            rapid.exceptions.SchemaGenerationFailedException: If an error occurs while generating the schema.
 
         Returns:
-            :class:`rapid.items.schema.Schema`: A Schema class type from the generated schema for the DataFrame and dataset.
+            rapid.items.schema.Schema: A Schema class type from the generated schema for the DataFrame and dataset.
         """
         url = f"{self.auth.url}/schema/{sensitivity}/{domain}/{dataset}/generate"
 
@@ -270,11 +263,11 @@ class Rapid:
         Creates a new schema on the API.
 
         Args:
-            schema (:class:`rapid.items.schema.Schema`): The schema model for which you want to create for.
+            schema rapid.items.schema.Schema: The schema model for which you want to create for.
 
         Raises:
-            :class: `rapid.exceptions.SchemaAlreadyExistsException`: If you try to create a schema that already exists in rAPId.
-            :class:`rapid.exceptions.SchemaCreateFailedException`: If an error occurs while trying to update the schema.
+            rapid.exceptions.SchemaAlreadyExistsException: If you try to create a schema that already exists in rAPId.
+            rapid.exceptions.SchemaCreateFailedException: If an error occurs while trying to update the schema.
         """
         schema_dict = schema.dict()
         url = f"{self.auth.url}/schema"
@@ -297,10 +290,10 @@ class Rapid:
         Uploads a new updated schema to the API.
 
         Args:
-            schema (:class:`rapid.items.schema.Schema`): The new schema model that will be used for the update.
+            schema (rapid.items.schema.Schema): The new schema model that will be used for the update.
 
         Raises:
-            :class:`rapid.exceptions.SchemaUpdateFailedException`: If an error occurs while trying to update the schema.
+            rapid.exceptions.SchemaUpdateFailedException: If an error occurs while trying to update the schema.
         """
         schema_dict = schema.dict()
         url = f"{self.auth.url}/schema"
