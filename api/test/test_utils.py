@@ -45,7 +45,7 @@ def mock_schema_response():
             {
                 "name": "colname1",
                 "partition_index": 0,
-                "data_type": "integer",
+                "data_type": "int",
                 "allow_null": True,
             }
         ],

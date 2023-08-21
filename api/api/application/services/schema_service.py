@@ -36,7 +36,7 @@ class SchemaService:
     def get_schema(
         self, dataset: Type[DatasetMetadata], latest: bool = False
     ) -> Schema:
-        if latest:
+        if latest or not dataset.get_version():
             schema_dict = self.dynamodb_adapter.get_latest_schema(dataset)
         else:
             schema_dict = self.dynamodb_adapter.get_schema(dataset)
@@ -90,10 +90,15 @@ class SchemaService:
         return self.dynamodb_adapter.delete_schema(dataset)
 
     def delete_schemas(self, dataset: Type[DatasetMetadata]) -> int:
-        dataset.version = self.get_latest_schema_version(dataset)
-        for i in range(dataset.version):
-            dataset.version = i
-            self.dynamodb_adapter.delete_schema(dataset)
+        max_version = self.get_latest_schema_version(dataset)
+        for i in range(max_version):
+            metadata = DatasetMetadata(
+                layer=dataset.layer,
+                domain=dataset.domain,
+                dataset=dataset.dataset,
+                version=i + 1,
+            )
+            self.dynamodb_adapter.delete_schema(metadata)
 
     def upload_schema(self, schema: Schema) -> str:
         schema.metadata.version = FIRST_SCHEMA_VERSION_NUMBER

@@ -185,6 +185,7 @@ async def get_permissions_ui():
 )
 async def get_datasets_ui(action: Action, request: Request):
     subject_id = parse_token(request.cookies.get(RAPID_ACCESS_TOKEN)).subject
+
     datasets = upload_service.get_authorised_datasets(subject_id, action)
     return [dataset.to_dict() for dataset in datasets]
 
