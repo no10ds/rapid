@@ -1,4 +1,4 @@
-import { Button, Card, Chip, Row } from '@/components'
+import { Button, Card } from '@/components'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import AccountLayout from '@/components/Layout/AccountLayout'
 import {
@@ -6,28 +6,31 @@ import {
   getSubjectPermissions,
   updateSubjectPermissions
 } from '@/service'
+import { extractPermissionNames } from '@/service/permissions'
 import {
   UpdateSubjectPermissionsBody,
   UpdateSubjectPermissionsResponse
 } from '@/service/types'
-import { Alert, Stack, Typography, LinearProgress } from '@mui/material'
+import { Alert, Typography, LinearProgress } from '@mui/material'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
+import { useForm, useFieldArray } from 'react-hook-form'
+import PermissionsTable from '@/components/PermissionsTable/PermissionsTable'
 
-const permissionListKeyMapping = {
-  ADMIN: 'Management Permissions',
-  GLOBAL_READ: 'Global Read Permissions',
-  GLOBAL_WRITE: 'Global Write Permissions',
-  PROTECTED_READ: 'Read Protected Permissions',
-  PROTECTED_WRITE: 'Write Protected Permissions'
-}
 
 function SubjectModifyPage() {
   const router = useRouter()
   const { subjectId, name } = router.query
 
-  const [selectedPermissions, setSelectedPermissions] = useState<string[]>([])
+  const { control, handleSubmit } = useForm()
+
+  const fieldArrayReturn = useFieldArray({
+    control,
+    name: 'permissions'
+  });
+
+  const { append } = fieldArrayReturn;
 
   const {
     isLoading: isPermissionsListDataLoading,
@@ -43,8 +46,9 @@ function SubjectModifyPage() {
 
   useEffect(() => {
     if (subjectPermissionsData) {
-      setSelectedPermissions(subjectPermissionsData)
+      append(subjectPermissionsData)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subjectPermissionsData])
 
   const { isLoading, mutate, error } = useMutation<
@@ -71,61 +75,38 @@ function SubjectModifyPage() {
   }
 
   return (
-    <Card
-      action={
-        <Button
-          color="primary"
-          loading={isLoading}
-          onClick={() => {
-            mutate({ subject_id: subjectId as string, permissions: selectedPermissions })
-          }}
-        >
-          Modify
-        </Button>
-      }
-    >
-      <Typography variant="h2" gutterBottom>
-        Modify Subject
-      </Typography>
-      <Typography gutterBottom>Select permissions for {name}</Typography>
-
-      {Object.keys(permissionsListData).map((key, index) => {
-        return (
-          <Row key={index}>
-            <Typography variant="caption" component="label" gutterBottom>
-              {permissionListKeyMapping[key]}
-            </Typography>
-            <Stack direction="row" spacing={2}>
-              {permissionsListData[key].map((item) => {
-                return (
-                  <Chip
-                    active={selectedPermissions.includes(item.name)}
-                    label={item.display_name}
-                    key={item.display_name_full}
-                    onToggle={(_e, active) => {
-                      if (active) {
-                        setSelectedPermissions([...selectedPermissions, item.name])
-                      } else {
-                        setSelectedPermissions(
-                          selectedPermissions.filter((_item) => _item !== item.name)
-                        )
-                      }
-                    }}
-                    toggle
-                  />
-                )
-              })}
-            </Stack>
-          </Row>
-        )
+    <form
+      onSubmit={handleSubmit(async (data) => {
+        const permissions = data.permissions.map((permission) => extractPermissionNames(permission, permissionsListData))
+        await mutate(
+          { subject_id: subjectId as string, permissions })
       })}
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error?.message}
-        </Alert>
-      )}
-    </Card>
+      noValidate
+    >
+      <Card
+        action={
+          <Button
+            color="primary"
+            type="submit"
+            loading={isLoading}
+            data-testid="submit"
+          >
+            Modify
+          </Button>
+        }
+      >
+        <Typography variant="h2" gutterBottom>
+          Modify Subject
+        </Typography>
+        <Typography gutterBottom>Select permissions for {name}</Typography>
+        <PermissionsTable permissionsListData={permissionsListData} fieldArrayReturn={fieldArrayReturn} />
+        {error && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {error?.message}
+          </Alert>
+        )}
+      </Card>
+    </form>
   )
 }
 

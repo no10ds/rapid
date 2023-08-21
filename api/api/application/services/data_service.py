@@ -1,11 +1,9 @@
-import os
 import uuid
 from pathlib import Path
 from threading import Thread
 from typing import List, Tuple
 
 import pandas as pd
-from pandas.io.parsers import TextFileReader
 
 from api.adapter.athena_adapter import AthenaAdapter
 from api.adapter.glue_adapter import GlueAdapter
@@ -15,7 +13,6 @@ from api.application.services.job_service import JobService
 from api.application.services.partitioning_service import generate_partitioned_data
 from api.application.services.schema_service import SchemaService
 from api.common.config.constants import (
-    CONTENT_ENCODING,
     DATASET_ROWS_QUERY_LIMIT,
     DATASET_SIZE_QUERY_LIMIT,
 )
@@ -26,10 +23,14 @@ from api.common.custom_exceptions import (
     UnprocessableDatasetError,
     UserError,
 )
+from api.common.data_handlers import (
+    construct_chunked_dataframe,
+    delete_incoming_raw_file,
+    get_dataframe_from_chunk_type,
+)
 from api.common.logger import AppLogger
 from api.common.utilities import build_error_message_list
 from api.domain.data_types import DateType
-from api.domain.dataset_filters import DatasetFilters
 from api.domain.dataset_metadata import DatasetMetadata
 from api.domain.enriched_schema import (
     EnrichedColumn,
@@ -40,10 +41,6 @@ from api.domain.Jobs.QueryJob import QueryJob, QueryStep
 from api.domain.Jobs.UploadJob import UploadJob, UploadStep
 from api.domain.schema import Schema
 from api.domain.sql_query import SQLQuery
-
-
-def construct_chunked_dataframe(file_path: Path) -> TextFileReader:
-    return pd.read_csv(file_path, encoding=CONTENT_ENCODING, sep=",", chunksize=200_000)
 
 
 class DataService:
@@ -112,14 +109,14 @@ class DataService:
             self.job_service.update_step(job, UploadStep.LOAD_PARTITIONS)
             self.load_partitions(schema)
             self.job_service.update_step(job, UploadStep.CLEAN_UP)
-            self.delete_incoming_raw_file(schema, file_path, raw_file_identifier)
+            delete_incoming_raw_file(schema, file_path, raw_file_identifier)
             self.job_service.update_step(job, UploadStep.NONE)
             self.job_service.succeed(job)
         except Exception as error:
             AppLogger.error(
                 f"Processing upload failed for layer [{schema.get_layer()}], domain [{schema.get_domain()}], dataset [{schema.get_dataset()}], and version [{schema.get_version()}]: {error}"
             )
-            self.delete_incoming_raw_file(schema, file_path, raw_file_identifier)
+            delete_incoming_raw_file(schema, file_path, raw_file_identifier)
             self.job_service.fail(job, build_error_message_list(error))
             raise error
 
@@ -131,12 +128,13 @@ class DataService:
         )
         dataset_errors = set()
         for chunk in construct_chunked_dataframe(file_path):
+            dataframe = get_dataframe_from_chunk_type(chunk)
             try:
-                build_validated_dataframe(schema, chunk)
+                build_validated_dataframe(schema, dataframe)
             except DatasetValidationError as error:
                 dataset_errors.update(error.message)
         if dataset_errors:
-            self.delete_incoming_raw_file(schema, file_path, raw_file_identifier)
+            delete_incoming_raw_file(schema, file_path, raw_file_identifier)
             raise DatasetValidationError(list(dataset_errors))
 
     def process_chunks(
@@ -146,7 +144,8 @@ class DataService:
             f"Processing chunks for {schema.get_layer()}/{schema.get_domain()}/{schema.get_dataset()}/{schema.get_version()}"
         )
         for chunk in construct_chunked_dataframe(file_path):
-            self.process_chunk(schema, raw_file_identifier, chunk)
+            dataframe = get_dataframe_from_chunk_type(chunk)
+            self.process_chunk(schema, raw_file_identifier, dataframe)
 
         if schema.has_overwrite_behaviour():
             self.remove_existing_data(schema, raw_file_identifier)
@@ -161,19 +160,6 @@ class DataService:
         validated_dataframe = build_validated_dataframe(schema, chunk)
         permanent_filename = self.generate_permanent_filename(raw_file_identifier)
         self.upload_data(schema, validated_dataframe, permanent_filename)
-
-    def delete_incoming_raw_file(
-        self, schema: Schema, file_path: Path, raw_file_identifier: str
-    ):
-        try:
-            os.remove(file_path.name)
-            AppLogger.info(
-                f"Temporary upload file for {schema.get_layer()}/{schema.get_domain()}/{schema.get_dataset()}/{schema.get_version()} deleted. Raw file identifier: {raw_file_identifier}"
-            )
-        except (FileNotFoundError, TypeError) as error:
-            AppLogger.error(
-                f"Temporary upload file for {schema.get_layer()}/{schema.get_domain()}/{schema.get_dataset()}/{schema.get_version()} not deleted. Raw file identifier: {raw_file_identifier}. Detail: {error}"
-            )
 
     def remove_existing_data(self, schema: Schema, raw_file_identifier: str) -> None:
         AppLogger.info(
@@ -196,29 +182,18 @@ class DataService:
                 f"Overriding existing data failed for layer [{schema.get_layer()}], domain [{schema.get_domain()}] and dataset [{schema.get_dataset()}]. Raw file identifier: {raw_file_identifier}"
             )
 
-    def list_datasets(self, query: DatasetFilters, enriched: bool = False):
-        metadatas = self.schema_service.get_schema_metadatas(query=query)
-        if metadatas:
-            if enriched:
-                return [
-                    dict(metadata)
-                    | {
-                        "last_updated_date": self.s3_adapter.get_last_updated_time(
-                            metadata.s3_file_location()
-                        )
-                    }
-                    for metadata in metadatas
-                ]
-            else:
-                return [dict(metadata) for metadata in metadatas]
-        return []
+    def get_last_updated_time(self, metadata: DatasetMetadata) -> str:
+        last_updated = self.s3_adapter.get_last_updated_time(
+            metadata.s3_file_location()
+        )
+        return last_updated or "Never updated"
 
     def get_dataset_info(self, dataset: DatasetMetadata) -> EnrichedSchema:
         schema = self.schema_service.get_schema(dataset)
         statistics_dataframe = self.athena_adapter.query(
             dataset, self._build_query(schema)
         )
-        last_updated = self.s3_adapter.get_last_updated_time(dataset.s3_file_location())
+        last_updated = self.get_last_updated_time(dataset)
         return EnrichedSchema(
             metadata=self._enrich_metadata(schema, statistics_dataframe, last_updated),
             columns=self._enrich_columns(schema, statistics_dataframe),

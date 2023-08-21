@@ -1,6 +1,6 @@
 import { screen, waitForElementToBeRemoved } from '@testing-library/react'
 import fetchMock from 'jest-fetch-mock'
-import { renderWithProviders } from '@/utils/test-utils'
+import { renderWithProviders } from '@/lib/test-utils'
 import CatalogPage from '@/pages/catalog/[search]'
 import { MetadataSearchResponse } from '@/service/types'
 

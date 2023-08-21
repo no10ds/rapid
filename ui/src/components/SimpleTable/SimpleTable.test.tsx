@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import SimpleTable from './SimpleTable'
-import { renderWithProviders, screen } from '@/utils/test-utils'
+import { renderWithProviders, screen } from '@/lib/test-utils'
 
 describe('SimpleTable', () => {
   it('empty row', async () => {

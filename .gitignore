@@ -181,3 +181,6 @@ docs/_build/
 # terraform files
 .terraform/
 .terraform.lock.hcl
+
+playwright/.auth
+playwright/.downloads
