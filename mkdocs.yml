@@ -1,0 +1,68 @@
+site_name: rAPId
+
+theme:
+  name: 'material'
+  palette:
+      scheme: default
+      primary: pink
+      accent: pink
+  logo: 'favicon.ico'
+  favicon: 'favicon.ico'
+
+repo_name: no10ds/rapid
+repo_url: https://github.com/no10ds/rapid
+
+nav:
+  - Welcome to rAPId: index.md
+  - Getting Started: getting_started.md
+  - API:
+    - api/usage.md
+    - api/schema.md
+    - api/data_access.md
+    - Routes:
+      - api/routes/schema.md
+      - api/routes/dataset.md
+      - api/routes/protected_domain.md
+      - api/routes/user.md
+      - api/routes/client.md
+      - api/routes/permissions.md
+      - api/routes/subject.md
+  - Infrastructure:
+    - infrastructure/getting_started.md
+    - Deployment:
+      - infrastructure/deployment/existing.md
+      - infrastructure/deployment/full_stack.md
+    - infrastructure/alerting_monitoring.md
+    - infrastructure/certificates.md
+    - infrastructure/domains_subdomains.md
+  - UI:
+    - ui/getting_started.md
+  - SDK:
+    - sdk/usage.md
+    - sdk/useful_patterns.md
+    - API Documentation:
+      - sdk/api/rapid.md
+      - sdk/api/auth.md
+      - Items:
+        - sdk/api/items/query.md
+        - sdk/api/items/schema.md
+      - Patterns:
+        - sdk/api/patterns/data.md
+  - Releases: releases.md
+  - Contributing: contributing.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: false
+            show_basis: true
+          paths: [sdk]
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.extra
+  - pymdownx.tabbed:
+      alternate_style: true
