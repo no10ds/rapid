@@ -33,6 +33,7 @@ DUMMY_COLUMNS_TWO = [
 
 
 DUMMY_METADATA = SchemaMetadata(
+    layer="raw",
     domain="test",
     dataset="rapid_sdk",
     sensitivity=SensitivityLevel.PUBLIC,
@@ -56,6 +57,7 @@ class TestOwnder:
 class TestSchemaMetadata:
     def test_create_schema_metadata_from_dict(self):
         _schema_metadata = {
+            "layer": "raw",
             "domain": "test",
             "dataset": "rapid_sdk",
             "sensitivity": SensitivityLevel.PUBLIC,
@@ -231,6 +233,7 @@ class TestSchema:
         schema = Schema(metadata=DUMMY_METADATA, columns=DUMMY_COLUMNS)
         expected_dict = {
             "metadata": {
+                "layer": "raw",
                 "domain": "test",
                 "dataset": "rapid_sdk",
                 "sensitivity": "PUBLIC",

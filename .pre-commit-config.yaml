@@ -59,6 +59,6 @@ repos:
     -   id: ui_test
         name: ui_test
         language: system
-        entry: bash -c 'cd ./ui; npm run test:all'
+        entry: bash -c 'cd ./ui; npm install; npm run test:all'
         files: ui/*.
         pass_filenames: false
