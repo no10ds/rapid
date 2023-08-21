@@ -6,26 +6,6 @@ variable "tags" {
   }
 }
 
-variable "data_s3_bucket_arn" {
-  type        = string
-  description = "S3 Bucket arn to store application data"
-}
-
-variable "data_s3_bucket_name" {
-  type        = string
-  description = "S3 Bucket name to store application data"
-}
-
-variable "vpc_id" {
-  type        = string
-  description = "Application VPC"
-}
-
-variable "private_subnet" {
-  type        = string
-  description = "Application Private subnet"
-}
-
 variable "aws_account" {
   type        = string
   description = "AWS Account number to host the rAPId service"

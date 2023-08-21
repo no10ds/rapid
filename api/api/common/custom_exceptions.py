@@ -63,6 +63,10 @@ class UnprocessableDatasetError(UserError):
     pass
 
 
+class InvalidFileUploadError(UserError):
+    pass
+
+
 # Specifically handled in global handler ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 

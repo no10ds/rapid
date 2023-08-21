@@ -1,0 +1,69 @@
+{
+  "cookies": [
+    {
+      "name": "csrf-state",
+      "value": "\"\"",
+      "domain": "rapid-preprod-auth.auth.eu-west-2.amazoncognito.com",
+      "path": "/",
+      "expires": 1692287927.336736,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "csrf-state-legacy",
+      "value": "\"\"",
+      "domain": "rapid-preprod-auth.auth.eu-west-2.amazoncognito.com",
+      "path": "/",
+      "expires": 1692287927.336913,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "XSRF-TOKEN",
+      "value": "58e5152c-5518-4a15-8f44-53aab80923e3",
+      "domain": "rapid-preprod-auth.auth.eu-west-2.amazoncognito.com",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "cognito",
+      "value": "\"H4sIAAAAAAAAAAHjABz/0cUswHEu+wt4sFtgX/MXtjfEuCG5J9+QOoDte5Xo+8fhLVV+z9tVnIc3CZMT9dor+RIIuLiP9D/+lidJbwe86EF6UaDpHjGE4G2pudZQsByLI9ltdUis+cyI7dAnBFmLao1OXbcaCG6IDKqwtF3QQ2zuO0Z8l3PlMCwkR3Cx28fhs2EqOSo9AZtWfvcrThpi2KbwI1Zub32pcqOMkVgYIyiCveNXqpjvR2zVNGrYatzd0DYka5DpLq8EyZVXK3HL2mWbalfT4KqdoMC9CYxWgMSDKGxw3H/EU5nk23uUIo8V44wxzDVT4wAAAA==.H4sIAAAAAAAAAAEgAN//jAzRXN0pqpqP9AxAks2+ygr+2fMuLXRS1sEKXC9B/YAo9zXxIAAAAA==.3\"",
+      "domain": ".rapid-preprod-auth.auth.eu-west-2.amazoncognito.com",
+      "path": "/",
+      "expires": 1692291228.147482,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "rat",
+      "value": "eyJraWQiOiI4NXBka2R2N0VlWHp5Qnk0aUcrRzkrVm03SWhyVFlqalhDZlwvTlNUMGNJUT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJiMTBkZWQ4OC00ZTEwLTQ2ZDMtYjljNy1mZjZjZjA1MjZjMDkiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtd2VzdC0yLmFtYXpvbmF3cy5jb21cL2V1LXdlc3QtMl9jWkRjYmViRm8iLCJ2ZXJzaW9uIjoyLCJjbGllbnRfaWQiOiI3YzRwOWdldWh2dG12MDFvMHRycDRyNWYxIiwib3JpZ2luX2p0aSI6IjgzMmI1ZjdkLTgwNGYtNDYwZS1hN2YyLTM5ODYyY2NlYThjZCIsImV2ZW50X2lkIjoiNDk4ODAwM2ItMGQyZS00ZGUzLTg5YTItNDRhOGYwYjdmNmZmIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJwaG9uZSBvcGVuaWQgZW1haWwiLCJhdXRoX3RpbWUiOjE2OTIyODc2MjgsImV4cCI6MTY5MjI5MTIyOCwiaWF0IjoxNjkyMjg3NjI4LCJqdGkiOiJkZTJlM2I0Zi05NzNjLTQ0NjItOWM1Yy1kZGNhZGY5ZDlkYjIiLCJ1c2VybmFtZSI6InJhcGlkLXByZXByb2RfdWlfdGVzdF91c2VyIn0.Xf-R3WBmlGQ_RgF5R0q8buwNRq4_SQqyFJ2oBQkM33fURlZ8oPUIoibne8VyIoNH4EsrFpn-9m0q7jfojNVPr9gUbZbTNjusO1aPDmpa95_wWE7ltWoFu_DRfiJmph9915cmWPZrvhE4cDfQBpnbSEXB8Qd-NveYPbX1dzcJqEsZC3MIUAhaEyynjAmKoPtzIPRCivcprjdU1GzYTVz_bidtMKv0f_JdLH-fsZKvHYp8ybd_8Yd_k-hD_rgmAb5pe2GQAgLWch1Z4Gw3vXcpXdNmWQZPuU4peS6BLnZ9hVPjBN7dse7JZL-bu-Z7pHfXcmB1BXt-xdt1j8shR4-jHw",
+      "domain": "preprod.getrapid.link",
+      "path": "/",
+      "expires": 1692291228.637131,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "https://rapid-preprod-auth.auth.eu-west-2.amazoncognito.com",
+      "localStorage": [
+        {
+          "name": "Amazon.AWS.Cognito.ContextData.LS_UBID",
+          "value": "hiq9hu40hfac59ul73l7:1692287627856"
+        },
+        {
+          "name": "amznfbgid",
+          "value": "X59-7904128-7171304:1692287627"
+        }
+      ]
+    }
+  ]
+}

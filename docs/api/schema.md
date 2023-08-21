@@ -1,13 +1,16 @@
 The core primitive of rAPId is the schema. A schema is a JSON file that defines the structure of a dataset. It is used to validate data uploaded to rAPId and to provide a consistent interface for querying data.
 
-The first step is to define a schema that matches the data structure that wants to be introduced, a schema can either be created [from scratch](#from-scratch) or auto-generated from a [sample data file](#auto-generated).
+The first step is to define a schema that contains the desired data structure, a schema can either be created [from scratch](#from-scratch) or auto-generated from a [sample data file](#auto-generated).
 
 ## Structure
 
 A schema is defined with the following structure:
 
-- `metadata` - General information of the schema.
-  - `layer` - String value, this is the name of the layer within rAPId that you wish to place the dataset within. The possible values of this are unique to the rAPId instance and specified on creation. If none are provided, it will default to `default`.
+### Metadata
+
+#### General information of the schema.
+
+  - `layer` - String value, this is the name of the layer within rAPId that you wish to place the dataset within. The possible values of this are unique to the rAPId instance and specified on creation. If none is provided, the option will be `default`.
   - `domain` - String value, is the name of the domain that owns the dataset, it could be for example the name of the department that handles the data.
   - `dataset` - String value, is the name of the dataset. e.g.: "receipts" or "address".
   - `sensitivity` - String value, is the sensitivity level of the dataset. e.g.: "PUBLIC", "PRIVATE", "PROTECTED"
@@ -16,7 +19,11 @@ A schema is defined with the following structure:
   - `key_value_tags` - Dictionary of string keys and values to associate to the dataset. e.g.: `{"school_level": "primary", "school_type": "private"}`
   - `key_only_tags` - List of strings of tags to associate to the dataset. e.g.: `["schooling", "benefits", "archive", "historic"]`
   - `update_behaviour` - String value, the action to take when a new file is uploaded. e.g.: `APPEND`, `OVERWRITE`.
-- `columns` - List of columns with the schema definition, at least one column is required, each column will have:
+
+### Columns
+
+#### A list defining the columns that are to be expected within the dataset.
+
   - `name` - String value, name of the column.
   - `data_type` - String value, this is an accepted pandas' data type, will be used to validate the schema.
   - `allow_null` - Boolean value, specifies whether the columns can have empty values or not.

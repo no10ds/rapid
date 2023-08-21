@@ -76,40 +76,34 @@ variable "admin_permissions" {
   }
 }
 
-variable "data_permissions" {
+variable "master_data_permissions" {
   type = map(map(any))
   default = {
     "READ_ALL" = {
       type        = "READ"
       sensitivity = "ALL"
+      layer       = "ALL"
     },
     "WRITE_ALL" = {
       type        = "WRITE"
       sensitivity = "ALL"
-    },
-    "READ_PUBLIC" = {
-      type        = "READ"
-      sensitivity = "PUBLIC"
-    },
-    "WRITE_PUBLIC" = {
-      type        = "WRITE"
-      sensitivity = "PUBLIC"
-    },
-    "READ_PRIVATE" = {
-      type        = "READ"
-      sensitivity = "PRIVATE"
-    },
-    "WRITE_PRIVATE" = {
-      type        = "WRITE"
-      sensitivity = "PRIVATE"
-    },
-    "READ_SENSITIVE" = {
-      type        = "READ"
-      sensitivity = "SENSITIVE"
-    },
-    "WRITE_SENSITIVE" = {
-      type        = "WRITE"
-      sensitivity = "SENSITIVE"
+      layer       = "ALL"
     },
   }
+}
+
+variable "global_data_sensitivities" {
+  type    = list(string)
+  default = ["PUBLIC", "PRIVATE"]
+}
+
+variable "data_actions" {
+  type    = list(string)
+  default = ["READ", "WRITE"]
+}
+
+variable "layers" {
+  type        = list(string)
+  description = "A list of the layers that the rAPId instance will contain"
+  default     = ["default"]
 }

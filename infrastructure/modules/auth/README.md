@@ -1,4 +1,4 @@
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 No requirements.
@@ -7,8 +7,8 @@ No requirements.
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.6.2 |
-| <a name="provider_random"></a> [random](#provider\_random) | 3.5.1 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | n/a |
+| <a name="provider_random"></a> [random](#provider\_random) | n/a |
 
 ## Modules
 
@@ -82,4 +82,4 @@ No modules.
 | <a name="output_user_permission_table_arn"></a> [user\_permission\_table\_arn](#output\_user\_permission\_table\_arn) | The arn of the dynamoDB table that stores permissions |
 | <a name="output_user_permission_table_name"></a> [user\_permission\_table\_name](#output\_user\_permission\_table\_name) | The name of the dynamoDB table that stores permissions |
 | <a name="output_user_pool_endpoint"></a> [user\_pool\_endpoint](#output\_user\_pool\_endpoint) | The Cognito rapid user pool endpoint |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->

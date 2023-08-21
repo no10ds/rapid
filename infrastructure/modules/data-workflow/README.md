@@ -1,4 +1,4 @@
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 No requirements.
@@ -57,4 +57,4 @@ No modules.
 | <a name="output_athena_workgroup_arn"></a> [athena\_workgroup\_arn](#output\_athena\_workgroup\_arn) | Query workgroup for Athena |
 | <a name="output_glue_catalog_arn"></a> [glue\_catalog\_arn](#output\_glue\_catalog\_arn) | Catalog database arn |
 | <a name="output_tags"></a> [tags](#output\_tags) | The tags used in the project |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->

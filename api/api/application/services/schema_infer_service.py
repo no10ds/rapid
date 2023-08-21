@@ -1,12 +1,16 @@
-from io import StringIO
-from typing import List, Union, Any
+from typing import List, Any
+from pathlib import Path
 
 import pandas as pd
 
 from api.application.services.schema_validation import validate_schema
-from api.common.config.constants import CONTENT_ENCODING
 from api.common.config.layers import Layer
 from api.common.custom_exceptions import UserError
+from api.common.data_handlers import (
+    construct_chunked_dataframe,
+    delete_incoming_raw_file,
+    get_dataframe_from_chunk_type,
+)
 from api.common.value_transformers import clean_column_name
 
 from api.domain.data_types import extract_athena_types
@@ -21,11 +25,10 @@ class SchemaInferService:
         domain: str,
         dataset: str,
         sensitivity: str,
-        file_content: Union[bytes, str],
+        file_path: Path,
     ) -> dict[str, Any]:
-        dataframe = self._construct_dataframe(file_content)
+        dataframe = self._construct_single_chunk_dataframe(file_path)
         columns = self._infer_columns(dataframe)
-
         schema = Schema(
             metadata=SchemaMetadata(
                 layer=layer,
@@ -36,13 +39,19 @@ class SchemaInferService:
             ),
             columns=columns,
         )
-        validate_schema(schema)
+        try:
+            validate_schema(schema)
+        finally:
+            # We need to delete the incoming file from the local file system
+            # regardless of the schema validation was successful or not
+            delete_incoming_raw_file(schema, file_path)
         return schema.dict(exclude={"metadata": {"version"}})
 
-    def _construct_dataframe(self, file_content: Union[bytes, str]) -> pd.DataFrame:
-        parsed_contents = StringIO(str(file_content, CONTENT_ENCODING))
+    def _construct_single_chunk_dataframe(self, file_path: Path) -> pd.DataFrame:
         try:
-            return pd.read_csv(parsed_contents, encoding=CONTENT_ENCODING, sep=",")
+            for chunk in construct_chunked_dataframe(file_path):
+                # We only validate a schema based on the frist chunk
+                return get_dataframe_from_chunk_type(chunk)
         except ValueError as error:
             raise UserError(
                 f"The dataset you have provided is not formatted correctly: {self._clean_error(error.args[0])}"

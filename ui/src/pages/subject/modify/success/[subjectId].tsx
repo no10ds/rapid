@@ -34,7 +34,7 @@ function SubjectModifyPageSuccess() {
 
       <Stack direction="column" spacing={2} sx={{ width: '100%', textAlign: 'center' }}>
         {subjectPermissionsData.map((item) => (
-          <Typography key={item}>{item}</Typography>
+          <Typography key={item.name}>{item.name}</Typography>
         ))}
       </Stack>
     </Card>

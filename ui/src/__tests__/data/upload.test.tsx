@@ -3,13 +3,13 @@ import {
   screen,
   waitFor,
   waitForElementToBeRemoved,
-  within
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import fetchMock from 'jest-fetch-mock'
-import { mockDataSetsList, renderWithProviders } from '@/utils/test-utils'
+import { mockDataset, mockDataSetsList, renderWithProviders, selectAutocompleteOption } from '@/lib/test-utils'
 import UploadPage from '@/pages/data/upload'
 import { UploadDatasetResponse } from '@/service/types'
+
 
 const pushSpy = jest.fn()
 jest.mock('next/router', () => ({
@@ -27,31 +27,21 @@ describe('Page: Upload page', () => {
   })
 
   it('renders', async () => {
+
     fetchMock.mockResponseOnce(JSON.stringify(mockDataSetsList), { status: 200 })
-    renderWithProviders(<UploadPage />)
+    renderWithProviders(<UploadPage datasetInput={mockDataset} />)
 
     await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
 
     const datasetDropdown = screen.getByTestId('select-dataset')
     expect(datasetDropdown).toBeVisible()
 
-    for (const key in mockDataSetsList) {
-      mockDataSetsList[key].forEach
-      for (const { dataset } of mockDataSetsList[key]) {
-        const option = within(datasetDropdown).getByRole('option', {
-          name: dataset
-        })
-        expect(option).toBeInTheDocument()
-        expect(option).toHaveValue(`${key}/${dataset}`)
-      }
-    }
-
     expect(screen.getByTestId('upload')).toBeInTheDocument()
   })
 
   it('error on fetch', async () => {
     fetchMock.mockReject(new Error('fake error message'))
-    renderWithProviders(<UploadPage />)
+    renderWithProviders(<UploadPage datasetInput={mockDataset} />)
 
     await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
 
@@ -69,20 +59,20 @@ describe('Page: Upload page', () => {
 
       await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
 
+
+      selectAutocompleteOption('select-layer', 'layer')
+      selectAutocompleteOption('select-domain', 'Pizza')
+      selectAutocompleteOption('select-dataset', 'bit_complicated')
+
       await fireEvent.change(screen.getByTestId('upload'), {
         target: { files: [file] }
       })
-
-      userEvent.selectOptions(
-        screen.getByTestId('select-dataset'),
-        mockDataSetsList['Pizza'][0].dataset
-      )
 
       await userEvent.click(screen.getByTestId('submit'))
 
       await waitFor(async () => {
         expect(fetchMock).toHaveBeenLastCalledWith(
-          '/api/datasets/Pizza/bit_complicated',
+          '/api/datasets/layer/Pizza/bit_complicated?version=3',
           expect.objectContaining({
             body: new FormData(),
             credentials: 'include',
@@ -106,9 +96,9 @@ describe('Page: Upload page', () => {
       fetchMock.mockResponses(
         [JSON.stringify(mockDataSetsList), { status: 200 }],
         [JSON.stringify(mockSuccess), { status: 200 }],
-        [JSON.stringify({ status: 'FAILED' }), { status: 200 }]
+        [JSON.stringify({ status: "FAILED" }), { status: 200 }]
       )
-      renderWithProviders(<UploadPage />)
+      renderWithProviders(<UploadPage datasetInput={mockDataset} />)
       await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
 
       await userEvent.click(screen.getByTestId('submit'))
@@ -141,9 +131,9 @@ describe('Page: Upload page', () => {
       fetchMock.mockResponses(
         [JSON.stringify(mockDataSetsList), { status: 200 }],
         [JSON.stringify(mockSuccess), { status: 200 }],
-        [JSON.stringify({ status: 'SUCCESS' }), { status: 200 }]
+        [JSON.stringify({ status: "SUCCESS" }), { status: 200 }]
       )
-      renderWithProviders(<UploadPage />)
+      renderWithProviders(<UploadPage datasetInput={mockDataset} />)
       await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
 
       await userEvent.click(screen.getByTestId('submit'))
@@ -176,9 +166,9 @@ describe('Page: Upload page', () => {
       fetchMock.mockResponses(
         [JSON.stringify(mockDataSetsList), { status: 200 }],
         [JSON.stringify(mockSuccess), { status: 200 }],
-        [JSON.stringify({ status: 'IN PROGRESS' }), { status: 200 }]
+        [JSON.stringify({ status: "IN PROGRESS" }), { status: 200 }]
       )
-      renderWithProviders(<UploadPage />)
+      renderWithProviders(<UploadPage datasetInput={mockDataset} />)
       await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
 
       await userEvent.click(screen.getByTestId('submit'))
@@ -196,14 +186,12 @@ describe('Page: Upload page', () => {
       })
     })
 
-    it('api error', async () => {
+    it('api error upload', async () => {
       fetchMock.mockResponseOnce(JSON.stringify(mockDataSetsList), { status: 200 })
-      renderWithProviders(<UploadPage />)
-
+      renderWithProviders(<UploadPage datasetInput={mockDataset} />)
       await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
 
       fetchMock.mockReject(new Error('fake error message'))
-
       await userEvent.click(screen.getByTestId('submit'))
 
       await waitFor(async () => {
