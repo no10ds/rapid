@@ -12,7 +12,7 @@ from pandas import DataFrame
 from rapid.auth import RapidAuth
 from rapid.items.schema import Schema
 from rapid.items.query import Query
-from rapid.utils.constants import TIMEOUT_PERIOD, Layer
+from rapid.utils.constants import TIMEOUT_PERIOD
 from rapid.exceptions import (
     DataFrameUploadFailedException,
     DataFrameUploadValidationException,
@@ -99,7 +99,7 @@ class Rapid:
 
     def download_dataframe(
         self,
-        layer: Layer,
+        layer: str,
         domain: str,
         dataset: str,
         version: Optional[int] = None,
@@ -109,7 +109,7 @@ class Rapid:
         Downloads data to a pandas DataFrame based on the domain, dataset and version passed.
 
         Args:
-            layer (Layer): The layer of the dataset to download the DataFrame from.
+            layer (str): The layer of the dataset to download the DataFrame from.
             domain (str): The domain of the dataset to download the DataFrame from.
             dataset (str): The dataset from the domain to download the DataFrame from.
             version (int, optional): Version of the dataset to download.
@@ -142,7 +142,7 @@ class Rapid:
 
     def upload_dataframe(
         self,
-        layer: Layer,
+        layer: str,
         domain: str,
         dataset: str,
         df: DataFrame,
@@ -152,7 +152,7 @@ class Rapid:
         Uploads a pandas DataFrame to a specified dataset in the API.
 
         Args:
-            layer (Layer): The layer of the dataset to upload the DataFrame to.
+            layer (str): The layer of the dataset to upload the DataFrame to.
             domain (str): The domain of the dataset to upload the DataFrame to.
             dataset (str): The name of the dataset to upload the DataFrame to.
             df (DataFrame): The pandas DataFrame to upload.
@@ -190,13 +190,13 @@ class Rapid:
             data["details"],
         )
 
-    def generate_info(self, df: DataFrame, layer: Layer, domain: str, dataset: str):
+    def generate_info(self, df: DataFrame, layer: str, domain: str, dataset: str):
         """
         Generates metadata information for a pandas DataFrame and a specified dataset in the API.
 
         Args:
             df (DataFrame): The pandas DataFrame to generate metadata for.
-            layer (Layer): The layer of the dataset to generate metadata for.
+            layer (str): The layer of the dataset to generate metadata for.
             domain (str): The domain of the dataset to generate metadata for.
             dataset (str): The name of the dataset to generate metadata for.
 
@@ -239,14 +239,14 @@ class Rapid:
         }
 
     def generate_schema(
-        self, df: DataFrame, layer: Layer, domain: str, dataset: str, sensitivity: str
+        self, df: DataFrame, layer: str, domain: str, dataset: str, sensitivity: str
     ) -> Schema:
         """
         Generates a schema for a pandas DataFrame and a specified dataset in the API.
 
         Args:
             df (DataFrame): The pandas DataFrame to generate a schema for.
-            layer (Layer): The layer of the dataset to generate a schema for.
+            layer (str): The layer of the dataset to generate a schema for.
             domain (str): The domain of the dataset to generate a schema for.
             dataset (str): The name of the dataset to generate a schema for.
             sensitivity (str): The sensitivity level of the schema to generate.
