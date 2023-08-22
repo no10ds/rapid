@@ -2,8 +2,6 @@ from enum import Enum
 from typing import Dict, List, Optional, Union
 from pydantic.main import BaseModel
 
-from rapid.utils.constants import Layer
-
 
 class SensitivityLevel(Enum):
     PUBLIC = "PUBLIC"
@@ -22,7 +20,7 @@ class Owner(BaseModel):
 
 
 class SchemaMetadata(BaseModel):
-    layer: Layer
+    layer: str
     domain: str
     dataset: str
     sensitivity: SensitivityLevel

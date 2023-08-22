@@ -7,4 +7,3 @@ requests
 requests-mock
 twine
 pydantic
-strenum
