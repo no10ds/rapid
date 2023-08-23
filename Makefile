@@ -11,9 +11,7 @@ help: 				## List targets and description
 precommit:
 	pre-commit install
 
-security-check:
-	@$(MAKE) detect-secrets
-	@$(MAKE) detect-vulnerabilities
+security-check: detect-secrets detect-vulnerabilities
 
 detect-secrets:
 	@git ls-files -z | xargs -0 detect-secrets-hook --baseline .secrets.baseline
