@@ -1,6 +1,6 @@
 import { ThemeProvider } from '@/components'
 import { CacheProvider, EmotionCache } from '@emotion/react'
-import createEmotionCache from '@/utils/createEmotionCache'
+import createEmotionCache from '@/lib/createEmotionCache'
 import { ErrorBoundary } from 'react-error-boundary'
 import { ReactNode, useEffect } from 'react'
 import { AppProps } from 'next/app'

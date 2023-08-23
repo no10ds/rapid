@@ -10,7 +10,7 @@ import {
   Alert
 } from '@/components'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
-import { asVerticalTableList } from '@/utils'
+import { asVerticalTableList } from '@/lib'
 import { getDatasetInfo, queryDataset } from '@/service'
 import { DataFormats } from '@/service/types'
 import { Typography, LinearProgress } from '@mui/material'
