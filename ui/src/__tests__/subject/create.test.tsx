@@ -48,6 +48,7 @@ describe('Page: Subject Create', () => {
 
       const mockData = {
         client_name: 'James Bond',
+        // pragma: allowlist secret
         client_secret: 'secret-code-word',
         client_id: 'id-abc123',
         permissions: ['DATA_ADMIN', 'READ_PRIVATE']
