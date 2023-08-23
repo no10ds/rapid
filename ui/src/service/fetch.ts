@@ -17,7 +17,7 @@ import {
   PermissionUiResponse,
   SubjectPermission
 } from './types'
-import { api } from '@/lib/data-utils'
+import { api } from '@/utils/data'
 
 export const getAuthStatus = async (): Promise<AuthResponse> => {
   const res = await api(`/api/auth`, { method: 'GET' })

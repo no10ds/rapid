@@ -1,7 +1,7 @@
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import AccountLayout from '@/components/Layout/AccountLayout'
 import SimpleTable from '@/components/SimpleTable/SimpleTable'
-import { asVerticalTableList } from '@/lib'
+import { asVerticalTableList } from '@/utils'
 import { getJob } from '@/service'
 import { Card, Typography, LinearProgress } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
