@@ -88,8 +88,8 @@ api-tag-and-upload-release-image:## Tag and upload the api release image
 api-tag-prod-candidate:		## Tag the uploaded api image as a candidate for PROD deployment
 	@cd api/; $(MAKE) tag-prod-candidate
 
-api-tag-live-in-prod:		## Deploy the latest version of the api
-	@cd api/; $(MAKE) tag-live-in-prod
+api-app-live-in-prod:		## Deploy the latest version of the api
+	@cd api/; $(MAKE) app-live-in-prod
 
 api-check-app-is-running:
 	@cd api/; $(MAKE) check-app-is-running

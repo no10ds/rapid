@@ -3,11 +3,6 @@ variable "tags" {
   description = "A common map of tags for all VPC resources that are created (for e.g. billing purposes)"
 }
 
-variable "runner-registration-token" {
-  description = "The Github Actions Runner registration token (you can get this from Settings > Actions > Runner (or by hitting the relevant endpoint))"
-  type        = string
-}
-
 variable "state_bucket" {
   type        = string
   description = "Bucket name for backend state"
@@ -23,12 +18,16 @@ variable "aws_region" {
   description = "The region of the AWS Account for the rAPId service"
 }
 
+variable "version_check" {
+  description = "Ensure that you have incremented the version of the ami. Enter 'yes' to continue"
+  validation {
+    condition     = var.version_check == "yes"
+    error_message = "You must enter 'yes' to continue"
+  }
+}
+
+
 variable "pipeline_ami_version" {
   type        = string
   description = "The version of the pipeline AMI to use"
-}
-
-variable "resource-name-prefix" {
-  type        = string
-  description = "The prefix to add to resources for easier identification"
 }
