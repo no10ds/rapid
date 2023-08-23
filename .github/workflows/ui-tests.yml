@@ -1,9 +1,6 @@
 name: rAPId Integration Tests
 
 on:
-  push:
-    branches:
-      - "**"
 
   workflow_dispatch:
 
@@ -29,11 +26,11 @@ jobs:
           npm install
 
       - name: Install playwright browsers
-        run: npx playwright install-deps && npx playwright install
+        run: npm install @playwright/test -D
 
       - name: run playwright tests
         run: npx playwright test ui/playwright
         env:
-          DOMAIN: ${{ secrets.DOMAIN }}
+          DOMAIN: "https://${{ secrets.DOMAIN }}"
           RESOURCE_PREFIX: ${{ secrets.RESOURCE_PREFIX }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
