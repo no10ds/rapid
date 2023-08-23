@@ -4,7 +4,6 @@ from unittest.mock import patch, ANY
 import pandas as pd
 import pytest
 
-from api.adapter.athena_adapter import AthenaAdapter
 from api.adapter.s3_adapter import S3Adapter
 from api.application.services.authorisation.dataset_access_evaluator import (
     DatasetAccessEvaluator,
