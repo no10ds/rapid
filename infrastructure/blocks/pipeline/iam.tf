@@ -151,29 +151,6 @@ resource "aws_iam_policy" "pipeline_secrets_manager_access" {
   })
 }
 
-resource "aws_iam_policy" "pipeline_ssm_access" {
-  name        = "pipeline_ssm_access"
-  description = "Allow pipeline to use SSM"
-  tags        = var.tags
-
-  policy = jsonencode({
-    "Statement" : [
-      {
-        "Effect" : "Allow",
-        "Action" : [
-          "ssm:UpdateInstanceInformation",
-          "ssmmessages:CreateControlChannel",
-          "ssmmessages:CreateDataChannel",
-          "ssmmessages:OpenControlChannel",
-          "ssmmessages:OpenDataChannel"
-        ],
-        "Resource" : "*"
-      }
-    ],
-    "Version" : "2012-10-17"
-  })
-}
-
 resource "aws_iam_policy" "pipeline_dynamodb_access" {
   name        = "pipeline_dynamodb_access"
   description = "Allow pipeline to access DynamoDB"
@@ -235,10 +212,12 @@ resource "aws_iam_role" "pipeline_ecr_role" {
 EOF
 }
 
-resource "aws_iam_role_policy_attachment" "ssm_role_policy_attach" {
+
+resource "aws_iam_role_policy_attachment" "ssm_policy_attachment" {
   role       = aws_iam_role.pipeline_ecr_role.name
-  policy_arn = aws_iam_policy.pipeline_ssm_access.arn
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
+
 
 resource "aws_iam_role_policy_attachment" "ecr_role_policy_attach" {
   role       = aws_iam_role.pipeline_ecr_role.name

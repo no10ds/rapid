@@ -1,37 +1,13 @@
-terraform {
-  backend "s3" {
-    key = "pipeline/terraform.tfstate"
-  }
-}
-
-data "terraform_remote_state" "s3-state" {
-  backend   = "s3"
-  workspace = "prod"
-
-  config = {
-    key    = "s3/terraform.tfstate"
-    bucket = var.state_bucket
-  }
-}
-
-data "terraform_remote_state" "ecr-state" {
-  backend = "s3"
-
-  config = {
-    key    = "ecr/terraform.tfstate"
-    bucket = var.state_bucket
-  }
-}
-
 resource "aws_instance" "pipeline" {
   #checkov:skip=CKV_AWS_135:EBS Optimised not available for instance type
-  ami                         = "ami-00826bd51e68b1487"
+  ami                         = data.aws_ami.this.id
   instance_type               = "t3.medium"
   associate_public_ip_address = false
   iam_instance_profile        = aws_iam_instance_profile.pipeline_instance_profile.name
   subnet_id                   = data.terraform_remote_state.vpc-state.outputs.private_subnets_ids[0]
   user_data                   = data.template_file.initialise-runner.rendered
   monitoring                  = true
+  vpc_security_group_ids      = [aws_security_group.this.id]
 
   metadata_options {
     http_endpoint = "enabled"
@@ -57,18 +33,24 @@ resource "aws_iam_instance_profile" "pipeline_instance_profile" {
 }
 
 data "template_file" "initialise-runner" {
-  template = file("../../scripts/initialisation-script.sh.tpl")
+  template = file("${path.module}/initialisation-script.sh.tpl")
   vars = {
     runner-registration-token = var.runner-registration-token
   }
 }
 
-data "terraform_remote_state" "vpc-state" {
-  backend   = "s3"
-  workspace = "prod"
+resource "aws_security_group" "this" {
+  vpc_id      = data.terraform_remote_state.vpc-state.outputs.vpc_id
+  name        = "${var.resource-name-prefix}-pipeline-sg"
+  description = "Pipeline security group"
+}
 
-  config = {
-    key    = "vpc/terraform.tfstate"
-    bucket = var.state_bucket
-  }
+resource "aws_security_group_rule" "this" {
+  type              = "egress"
+  description       = "Allow all outbound traffic"
+  from_port         = 0
+  to_port           = 65535
+  protocol          = "TCP"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.this.id
 }
