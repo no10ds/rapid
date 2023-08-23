@@ -26,10 +26,14 @@ jobs:
           npm install
 
       - name: Install playwright browsers
-        run: npm install @playwright/test -D
+        run: |
+          cd ui
+          npm install @playwright/test -D
 
       - name: run playwright tests
-        run: npx playwright test ui/playwright
+        run: |
+          cd ui
+          npx playwright test ui/playwright
         env:
           DOMAIN: "https://${{ secrets.DOMAIN_NAME }}"
           RESOURCE_PREFIX: ${{ secrets.RESOURCE_PREFIX }}
