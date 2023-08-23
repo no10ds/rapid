@@ -7,7 +7,7 @@ import Document, {
 } from 'next/document'
 import createEmotionServer from '@emotion/server/create-instance'
 import theme from '@/style/theme'
-import createEmotionCache from '@/lib/createEmotionCache'
+import createEmotionCache from '@/utils/createEmotionCache'
 import { ReactNode } from 'react'
 
 type DocumentProps = {

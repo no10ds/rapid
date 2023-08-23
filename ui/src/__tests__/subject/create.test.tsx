@@ -1,7 +1,7 @@
 import { screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import fetchMock from 'jest-fetch-mock'
-import { renderWithProviders, mockPermissionUiResponse } from '@/lib/test-utils'
+import { renderWithProviders, mockPermissionUiResponse } from '@/utils/testing'
 import SubjectCreatePage from '@/pages/subject/create/index'
 
 
