@@ -64,7 +64,7 @@ api-create-local-venv:		## Create the api local venv for deployment
 	@cd api/; ./local-venv-setup.sh
 
 api-create-image:		## Manually (re)create the api environment image
-	@cd api/; ./batect runtime-environment
+	@cd api/; ./batect --tag-image service-image=rapid-api-service-image runtime-environment
 
 api-shell:			## Run the api application and drop me into a shell
 	@cd api/; ./batect shell
