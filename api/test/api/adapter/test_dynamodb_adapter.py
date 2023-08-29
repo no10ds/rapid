@@ -4,7 +4,7 @@ import pytest
 from boto3.dynamodb.conditions import Key, Attr, Or
 from botocore.exceptions import ClientError
 
-from api.adapter.dynamodb_adapter import DynamoDBAdapter
+from api.adapter.dynamodb_adapter import DynamoDBAdapter, ExpressionAttribute
 from api.common.config.auth import SubjectType
 from api.common.custom_exceptions import (
     AWSServiceError,
@@ -1105,7 +1105,7 @@ class TestDynamoDBAdapterSchemaTable:
 
     def test_get_latest_schemas_with_no_args(self):
         self.schema_table.scan.return_value = {"Items": ["schema", "schema_2"]}
-        res = self.dynamo_adapter.get_latest_schemas(DatasetFilters())
+        res = self.dynamo_adapter.get_latest_schemas()
 
         self.schema_table.scan.assert_called_once_with(
             FilterExpression=Attr("IsLatestVersion").eq(True)
@@ -1114,9 +1114,30 @@ class TestDynamoDBAdapterSchemaTable:
 
     @pytest.mark.parametrize(
         "result, expected",
-        [({"Items": ["schema", "schema_2"]}, ["schema", "schema_2"]), ({}, None)],
+        [({"Items": ["schema", "schema_2"]}, ["schema", "schema_2"]), ({}, [])],
     )
-    def test_get_latest_schemas_with_args(self, result, expected):
+    def test_get_latest_schemas_with_filters(self, result, expected):
+        self.schema_table.scan.return_value = result
+
+        res = self.dynamo_adapter.get_latest_schemas(
+            attributes=[
+                ExpressionAttribute("Layer", "L"),
+                ExpressionAttribute("Domain", "Domain"),
+            ]
+        )
+
+        self.schema_table.scan.assert_called_once_with(
+            FilterExpression=Attr("IsLatestVersion").eq(True),
+            ProjectionExpression="#L, #Domain",
+            ExpressionAttributeNames={"#L": "Layer", "#Domain": "Domain"},
+        )
+        assert res == expected
+
+    @pytest.mark.parametrize(
+        "result, expected",
+        [({"Items": ["schema", "schema_2"]}, ["schema", "schema_2"]), ({}, [])],
+    )
+    def test_get_latest_schemas_with_attributes(self, result, expected):
         self.schema_table.scan.return_value = result
 
         mock_query = Attr("KeyOnlyTags").eq("2") & Attr("foo").is_in(["bar"])

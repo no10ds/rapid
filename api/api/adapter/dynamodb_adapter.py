@@ -1,5 +1,6 @@
 import time
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from functools import reduce
 from typing import Any, Callable, Dict, List, Optional, Type
 
@@ -101,6 +102,20 @@ class DatabaseAdapter(ABC):
     @abstractmethod
     def deprecate_schema(self, metadata: Type[DatasetMetadata]) -> None:
         pass
+
+
+@dataclass
+class ExpressionAttribute:
+    name: str
+    _alias: str
+
+    @property
+    def alias(self) -> str:
+        return f"#{self._alias}"
+
+    @alias.setter
+    def alias(self, value: str) -> None:
+        self._alias = value
 
 
 class DynamoDBAdapter(DatabaseAdapter):
@@ -390,7 +405,11 @@ class DynamoDBAdapter(DatabaseAdapter):
         except ClientError as error:
             self._handle_client_error("Error fetching schema from the database", error)
 
-    def get_latest_schemas(self, query: DatasetFilters) -> Optional[List[dict]]:
+    def get_latest_schemas(
+        self,
+        query: DatasetFilters = DatasetFilters(),
+        attributes: List[ExpressionAttribute] = None,
+    ) -> List[dict]:
         try:
             query_arguments = query.format_resource_query()
             if query_arguments:
@@ -398,11 +417,22 @@ class DynamoDBAdapter(DatabaseAdapter):
             else:
                 filter_expression = Attr("IsLatestVersion").eq(True)
 
+            additional_kwargs = {}
+            if attributes:
+                additional_kwargs["ProjectionExpression"] = ", ".join(
+                    [attr.alias for attr in attributes]
+                )
+                additional_kwargs["ExpressionAttributeNames"] = {
+                    attr.alias: attr.name for attr in attributes
+                }
+
             return self.collect_all_items(
-                self.schema_table.scan, FilterExpression=filter_expression
+                self.schema_table.scan,
+                FilterExpression=filter_expression,
+                **additional_kwargs,
             )
         except KeyError:
-            return None
+            return []
         except ClientError as error:
             self._handle_client_error(
                 "Error fetching the latest schemas from the database", error
