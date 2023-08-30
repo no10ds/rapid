@@ -163,6 +163,12 @@ ui-run-dev:			## Run the ui application with hot reload
 ui-test:			## Test ui site
 	@cd ui/; npm run test:all
 
+ui-test-e2e:
+	@cd ui/; npx playwright test ui/playwright
+
+ui-test-e2e-headed:
+	@cd ui/; npx playwright test ui/playwright --ui
+
 # UI Release --------------------
 ##
 ui-create-static-out:

@@ -182,5 +182,6 @@ docs/_build/
 .terraform/
 .terraform.lock.hcl
 
-playwright/.auth
-playwright/.downloads
+ui/playwright/.auth
+ui/playwright/.downloads
+ui/test-results/
