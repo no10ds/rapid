@@ -184,3 +184,4 @@ docs/_build/
 
 ui/playwright/.auth
 ui/playwright/.downloads
+ui/test-results/
