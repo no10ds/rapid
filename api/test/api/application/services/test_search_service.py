@@ -16,7 +16,6 @@ from api.application.services.search_service import (
     MATCHING_FIELD,
 )
 from api.domain.search_metadata import SearchMetadata, MatchField
-from api.domain.dataset_filters import DatasetFilters, SearchFilter
 
 
 class TestSearchService:
@@ -42,7 +41,7 @@ class TestSearchService:
                     ],
                 ]
             ],
-            columns=[self.search_service.input_columns],
+            columns=self.search_service.input_columns,
         )
         self.search_service.fetch_schema_data = Mock(return_value=mock_df)
 
@@ -93,10 +92,10 @@ class TestSearchService:
                 "domain",
                 "dataset",
                 1,
+                "No description",
                 [
                     {"name": "postcode"},
                 ],
-                "No description",
             ],
             # Description match
             [
@@ -104,8 +103,8 @@ class TestSearchService:
                 "domain",
                 "dataset_2",
                 3,
-                [{"name": "column1"}],
                 "Includes the postcode",
+                [{"name": "column1"}],
             ],
             # Dataset match
             [
@@ -113,8 +112,8 @@ class TestSearchService:
                 "domain",
                 "dataset_postcode",
                 4,
-                [{"name": "column1"}],
                 "No description",
+                [{"name": "column1"}],
             ],
             # Matches all
             [
@@ -122,8 +121,8 @@ class TestSearchService:
                 "domain",
                 "dataset_postcode_2",
                 1,
-                [{"name": "postcode"}],
                 "Include the postcode",
+                [{"name": "postcode"}],
             ],
         ]
         input_columns = self.search_service.input_columns
