@@ -9,18 +9,12 @@ from api.common.custom_exceptions import UserError
 from api.common.config.auth import Layer
 
 
-class SearchFilter(BaseModel):
-    name: str
-    value: str
-
-
 class DatasetFilters(BaseModel):
     layer: Optional[Union[List[Layer], Layer]] = None
     domain: Optional[Union[List[str], str]] = None
     sensitivity: Optional[Union[List[str], str]] = None
     key_value_tags: Optional[Dict[str, Optional[str]]] = dict()
     key_only_tags: Optional[List[str]] = list()
-    search_filter: Optional[SearchFilter] = None
 
     def combine_conditions(func: Callable[..., List[ConditionBase]]) -> And:
         """Combines a list of conditions into a single And condition"""
@@ -50,12 +44,7 @@ class DatasetFilters(BaseModel):
             self.build_generic_filter("Sensitivity", self.sensitivity),
             self.build_generic_filter("Layer", self.layer),
             self.build_generic_filter("Domain", self.domain),
-            self.build_search_filter(),
         ]
-
-    def build_search_filter(self) -> Contains:
-        if self.search_filter:
-            return Attr(self.search_filter.name).contains(self.search_filter.value)
 
     @combine_conditions
     def build_key_only_tags(self) -> List[Contains]:

@@ -1,7 +1,7 @@
 import pytest
 
 from api.common.custom_exceptions import UserError
-from api.domain.dataset_filters import DatasetFilters, SearchFilter
+from api.domain.dataset_filters import DatasetFilters
 from boto3.dynamodb.conditions import Attr
 
 
@@ -42,14 +42,6 @@ def test_build_generic_filter_with_list_of_values():
     assert res == expected
 
 
-def test_build_search_filter():
-    filters = DatasetFilters(search_filter=SearchFilter(name="Dataset", value="data"))
-    expected = Attr("Dataset").contains("data")
-
-    res = filters.build_search_filter()
-    assert res == expected
-
-
 def test_format_resource_query_with_all_values():
     filters = DatasetFilters(
         key_value_tags={"tag2": "value2"},
@@ -57,7 +49,6 @@ def test_format_resource_query_with_all_values():
         sensitivity=["PUBLIC", "PRIVATE"],
         domain="domain",
         layer="raw",
-        search_filter=SearchFilter(name="Description", value="value"),
     )
 
     expected = (
@@ -66,7 +57,6 @@ def test_format_resource_query_with_all_values():
         & Attr("Sensitivity").is_in(["PUBLIC", "PRIVATE"])
         & Attr("Layer").eq("raw")
         & Attr("Domain").eq("domain")
-        & Attr("Description").contains("value")
     )
 
     res = filters.format_resource_query()
