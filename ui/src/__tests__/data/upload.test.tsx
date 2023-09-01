@@ -6,7 +6,7 @@ import {
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import fetchMock from 'jest-fetch-mock'
-import { mockDataset, mockDataSetsList, renderWithProviders, selectAutocompleteOption } from '@/lib/test-utils'
+import { mockDataset, mockDataSetsList, renderWithProviders, selectAutocompleteOption } from '@/utils/testing'
 import UploadPage from '@/pages/data/upload'
 import { UploadDatasetResponse } from '@/service/types'
 

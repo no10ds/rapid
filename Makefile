@@ -11,9 +11,7 @@ help: 				## List targets and description
 precommit:
 	pre-commit install
 
-security-check:
-	@$(MAKE) detect-secrets
-	@$(MAKE) detect-vulnerabilities
+security-check: detect-secrets detect-vulnerabilities
 
 detect-secrets:
 	@git ls-files -z | xargs -0 detect-secrets-hook --baseline .secrets.baseline
@@ -66,7 +64,7 @@ api-create-local-venv:		## Create the api local venv for deployment
 	@cd api/; ./local-venv-setup.sh
 
 api-create-image:		## Manually (re)create the api environment image
-	@cd api/; ./batect runtime-environment
+	@cd api/; ./batect --tag-image service-image=rapid-api-service-image runtime-environment
 
 api-shell:			## Run the api application and drop me into a shell
 	@cd api/; ./batect shell
@@ -88,8 +86,8 @@ api-tag-and-upload-release-image:## Tag and upload the api release image
 api-tag-prod-candidate:		## Tag the uploaded api image as a candidate for PROD deployment
 	@cd api/; $(MAKE) tag-prod-candidate
 
-api-tag-live-in-prod:		## Deploy the latest version of the api
-	@cd api/; $(MAKE) tag-live-in-prod
+api-app-live-in-prod:		## Deploy the latest version of the api
+	@cd api/; $(MAKE) app-live-in-prod
 
 api-check-app-is-running:
 	@cd api/; $(MAKE) check-app-is-running

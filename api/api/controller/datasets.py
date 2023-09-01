@@ -43,7 +43,6 @@ from api.common.utilities import construct_dataset_metadata
 from api.domain.dataset_filters import DatasetFilters
 from api.domain.dataset_metadata import DatasetMetadata
 from api.domain.schema_metadata import SchemaMetadata
-from api.domain.metadata_search import metadata_search_query
 from api.domain.mime_type import MimeType
 from api.domain.sql_query import SQLQuery
 from api.domain.Jobs.Job import generate_uuid
@@ -128,11 +127,7 @@ if not CATALOG_DISABLED:
         include_in_schema=False,
     )
     async def search_dataset_metadata(term: str):
-        sql_query = metadata_search_query(term)
-        df = athena_adapter.query_sql(sql_query)
-        df["version"] = df["version"].fillna(value="0")
-        df["data"] = df["data"].fillna(value="")
-        return df.to_dict("records")
+        return None
 
 
 @datasets_router.get(
