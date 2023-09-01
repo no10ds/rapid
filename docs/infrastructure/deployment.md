@@ -74,9 +74,6 @@ Our infrastructure is built using AWS, so you'll need an AWS account, and access
 Follow these steps to set up the AWS profile:
 
 - [Install/Update AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
-- [Set up a named profile](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html) if you already have the AWS cli.
-
-After setting up the named profile, the current session can be checked by running ```aws sts get-caller-identity```. We have a file (`scripts/env_setup.sh) with the required exports to use the 'gov' profile. These exports have to be run when starting a new session.
 
 We use `jq` in our scripts to help the `make` targets work correctly, please [Install jq](https://stedolan.github.io/jq/download/) before running any make command.
 
@@ -183,8 +180,6 @@ manual_users = {
 In order to gain the admin privileges necessary for infrastructure changes one needs to assume admin role. This will be
 enabled only for user's defined in `input-params.tfvars`, only after logging into the AWS console for the first time as an
 IAM user and enabling MFA.
-
-Then, to assume the role, set up the profile (`scripts/env_setup.sh`), run ```make infra-assume-role``` and follow the prompts.
 
 ### Deploying remaining infra-blocks
 

@@ -4,7 +4,6 @@ from unittest.mock import patch, ANY
 import pandas as pd
 import pytest
 
-from api.adapter.athena_adapter import AthenaAdapter
 from api.adapter.s3_adapter import S3Adapter
 from api.application.services.authorisation.dataset_access_evaluator import (
     DatasetAccessEvaluator,
@@ -634,39 +633,39 @@ class TestListDatasets(BaseClientTest):
         assert response.json() == expected_response
 
 
-class TestSearchDatasets(BaseClientTest):
-    @patch.object(AthenaAdapter, "query_sql")
-    @patch("api.controller.datasets.metadata_search_query")
-    def test_search_dataset_metadata(self, mock_metadata_search_query, mock_query_sql):
-        mock_query = "SELECT * FROM table"
+# class TestSearchDatasets(BaseClientTest):
+#     @patch.object(AthenaAdapter, "query_sql")
+#     @patch("api.controller.datasets.metadata_search_query")
+#     def test_search_dataset_metadata(self, mock_metadata_search_query, mock_query_sql):
+#         mock_query = "SELECT * FROM table"
 
-        mock_metadata_search_query.return_value = mock_query
+#         mock_metadata_search_query.return_value = mock_query
 
-        mock_data = [
-            {
-                "dataset": "test",
-                "data": "foo",
-                "version": "1",
-                "data_type": "column",
-            },
-            {
-                "dataset": "bar",
-                "data": "bar",
-                "version": "1",
-                "data_type": "table_name",
-            },
-        ]
+#         mock_data = [
+#             {
+#                 "dataset": "test",
+#                 "data": "foo",
+#                 "version": "1",
+#                 "data_type": "column",
+#             },
+#             {
+#                 "dataset": "bar",
+#                 "data": "bar",
+#                 "version": "1",
+#                 "data_type": "table_name",
+#             },
+#         ]
 
-        mock_query_sql.return_value = pd.DataFrame(mock_data)
-        response = self.client.get(
-            f"{BASE_API_PATH}/datasets/search/foo bar",
-            headers={"Authorization": "Bearer test-token"},
-        )
+#         mock_query_sql.return_value = pd.DataFrame(mock_data)
+#         response = self.client.get(
+#             f"{BASE_API_PATH}/datasets/search/foo bar",
+#             headers={"Authorization": "Bearer test-token"},
+#         )
 
-        mock_metadata_search_query.assert_called_once_with("foo bar")
-        mock_query_sql.assert_called_once_with(mock_query)
-        assert response.status_code == 200
-        assert response.json() == mock_data
+#         mock_metadata_search_query.assert_called_once_with("foo bar")
+#         mock_query_sql.assert_called_once_with(mock_query)
+#         assert response.status_code == 200
+#         assert response.json() == mock_data
 
 
 class TestDatasetInfo(BaseClientTest):

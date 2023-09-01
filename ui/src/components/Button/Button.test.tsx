@@ -1,5 +1,5 @@
 import { screen } from '@testing-library/react'
-import { renderWithProviders } from '@/lib/test-utils'
+import { renderWithProviders } from '@/utils/testing'
 import Button from './Button'
 
 describe('Button', () => {
