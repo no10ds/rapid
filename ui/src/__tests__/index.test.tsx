@@ -1,6 +1,6 @@
 import { screen, waitFor } from '@testing-library/react'
 import fetchMock from 'jest-fetch-mock'
-import { renderWithProviders } from '@/lib/test-utils'
+import { renderWithProviders } from '@/utils/testing'
 import IndexPage from '@/pages/index'
 import { MethodsResponse } from '@/service/types'
 
