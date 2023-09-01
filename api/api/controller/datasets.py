@@ -129,9 +129,8 @@ if not CATALOG_DISABLED:
     )
     async def search_dataset_metadata(
         term: str,
-        include_columns: Optional[bool] = False,
     ):
-        return search_service.search(term, include_columns=include_columns)
+        return search_service.search(term)
 
 
 @datasets_router.get(
