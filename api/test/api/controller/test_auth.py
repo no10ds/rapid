@@ -42,5 +42,6 @@ class TestAuth(BaseClientTest):
                 "redirect_uri": COGNITO_REDIRECT_URI,
                 "code": temporary_code,
             },
+            timeout=5,
         )
         mock_redirect.assert_called_once_with(url="/", status_code=HTTP_302_FOUND)

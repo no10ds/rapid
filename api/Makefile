@@ -1,5 +1,5 @@
-ECS_SERVICE=rapid-ecs-service
-ECS_CLUSTER=rapid-cluster
+ECS_SERVICE=rapid-preprod-ecs-service
+ECS_CLUSTER=rapid-preprod-cluster
 LATEST_COMMIT_HASH=$(shell git rev-parse --short HEAD)
 ACCOUNT_ECR_URI=$(AWS_ACCOUNT).dkr.ecr.$(AWS_REGION).amazonaws.com
 IMAGE_NAME=data-f1-registry
