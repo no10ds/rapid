@@ -1,14 +1,9 @@
-from unittest.mock import Mock, call
-from typing import List, Union
+from unittest.mock import Mock
 
-import pytest
-from botocore.exceptions import ClientError
 from pandas import DataFrame
 from pandas.testing import assert_frame_equal
-import numpy as np
 
-from api.adapter.athena_adapter import AthenaAdapter
-from api.adapter.dynamodb_adapter import DynamoDBAdapter, ExpressionAttribute
+from api.adapter.dynamodb_adapter import ExpressionAttribute
 
 from api.application.services.search_service import (
     SearchService,
