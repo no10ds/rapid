@@ -1,10 +1,14 @@
-from typing import List, Union
+from typing import List
+
+from pandas import DataFrame
 
 from api.adapter.athena_adapter import AthenaAdapter
 from api.adapter.dynamodb_adapter import DynamoDBAdapter, ExpressionAttribute
-
 from api.domain.search_metadata import SearchMetadata, MatchField
-from api.domain.dataset_filters import DatasetFilters, SearchFilter
+
+
+MATCHING_DATA = "matching_data"
+MATCHING_FIELD = "matching_field"
 
 
 class SearchService:
@@ -16,81 +20,112 @@ class SearchService:
         self.athena_adapter = athena_adapter
         self.dynamodb_adapter = dynamodb_adapter
 
-    def search(
-        self, search_term: str, include_columns: bool = False
-    ) -> List[SearchMetadata]:
-        items = self.query_database_for_search_filter(
-            SearchFilter(name=MatchField.Dataset, value=search_term)
-        ) + self.query_database_for_search_filter(
-            SearchFilter(name=MatchField.Description, value=search_term)
+    def search(self, search_term: str) -> List[SearchMetadata]:
+        df = self.fetch_schema_data()
+        df = self.find_matches(df, search_term)
+        return self.convert_dataframe_to_search_metadata(df)
+
+    def find_matches(self, df: DataFrame, search_term: str) -> DataFrame:
+        """
+        Finds matches for the search term in the given dataframe.
+        The order of these functions is significant in terms of which matches are surfaced if there are duplicates.
+        Any subsequent matches on the same dataset will be ignored.
+        """
+        return (
+            self.produce_generic_matches(search_term, MatchField.Dataset, df)
+            .combine_first(
+                self.produce_generic_matches(search_term, MatchField.Description, df)
+            )
+            .combine_first(self.produce_column_matches(search_term, df))
         )
-        if include_columns:
-            items += self.search_columns(search_term)
 
-        return self.remove_duplicates_from_search_results(items)
-
-    def query_database_for_search_filter(
-        self, search_filter: SearchFilter
-    ) -> List[SearchMetadata]:
+    @property
+    def output_columns(self) -> List[str]:
         return [
-            self.convert_item_to_search_metadata(
-                item, search_filter.name, item[search_filter.name]
-            )
-            for item in self.dynamodb_adapter.get_latest_schemas(
-                DatasetFilters(search_filter=search_filter)
-            )
+            "Layer",
+            "Domain",
+            "Dataset",
+            "Version",
+            MATCHING_DATA,
+            MATCHING_FIELD,
         ]
 
-    def search_columns(self, search_term: str) -> List[SearchMetadata]:
-        items = self.dynamodb_adapter.get_latest_schemas(
-            attributes=[
-                ExpressionAttribute("Layer", "L"),
-                ExpressionAttribute("Domain", "Do"),
-                ExpressionAttribute("Dataset", "Da"),
-                ExpressionAttribute("Version", "V"),
-                ExpressionAttribute("Columns", "C"),
-            ]
+    @property
+    def input_columns(self) -> List[str]:
+        return [
+            "Layer",
+            "Domain",
+            "Dataset",
+            "Version",
+            "Description",
+            "Columns",
+        ]
+
+    def _generate_expression_attributes(self) -> List[ExpressionAttribute]:
+        return [
+            ExpressionAttribute(column, column[0:2]) for column in self.input_columns
+        ]
+
+    def fetch_schema_data(self) -> DataFrame:
+        return DataFrame(
+            data=self.dynamodb_adapter.get_latest_schemas(
+                attributes=self._generate_expression_attributes()
+            ),
+            columns=self.input_columns,
         )
 
-        matching_items = []
-        for item in items:
-            matching_columns = [
-                col["name"] for col in item["Columns"] if search_term in col["name"]
-            ]
-            if matching_columns:
-                matching_items.append(
-                    self.convert_item_to_search_metadata(
-                        item, MatchField.Columns, matching_columns
-                    )
-                )
+    def produce_generic_matches(
+        self, search_term: str, column: MatchField, df: DataFrame
+    ) -> DataFrame:
+        """
+        Looks for matches in the given dataframe for the given search term in the given column
+        """
+        mask = df[column].str.contains(search_term, case=False, na=False)
+        matches = df.loc[mask].assign(
+            **{MATCHING_FIELD: column, MATCHING_DATA: lambda x: x[column]}
+        )
+        return matches[self.output_columns]
 
-        return matching_items
+    def produce_column_matches(self, search_term: str, df: DataFrame) -> DataFrame:
+        # Temporary columns
+        index_col = "index_col"
+        column_names = "column_names"
+        is_matching = "is_matching"
 
-    def convert_item_to_search_metadata(
+        # Transforms
+        df[index_col] = df.index
+        transformed_df = (
+            df.explode(MatchField.Columns)
+            .assign(
+                **{
+                    column_names: lambda x: x[MatchField.Columns].apply(
+                        lambda col: col["name"]
+                    ),
+                    is_matching: lambda x: x[column_names].str.contains(
+                        search_term, case=False
+                    ),
+                }
+            )
+            .query(is_matching)
+            .groupby(index_col)[column_names]
+            .apply(list)
+            .reset_index(name=MATCHING_DATA)
+            .assign(**{MATCHING_FIELD: MatchField.Columns})
+        )
+        return df.merge(transformed_df, how="inner", on=index_col)[self.output_columns]
+
+    def convert_dataframe_to_search_metadata(
         self,
-        item: dict,
-        matching_field: MatchField,
-        matching_data: Union[str, List[str]],
-    ) -> SearchMetadata:
-        return SearchMetadata(
-            layer=item["Layer"],
-            domain=item["Domain"],
-            dataset=item["Dataset"],
-            version=item["Version"],
-            matching_data=matching_data,
-            matching_field=matching_field,
-        )
-
-    def remove_duplicates_from_search_results(
-        self, metadatas: List[SearchMetadata]
+        df: DataFrame,
     ) -> List[SearchMetadata]:
-        seen_metadatas = set()
-        result = []
-
-        for metadata in metadatas:
-            identifier = metadata.dataset_identifier(with_version=False)
-            if identifier not in seen_metadatas:
-                seen_metadatas.add(identifier)
-                result.append(metadata)
-
-        return result
+        return [
+            SearchMetadata(
+                layer=item["Layer"],
+                domain=item["Domain"],
+                dataset=item["Dataset"],
+                version=item["Version"],
+                matching_data=item[MATCHING_DATA],
+                matching_field=item[MATCHING_FIELD],
+            )
+            for item in df.to_dict("records")
+        ]

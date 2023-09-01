@@ -1,15 +1,20 @@
 from unittest.mock import Mock, call
+from typing import List, Union
 
 import pytest
 from botocore.exceptions import ClientError
-
-
-from typing import List, Union
+from pandas import DataFrame
+from pandas.testing import assert_frame_equal
+import numpy as np
 
 from api.adapter.athena_adapter import AthenaAdapter
 from api.adapter.dynamodb_adapter import DynamoDBAdapter, ExpressionAttribute
 
-from api.application.services.search_service import SearchService
+from api.application.services.search_service import (
+    SearchService,
+    MATCHING_DATA,
+    MATCHING_FIELD,
+)
 from api.domain.search_metadata import SearchMetadata, MatchField
 from api.domain.dataset_filters import DatasetFilters, SearchFilter
 
@@ -23,146 +28,250 @@ class TestSearchService:
             dynamodb_adapter=self.dynamodb_adapter,
         )
 
-    def test_search_not_including_columns(self):
-        self.search_service.search_columns = Mock()
-
-        self.search_service.query_database_for_search_filter = Mock(
-            side_effect=[
-                self._generate_valid_search_metadatas(["dataset", "dataset_1"]),
-                self._generate_valid_search_metadatas(["dataset_1", "dataset_3"]),
-            ]
+    def test_search(self):
+        mock_df = DataFrame(
+            data=[
+                [
+                    "raw",
+                    "domain",
+                    "dataset",
+                    1,
+                    "No description",
+                    [
+                        {"name": "postcode"},
+                    ],
+                ]
+            ],
+            columns=[self.search_service.input_columns],
         )
-        res = self.search_service.search("search_term")
+        self.search_service.fetch_schema_data = Mock(return_value=mock_df)
 
-        assert res == self._generate_valid_search_metadatas(
-            ["dataset", "dataset_1", "dataset_3"]
-        )
-        self.search_service.search_columns.assert_not_called()
-        self.search_service.query_database_for_search_filter.assert_has_calls(
-            [
-                call(SearchFilter(name=MatchField.Dataset, value="search_term")),
-                call(SearchFilter(name=MatchField.Description, value="search_term")),
-            ]
-        )
+        res = self.search_service.search("desc")
 
-    def test_search_including_columns(self):
-        self.search_service.search_columns = Mock(
-            return_value=self._generate_valid_search_metadatas(
-                ["dataset_3", "dataset_4"]
-            )
-        )
-        self.search_service.query_database_for_search_filter = Mock(
-            side_effect=[
-                self._generate_valid_search_metadatas(["dataset", "dataset_1"]),
-                self._generate_valid_search_metadatas(["dataset_1", "dataset_3"]),
-            ]
-        )
-
-        res = self.search_service.search("search_term", include_columns=True)
-
-        assert res == self._generate_valid_search_metadatas(
-            ["dataset", "dataset_1", "dataset_3", "dataset_4"]
-        )
-        self.search_service.search_columns.assert_called_once_with("search_term")
-        self.search_service.query_database_for_search_filter.assert_has_calls(
-            [
-                call(SearchFilter(name=MatchField.Dataset, value="search_term")),
-                call(SearchFilter(name=MatchField.Description, value="search_term")),
-            ]
-        )
-
-    def test_search_no_result(self):
-        self.search_service.search_columns = Mock(return_value=[])
-        self.search_service.query_database_for_search_filter = Mock(
-            side_effect=[[], []]
-        )
-
-        res = self.search_service.search("search_term", include_columns=True)
-
-        assert res == []
-        self.search_service.search_columns.assert_called_once_with("search_term")
-        self.search_service.query_database_for_search_filter.assert_has_calls(
-            [
-                call(SearchFilter(name=MatchField.Dataset, value="search_term")),
-                call(SearchFilter(name=MatchField.Description, value="search_term")),
-            ]
-        )
-
-    def _generate_valid_search_metadatas(self, datasets: List[str]):
-        return [
-            SearchMetadata(
-                layer="raw",
-                domain="domain",
-                dataset=dataset,
-                version=1,
-                matching_data="dataset",
-                matching_field=MatchField.Dataset,
-            )
-            for dataset in datasets
-        ]
-
-    def test_query_database_for_search_filter_returns_nothing(self):
-        self.dynamodb_adapter.get_latest_schemas.return_value = []
-        res = self.search_service.query_database_for_search_filter(
-            SearchFilter(name="Dataset", value="data")
-        )
-
-        assert res == []
-        self.dynamodb_adapter.get_latest_schemas.assert_called_once_with(
-            DatasetFilters(search_filter=SearchFilter(name="Dataset", value="data"))
-        )
-
-    def test_query_database_for_search_filter(self):
-        self.dynamodb_adapter.get_latest_schemas.return_value = [
-            {
-                "Layer": "raw",
-                "Domain": "domain",
-                "Dataset": "dataset",
-                "Version": 1,
-            },
-            {
-                "Layer": "raw",
-                "Domain": "domain",
-                "Dataset": "other_dataset",
-                "Version": 2,
-            },
-        ]
-
-        expected = [
+        assert res == [
             SearchMetadata(
                 layer="raw",
                 domain="domain",
                 dataset="dataset",
                 version=1,
-                matching_data="dataset",
-                matching_field=MatchField.Dataset,
+                matching_field=MatchField.Description,
+                matching_data="No description",
+            )
+        ]
+
+    def test_search_no_result(self):
+        mock_df = DataFrame(data=[], columns=self.search_service.input_columns)
+        self.search_service.fetch_schema_data = Mock(return_value=mock_df)
+
+        res = self.search_service.search("search_term")
+
+        assert res == []
+
+    def test_generate_expression_attributes(self):
+        res = self.search_service._generate_expression_attributes()
+
+        assert res == [
+            ExpressionAttribute("Layer", "La"),
+            ExpressionAttribute("Domain", "Do"),
+            ExpressionAttribute("Dataset", "Da"),
+            ExpressionAttribute("Version", "Ve"),
+            ExpressionAttribute("Description", "De"),
+            ExpressionAttribute("Columns", "Co"),
+        ]
+
+    def test_generate_expression_attributes_values_are_unique(self):
+        attributes = self.search_service._generate_expression_attributes()
+        assert len(attributes) == len(
+            set([attribute.alias for attribute in attributes])
+        )
+
+    def test_find_matches(self):
+        input_data = [
+            # Column match
+            [
+                "raw",
+                "domain",
+                "dataset",
+                1,
+                [
+                    {"name": "postcode"},
+                ],
+                "No description",
+            ],
+            # Description match
+            [
+                "raw",
+                "domain",
+                "dataset_2",
+                3,
+                [{"name": "column1"}],
+                "Includes the postcode",
+            ],
+            # Dataset match
+            [
+                "raw",
+                "domain",
+                "dataset_postcode",
+                4,
+                [{"name": "column1"}],
+                "No description",
+            ],
+            # Matches all
+            [
+                "raw",
+                "domain",
+                "dataset_postcode_2",
+                1,
+                [{"name": "postcode"}],
+                "Include the postcode",
+            ],
+        ]
+        input_columns = self.search_service.input_columns
+        input_df = DataFrame(columns=input_columns, data=input_data)
+
+        expected_data = [
+            input_data[0][0:4] + [["postcode"], MatchField.Columns],
+            input_data[1][0:4] + ["Includes the postcode", MatchField.Description],
+            input_data[2][0:4] + ["dataset_postcode", MatchField.Dataset],
+            input_data[3][0:4] + ["dataset_postcode_2", MatchField.Dataset],
+        ]
+        expected_columns = input_columns[0:4] + [MATCHING_DATA, MATCHING_FIELD]
+        expected_df = DataFrame(columns=expected_columns, data=expected_data)
+
+        res = self.search_service.find_matches(input_df, "postcode")
+
+        assert_frame_equal(res, expected_df)
+
+    def test_produce_generic_matches(self):
+        input_data = [
+            ["raw", "domain", "dataset", 2],
+            ["raw", "domain", "other_dataset", 3],
+        ]
+        input_columns = [
+            "Layer",
+            "Domain",
+            "Dataset",
+            "Version",
+        ]
+
+        input_df = DataFrame(
+            columns=input_columns,
+            data=input_data,
+        )
+
+        expected_data = [
+            input_data[1] + ["other_dataset", MatchField.Dataset],
+        ]
+        expected_columns = input_columns + [MATCHING_DATA, MATCHING_FIELD]
+        expected_df = DataFrame(
+            columns=expected_columns,
+            data=expected_data,
+        )
+        res = self.search_service.produce_generic_matches(
+            "OTHER", MatchField.Dataset, input_df
+        )
+        res.reset_index(inplace=True, drop=True)
+
+        assert_frame_equal(res, expected_df, check_dtype=False)
+
+    def test_produce_column_matches(self):
+        input_data = [
+            [
+                "raw",
+                "domain",
+                "dataset",
+                1,
+                [
+                    {"name": "postcode_long"},
+                    {"name": "postcode_short"},
+                    {"name": "other"},
+                ],
+            ],
+            [
+                "raw",
+                "domain",
+                "other_dataset",
+                2,
+                [{"name": "column1"}, {"name": "column2"}],
+            ],
+        ]
+        input_columns = ["Layer", "Domain", "Dataset", "Version", "Columns"]
+
+        input_df = DataFrame(
+            columns=input_columns,
+            data=input_data,
+        )
+
+        expected_data = [
+            input_data[0][0:4] + [["postcode_long", "postcode_short"], "Columns"],
+        ]
+        expected_columns = input_columns[0:4] + [MATCHING_DATA, MATCHING_FIELD]
+        expected_df = DataFrame(
+            columns=expected_columns,
+            data=expected_data,
+        )
+
+        res = self.search_service.produce_column_matches("POSTCODE", input_df)
+        assert_frame_equal(res, expected_df)
+
+    def test_convert_dataframe_to_search_metadata(self):
+        input_data = [
+            [
+                "raw",
+                "domain",
+                "dataset",
+                1,
+                ["postcode"],
+                "Columns",
+            ],
+            [
+                "raw",
+                "domain",
+                "other_dataset",
+                2,
+                "postcode data",
+                "Description",
+            ],
+        ]
+        input_columns = [
+            "Layer",
+            "Domain",
+            "Dataset",
+            "Version",
+            MATCHING_DATA,
+            MATCHING_FIELD,
+        ]
+
+        input_df = DataFrame(data=input_data, columns=input_columns)
+        res = self.search_service.convert_dataframe_to_search_metadata(input_df)
+
+        assert res == [
+            SearchMetadata(
+                layer="raw",
+                domain="domain",
+                dataset="dataset",
+                version=1,
+                matching_data=["postcode"],
+                matching_field=MatchField.Columns,
             ),
             SearchMetadata(
                 layer="raw",
                 domain="domain",
                 dataset="other_dataset",
                 version=2,
-                matching_data="other_dataset",
-                matching_field=MatchField.Dataset,
+                matching_data="postcode data",
+                matching_field=MatchField.Description,
             ),
         ]
 
-        res = self.search_service.query_database_for_search_filter(
-            SearchFilter(name="Dataset", value="data")
-        )
-
-        assert res == expected
-        self.dynamodb_adapter.get_latest_schemas.assert_called_once_with(
-            DatasetFilters(search_filter=SearchFilter(name="Dataset", value="data"))
-        )
-
-    def test_search_columns(self):
-        self.dynamodb_adapter.get_latest_schemas.return_value = [
+    def test_fetch_data(self):
+        mock_data = [
             {
                 "Layer": "raw",
                 "Domain": "domain",
                 "Dataset": "dataset",
                 "Version": 1,
+                "Description": "A description",
                 "Columns": [
                     {"name": "postcode_long"},
                     {"name": "postcode_short"},
@@ -174,91 +283,45 @@ class TestSearchService:
                 "Domain": "domain",
                 "Dataset": "other_dataset",
                 "Version": 2,
+                "Description": "A description",
                 "Columns": [{"name": "column1"}, {"name": "column2"}],
             },
         ]
+        self.dynamodb_adapter.get_latest_schemas.return_value = mock_data
+        expected = DataFrame(mock_data)
 
-        expected = SearchMetadata(
-            layer="raw",
-            domain="domain",
-            dataset="dataset",
-            version=1,
-            matching_data=["postcode_long", "postcode_short"],
-            matching_field=MatchField.Columns,
-        )
+        res = self.search_service.fetch_schema_data()
 
-        res = self.search_service.search_columns("postcode")
-
-        assert res == [expected]
+        assert_frame_equal(res, expected)
         self.dynamodb_adapter.get_latest_schemas.assert_called_once_with(
             attributes=[
-                ExpressionAttribute("Layer", "L"),
+                ExpressionAttribute("Layer", "La"),
                 ExpressionAttribute("Domain", "Do"),
                 ExpressionAttribute("Dataset", "Da"),
-                ExpressionAttribute("Version", "V"),
-                ExpressionAttribute("Columns", "C"),
+                ExpressionAttribute("Version", "Ve"),
+                ExpressionAttribute("Description", "De"),
+                ExpressionAttribute("Columns", "Co"),
             ]
         )
 
-    def test_search_columns_no_result(self):
-        self.dynamodb_adapter.get_latest_schemas.return_value = []
-
-        res = self.search_service.search_columns("postcode")
-
-        assert res == []
-
-    def test_remove_duplicates_from_search_results(self):
-        to_keep = [
-            SearchMetadata(
-                layer="raw",
-                domain="domain",
-                dataset="dataset",
-                version=1,
-                matching_data="data",
-                matching_field=MatchField.Dataset,
-            ),
-            SearchMetadata(
-                layer="raw",
-                domain="domain",
-                dataset="other_dataset",
-                version=1,
-                matching_data="data",
-                matching_field=MatchField.Dataset,
-            ),
-        ]
-        to_remove = [
-            SearchMetadata(
-                layer="raw",
-                domain="domain",
-                dataset="dataset",
-                version=2,
-                matching_data="data",
-                matching_field=MatchField.Description,
-            ),
-        ]
-        search_results = to_keep + to_remove
-
-        res = self.search_service.remove_duplicates_from_search_results(search_results)
-
-        assert res == to_keep
-
-    def test_convert_item_to_search_metadata(self):
-        item = {
-            "Layer": "raw",
-            "Domain": "domain",
-            "Dataset": "dataset",
-            "Version": 1,
-        }
-
-        res = self.search_service.convert_item_to_search_metadata(
-            item, MatchField.Dataset, ["data"]
+    def test_fetch_schema_data_when_empty(self):
+        mock_data = []
+        self.dynamodb_adapter.get_latest_schemas.return_value = mock_data
+        expected = DataFrame(
+            data=[],
+            columns=["Layer", "Domain", "Dataset", "Version", "Description", "Columns"],
         )
 
-        assert res == SearchMetadata(
-            layer="raw",
-            domain="domain",
-            dataset="dataset",
-            version=1,
-            matching_data=["data"],
-            matching_field=MatchField.Dataset,
+        res = self.search_service.fetch_schema_data()
+
+        assert_frame_equal(res, expected)
+        self.dynamodb_adapter.get_latest_schemas.assert_called_once_with(
+            attributes=[
+                ExpressionAttribute("Layer", "La"),
+                ExpressionAttribute("Domain", "Do"),
+                ExpressionAttribute("Dataset", "Da"),
+                ExpressionAttribute("Version", "Ve"),
+                ExpressionAttribute("Description", "De"),
+                ExpressionAttribute("Columns", "Co"),
+            ]
         )

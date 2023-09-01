@@ -663,38 +663,7 @@ class TestSearchDatasets(BaseClientTest):
             headers={"Authorization": "Bearer test-token"},
         )
 
-        mock_search.assert_called_once_with("foo bar", include_columns=False)
-        assert response.status_code == 200
-        assert response.json() == mock_data
-
-    @patch.object(SearchService, "search")
-    def test_search_with_columns(self, mock_search):
-        mock_data = [
-            SearchMetadata(
-                layer="layer",
-                domain="domain1",
-                dataset="dataset1",
-                version=1,
-                matching_field=MatchField.Columns,
-                matching_data=["col1", "col2"],
-            ),
-            SearchMetadata(
-                layer="layer",
-                domain="domain2",
-                dataset="dataset2",
-                version=1,
-                matching_field=MatchField.Description,
-                matching_data="This is a test dataset",
-            ),
-        ]
-        mock_search.return_value = mock_data
-
-        response = self.client.get(
-            f"{BASE_API_PATH}/datasets/search/foo bar?include_columns=true",
-            headers={"Authorization": "Bearer test-token"},
-        )
-
-        mock_search.assert_called_once_with("foo bar", include_columns=True)
+        mock_search.assert_called_once_with("foo bar")
         assert response.status_code == 200
         assert response.json() == mock_data
 
@@ -707,7 +676,7 @@ class TestSearchDatasets(BaseClientTest):
             headers={"Authorization": "Bearer test-token"},
         )
 
-        mock_search.assert_called_once_with("foo bar", include_columns=False)
+        mock_search.assert_called_once_with("foo bar")
         assert response.status_code == 200
         assert response.json() == []
 
