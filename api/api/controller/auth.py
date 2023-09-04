@@ -65,7 +65,9 @@ async def redirect_oauth_token_request(request: Request):
     }
     payload = await _load_json_bytes_to_dict(request)
 
-    response = requests.post(IDENTITY_PROVIDER_TOKEN_URL, headers=headers, data=payload)
+    response = requests.post(
+        IDENTITY_PROVIDER_TOKEN_URL, headers=headers, data=payload, timeout=5
+    )
 
     return response.json()
 
@@ -114,7 +116,7 @@ async def _get_access_token(auth, code, cognito_user_login_client_id):
         "code": code,
     }
     response = requests.post(
-        IDENTITY_PROVIDER_TOKEN_URL, auth=auth, headers=headers, data=payload
+        IDENTITY_PROVIDER_TOKEN_URL, auth=auth, headers=headers, data=payload, timeout=5
     )
     response_content = json.loads(response.content.decode(CONTENT_ENCODING))
     access_token = response_content["access_token"]

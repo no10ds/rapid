@@ -45,8 +45,6 @@ jobs:
       - name: Populate .env with additional vars
         run: |
           cp ./.github/.github.env .env
-          echo DOMAIN_NAME=${{ secrets.DOMAIN_NAME }} >> .env
-          echo DATA_BUCKET=${{ secrets.DATA_BUCKET }} >> .env
           echo AWS_ACCOUNT=${{ secrets.AWS_ACCOUNT }} >> .env
           echo AWS_REGION=${{ secrets.AWS_REGION }} >> .env
           echo AWS_DEFAULT_REGION=${{ secrets.AWS_REGION }} >> .env
@@ -76,7 +74,7 @@ jobs:
         run: |
           echo "TWINE_USERNAME=${{ secrets.TWINE_USERNAME_TEST }}" >> .env
           echo "TWINE_PASSWORD=${{ secrets.TWINE_PASSWORD_TEST }}" >> .env
-          echo TWINE_NON_INTERACTIVE=${{ secrets.TWINE_NON_INTERACTIVE }} >> .env
+          echo "TWINE_NON_INTERACTIVE=true" >> .env
 
       - name: Setup Python
         uses: actions/setup-python@v4
