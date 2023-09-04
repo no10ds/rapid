@@ -148,7 +148,7 @@ class TestSchemaMetadata:
         )
         assert schema_metadata.get_version() is None
 
-    def test_initialises_with_default_tags_when_no_tags_provided(self):
+    def test_get_tags_when_none_are_provided(self):
         result = SchemaMetadata(
             layer="raw",
             domain="domain",
@@ -158,12 +158,7 @@ class TestSchemaMetadata:
             owners=[Owner(name="owner", email="owner@email.com")],
         )
 
-        assert result.get_tags() == {
-            "no_of_versions": "1",
-            "sensitivity": "PUBLIC",
-            "layer": "raw",
-            "domain": "domain",
-        }
+        assert result.get_tags() == {}
 
     def test_gets_tags(self):
         provided_key_value_tags = {
@@ -185,10 +180,6 @@ class TestSchemaMetadata:
         )
 
         assert result.get_tags() == {
-            "no_of_versions": "2",
             **provided_key_value_tags,
             **dict.fromkeys(provided_key_only_tags, ""),
-            "sensitivity": "PUBLIC",
-            "domain": "domain",
-            "layer": "raw",
         }

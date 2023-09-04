@@ -9,7 +9,7 @@ from api.application.services.schema_validation import (
     schema_has_valid_tag_set,
 )
 from api.common.config.auth import Sensitivity
-from api.common.config.aws import MAX_CUSTOM_TAG_COUNT
+from api.common.config.aws import MAX_TAG_COUNT
 from api.common.custom_exceptions import SchemaValidationError
 from api.domain.schema import Schema, Column
 from api.domain.schema_metadata import Owner, UpdateBehaviour, SchemaMetadata
@@ -743,8 +743,8 @@ class TestSchemaValidation:
             r"You must specify a valid update behaviour. Accepted values: \['APPEND', 'OVERWRITE'\]",
         )
 
-    def test_valid_schema_when_all_custom_tags_are_set(self):
-        tags = {f"tag_{index}": "" for index in range(MAX_CUSTOM_TAG_COUNT - 1)}
+    def test_valid_schema_when_all_tags_are_set(self):
+        tags = {f"tag_{index}": "" for index in range(MAX_TAG_COUNT - 1)}
 
         valid_schema = Schema(
             metadata=SchemaMetadata(
@@ -772,9 +772,7 @@ class TestSchemaValidation:
             pytest.fail("Unexpected SchemaValidationError was thrown")
 
     def test_invalid_schema_when_too_many_tags_are_specified(self):
-        key_value_tags = {
-            f"tag_{index}": "" for index in range(MAX_CUSTOM_TAG_COUNT - 1)
-        }
+        key_value_tags = {f"tag_{index}": "" for index in range(MAX_TAG_COUNT - 1)}
         key_only_tags = ["tag1", "tag2"]
 
         invalid_schema = Schema(
@@ -799,7 +797,7 @@ class TestSchemaValidation:
 
         with pytest.raises(
             SchemaValidationError,
-            match=f"You cannot specify more than {MAX_CUSTOM_TAG_COUNT} tags",
+            match=f"You cannot specify more than {MAX_TAG_COUNT} tags",
         ):
             validate_schema_for_upload(invalid_schema)
 

@@ -120,10 +120,6 @@ class AthenaAdapter:
 
     def _handle_query_error(self, error):
         if re.match(".+ Table .+ does not exist", error.args[0]):
-            if "_metadata_table" in error.args[0]:
-                raise UserError(
-                    "Query failed to execute: The metadata table does not exist."
-                )
             raise UserError(
                 "Query failed to execute: The table does not exist. The data could be currently processing or you might need to upload it."
             )

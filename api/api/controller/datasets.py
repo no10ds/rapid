@@ -22,6 +22,7 @@ from api.application.services.data_service import DataService
 from api.application.services.delete_service import DeleteService
 from api.application.services.format_service import FormatService
 from api.application.services.schema_service import SchemaService
+from api.application.services.search_service import SearchService
 from api.common.data_handlers import store_file_to_disk
 from api.common.utilities import strtobool
 from api.common.config.auth import Action
@@ -55,7 +56,7 @@ data_service = DataService()
 delete_service = DeleteService()
 schema_service = SchemaService()
 data_access_evaluator = DatasetAccessEvaluator()
-
+search_service = SearchService()
 
 datasets_router = APIRouter(
     prefix=f"{BASE_API_PATH}/datasets",
@@ -126,8 +127,10 @@ if not CATALOG_DISABLED:
         status_code=http_status.HTTP_200_OK,
         include_in_schema=False,
     )
-    async def search_dataset_metadata(term: str):
-        return None
+    async def search_dataset_metadata(
+        term: str,
+    ):
+        return search_service.search(term)
 
 
 @datasets_router.get(
