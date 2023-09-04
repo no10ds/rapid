@@ -9,13 +9,6 @@ resource "aws_iam_policy" "pipeline_ecr_access" {
       {
         Effect : "Allow",
         Action : [
-          "ecr:GetAuthorizationToken",
-        ],
-        Resource : "*"
-      },
-      {
-        Effect : "Allow",
-        Action : [
           "ecs:UpdateService",
           "ecs:DescribeServices",
         ],
@@ -63,26 +56,20 @@ resource "aws_iam_policy" "pipeline_ecr_public_access" {
       {
         Effect : "Allow",
         Action : [
-          "ecr-public:GetAuthorizationToken",
-          "sts:GetServiceBearerToken",
-        ],
-        Resource : "*"
-      },
-      {
-        Effect : "Allow",
-        Action : [
           "ecr-public:BatchCheckLayerAvailability",
           "ecr-public:GetRepositoryPolicy",
           "ecr-public:DescribeRepositories",
           "ecr-public:DescribeRegistries",
           "ecr-public:DescribeImages",
           "ecr-public:DescribeImageTags",
+          "ecr-public:GetAuthorizationToken",
           "ecr-public:GetRepositoryCatalogData",
           "ecr-public:GetRegistryCatalogData",
           "ecr-public:InitiateLayerUpload",
           "ecr-public:UploadLayerPart",
           "ecr-public:CompleteLayerUpload",
-          "ecr-public:PutImage"
+          "ecr-public:PutImage",
+          "sts:GetServiceBearerToken",
         ],
         Resource : [
           data.terraform_remote_state.ecr-state.outputs.ecr_public_repo_arn,

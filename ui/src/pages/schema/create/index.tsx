@@ -9,7 +9,12 @@ import {
   CreateSchema as CreateSchemaComponent
 } from '@/components'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
-import { generateSchema, schemaGenerateSchema, GlobalSensitivities, ProtectedSensitivity } from '@/service'
+import {
+  generateSchema,
+  schemaGenerateSchema,
+  GlobalSensitivities,
+  ProtectedSensitivity
+} from '@/service'
 import { getLayers } from '@/service/fetch'
 import { GenerateSchemaResponse, SchemaGenerate } from '@/service/types'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -22,10 +27,11 @@ import { useQuery } from '@tanstack/react-query'
 function CreateSchema() {
   const [file, setFile] = useState<File | undefined>()
 
-  const { isLoading: isLayersLoading, data: layersData, error: layersError } = useQuery(
-    ['layers'],
-    getLayers,
-  )
+  const {
+    isLoading: isLayersLoading,
+    data: layersData,
+    error: layersError
+  } = useQuery(['layers'], getLayers)
 
   const { control, handleSubmit } = useForm<SchemaGenerate>({
     resolver: zodResolver(schemaGenerateSchema)
@@ -51,7 +57,6 @@ function CreateSchema() {
   if (layersError) {
     return <ErrorCard error={layersError as Error} />
   }
-
 
   return (
     <form
@@ -103,7 +108,7 @@ function CreateSchema() {
           <Controller
             name="layer"
             control={control}
-            defaultValue={layersData.length === 1 ? layersData[0] : ""}
+            defaultValue={layersData.length === 1 ? layersData[0] : ''}
             render={({ field, fieldState: { error } }) => (
               <>
                 <Typography variant="caption">Dataset Layer</Typography>

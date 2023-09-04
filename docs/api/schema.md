@@ -10,50 +10,57 @@ A schema is defined with the following structure:
 
 #### General information of the schema.
 
-  - `layer` - String value, this is the name of the layer within rAPId that you wish to place the dataset within. The possible values of this are unique to the rAPId instance and specified on creation. If none is provided, the option will be `default`.
-  - `domain` - String value, is the name of the domain that owns the dataset, it could be for example the name of the department that handles the data.
-  - `dataset` - String value, is the name of the dataset. e.g.: "receipts" or "address".
-  - `sensitivity` - String value, is the sensitivity level of the dataset. e.g.: "PUBLIC", "PRIVATE", "PROTECTED"
-  - `description` - Free text string that provides human readable information about the details of the dataset.
-  - `version` - int value, denotes the schema version
-  - `key_value_tags` - Dictionary of string keys and values to associate to the dataset. e.g.: `{"school_level": "primary", "school_type": "private"}`
-  - `key_only_tags` - List of strings of tags to associate to the dataset. e.g.: `["schooling", "benefits", "archive", "historic"]`
-  - `update_behaviour` - String value, the action to take when a new file is uploaded. e.g.: `APPEND`, `OVERWRITE`.
+- `layer` - String value, this is the name of the layer within rAPId that you wish to place the dataset within. The possible values of this are unique to the rAPId instance and specified on creation. If none is provided, the option will be `default`.
+- `domain` - String value, is the name of the domain that owns the dataset, it could be for example the name of the department that handles the data.
+- `dataset` - String value, is the name of the dataset. e.g.: "receipts" or "address".
+- `sensitivity` - String value, is the sensitivity level of the dataset. e.g.: "PUBLIC", "PRIVATE", "PROTECTED"
+- `description` - Free text string that provides human readable information about the details of the dataset.
+- `version` - int value, denotes the schema version
+- `key_value_tags` - Dictionary of string keys and values to associate to the dataset. e.g.: `{"school_level": "primary", "school_type": "private"}`
+- `key_only_tags` - List of strings of tags to associate to the dataset. e.g.: `["schooling", "benefits", "archive", "historic"]`
+- `update_behaviour` - String value, the action to take when a new file is uploaded. e.g.: `APPEND`, `OVERWRITE`.
 
 ### Columns
 
 #### A list defining the columns that are to be expected within the dataset.
 
-  - `name` - String value, name of the column.
-  - `data_type` - String value, this is an accepted pandas' data type, will be used to validate the schema.
-  - `allow_null` - Boolean value, specifies whether the columns can have empty values or not.
-  - `partition_index` (Optional) - Integer value, whether the column is a [partition](#partitions) and its index.
-  - `format` (Conditional) - String value, regular expression used to specify the format of the dates. Will only be used and required if the data_type is date.
+- `name` - String value, name of the column.
+- `data_type` - String value, this is an accepted pandas' data type, will be used to validate the schema.
+- `allow_null` - Boolean value, specifies whether the columns can have empty values or not.
+- `partition_index` (Optional) - Integer value, whether the column is a [partition](#partitions) and its index.
+- `format` (Conditional) - String value, regular expression used to specify the format of the dates. Will only be used and required if the data_type is date.
 
 ### Sensitivity
+
 The sensitivity level of a dataset can be described by one of three values: `PUBLIC`, `PRIVATE` and `PROTECTED`.
 These determine the access level that different clients will have to the data depending on their permissions.
 
 Notes if you wish to use the sensitivity level `PROTECTED` then you must first create a Protected Domain for your Dataset. See the [data access docs](data_access.md)
 
 ### Description
+
 The description is where you can specify human readable details about the dataset so that a user can quickly understand the contents and purpose of a dataset.
 
 ### Version
+
 The schema version is automatically generated and cannot be updated by the user
 
 ### Tags
+
 You can add up to 30 custom tags to a dataset. These are in a key: value format which allow for identification and categorisation of the datasets.
 
 Restrictions applying to the keys:
+
 - Only alphanumeric characters, hyphens and underscores
 - Length between 1 and 128 characters
 
 Restrictions applying to the values:
+
 - Only alphanumeric characters, hyphens and underscores
 - Length between 0 and 256 characters
 
 ### Owners
+
 You must specify at least one dataset owner.
 
 Typically this is a point of contact if there are issues or questions surrounding the dataset.
@@ -61,18 +68,23 @@ Typically this is a point of contact if there are issues or questions surroundin
 You MUST change the default values, otherwise an error will be thrown and schema upload will fail.
 
 ### Update Behaviour
+
 The behaviour of the API when a new file is uploaded to the dataset. The possible values are:
+
 - `APPEND` - New files will be added to the dataset, there are no duplication checks so new data must be unique. This is the default behaviour.
 - `OVERWRITE` - Any new file will overwrite the current content. The overwrite will happen on the partitions, so if there is an old partition that is not included in the new dataset, that will not be overwritten.
 
 ### Column headings
+
 Column heading names should follow a strict format. The [requirements](https://docs.aws.amazon.com/glue/latest/dg/add-classifier.html) are:
+
 - Lowercase
 - No whitespace
 - No other punctuation except underscores, but not be exclusively underscores
 - CAN include digits, but not be exclusively digits
 
 ### Accepted data types
+
 The data accepted data types for a rAPId instance can be found detailed [here](https://docs.aws.amazon.com/athena/latest/ug/data-types.html). The only Athena types that are currently unsupported are array, map and struct types.
 
 - `integer` - Use it to define integer values.
@@ -110,6 +122,7 @@ In order to make the application more efficient in terms of time and money when 
 maker in the rAPId service, in order to use it, just add an integer into the partition_index when creating a schema.
 
 The partition columns must:
+
 - Start with 0 as the first index.
 - Be a positive integer.
 - Be sequential (0, 1, 2, ... N), the lower the index number the higher the hierarchy.
@@ -195,10 +208,10 @@ Once all the values have been set up, just upload the json using the POST `/sche
 
 ## Auto-generated
 
-
 Use the POST `/schema/{my_domain_name}/{my_datase_name}/generate` endpoint to automatically generate a draft for the schema.
 
 Consider the following:
+
 - The domain and dataset names will be taken from the url, but can be changed manually afterwards.
 - It will not set any [partition columns](#partitions), ensure you add them after the schema has been generated.
 - It might not infer the `date` type and its format, ensure you add this information if required.
@@ -315,4 +328,4 @@ You might then change the values that fit your data and come with something like
 }
 ```
 
-Once all the values have been set up, just upload the json using the POST ```/schema``` endpoint of the rAPId instance to create a dataset.
+Once all the values have been set up, just upload the json using the POST `/schema` endpoint of the rAPId instance to create a dataset.

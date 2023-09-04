@@ -25,7 +25,7 @@ type SensitivityType = z.infer<typeof SensitivityEnum>
 const PermissionsTable = ({
   permissionsListData,
   fieldArrayReturn,
-  isModifyPage = false,
+  isModifyPage = false
 }: {
   permissionsListData: PermissionUiResponse
   fieldArrayReturn: FieldValues
@@ -36,7 +36,7 @@ const PermissionsTable = ({
 
   const removePermissionAsAnOption = (
     permission: PermissionType,
-    permissionsList: PermissionUiResponse,
+    permissionsList: PermissionUiResponse
   ) => {
     const { type, layer, sensitivity, domain } = permission
     const typeList = permissionsList[type]
@@ -90,7 +90,7 @@ const PermissionsTable = ({
   const { fields, append, remove } = fieldArrayReturn
 
   const { control, trigger, watch, reset, setError, setValue } = useForm<PermissionType>({
-    resolver: zodResolver(Permission),
+    resolver: zodResolver(Permission)
   })
 
   // Remove any of the selected permissions from being an option
@@ -190,7 +190,7 @@ const PermissionsTable = ({
                           type: undefined,
                           layer: undefined,
                           sensitivity: undefined,
-                          domain: undefined,
+                          domain: undefined
                         })
                       }
                     }
@@ -211,7 +211,7 @@ const PermissionsTable = ({
                       helperText={error?.message}
                       native
                       inputProps={{
-                        'data-testid': 'select-type',
+                        'data-testid': 'select-type'
                       }}
                       // Reset all other values when this is changed
                       onChange={(event) => {
@@ -240,14 +240,14 @@ const PermissionsTable = ({
                         helperText={error?.message}
                         native
                         inputProps={{
-                          'data-testid': 'select-layer',
+                          'data-testid': 'select-layer'
                         }}
                       >
                         <option key={''} value={''}>
                           Layer
                         </option>
                         {generateOptions(
-                          Object.keys(filteredPermissionsListData[watch('type')]),
+                          Object.keys(filteredPermissionsListData[watch('type')])
                         )}
                       </Select>
                     )
@@ -270,7 +270,7 @@ const PermissionsTable = ({
                         helperText={error?.message}
                         native
                         inputProps={{
-                          'data-testid': 'select-sensitivity',
+                          'data-testid': 'select-sensitivity'
                         }}
                         // Reset domain if this is changed
                         onChange={(event) => {
@@ -281,8 +281,8 @@ const PermissionsTable = ({
                         <option value={''}>Sensitivity</option>
                         {generateOptions(
                           Object.keys(
-                            filteredPermissionsListData[watch('type')][watch('layer')],
-                          ),
+                            filteredPermissionsListData[watch('type')][watch('layer')]
+                          )
                         )}
                       </Select>
                     )
@@ -305,7 +305,7 @@ const PermissionsTable = ({
                         helperText={error?.message}
                         native
                         inputProps={{
-                          'data-testid': 'domain',
+                          'data-testid': 'domain'
                         }}
                       >
                         <option value={''}>Domain</option>
@@ -314,8 +314,8 @@ const PermissionsTable = ({
                             Object.keys(
                               filteredPermissionsListData[watch('type')][watch('layer')][
                                 watch('sensitivity')
-                              ],
-                            ),
+                              ]
+                            )
                           )}
                       </Select>
                     )

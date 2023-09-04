@@ -45,7 +45,7 @@ test('test', async ({ page }) => {
   await page.getByTestId('submit').click()
 
   expect(await page.getByText('Data uploaded successfully').textContent()).toEqual(
-    'Status: Data uploaded successfully',
+    'Status: Data uploaded successfully'
   )
 
   // Download the dataset
@@ -82,10 +82,10 @@ test('test', async ({ page }) => {
   await page.getByTestId('submit').click()
 
   const datasetDeletedElement = await page.waitForSelector('.MuiAlertTitle-root', {
-    text: `Dataset deleted: default/ui_test_domain/${datasetName}`,
+    text: `Dataset deleted: default/ui_test_domain/${datasetName}`
   })
 
   expect(await datasetDeletedElement.innerText()).toEqual(
-    `Dataset deleted: default/ui_test_domain/${datasetName}`,
+    `Dataset deleted: default/ui_test_domain/${datasetName}`
   )
 })

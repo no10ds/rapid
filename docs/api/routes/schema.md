@@ -4,7 +4,6 @@ In order to upload the dataset for the first time, you need to define its schema
 
 > The first 50MB of the uploaded file (regardless of size) are used to infer the schema. Consider uploading a representative sample of your dataset (e.g.: the first 10,000 rows) instead of uploading the entire large file which could take a long time
 
-
 ### Permissions
 
 Any
@@ -13,11 +12,10 @@ Any
 
 `POST /schema/{sensitivity}/{domain}/{dataset}/generate`
 
-
 ### Inputs
 
 | Parameters    | Usage                                   | Example values               | Definition                 |
-|---------------|-----------------------------------------|------------------------------|----------------------------|
+| ------------- | --------------------------------------- | ---------------------------- | -------------------------- |
 | `layer`       | URL parameter                           | `default`                    | layer of the dataset       |
 | `sensitivity` | URL parameter                           | `PUBLIC, PRIVATE, PROTECTED` | sensitivity of the dataset |
 | `domain`      | URL parameter                           | `land`                       | domain of the dataset      |
@@ -77,9 +75,9 @@ When you have a schema definition you can use this endpoint to upload it. This w
 
 ### Inputs
 
-| Parameters    | Usage                                   | Example values               | Definition            |
-|---------------|-----------------------------------------|------------------------------|-----------------------|
-| schema        | JSON request body                       | see below                    | the schema definition |
+| Parameters | Usage             | Example values | Definition            |
+| ---------- | ----------------- | -------------- | --------------------- |
+| schema     | JSON request body | see below      | the schema definition |
 
 Example schema JSON body:
 
@@ -93,9 +91,7 @@ Example schema JSON body:
     "key_value_tags": {
       "train": "passenger"
     },
-    "key_only_tags": [
-      "land"
-    ],
+    "key_only_tags": ["land"],
     "owners": [
       {
         "name": "Stanley Shunpike",
@@ -141,7 +137,7 @@ Any relevant `WRITE` permissions that matches dataset sensitivity level, e.g. `W
 ### Inputs
 
 | Parameters | Required | Usage                                   | Example values              | Definition              |
-|------------|----------|-----------------------------------------|-----------------------------|-------------------------|
+| ---------- | -------- | --------------------------------------- | --------------------------- | ----------------------- |
 | `layer`    | True     | URL parameter                           | `default`                   | layer of the dataset    |
 | `domain`   | True     | URL parameter                           | `air`                       | domain of the dataset   |
 | `dataset`  | True     | URL parameter                           | `passengers_by_airport`     | dataset title           |
