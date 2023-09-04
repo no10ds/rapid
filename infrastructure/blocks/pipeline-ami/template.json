@@ -1,58 +1,54 @@
 {
-    "variables": {
-        "version": "",
-        "region": "",
-        "subnet_id": "",
-        "vpc_id": ""
-    },
-    "builders": [
+  "variables": {
+    "version": "",
+    "region": "",
+    "subnet_id": "",
+    "vpc_id": ""
+  },
+  "builders": [
+    {
+      "ami_description": "An AMI for creating github runners",
+      "ami_name": "pipeline-ami-{{user `version`}}",
+      "instance_type": "t3.large",
+      "region": "{{user `region`}}",
+      "force_deregister": "true",
+      "force_delete_snapshot": "true",
+      "vpc_id": "{{user `vpc_id`}}",
+      "subnet_id": "{{user `subnet_id`}}",
+      "associate_public_ip_address": true,
+      "ami_block_device_mappings": [
         {
-            "ami_description": "An AMI for creating github runners",
-            "ami_name": "pipeline-ami-{{user `version`}}",
-            "instance_type": "t3.large",
-            "region": "{{user `region`}}",
-            "force_deregister": "true",
-            "force_delete_snapshot": "true",
-            "vpc_id": "{{user `vpc_id`}}",
-            "subnet_id": "{{user `subnet_id`}}",
-            "associate_public_ip_address": true,
-            "ami_block_device_mappings": [
-                {
-                    "device_name": "/dev/sda1",
-                    "encrypted": false,
-                    "volume_type": "gp2",
-                    "volume_size": 32,
-                    "delete_on_termination": true
-                }
-            ],
-            "source_ami_filter": {
-                "filters": {
-                    "name": "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*",
-                    "virtualization-type": "hvm",
-                    "root-device-type": "ebs"
-                },
-                "most_recent": true,
-                "owners": [
-                    "099720109477"
-                ]
-            },
-            "ssh_username": "ubuntu",
-            "type": "amazon-ebs"
+          "device_name": "/dev/sda1",
+          "encrypted": false,
+          "volume_type": "gp2",
+          "volume_size": 32,
+          "delete_on_termination": true
         }
-    ],
-    "provisioners": [
-        {
-            "inline": [
-                "echo 'Sleeping for 30 seconds to give Ubuntu enough time to initialize (otherwise, packages may fail to install).'",
-                "sleep 30"
-            ],
-            "type": "shell"
+      ],
+      "source_ami_filter": {
+        "filters": {
+          "name": "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*",
+          "virtualization-type": "hvm",
+          "root-device-type": "ebs"
         },
-        {
-            "scripts": [
-                "{{template_dir}}/install.sh"
-            ],
-            "type": "shell"
-        }
-    ]
+        "most_recent": true,
+        "owners": ["099720109477"]
+      },
+      "ssh_username": "ubuntu",
+      "type": "amazon-ebs"
+    }
+  ],
+  "provisioners": [
+    {
+      "inline": [
+        "echo 'Sleeping for 30 seconds to give Ubuntu enough time to initialize (otherwise, packages may fail to install).'",
+        "sleep 30"
+      ],
+      "type": "shell"
+    },
+    {
+      "scripts": ["{{template_dir}}/install.sh"],
+      "type": "shell"
+    }
+  ]
 }

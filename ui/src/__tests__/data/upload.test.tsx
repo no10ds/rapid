@@ -2,14 +2,18 @@ import {
   fireEvent,
   screen,
   waitFor,
-  waitForElementToBeRemoved,
+  waitForElementToBeRemoved
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import fetchMock from 'jest-fetch-mock'
-import { mockDataset, mockDataSetsList, renderWithProviders, selectAutocompleteOption } from '@/utils/testing'
+import {
+  mockDataset,
+  mockDataSetsList,
+  renderWithProviders,
+  selectAutocompleteOption
+} from '@/utils/testing'
 import UploadPage from '@/pages/data/upload'
 import { UploadDatasetResponse } from '@/service/types'
-
 
 const pushSpy = jest.fn()
 jest.mock('next/router', () => ({
@@ -27,7 +31,6 @@ describe('Page: Upload page', () => {
   })
 
   it('renders', async () => {
-
     fetchMock.mockResponseOnce(JSON.stringify(mockDataSetsList), { status: 200 })
     renderWithProviders(<UploadPage datasetInput={mockDataset} />)
 
@@ -58,7 +61,6 @@ describe('Page: Upload page', () => {
       renderWithProviders(<UploadPage />)
 
       await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
-
 
       selectAutocompleteOption('select-layer', 'layer')
       selectAutocompleteOption('select-domain', 'Pizza')
@@ -96,7 +98,7 @@ describe('Page: Upload page', () => {
       fetchMock.mockResponses(
         [JSON.stringify(mockDataSetsList), { status: 200 }],
         [JSON.stringify(mockSuccess), { status: 200 }],
-        [JSON.stringify({ status: "FAILED" }), { status: 200 }]
+        [JSON.stringify({ status: 'FAILED' }), { status: 200 }]
       )
       renderWithProviders(<UploadPage datasetInput={mockDataset} />)
       await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
@@ -131,7 +133,7 @@ describe('Page: Upload page', () => {
       fetchMock.mockResponses(
         [JSON.stringify(mockDataSetsList), { status: 200 }],
         [JSON.stringify(mockSuccess), { status: 200 }],
-        [JSON.stringify({ status: "SUCCESS" }), { status: 200 }]
+        [JSON.stringify({ status: 'SUCCESS' }), { status: 200 }]
       )
       renderWithProviders(<UploadPage datasetInput={mockDataset} />)
       await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
@@ -166,7 +168,7 @@ describe('Page: Upload page', () => {
       fetchMock.mockResponses(
         [JSON.stringify(mockDataSetsList), { status: 200 }],
         [JSON.stringify(mockSuccess), { status: 200 }],
-        [JSON.stringify({ status: "IN PROGRESS" }), { status: 200 }]
+        [JSON.stringify({ status: 'IN PROGRESS' }), { status: 200 }]
       )
       renderWithProviders(<UploadPage datasetInput={mockDataset} />)
       await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))

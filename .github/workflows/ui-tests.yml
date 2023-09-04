@@ -31,6 +31,6 @@ jobs:
       - name: Run playwright tests
         run: make ui-test-e2e
         env:
-          DOMAIN_NAME: "https://${{ secrets.DOMAIN_NAME }}"
+          DOMAIN_NAME: 'https://${{ secrets.DOMAIN_NAME }}'
           RESOURCE_PREFIX: ${{ secrets.RESOURCE_PREFIX }}
           AWS_REGION: ${{ secrets.AWS_REGION }}

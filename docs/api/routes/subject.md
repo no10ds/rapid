@@ -43,17 +43,14 @@ Use this endpoint to modify the permissions that are granted to users and client
 
 ### Inputs
 
-| Parameters            | Usage               | Example values   | Definition                             |
-|-----------------------|---------------------|------------------|----------------------------------------|
-| `Subject Permissions` | JSON Request Body   | See below        | The details used to modify permissions |
+| Parameters            | Usage             | Example values | Definition                             |
+| --------------------- | ----------------- | -------------- | -------------------------------------- |
+| `Subject Permissions` | JSON Request Body | See below      | The details used to modify permissions |
 
 ```json
 {
   "subject_id": "123456789",
-  "permissions": [
-    "READ_ALL",
-    "WRITE_PUBLIC"
-  ]
+  "permissions": ["READ_ALL", "WRITE_PUBLIC"]
 }
 ```
 
@@ -64,9 +61,6 @@ Confirmation of permissions:
 ```json
 {
   "subject_id": "123456789",
-  "permissions": [
-    "READ_ALL",
-    "WRITE_PUBLIC"
-  ]
+  "permissions": ["READ_ALL", "WRITE_PUBLIC"]
 }
 ```

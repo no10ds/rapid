@@ -12,7 +12,6 @@ Pioneered by 10 Downing Street, rAPId aims to improve the government's use of da
 
 rAPId is comprised of several components that together form a replicable template for simple data storage infrastructure in AWS with a RESTful API and user-friendly UI. It allows the simple ingestion and sharing of standardised datasets.
 
-
 ## API
 
 The rAPId API is a RESTful API built using FastAPI and Python. It handles all the serving for user management, schema definitions and data storage and retrieval.
