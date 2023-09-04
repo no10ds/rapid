@@ -10,6 +10,7 @@ from api.application.services.authorisation.dataset_access_evaluator import (
 )
 from api.application.services.data_service import DataService
 from api.application.services.delete_service import DeleteService
+from api.application.services.search_service import SearchService
 from api.common.custom_exceptions import (
     UserError,
     DatasetValidationError,
@@ -21,6 +22,7 @@ from api.domain.dataset_filters import DatasetFilters
 from api.domain.dataset_metadata import DatasetMetadata
 from api.domain.schema import Schema, Column
 from api.domain.schema_metadata import Owner, SchemaMetadata
+from api.domain.search_metadata import SearchMetadata, MatchField
 from api.domain.sql_query import SQLQuery
 from test.api.common.controller_test_utils import BaseClientTest
 
@@ -633,39 +635,50 @@ class TestListDatasets(BaseClientTest):
         assert response.json() == expected_response
 
 
-# class TestSearchDatasets(BaseClientTest):
-#     @patch.object(AthenaAdapter, "query_sql")
-#     @patch("api.controller.datasets.metadata_search_query")
-#     def test_search_dataset_metadata(self, mock_metadata_search_query, mock_query_sql):
-#         mock_query = "SELECT * FROM table"
+class TestSearchDatasets(BaseClientTest):
+    @patch.object(SearchService, "search")
+    def test_search(self, mock_search):
+        mock_data = [
+            SearchMetadata(
+                layer="layer",
+                domain="domain1",
+                dataset="dataset1",
+                version=1,
+                matching_field=MatchField.Columns,
+                matching_data=["col1", "col2"],
+            ),
+            SearchMetadata(
+                layer="layer",
+                domain="domain2",
+                dataset="dataset2",
+                version=1,
+                matching_field=MatchField.Description,
+                matching_data="This is a test dataset",
+            ),
+        ]
+        mock_search.return_value = mock_data
 
-#         mock_metadata_search_query.return_value = mock_query
+        response = self.client.get(
+            f"{BASE_API_PATH}/datasets/search/foo bar",
+            headers={"Authorization": "Bearer test-token"},
+        )
 
-#         mock_data = [
-#             {
-#                 "dataset": "test",
-#                 "data": "foo",
-#                 "version": "1",
-#                 "data_type": "column",
-#             },
-#             {
-#                 "dataset": "bar",
-#                 "data": "bar",
-#                 "version": "1",
-#                 "data_type": "table_name",
-#             },
-#         ]
+        mock_search.assert_called_once_with("foo bar")
+        assert response.status_code == 200
+        assert response.json() == mock_data
 
-#         mock_query_sql.return_value = pd.DataFrame(mock_data)
-#         response = self.client.get(
-#             f"{BASE_API_PATH}/datasets/search/foo bar",
-#             headers={"Authorization": "Bearer test-token"},
-#         )
+    @patch.object(SearchService, "search")
+    def test_search_when_empty(self, mock_search):
+        mock_search.return_value = []
 
-#         mock_metadata_search_query.assert_called_once_with("foo bar")
-#         mock_query_sql.assert_called_once_with(mock_query)
-#         assert response.status_code == 200
-#         assert response.json() == mock_data
+        response = self.client.get(
+            f"{BASE_API_PATH}/datasets/search/foo bar",
+            headers={"Authorization": "Bearer test-token"},
+        )
+
+        mock_search.assert_called_once_with("foo bar")
+        assert response.status_code == 200
+        assert response.json() == []
 
 
 class TestDatasetInfo(BaseClientTest):
