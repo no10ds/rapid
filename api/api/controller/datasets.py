@@ -141,7 +141,7 @@ async def get_dataset_info(
     layer: Layer,
     dataset: str,
     domain: str = FastApiPath(
-        default="", regex=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
+        ..., pattern=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
     ),
     version: Optional[int] = None,
 ):
@@ -202,7 +202,7 @@ async def list_raw_files(
     dataset: str,
     version: int,
     domain: str = FastApiPath(
-        default="", regex=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
+        ..., pattern=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
     ),
 ):
     """
@@ -302,7 +302,7 @@ async def delete_data_file(
     version: int,
     filename: str,
     domain: str = FastApiPath(
-        default="", regex=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
+        ..., pattern=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
     ),
 ):
     """
@@ -364,7 +364,7 @@ def upload_data(
     request: Request,
     response: Response,
     domain: str = FastApiPath(
-        default="", regex=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
+        ..., pattern=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
     ),
     version: Optional[int] = None,
     file: UploadFile = File(...),
@@ -476,7 +476,7 @@ async def query_dataset(
     dataset: str,
     request: Request,
     domain: str = FastApiPath(
-        default="", regex=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
+        ..., pattern=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
     ),
     version: Optional[int] = None,
     query: Optional[SQLQuery] = SQLQuery(),
@@ -569,7 +569,7 @@ async def query_large_dataset(
     dataset: str,
     request: Request,
     domain: str = FastApiPath(
-        default="", regex=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
+        ..., pattern=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
     ),
     version: Optional[int] = None,
     query: Optional[SQLQuery] = SQLQuery(),

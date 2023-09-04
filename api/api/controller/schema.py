@@ -42,7 +42,7 @@ async def generate_schema(
     sensitivity: Sensitivity,
     dataset: str,
     domain: str = FastApiPath(
-        default="", regex=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
+        ..., pattern=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
     ),
     file: UploadFile = File(...),
 ):
