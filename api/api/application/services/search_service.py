@@ -5,7 +5,9 @@ from pandas import DataFrame
 from api.adapter.athena_adapter import AthenaAdapter
 from api.adapter.dynamodb_adapter import DynamoDBAdapter, ExpressionAttribute
 from api.domain.search_metadata import SearchMetadata, MatchField
-
+from api.domain.dataset_metadata import DatasetMetadata, LAYER, DOMAIN, DATASET, VERSION
+from api.domain.schema_metadata import DESCRIPTION
+from api.domain.schema import COLUMNS
 
 MATCHING_DATA = "matching_data"
 MATCHING_FIELD = "matching_field"
@@ -41,24 +43,16 @@ class SearchService:
 
     @property
     def output_columns(self) -> List[str]:
-        return [
-            "Layer",
-            "Domain",
-            "Dataset",
-            "Version",
+        return DatasetMetadata.get_fields() + [
             MATCHING_DATA,
             MATCHING_FIELD,
         ]
 
     @property
     def input_columns(self) -> List[str]:
-        return [
-            "Layer",
-            "Domain",
-            "Dataset",
-            "Version",
-            "Description",
-            "Columns",
+        return DatasetMetadata.get_fields() + [
+            DESCRIPTION,
+            COLUMNS,
         ]
 
     def _generate_expression_attributes(self) -> List[ExpressionAttribute]:
@@ -120,10 +114,10 @@ class SearchService:
     ) -> List[SearchMetadata]:
         return [
             SearchMetadata(
-                layer=item["Layer"],
-                domain=item["Domain"],
-                dataset=item["Dataset"],
-                version=item["Version"],
+                layer=item[LAYER],
+                domain=item[DOMAIN],
+                dataset=item[DATASET],
+                version=item[VERSION],
                 matching_data=item[MATCHING_DATA],
                 matching_field=item[MATCHING_FIELD],
             )

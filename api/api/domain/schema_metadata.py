@@ -4,6 +4,14 @@ from strenum import StrEnum
 
 from api.domain.dataset_metadata import DatasetMetadata
 
+SENSITIVITY = "sensitivity"
+DESCRIPTION = "description"
+KEY_VALUE_TAGS = "key_value_tags"
+KEY_ONLY_TAGS = "key_only_tags"
+OWNERS = "owners"
+UPDATE_BEHAVIOUR = "update_behaviour"
+IS_LATEST_VERSION = "is_latest_version"
+
 
 class Owner(BaseModel):
     name: str
@@ -30,17 +38,8 @@ class SchemaMetadata(DatasetMetadata):
     def get_description(self) -> str:
         return self.description
 
-    def get_custom_tags(self) -> Dict[str, str]:
-        return {**self.key_value_tags, **dict.fromkeys(self.key_only_tags, "")}
-
     def get_tags(self) -> Dict[str, str]:
-        return {
-            **self.get_custom_tags(),
-            "sensitivity": self.get_sensitivity(),
-            "no_of_versions": str(self.get_version()),
-            "layer": self.get_layer(),
-            "domain": self.get_domain(),
-        }
+        return {**self.key_value_tags, **dict.fromkeys(self.key_only_tags, "")}
 
     def get_owners(self) -> Optional[List[Owner]]:
         return self.owners

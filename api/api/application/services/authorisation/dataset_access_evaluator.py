@@ -6,8 +6,8 @@ from api.common.config.auth import Action, Sensitivity, ALL, Layer
 from api.application.services.permissions_service import PermissionsService
 from api.application.services.schema_service import SchemaService
 from api.domain.dataset_filters import DatasetFilters
-from api.domain.schema_metadata import SchemaMetadata
-from api.domain.dataset_metadata import DatasetMetadata
+from api.domain.dataset_metadata import DatasetMetadata, LAYER, DOMAIN
+from api.domain.schema_metadata import SchemaMetadata, SENSITIVITY
 from api.domain.permission_item import PermissionItem
 
 
@@ -124,11 +124,11 @@ class DatasetAccessEvaluator:
                 # If there are overlapping keys, the permission values will overwrite the others
                 dict(filters)
                 | {
-                    "sensitivity": SensitivityPermissionConverter[
+                    SENSITIVITY: SensitivityPermissionConverter[
                         permission.sensitivity
                     ].value,
-                    "layer": LayerPermissionConverter[permission.layer].value,
-                    "domain": permission.domain,
+                    LAYER: LayerPermissionConverter[permission.layer].value,
+                    DOMAIN: permission.domain,
                 }
             )
         )
