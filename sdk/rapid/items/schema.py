@@ -52,7 +52,7 @@ class Schema(BaseModel):
 
             schema = Schema(
                 metadata=SchemaMetadata(
-                    layer=Layer.default,
+                    layer='default',
                     domain="domain",
                     dataset="dataset",
                     sensitivity=SensitivityLevel.PUBLIC,
