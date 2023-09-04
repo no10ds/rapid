@@ -1,7 +1,7 @@
 import { screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import fetchMock from 'jest-fetch-mock'
-import { renderWithProviders, mockPermissionUiResponse } from '@/lib/test-utils'
+import { renderWithProviders, mockPermissionUiResponse } from '@/utils/testing'
 import SubjectCreatePage from '@/pages/subject/create/index'
 
 
@@ -48,7 +48,7 @@ describe('Page: Subject Create', () => {
 
       const mockData = {
         client_name: 'James Bond',
-        client_secret: 'secret-code-word',
+        client_secret: 'secret-code-word', // pragma: allowlist secret
         client_id: 'id-abc123',
         permissions: ['DATA_ADMIN', 'READ_PRIVATE']
       }

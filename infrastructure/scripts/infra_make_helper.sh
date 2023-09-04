@@ -5,22 +5,8 @@ set -e -ou pipefail
 PROJECT_DIR=$(git rev-parse --show-toplevel)
 BLOCKS_DIR=${PROJECT_DIR}/infrastructure/blocks
 CONFIG_DIR="${RAPID_INFRA_CONFIG_ENV:-../../rapid-infrastructure-config}"
-ENV_FILE=${PROJECT_DIR}/infrastructure/scripts/env_setup.sh
 BACKEND_SETUP_SCRIPT=${PROJECT_DIR}/infrastructure/scripts/backend_setup.sh
 TERRAFORM=$(which terraform)
-
-function _set_aws_vars() {
-  # shellcheck source=/dev/null
-  source "$ENV_FILE"|| die "[ERROR] Not able to load $ENV_FILE"
-}
-
-function _unset_aws_vars(){
-  #shellcheck disable=SC2013
-  for var in $(grep export "$ENV_FILE"| awk '{print $2}'|awk -F= '{print $1}')
-  do
-    unset "$var"
-  done
-}
 
 function _go_to_block() {
   local block="$1"
@@ -51,7 +37,6 @@ function run_tf() {
     var_file="input-params.tfvars"
   fi
   _go_to_block "$block"
-  _set_aws_vars
   if [ "$cmd" == "plan" ] || [ "$cmd" == "apply" ] || [ "$cmd" == "destroy" ]
   then
     $TERRAFORM workspace select $env
@@ -60,7 +45,6 @@ function run_tf() {
      $TERRAFORM workspace select $env
     $TERRAFORM "$cmd"
   fi
-  _unset_aws_vars
 }
 
 function run_init() {
@@ -68,9 +52,7 @@ function run_init() {
   _go_to_block "$block"
   local config_path="${CONFIG_DIR}/backend.hcl"
   local cmd="init -backend-config ${config_path}"
-  _set_aws_vars
   echo "$TERRAFORM $cmd" |bash
-  _unset_aws_vars
 }
 
 function precommit() {
@@ -87,11 +69,9 @@ function _set_backend_config_vars(){
 
 function create_backend(){
   _set_backend_config_vars
-  _set_aws_vars
   echo $bucket
   echo $dynamodb_table
   $BACKEND_SETUP_SCRIPT $bucket $dynamodb_table
-  _unset_aws_vars
 }
 
 "$@"

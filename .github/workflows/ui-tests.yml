@@ -1,10 +1,6 @@
 name: rAPId Integration Tests
 
 on:
-  push:
-    branches:
-      - "**"
-
   workflow_dispatch:
 
   pull_request:
@@ -12,7 +8,6 @@ on:
       - opened
 
 jobs:
-
   run-ui-test:
     runs-on: self-hosted
 
@@ -29,11 +24,13 @@ jobs:
           npm install
 
       - name: Install playwright browsers
-        run: npx playwright install-deps && npx playwright install
+        run: |
+          cd ui
+          npm install @playwright/test -D
 
-      - name: run playwright tests
-        run: npx playwright test ui/playwright
+      - name: Run playwright tests
+        run: make ui-test-e2e
         env:
-          DOMAIN: ${{ secrets.DOMAIN }}
+          DOMAIN_NAME: "https://${{ secrets.DOMAIN_NAME }}"
           RESOURCE_PREFIX: ${{ secrets.RESOURCE_PREFIX }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
