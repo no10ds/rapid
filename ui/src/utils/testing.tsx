@@ -1,4 +1,11 @@
-import { fireEvent, render, renderHook, RenderOptions, screen, waitFor } from '@testing-library/react'
+import {
+  fireEvent,
+  render,
+  renderHook,
+  RenderOptions,
+  screen,
+  waitFor
+} from '@testing-library/react'
 import { ThemeProvider } from '@/components'
 import { ReactNode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -102,35 +109,34 @@ export const mockDataSetsList: Dataset[] = [
 ]
 
 export const mockPermissionUiResponse: PermissionUiResponse = {
-  "DATA_ADMIN": "DATA_ADMIN",
-  "USER_ADMIN": "USER_ADMIN",
-  "READ": {
-    "ALL": {
-      "ALL": "READ_ALL",
-      "PROTECTED": {
-        "TEST": "READ_ALL_PROTECTED_TEST",
-      },
-    },
+  DATA_ADMIN: 'DATA_ADMIN',
+  USER_ADMIN: 'USER_ADMIN',
+  READ: {
+    ALL: {
+      ALL: 'READ_ALL',
+      PROTECTED: {
+        TEST: 'READ_ALL_PROTECTED_TEST'
+      }
+    }
   },
-  "WRITE": {
-    "ALL": {
-      "ALL": "WRITE_ALL",
-      "PROTECTED": {
-        "TEST": "WRITE_ALL_PROTECTED_TEST",
-      },
+  WRITE: {
+    ALL: {
+      ALL: 'WRITE_ALL',
+      PROTECTED: {
+        TEST: 'WRITE_ALL_PROTECTED_TEST'
+      }
     },
-    "DEFAULT": {
-      "ALL": "WRITE_DEFAULT_ALL",
-      "PROTECTED": {
-        "TEST": "WRITE_DEFAULT_PROTECTED_TEST",
-      },
-    },
+    DEFAULT: {
+      ALL: 'WRITE_DEFAULT_ALL',
+      PROTECTED: {
+        TEST: 'WRITE_DEFAULT_PROTECTED_TEST'
+      }
+    }
   }
 }
 
-
 export const selectAutocompleteOption = (id, value) => {
-  const autocomplete = screen.getByTestId(id);
+  const autocomplete = screen.getByTestId(id)
   const input = autocomplete.querySelector('input')
   autocomplete.focus()
   fireEvent.change(input, { target: { value: value } })

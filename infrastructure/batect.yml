@@ -18,4 +18,4 @@ tasks:
     description: Parse the changelog file for the release's changes
     run:
       container: utility
-      command: "python get_latest_release_changelog.py"
+      command: 'python get_latest_release_changelog.py'

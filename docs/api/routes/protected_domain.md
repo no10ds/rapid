@@ -12,9 +12,9 @@ Protected domains can be created to restrict access permissions to specific doma
 
 ### Inputs
 
-| Parameters       | Usage               | Example values   | Definition                       |
-|------------------|---------------------|------------------|----------------------------------|
-| `domain`         | URL Parameter       | `land`           | The name of the protected domain |
+| Parameters | Usage         | Example values | Definition                       |
+| ---------- | ------------- | -------------- | -------------------------------- |
+| `domain`   | URL Parameter | `land`         | The name of the protected domain |
 
 ## List
 
@@ -33,8 +33,5 @@ Use this endpoint to list the protected domains that currently exist.
 List of protected permissions in json format in the response body:
 
 ```json
-[
-  "land",
-  "department"
-]
+["land", "department"]
 ```

@@ -10,16 +10,16 @@ export async function makeAPIRequest(
   method: string,
   body?: any,
   authToken?: string,
-  optionalHeaders = {},
+  optionalHeaders = {}
 ): Promise<any> {
   const response = await fetch(`https://${baseDomain}/${path}`, {
     method,
     headers: {
       'Content-Type': 'application/json',
       ...optionalHeaders,
-      ...(authToken ? { Authorization: authToken } : {}),
+      ...(authToken ? { Authorization: authToken } : {})
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify(body)
   })
   return response.json()
 }
@@ -48,11 +48,11 @@ export async function generateRapidAuthToken(): Promise<any> {
     'POST',
     {
       grant_type: 'client_credentials',
-      client_id: clientId,
+      client_id: clientId
     },
     `Basic ${credentialsSecret}`,
     {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
   )
 }

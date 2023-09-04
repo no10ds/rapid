@@ -4,7 +4,6 @@ import fetchMock from 'jest-fetch-mock'
 import { renderWithProviders, mockPermissionUiResponse } from '@/utils/testing'
 import SubjectCreatePage from '@/pages/subject/create/index'
 
-
 const pushSpy = jest.fn()
 jest.mock('next/router', () => ({
   ...jest.requireActual('next/router'),
@@ -43,9 +42,7 @@ describe('Page: Subject Create', () => {
   })
 
   describe('on submit', () => {
-
     it('client  success', async () => {
-
       const mockData = {
         client_name: 'James Bond',
         client_secret: 'secret-code-word', // pragma: allowlist secret
@@ -53,7 +50,9 @@ describe('Page: Subject Create', () => {
         permissions: ['DATA_ADMIN', 'READ_PRIVATE']
       }
 
-      fetchMock.mockResponseOnce(JSON.stringify(mockPermissionUiResponse), { status: 200 })
+      fetchMock.mockResponseOnce(JSON.stringify(mockPermissionUiResponse), {
+        status: 200
+      })
       renderWithProviders(<SubjectCreatePage />)
       await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
 
@@ -96,7 +95,9 @@ describe('Page: Subject Create', () => {
         email: 'test@example.com'
       }
 
-      fetchMock.mockResponseOnce(JSON.stringify(mockPermissionUiResponse), { status: 200 })
+      fetchMock.mockResponseOnce(JSON.stringify(mockPermissionUiResponse), {
+        status: 200
+      })
       renderWithProviders(<SubjectCreatePage />)
       await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
 
@@ -108,7 +109,7 @@ describe('Page: Subject Create', () => {
       userEvent.selectOptions(screen.getByTestId('select-layer'), 'ALL')
       userEvent.selectOptions(screen.getByTestId('select-sensitivity'), 'ALL')
       await userEvent.click(screen.getByTestId('AddIcon'))
-      await new Promise((r) => setTimeout(r, 2000));
+      await new Promise((r) => setTimeout(r, 2000))
       await userEvent.click(screen.getByTestId('submit'))
       fetchMock.mockResponseOnce(JSON.stringify(mockData), { status: 200 })
 
@@ -135,7 +136,9 @@ describe('Page: Subject Create', () => {
 
     it('server error', async () => {
       const error = 'server error message'
-      fetchMock.mockResponseOnce(JSON.stringify(mockPermissionUiResponse), { status: 200 })
+      fetchMock.mockResponseOnce(JSON.stringify(mockPermissionUiResponse), {
+        status: 200
+      })
       renderWithProviders(<SubjectCreatePage />)
       await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
 

@@ -18,7 +18,6 @@ import {
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import PermissionsTable from '@/components/PermissionsTable/PermissionsTable'
 
-
 const userType = ['User', 'Client']
 
 type UserCreate = z.infer<typeof SubjectCreate>
@@ -39,7 +38,7 @@ function CreateUserPage() {
   const fieldArrayReturn = useFieldArray({
     control,
     name: 'permissions'
-  });
+  })
 
   const { isLoading, mutate, error } = useMutation<
     ClientCreateResponse | UserCreateResponse,
@@ -80,7 +79,9 @@ function CreateUserPage() {
     return (
       <form
         onSubmit={handleSubmit(async (data) => {
-          const permissions = data.permissions.map((permission) => extractPermissionNames(permission, permissionsListData))
+          const permissions = data.permissions.map((permission) =>
+            extractPermissionNames(permission, permissionsListData)
+          )
           if (data.type === 'User') {
             await mutate({
               path: 'user',
@@ -214,7 +215,10 @@ function CreateUserPage() {
             Select Permissions
           </Typography>
           <Row>
-            <PermissionsTable permissionsListData={permissionsListData} fieldArrayReturn={fieldArrayReturn} />
+            <PermissionsTable
+              permissionsListData={permissionsListData}
+              fieldArrayReturn={fieldArrayReturn}
+            />
           </Row>
           {error && (
             <Alert severity="error" sx={{ mb: 3 }}>

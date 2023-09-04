@@ -61,7 +61,11 @@ function DeleteDataset({ datasetInput = null }: { datasetInput?: Dataset }) {
           dataset and the underlying crawlers and raw data.
         </Typography>
 
-        <DatasetSelector datasetsList={datasetsList} setParentDataset={setDataset} enableVersionSelector={false}></DatasetSelector>
+        <DatasetSelector
+          datasetsList={datasetsList}
+          setParentDataset={setDataset}
+          enableVersionSelector={false}
+        ></DatasetSelector>
 
         {deleteDatasetSuccessDetails ? (
           <Alert

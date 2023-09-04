@@ -15,7 +15,7 @@ You will need a relevant `WRITE` permission that matches the dataset senstivity 
 ### Inputs
 
 | Parameters | Required | Usage                                   | Example values              | Definition              |
-|------------|----------|-----------------------------------------|-----------------------------|-------------------------|
+| ---------- | -------- | --------------------------------------- | --------------------------- | ----------------------- |
 | `layer`    | True     | URL parameter                           | `default`                   | layer of the dataset    |
 | `domain`   | True     | URL parameter                           | `air`                       | domain of the dataset   |
 | `dataset`  | True     | URL parameter                           | `passengers_by_airport`     | dataset title           |
@@ -52,11 +52,11 @@ Use this endpoint to delete all the contents linked to a layer/domain/dataset. I
 
 ### Inputs
 
-| Parameters | Required | Usage         | Example values                  | Definition                    |
-|------------|----------|---------------|---------------------------------|-------------------------------|
-| `layer`    | True     | URL parameter | `raw`                           | layer of the dataset          |
-| `domain`   | True     | URL parameter | `land`                          | domain of the dataset         |
-| `dataset`  | True     | URL parameter | `train_journeys`                | dataset title                 |
+| Parameters | Required | Usage         | Example values   | Definition            |
+| ---------- | -------- | ------------- | ---------------- | --------------------- |
+| `layer`    | True     | URL parameter | `raw`            | layer of the dataset  |
+| `domain`   | True     | URL parameter | `land`           | domain of the dataset |
+| `dataset`  | True     | URL parameter | `train_journeys` | dataset title         |
 
 ### Outputs
 
@@ -64,7 +64,7 @@ If successful returns the dataset has been deleted
 
 ```json
 {
-    "details": "{dataset} has been deleted."
+  "details": "{dataset} has been deleted."
 }
 ```
 
@@ -86,7 +86,7 @@ You will need a relevant `WRITE` permission that matches the dataset senstivity 
 ### Inputs
 
 | Parameters | Required | Usage         | Example values                  | Definition                    |
-|------------|----------|---------------|---------------------------------|-------------------------------|
+| ---------- | -------- | ------------- | ------------------------------- | ----------------------------- |
 | `layer`    | True     | URL parameter | `raw`                           | layer of the dataset          |
 | `domain`   | True     | URL parameter | `land`                          | domain of the dataset         |
 | `dataset`  | True     | URL parameter | `train_journeys`                | dataset title                 |
@@ -99,7 +99,7 @@ If successful returns the file has been deleted
 
 ```json
 {
-    "details": "{filename} has been deleted."
+  "details": "{filename} has been deleted."
 }
 ```
 
@@ -112,7 +112,6 @@ If you do not specify any filter values, you will retrieve all available dataset
 
 You can optionally enrich the information returned, this will include values like `Last Updated Time`, `Description` and `Tags`.
 
-
 ### Required Permissions
 
 None
@@ -123,11 +122,10 @@ None
 
 ### Inputs
 
-| Parameters    | Required| Usage                                   | Example values                                                                                         | Definition            |
-|---------------|---------|-----------------------------------------|------------------------------------------------------------------------------------------------------- |-----------------------|
-| enriched      | False   | Boolean Query parameter                 | True                                                                                                   | enriches the metadata |
-| query         | False   | JSON Request Body                       | Consult the [docs](https://github.com/no10ds/rapid-api/blob/main/docs/guides/usage/usage.md#examples-2)| the filtering query   |
-
+| Parameters | Required | Usage                   | Example values                                                                                          | Definition            |
+| ---------- | -------- | ----------------------- | ------------------------------------------------------------------------------------------------------- | --------------------- |
+| enriched   | False    | Boolean Query parameter | True                                                                                                    | enriches the metadata |
+| query      | False    | JSON Request Body       | Consult the [docs](https://github.com/no10ds/rapid-api/blob/main/docs/guides/usage/usage.md#examples-2) | the filtering query   |
 
 ### Outputs
 
@@ -181,22 +179,19 @@ None
 
 ### Inputs
 
-| Parameters    | Required  | Usage                                   | Example values               | Definition            |
-|---------------|-----------|-----------------------------------------|------------------------------|-----------------------|
-| `layer`       | True      | URL parameter                           | `raw`                        | layer of the dataset  |
-| `domain`      | True      | URL parameter                           | `land`                       | domain of the dataset |
-| `dataset`     | True      | URL parameter                           | `train_journeys`             | dataset title         |
-| `version`     | True      | URL parameter                           | `3`                          | dataset version       |
+| Parameters | Required | Usage         | Example values   | Definition            |
+| ---------- | -------- | ------------- | ---------------- | --------------------- |
+| `layer`    | True     | URL parameter | `raw`            | layer of the dataset  |
+| `domain`   | True     | URL parameter | `land`           | domain of the dataset |
+| `dataset`  | True     | URL parameter | `train_journeys` | dataset title         |
+| `version`  | True     | URL parameter | `3`              | dataset version       |
 
 ### Outputs
 
 List of raw files in json format, e.g.:
 
 ```json
-[
-    "2022-01-21T17:12:31-file1.csv",
-    "2022-01-24T11:43:28-file2.csv"
-]
+["2022-01-21T17:12:31-file1.csv", "2022-01-24T11:43:28-file2.csv"]
 ```
 
 ## Query
@@ -213,14 +208,13 @@ You will need `READ` permission appropriate to the dataset sensitivity level, e.
 
 ### Inputs
 
-| Parameters    | Required     | Usage                   | Example values                                                                                                              | Definition                    |
-|---------------|--------------|-------------------------|-----------------------------------------------------------------------------------------------------------------------------|-------------------------------|
-| `layer`       | True         | URL parameter           | `raw`                                                                                                                       | layer of the dataset          |
-| `domain`      | True         | URL parameter           | `space`                                                                                                                     | domain of the dataset         |
-| `dataset`     | True         | URL parameter           | `rocket_launches`                                                                                                           | dataset title                 |
-| `version`     | False        | Query parameter         | '3'                                                                                                                         | dataset version               |
-| `query`       | False        | JSON Request Body       | Consult the [docs](https://github.com/no10ds/rapid-api/blob/main/docs/guides/usage/usage.md#how-to-construct-a-query-object)| the query object              |
-
+| Parameters | Required | Usage             | Example values                                                                                                               | Definition            |
+| ---------- | -------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| `layer`    | True     | URL parameter     | `raw`                                                                                                                        | layer of the dataset  |
+| `domain`   | True     | URL parameter     | `space`                                                                                                                      | domain of the dataset |
+| `dataset`  | True     | URL parameter     | `rocket_launches`                                                                                                            | dataset title         |
+| `version`  | False    | Query parameter   | '3'                                                                                                                          | dataset version       |
+| `query`    | False    | JSON Request Body | Consult the [docs](https://github.com/no10ds/rapid-api/blob/main/docs/guides/usage/usage.md#how-to-construct-a-query-object) | the query object      |
 
 ### Outputs
 
@@ -264,14 +258,13 @@ You will need a `READ` permission appropriate to the dataset sensitivity level, 
 
 ### Inputs
 
-| Parameters    | Required     | Usage                   | Example values                                                                                                              | Definition                    |
-|---------------|--------------|-------------------------|-----------------------------------------------------------------------------------------------------------------------------|-------------------------------|
-| `layer`       | True         | URL parameter           | `raw`                                                                                                                       | layer of the dataset          |
-| `domain`      | True         | URL parameter           | `space`                                                                                                                     | domain of the dataset         |
-| `dataset`     | True         | URL parameter           | `rocket_launches`                                                                                                           | dataset title                 |
-| `version`     | False        | Query parameter         | '3'                                                                                                                         | dataset version               |
-| `query`       | False        | JSON Request Body       | Consult the [docs](https://github.com/no10ds/rapid-api/blob/main/docs/guides/usage/usage.md#how-to-construct-a-query-object)| the query object              |
-
+| Parameters | Required | Usage             | Example values                                                                                                               | Definition            |
+| ---------- | -------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| `layer`    | True     | URL parameter     | `raw`                                                                                                                        | layer of the dataset  |
+| `domain`   | True     | URL parameter     | `space`                                                                                                                      | domain of the dataset |
+| `dataset`  | True     | URL parameter     | `rocket_launches`                                                                                                            | dataset title         |
+| `version`  | False    | Query parameter   | '3'                                                                                                                          | dataset version       |
+| `query`    | False    | JSON Request Body | Consult the [docs](https://github.com/no10ds/rapid-api/blob/main/docs/guides/usage/usage.md#how-to-construct-a-query-object) | the query object      |
 
 ### Outputs
 
@@ -281,10 +274,7 @@ Asynchronous Job ID that can be used to track the progress of the query. Once th
 
 Use this endpoint to retrieve basic information for specific datasets, if there is no data stored for the dataset and error will be thrown.
 
-When a valid dataset is retrieved the available data will be the schema definition with some extra values such as:
-    - number of rows
-    - number of columns
-    - statistics data for date columns
+When a valid dataset is retrieved the available data will be the schema definition with some extra values such as: - number of rows - number of columns - statistics data for date columns
 
 ### Required Permissions
 
@@ -296,12 +286,12 @@ You will need any `READ` permission, e.g.: `READ_ALL`, `READ_PUBLIC`, `READ_PRIV
 
 ### Inputs
 
-| Parameters | Required | Usage             | Example values   | Definition            |
-|------------|----------|-------------------|------------------|-----------------------|
-| `layer`    | True     | URL parameter     | `raw`            | layer of the dataset  |
-| `domain`   | True     | URL parameter     | `land`           | domain of the dataset |
-| `dataset`  | True     | URL parameter     | `train_journeys` | dataset title         |
-| `version`  | False    | Query parameter   | `3`              | dataset version       |
+| Parameters | Required | Usage           | Example values   | Definition            |
+| ---------- | -------- | --------------- | ---------------- | --------------------- |
+| `layer`    | True     | URL parameter   | `raw`            | layer of the dataset  |
+| `domain`   | True     | URL parameter   | `land`           | domain of the dataset |
+| `dataset`  | True     | URL parameter   | `train_journeys` | dataset title         |
+| `version`  | False    | Query parameter | `3`              | dataset version       |
 
 ### Outputs
 

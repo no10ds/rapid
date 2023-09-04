@@ -12,18 +12,15 @@ As a maintainer of a rAPId you can create new users to interact with the API to 
 
 ### Inputs
 
-| Parameters       | Usage               | Example values   | Definition                                                                |
-|------------------|---------------------|------------------|---------------------------------------------------------------------------|
-| `User details`   | JSON Request Body   | See below        | The name of the user application to onboard and the granted permissions   |
+| Parameters     | Usage             | Example values | Definition                                                              |
+| -------------- | ----------------- | -------------- | ----------------------------------------------------------------------- |
+| `User details` | JSON Request Body | See below      | The name of the user application to onboard and the granted permissions |
 
 ```json
 {
   "username": "jhon_doe",
   "email": "jhon.doe@email.com",
-  "permissions": [
-    "READ_ALL",
-    "WRITE_PUBLIC"
-  ]
+  "permissions": ["READ_ALL", "WRITE_PUBLIC"]
 }
 ```
 
@@ -39,10 +36,10 @@ The username must adhere to the following conditions:
 #### Email address
 
 The email must adhere to the following conditions:
+
 - The domain must be included on the `ALLOWED_EMAIL_DOMAINS` environment
 - Must satisfy the Email Standard Structure `RFC5322` (
   see [Email Address in Wikipedia](https://en.wikipedia.org/wiki/Email_address))
-
 
 ### Outputs
 
@@ -52,10 +49,7 @@ Once the new user has been created, the following information will be shown in t
 {
   "username": "jhon_doe",
   "email": "jhon.doe@email.com",
-  "permissions": [
-    "READ_ALL",
-    "WRITE_PUBLIC"
-  ],
+  "permissions": ["READ_ALL", "WRITE_PUBLIC"],
   "user_id": "some-generated-id-eq2e3q-eqwe32-12eqwe214q"
 }
 ```
@@ -74,9 +68,9 @@ Given a user already exists you can delete them from rAPId.
 
 ### Inputs
 
-| Parameters       | Usage               | Example values   | Definition                            |
-|------------------|---------------------|------------------|---------------------------------------|
-| `user details`   | JSON Request Body   | See below        | The name and id of the user to delete |
+| Parameters     | Usage             | Example values | Definition                            |
+| -------------- | ----------------- | -------------- | ------------------------------------- |
+| `user details` | JSON Request Body | See below      | The name and id of the user to delete |
 
 ```json
 {

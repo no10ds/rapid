@@ -4,12 +4,12 @@ import AccountLayout from '@/components/Layout/AccountLayout'
 import {
   getPermissionsListUi,
   getSubjectPermissions,
-  updateSubjectPermissions,
+  updateSubjectPermissions
 } from '@/service'
 import { extractPermissionNames } from '@/service/permissions'
 import {
   UpdateSubjectPermissionsBody,
-  UpdateSubjectPermissionsResponse,
+  UpdateSubjectPermissionsResponse
 } from '@/service/types'
 import { Alert, Typography, LinearProgress } from '@mui/material'
 import { useMutation, useQuery } from '@tanstack/react-query'
@@ -26,7 +26,7 @@ function SubjectModifyPage() {
 
   const fieldArrayReturn = useFieldArray({
     control,
-    name: 'permissions',
+    name: 'permissions'
   })
 
   const { append } = fieldArrayReturn
@@ -34,13 +34,13 @@ function SubjectModifyPage() {
   const {
     isLoading: isPermissionsListDataLoading,
     data: permissionsListData,
-    error: permissionsListDataError,
+    error: permissionsListDataError
   } = useQuery(['permissionsList'], getPermissionsListUi)
 
   const {
     isLoading: isSubjectPermissionsLoading,
     data: subjectPermissionsData,
-    error: subjectPermissionsError,
+    error: subjectPermissionsError
   } = useQuery(['subjectPermissions', subjectId], getSubjectPermissions)
 
   useEffect(() => {
@@ -58,7 +58,7 @@ function SubjectModifyPage() {
     mutationFn: updateSubjectPermissions,
     onSuccess: () => {
       router.push({ pathname: `/subject/modify/success/${subjectId}`, query: { name } })
-    },
+    }
   })
 
   if (isPermissionsListDataLoading || isSubjectPermissionsLoading) {
@@ -77,7 +77,7 @@ function SubjectModifyPage() {
     <form
       onSubmit={handleSubmit(async (data) => {
         const permissions = data.permissions.map((permission) =>
-          extractPermissionNames(permission, permissionsListData),
+          extractPermissionNames(permission, permissionsListData)
         )
         await mutate({ subject_id: subjectId as string, permissions })
       })}
