@@ -1,10 +1,12 @@
-from datetime import datetime
-from typing import Dict, Optional
 import json
 import time
 import requests
 
+from datetime import datetime
+from typing import Dict, Optional
+
 import pandas as pd
+
 from pandas import DataFrame
 
 from rapid.auth import RapidAuth
@@ -41,7 +43,7 @@ class Rapid:
 
     def list_datasets(self):
         """
-        Makes a POST request to the API to list the current datasets.
+        List all current datasets within rAPId instance.
 
         Returns:
             A JSON response of the API's response.
@@ -97,6 +99,7 @@ class Rapid:
 
     def download_dataframe(
         self,
+        layer: str,
         domain: str,
         dataset: str,
         version: Optional[int] = None,
@@ -106,6 +109,7 @@ class Rapid:
         Downloads data to a pandas DataFrame based on the domain, dataset and version passed.
 
         Args:
+            layer (str): The layer of the dataset to download the DataFrame from.
             domain (str): The domain of the dataset to download the DataFrame from.
             dataset (str): The dataset from the domain to download the DataFrame from.
             version (int, optional): Version of the dataset to download.
@@ -119,7 +123,7 @@ class Rapid:
         Returns:
             DataFrame: A pandas DataFrame of the data
         """
-        url = f"{self.auth.url}/datasets/{domain}/{dataset}/query"
+        url = f"{self.auth.url}/datasets/{layer}/{domain}/{dataset}/query"
         if version is not None:
             url = f"{url}?version={version}"
         response = requests.post(
@@ -137,12 +141,18 @@ class Rapid:
         )
 
     def upload_dataframe(
-        self, domain: str, dataset: str, df: DataFrame, wait_to_complete: bool = True
+        self,
+        layer: str,
+        domain: str,
+        dataset: str,
+        df: DataFrame,
+        wait_to_complete: bool = True,
     ):
         """
         Uploads a pandas DataFrame to a specified dataset in the API.
 
         Args:
+            layer (str): The layer of the dataset to upload the DataFrame to.
             domain (str): The domain of the dataset to upload the DataFrame to.
             dataset (str): The name of the dataset to upload the DataFrame to.
             df (DataFrame): The pandas DataFrame to upload.
@@ -156,7 +166,7 @@ class Rapid:
             If wait_to_complete is True, returns "Success" if the upload is successful.
             If wait_to_complete is False, returns the ID of the upload job if the upload is accepted.
         """
-        url = f"{self.auth.url}/datasets/{domain}/{dataset}"
+        url = f"{self.auth.url}/datasets/{layer}/{domain}/{dataset}"
         response = requests.post(
             url,
             headers=self.generate_headers(),
@@ -180,12 +190,13 @@ class Rapid:
             data["details"],
         )
 
-    def generate_info(self, df: DataFrame, domain: str, dataset: str):
+    def generate_info(self, df: DataFrame, layer: str, domain: str, dataset: str):
         """
         Generates metadata information for a pandas DataFrame and a specified dataset in the API.
 
         Args:
             df (DataFrame): The pandas DataFrame to generate metadata for.
+            layer (str): The layer of the dataset to generate metadata for.
             domain (str): The domain of the dataset to generate metadata for.
             dataset (str): The name of the dataset to generate metadata for.
 
@@ -195,7 +206,7 @@ class Rapid:
         Returns:
             A dictionary containing the metadata information for the DataFrame and dataset.
         """
-        url = f"{self.auth.url}/datasets/{domain}/{dataset}/info"
+        url = f"{self.auth.url}/datasets/{layer}/{domain}/{dataset}/info"
         response = requests.post(
             url,
             headers=self.generate_headers(),
@@ -228,13 +239,14 @@ class Rapid:
         }
 
     def generate_schema(
-        self, df: DataFrame, domain: str, dataset: str, sensitivity: str
+        self, df: DataFrame, layer: str, domain: str, dataset: str, sensitivity: str
     ) -> Schema:
         """
         Generates a schema for a pandas DataFrame and a specified dataset in the API.
 
         Args:
             df (DataFrame): The pandas DataFrame to generate a schema for.
+            layer (str): The layer of the dataset to generate a schema for.
             domain (str): The domain of the dataset to generate a schema for.
             dataset (str): The name of the dataset to generate a schema for.
             sensitivity (str): The sensitivity level of the schema to generate.
@@ -245,7 +257,9 @@ class Rapid:
         Returns:
             rapid.items.schema.Schema: A Schema class type from the generated schema for the DataFrame and dataset.
         """
-        url = f"{self.auth.url}/schema/{sensitivity}/{domain}/{dataset}/generate"
+        url = (
+            f"{self.auth.url}/schema/{layer}/{sensitivity}/{domain}/{dataset}/generate"
+        )
 
         response = requests.post(
             url,

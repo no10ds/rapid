@@ -29,7 +29,7 @@ detect-vulnerabilities:
 # API Testing --------------------
 api-test:			## Run api python unit tests
 	@cd api/; ./batect test-unit
-
+ 
 api-test-coverage:		## Run api python unit tests with coverage report
 	@cd api/; ./batect test-coverage
 
@@ -53,10 +53,10 @@ api-scheduled-prod-scan:	## Handle api scheduled scan result for production imag
 # API Running --------------------
 ##
 api-run:			## Run the api application base image
-	@cd /api; ./batect run-app
+	@cd api; ./batect run-app
 
 api-run-dev:			## Run the api application with hot reload
-	@cd /api; ./batect run-local-dev
+	@cd api; ./batect run-local-dev
 
 # API Setup and Config --------------------
 ##

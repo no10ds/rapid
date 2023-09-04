@@ -5,6 +5,9 @@ from pydantic.main import BaseModel
 
 from api.domain.schema_metadata import Owner, SchemaMetadata, UpdateBehaviour
 
+METADATA = "metadata"
+COLUMNS = "columns"
+
 
 class Column(BaseModel):
     name: str
@@ -38,9 +41,6 @@ class Schema(BaseModel):
 
     def get_version(self) -> int:
         return self.metadata.get_version()
-
-    def get_custom_tags(self) -> Dict[str, str]:
-        return self.metadata.get_custom_tags()
 
     def get_tags(self) -> Dict[str, str]:
         return self.metadata.get_tags()
