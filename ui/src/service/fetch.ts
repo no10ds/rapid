@@ -61,9 +61,7 @@ export const getSubjectsListUi = async (): Promise<
   return res.json()
 }
 
-export const getDatasetsUi = async ({
-  queryKey
-}): Promise<Dataset[]> => {
+export const getDatasetsUi = async ({ queryKey }): Promise<Dataset[]> => {
   const [, action] = queryKey
   const res = await api(`/api/datasets_ui/${action}`, {
     method: 'GET'
@@ -86,7 +84,9 @@ export const getJob = async ({ queryKey }): Promise<JobResponse> => {
   return res.json()
 }
 
-export const getSubjectPermissions = async ({ queryKey }): Promise<SubjectPermission[]> => {
+export const getSubjectPermissions = async ({
+  queryKey
+}): Promise<SubjectPermission[]> => {
   const [, subjectId] = queryKey
   const res = await api(`/api/permissions/${subjectId}`, {
     method: 'GET'
@@ -147,9 +147,12 @@ export const deleteDataset = async ({ path }: { path: string }) => {
 
 export const getDatasetInfo = async ({ queryKey }): Promise<DatasetInfoResponse> => {
   const [, layer, domain, dataset, version] = queryKey
-  const res = await api(`/api/datasets/${layer}/${domain}/${dataset}/info?version=${version}`, {
-    method: 'GET'
-  })
+  const res = await api(
+    `/api/datasets/${layer}/${domain}/${dataset}/info?version=${version}`,
+    {
+      method: 'GET'
+    }
+  )
   return res.json()
 }
 

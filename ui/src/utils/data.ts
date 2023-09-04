@@ -20,6 +20,6 @@ export const api = async (
   try {
     const { details } = await res.json()
     detailMessage = details
-  } catch (e) { }
+  } catch (e) {}
   throw new Error(detailMessage || defaultError)
 }

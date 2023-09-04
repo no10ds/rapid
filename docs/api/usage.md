@@ -3,7 +3,7 @@ The rAPId API serves to make data storage and retrieval as easy and consistent a
 The API functionality includes:
 
 - [Uploading a schema (i.e. creating a new dataset definition)](/api/routes/schema/)
-    - Also creating a new version of an existing schema
+  - Also creating a new version of an existing schema
 - [Uploading data to any version of a dataset](/api/routes/dataset/#upload)
 - [Listing available data](/api/routes/dataset/#list)
 - [Querying data from any version of a dataset](/api/routes/dataset/#query)
@@ -17,8 +17,8 @@ The first step is to create a dataset, which we can do by uploading a schema. Th
 
 After a schema has been uploaded, data can then be uploaded to the dataset. During the upload process, the API checks if the data matches the schema. This ensures that each of the datasets remain consistent.
 
-
 <!-- TODO: Update diagrams -->
+
 ## Data upload and query flows
 
 ### No schema exists + upload data + query

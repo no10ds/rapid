@@ -9,8 +9,6 @@ import { useState } from 'react'
 import DatasetSelector from '@/components/DatasetSelector/DatasetSelector'
 import { Dataset } from '@/service/types'
 
-
-
 function DownloadData({ datasetInput = null }: { datasetInput?: Dataset }) {
   const router = useRouter()
   const [dataset, setDataset] = useState<Dataset>(datasetInput)
@@ -45,22 +43,29 @@ function DownloadData({ datasetInput = null }: { datasetInput?: Dataset }) {
 
   return (
     <Card
-      action={<Button
-        data-testid="submit"
-        color="primary"
-        onClick={() =>
-          router.push(`/data/download/${dataset.layer}/${dataset.domain}/${dataset.dataset}?version=${dataset.version}`)
-        }
-      >
-        Next
-      </Button>}
+      action={
+        <Button
+          data-testid="submit"
+          color="primary"
+          onClick={() =>
+            router.push(
+              `/data/download/${dataset.layer}/${dataset.domain}/${dataset.dataset}?version=${dataset.version}`
+            )
+          }
+        >
+          Next
+        </Button>
+      }
     >
       <Typography variant="body1" gutterBottom>
         Download the contents of a datasource from rAPId. Select the relevant dataset you
         want to download and then the version to download from. Please note it might take
         some time to for the API to query the dataset especially if they are large.
       </Typography>
-      <DatasetSelector datasetsList={datasetsList} setParentDataset={setDataset}></DatasetSelector>
+      <DatasetSelector
+        datasetsList={datasetsList}
+        setParentDataset={setDataset}
+      ></DatasetSelector>
     </Card>
   )
 }
