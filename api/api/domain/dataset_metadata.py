@@ -1,5 +1,5 @@
 import json
-from typing import Optional, TYPE_CHECKING
+from typing import List, Optional, TYPE_CHECKING
 
 from pydantic import BaseModel
 from api.common.config.aws import DATA_BUCKET
@@ -8,6 +8,12 @@ from api.common.logger import AppLogger
 
 if TYPE_CHECKING:
     from api.application.services.schema_service import SchemaService
+
+
+LAYER = "layer"
+DOMAIN = "domain"
+DATASET = "dataset"
+VERSION = "version"
 
 
 class DatasetMetadata(BaseModel):
@@ -29,10 +35,10 @@ class DatasetMetadata(BaseModel):
         This is for our ease of use, given how widely used the class is.
         """
         expected_inputs = {
-            "layer": layer,
-            "domain": domain.lower() if domain else None,
-            "dataset": dataset,
-            "version": version,
+            LAYER: layer,
+            DOMAIN: domain.lower() if domain else None,
+            DATASET: dataset,
+            VERSION: version,
         }
         # Only include arguments if they're not None.
         # This code ensures that Pydantic returns a descriptive error: `ValidationError: field <field> missing`.
@@ -42,12 +48,16 @@ class DatasetMetadata(BaseModel):
             **kwargs,
         )
 
+    @classmethod
+    def get_fields(cls) -> List[str]:
+        return list(cls.__fields__.keys())
+
     def to_dict(self):
         return {
-            "layer": self.layer,
-            "domain": self.domain,
-            "dataset": self.dataset,
-            "version": self.version,
+            LAYER: self.layer,
+            DOMAIN: self.domain,
+            DATASET: self.dataset,
+            VERSION: self.version,
         }
 
     def __hash__(self):

@@ -28,7 +28,8 @@ from api.domain.Jobs.Job import Job
 from api.domain.Jobs.QueryJob import QueryJob
 from api.domain.Jobs.UploadJob import UploadJob
 from api.domain.permission_item import PermissionItem
-from api.domain.schema import Schema
+from api.domain.schema import Schema, COLUMNS
+from api.domain.schema_metadata import IS_LATEST_VERSION
 from api.domain.subject_permissions import SubjectPermissions
 
 
@@ -176,18 +177,8 @@ class DynamoDBAdapter(DatabaseAdapter):
                 Item={
                     "PK": schema.metadata.dataset_identifier(with_version=False),
                     "SK": schema.metadata.get_version(),
-                    "Layer": schema.get_layer(),
-                    "Domain": schema.get_domain(),
-                    "Dataset": schema.get_dataset(),
-                    "Version": schema.get_version(),
-                    "Sensitivity": schema.get_sensitivity(),
-                    "Description": schema.get_description(),
-                    "UpdateBehaviour": schema.get_update_behaviour(),
-                    "KeyValueTags": schema.metadata.key_value_tags,
-                    "KeyOnlyTags": schema.metadata.key_only_tags,
-                    "Owners": [dict(owner) for owner in schema.get_owners()],
-                    "IsLatestVersion": schema.metadata.get_is_latest_version(),
-                    "Columns": [dict(col) for col in schema.columns],
+                    **schema.metadata.dict(),
+                    COLUMNS: [dict(col) for col in schema.columns],
                 }
             )
         except ClientError as error:
@@ -413,9 +404,9 @@ class DynamoDBAdapter(DatabaseAdapter):
         try:
             query_arguments = query.format_resource_query()
             if query_arguments:
-                filter_expression = Attr("IsLatestVersion").eq(True) & query_arguments
+                filter_expression = Attr(IS_LATEST_VERSION).eq(True) & query_arguments
             else:
-                filter_expression = Attr("IsLatestVersion").eq(True)
+                filter_expression = Attr(IS_LATEST_VERSION).eq(True)
 
             additional_kwargs = {}
             if attributes:
@@ -463,7 +454,7 @@ class DynamoDBAdapter(DatabaseAdapter):
                 },
                 UpdateExpression="set #A = :a",
                 ExpressionAttributeNames={
-                    "#A": "IsLatestVersion",
+                    "#A": IS_LATEST_VERSION,
                 },
                 ExpressionAttributeValues={
                     ":a": False,

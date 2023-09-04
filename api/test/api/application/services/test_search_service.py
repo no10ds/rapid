@@ -10,6 +10,7 @@ from api.application.services.search_service import (
     MATCHING_DATA,
     MATCHING_FIELD,
 )
+from api.domain.dataset_metadata import DatasetMetadata
 from api.domain.search_metadata import SearchMetadata, MatchField
 
 
@@ -65,12 +66,12 @@ class TestSearchService:
         res = self.search_service._generate_expression_attributes()
 
         assert res == [
-            ExpressionAttribute("Layer", "La"),
-            ExpressionAttribute("Domain", "Do"),
-            ExpressionAttribute("Dataset", "Da"),
-            ExpressionAttribute("Version", "Ve"),
-            ExpressionAttribute("Description", "De"),
-            ExpressionAttribute("Columns", "Co"),
+            ExpressionAttribute("layer", "la"),
+            ExpressionAttribute("domain", "do"),
+            ExpressionAttribute("dataset", "da"),
+            ExpressionAttribute("version", "ve"),
+            ExpressionAttribute("description", "de"),
+            ExpressionAttribute("columns", "co"),
         ]
 
     def test_generate_expression_attributes_values_are_unique(self):
@@ -141,12 +142,7 @@ class TestSearchService:
             ["raw", "domain", "dataset", 2],
             ["raw", "domain", "other_dataset", 3],
         ]
-        input_columns = [
-            "Layer",
-            "Domain",
-            "Dataset",
-            "Version",
-        ]
+        input_columns = DatasetMetadata.get_fields()
 
         input_df = DataFrame(
             columns=input_columns,
@@ -189,7 +185,7 @@ class TestSearchService:
                 [{"name": "column1"}, {"name": "column2"}],
             ],
         ]
-        input_columns = ["Layer", "Domain", "Dataset", "Version", "Columns"]
+        input_columns = DatasetMetadata.get_fields() + ["columns"]
 
         input_df = DataFrame(
             columns=input_columns,
@@ -197,7 +193,8 @@ class TestSearchService:
         )
 
         expected_data = [
-            input_data[0][0:4] + [["postcode_long", "postcode_short"], "Columns"],
+            input_data[0][0:4]
+            + [["postcode_long", "postcode_short"], MatchField.Columns],
         ]
         expected_columns = input_columns[0:4] + [MATCHING_DATA, MATCHING_FIELD]
         expected_df = DataFrame(
@@ -216,7 +213,7 @@ class TestSearchService:
                 "dataset",
                 1,
                 ["postcode"],
-                "Columns",
+                "columns",
             ],
             [
                 "raw",
@@ -224,19 +221,13 @@ class TestSearchService:
                 "other_dataset",
                 2,
                 "postcode data",
-                "Description",
+                "description",
             ],
         ]
-        input_columns = [
-            "Layer",
-            "Domain",
-            "Dataset",
-            "Version",
-            MATCHING_DATA,
-            MATCHING_FIELD,
-        ]
 
-        input_df = DataFrame(data=input_data, columns=input_columns)
+        input_df = DataFrame(
+            data=input_data, columns=self.search_service.output_columns
+        )
         res = self.search_service.convert_dataframe_to_search_metadata(input_df)
 
         assert res == [
@@ -261,24 +252,24 @@ class TestSearchService:
     def test_fetch_data(self):
         mock_data = [
             {
-                "Layer": "raw",
-                "Domain": "domain",
-                "Dataset": "dataset",
-                "Version": 1,
-                "Description": "A description",
-                "Columns": [
+                "layer": "raw",
+                "domain": "domain",
+                "dataset": "dataset",
+                "version": 1,
+                "description": "A description",
+                "columns": [
                     {"name": "postcode_long"},
                     {"name": "postcode_short"},
                     {"name": "other"},
                 ],
             },
             {
-                "Layer": "raw",
-                "Domain": "domain",
-                "Dataset": "other_dataset",
-                "Version": 2,
-                "Description": "A description",
-                "Columns": [{"name": "column1"}, {"name": "column2"}],
+                "layer": "raw",
+                "domain": "domain",
+                "dataset": "other_dataset",
+                "version": 2,
+                "description": "A description",
+                "columns": [{"name": "column1"}, {"name": "column2"}],
             },
         ]
         self.dynamodb_adapter.get_latest_schemas.return_value = mock_data
@@ -289,12 +280,12 @@ class TestSearchService:
         assert_frame_equal(res, expected)
         self.dynamodb_adapter.get_latest_schemas.assert_called_once_with(
             attributes=[
-                ExpressionAttribute("Layer", "La"),
-                ExpressionAttribute("Domain", "Do"),
-                ExpressionAttribute("Dataset", "Da"),
-                ExpressionAttribute("Version", "Ve"),
-                ExpressionAttribute("Description", "De"),
-                ExpressionAttribute("Columns", "Co"),
+                ExpressionAttribute("layer", "la"),
+                ExpressionAttribute("domain", "do"),
+                ExpressionAttribute("dataset", "da"),
+                ExpressionAttribute("version", "ve"),
+                ExpressionAttribute("description", "de"),
+                ExpressionAttribute("columns", "co"),
             ]
         )
 
@@ -303,7 +294,7 @@ class TestSearchService:
         self.dynamodb_adapter.get_latest_schemas.return_value = mock_data
         expected = DataFrame(
             data=[],
-            columns=["Layer", "Domain", "Dataset", "Version", "Description", "Columns"],
+            columns=self.search_service.input_columns,
         )
 
         res = self.search_service.fetch_schema_data()
@@ -311,11 +302,11 @@ class TestSearchService:
         assert_frame_equal(res, expected)
         self.dynamodb_adapter.get_latest_schemas.assert_called_once_with(
             attributes=[
-                ExpressionAttribute("Layer", "La"),
-                ExpressionAttribute("Domain", "Do"),
-                ExpressionAttribute("Dataset", "Da"),
-                ExpressionAttribute("Version", "Ve"),
-                ExpressionAttribute("Description", "De"),
-                ExpressionAttribute("Columns", "Co"),
+                ExpressionAttribute("layer", "la"),
+                ExpressionAttribute("domain", "do"),
+                ExpressionAttribute("dataset", "da"),
+                ExpressionAttribute("version", "ve"),
+                ExpressionAttribute("description", "de"),
+                ExpressionAttribute("columns", "co"),
             ]
         )

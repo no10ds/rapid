@@ -2,7 +2,7 @@ import re
 from typing import List, Union, Any, Optional
 
 from api.common.config.auth import Sensitivity
-from api.common.config.aws import INFERRED_UNNAMED_COLUMN_PREFIX, MAX_CUSTOM_TAG_COUNT
+from api.common.config.aws import INFERRED_UNNAMED_COLUMN_PREFIX, MAX_TAG_COUNT
 from api.common.config.constants import (
     TAG_VALUES_REGEX,
     TAG_KEYS_REGEX,
@@ -116,9 +116,9 @@ def validate_metadata_character_string(string_input: str) -> bool:
 
 def schema_has_valid_tag_set(schema: Schema):
     schema.metadata.remove_duplicates()
-    if len(schema.get_custom_tags()) > MAX_CUSTOM_TAG_COUNT:
+    if len(schema.get_tags()) > MAX_TAG_COUNT:
         raise SchemaValidationError(
-            f"You cannot specify more than {MAX_CUSTOM_TAG_COUNT} tags"
+            f"You cannot specify more than {MAX_TAG_COUNT} tags"
         )
 
     for key, value in schema.get_tags().items():

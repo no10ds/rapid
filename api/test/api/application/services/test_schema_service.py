@@ -365,18 +365,18 @@ class TestGetSchema:
         self.schema = Schema(metadata=self.metadata, columns=self.columns)
 
         self.schema_dict = {
-            "Layer": "raw",
-            "Domain": "some",
-            "Dataset": "other",
-            "Version": 2,
-            "Description": "",
-            "Sensitivity": "PUBLIC",
-            "UpdateBehaviour": "APPEND",
-            "IsLatestVersion": True,
-            "Owners": [{"name": "owner", "email": "owner@email.com"}],
-            "Columns": [dict(col) for col in self.columns],
-            "KeyValueTags": {},
-            "KeyOnlyTags": [],
+            "layer": "raw",
+            "domain": "some",
+            "dataset": "other",
+            "version": 2,
+            "description": "",
+            "sensitivity": "PUBLIC",
+            "update_behaviour": "APPEND",
+            "is_latest_version": True,
+            "owners": [{"name": "owner", "email": "owner@email.com"}],
+            "columns": [dict(col) for col in self.columns],
+            "key_value_tags": {},
+            "key_only_tags": [],
         }
 
     def test_get_schema_success(self):

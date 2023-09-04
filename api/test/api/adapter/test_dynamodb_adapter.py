@@ -1034,18 +1034,18 @@ class TestDynamoDBAdapterSchemaTable:
             Item={
                 "PK": "raw/some/other",
                 "SK": 2,
-                "Layer": "raw",
-                "Domain": "some",
-                "Dataset": "other",
-                "Version": 2,
-                "Sensitivity": "PUBLIC",
-                "Description": "This is a test schema",
-                "UpdateBehaviour": "APPEND",
-                "KeyValueTags": {"key": "value"},
-                "KeyOnlyTags": ["key"],
-                "Owners": [{"name": "owner", "email": "owner@email.com"}],
-                "IsLatestVersion": True,
-                "Columns": [
+                "layer": "raw",
+                "domain": "some",
+                "dataset": "other",
+                "version": 2,
+                "sensitivity": "PUBLIC",
+                "description": "This is a test schema",
+                "update_behaviour": "APPEND",
+                "key_value_tags": {"key": "value"},
+                "key_only_tags": ["key"],
+                "owners": [{"name": "owner", "email": "owner@email.com"}],
+                "is_latest_version": True,
+                "columns": [
                     {
                         "name": "colname1",
                         "partition_index": 0,
@@ -1108,7 +1108,7 @@ class TestDynamoDBAdapterSchemaTable:
         res = self.dynamo_adapter.get_latest_schemas()
 
         self.schema_table.scan.assert_called_once_with(
-            FilterExpression=Attr("IsLatestVersion").eq(True)
+            FilterExpression=Attr("is_latest_version").eq(True)
         )
         assert res == ["schema", "schema_2"]
 
@@ -1127,7 +1127,7 @@ class TestDynamoDBAdapterSchemaTable:
         )
 
         self.schema_table.scan.assert_called_once_with(
-            FilterExpression=Attr("IsLatestVersion").eq(True),
+            FilterExpression=Attr("is_latest_version").eq(True),
             ProjectionExpression="#L, #Domain",
             ExpressionAttributeNames={"#L": "Layer", "#Domain": "Domain"},
         )
@@ -1140,7 +1140,7 @@ class TestDynamoDBAdapterSchemaTable:
     def test_get_latest_schemas_with_attributes(self, result, expected):
         self.schema_table.scan.return_value = result
 
-        mock_query = Attr("KeyOnlyTags").eq("2") & Attr("foo").is_in(["bar"])
+        mock_query = Attr("key_only_tags").eq("2") & Attr("foo").is_in(["bar"])
 
         dataset_filters = Mock()
         dataset_filters.format_resource_query = Mock(return_value=mock_query)
@@ -1148,7 +1148,7 @@ class TestDynamoDBAdapterSchemaTable:
         res = self.dynamo_adapter.get_latest_schemas(dataset_filters)
 
         self.schema_table.scan.assert_called_once_with(
-            FilterExpression=Attr("IsLatestVersion").eq(True) & mock_query
+            FilterExpression=Attr("is_latest_version").eq(True) & mock_query
         )
         dataset_filters.format_resource_query.assert_called_once()
         assert res == expected
@@ -1206,7 +1206,7 @@ class TestDynamoDBAdapterSchemaTable:
             },
             UpdateExpression="set #A = :a",
             ExpressionAttributeNames={
-                "#A": "IsLatestVersion",
+                "#A": "is_latest_version",
             },
             ExpressionAttributeValues={
                 ":a": False,
