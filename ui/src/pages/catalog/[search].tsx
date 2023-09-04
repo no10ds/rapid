@@ -37,21 +37,21 @@ function GetSearch() {
   }
 
   const getChipLabel = (type) => {
-    if (type === 'column_name') {
+    if (type === 'Columns') {
       return 'Column'
-    } else if (type === 'dataset_name') {
+    } else if (type === 'Dataset') {
       return 'Dataset Title'
-    } else if (type === 'description') {
+    } else if (type === 'Description') {
       return 'Description'
     }
   }
 
   const getChipColor = (type) => {
-    if (type === 'column_name') {
+    if (type === 'Columns') {
       return 'error'
-    } else if (type === 'dataset_name') {
+    } else if (type === 'Dataset') {
       return 'primary'
-    } else if (type === 'description') {
+    } else if (type === 'Description') {
       return 'warning'
     }
   }
@@ -70,12 +70,12 @@ function GetSearch() {
             { children: item.domain },
             { children: item.dataset },
             { children: item.version },
-            { children: item.data },
+            { children: item.matching_data },
             {
               children: (
                 <Chip
-                  label={getChipLabel(item.data_type)}
-                  color={getChipColor(item.data_type)}
+                  label={getChipLabel(item.matching_field)}
+                  color={getChipColor(item.matching_field)}
                   size="small"
                 />
               )

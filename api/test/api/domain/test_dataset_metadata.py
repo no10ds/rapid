@@ -71,3 +71,11 @@ class TestDatasetMetadata:
         original_version = deepcopy(self.dataset_metadata.version)
         self.dataset_metadata.set_version(SchemaService())
         assert original_version == self.dataset_metadata.version
+
+    def test_get_fields(self):
+        assert self.dataset_metadata.get_fields() == [
+            "layer",
+            "domain",
+            "dataset",
+            "version",
+        ]

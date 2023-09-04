@@ -147,9 +147,9 @@ export type GetLoginResponse = {
 export type MetadataItem = {
   dataset: string
   domain: string
-  data: string
+  matching_data: string
   version: string
-  data_type: 'column_name' | 'data_name' | 'description'
+  matching_field: 'Columns' | 'Description' | 'Dataset'
 }
 
 export type MetadataSearchResponse = MetadataItem[]
