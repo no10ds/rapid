@@ -26,11 +26,11 @@ def upload_and_create_dataframe(
         Exception: If an error occurs while generating the schema, creating the schema, or uploading the DataFrame.
     """
     schema = rapid.generate_schema(
-        df, metadata.domain, metadata.dataset, metadata.sensitivity
+        df, metadata.layer, metadata.domain, metadata.dataset, metadata.sensitivity
     )
     try:
         rapid.create_schema(schema)
-        rapid.upload_dataframe(metadata.domain, metadata.dataset, df)
+        rapid.upload_dataframe(metadata.layer, metadata.domain, metadata.dataset, df)
     except DataFrameUploadValidationException as exception:
         if upgrade_schema_on_fail:
             update_schema_dataframe(rapid, metadata, df, schema.columns)
@@ -59,7 +59,7 @@ def update_schema_dataframe(
         rapid.exceptions.ColumnNotDifferentException: If the new schema columns are the same as the existing schema columns.
         Exception: If an error occurs while generating the schema information, updating the schema, or comparing the schema columns.
     """
-    info = rapid.generate_info(df, metadata.domain, metadata.dataset)
+    info = rapid.generate_info(df, metadata.layer, metadata.domain, metadata.dataset)
     try:
         schema = Schema(metadata=metadata, columns=info["columns"])
         if schema.are_columns_the_same(new_columns=new_columns):
