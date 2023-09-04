@@ -14,7 +14,7 @@ from api.common.custom_exceptions import (
     UserError,
 )
 from api.common.logger import AppLogger
-from api.domain.schema import Schema, Column
+from api.domain.schema import Schema, Column, COLUMNS
 from api.domain.schema_metadata import SchemaMetadata
 from api.domain.dataset_metadata import DatasetMetadata
 
@@ -49,24 +49,12 @@ class SchemaService:
         return self._parse_schema(schema_dict)
 
     def _parse_schema(self, schema: dict, only_metadata: bool = False):
-        metadata = SchemaMetadata(
-            layer=schema["Layer"],
-            domain=schema["Domain"],
-            dataset=schema["Dataset"],
-            version=schema["Version"],
-            sensitivity=schema["Sensitivity"],
-            description=schema["Description"],
-            update_behaviour=schema["UpdateBehaviour"],
-            owners=schema["Owners"],
-            is_latest_version=schema["IsLatestVersion"],
-            key_value_tags=schema["KeyValueTags"],
-            key_only_tags=schema["KeyOnlyTags"],
-        )
+        metadata = SchemaMetadata.parse_obj(schema)
         if only_metadata:
             return metadata
         return Schema(
             metadata=metadata,
-            columns=[Column.parse_obj(col) for col in schema["Columns"]],
+            columns=[Column.parse_obj(col) for col in schema[COLUMNS]],
         )
 
     def get_schema_metadatas(
