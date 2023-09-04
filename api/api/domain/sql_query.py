@@ -22,7 +22,7 @@ class SQLQuery(BaseModel):
     group_by_columns: Optional[List[str]] = None
     aggregation_conditions: Optional[str] = None
     order_by_columns: Optional[List[SQLQueryOrderBy]] = None
-    limit: Optional[str] = None
+    limit: Optional[int] = None
 
     class Config:
         extra = Extra.forbid

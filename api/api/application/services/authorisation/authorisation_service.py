@@ -5,7 +5,7 @@ from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
 from fastapi.security import OAuth2
 from fastapi.security import SecurityScopes
 from fastapi.security.utils import get_authorization_scheme_param
-from jwt import InvalidTokenError
+from jwt.exceptions import InvalidTokenError
 from starlette.requests import Request
 from starlette.status import HTTP_401_UNAUTHORIZED
 

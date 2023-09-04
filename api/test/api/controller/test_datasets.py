@@ -665,7 +665,7 @@ class TestSearchDatasets(BaseClientTest):
 
         mock_search.assert_called_once_with("foo bar")
         assert response.status_code == 200
-        assert response.json() == mock_data
+        assert response.json() == [item.dict() for item in mock_data]
 
     @patch.object(SearchService, "search")
     def test_search_when_empty(self, mock_search):
@@ -720,7 +720,7 @@ class TestDatasetInfo(BaseClientTest):
         )
 
         assert response.status_code == 200
-        assert response.json() == expected_response
+        assert response.json() == expected_response.dict()
         mock_get_dataset_info.assert_called_once_with(
             DatasetMetadata("layer", "mydomain", "mydataset", 2)
         )
@@ -768,7 +768,7 @@ class TestDatasetInfo(BaseClientTest):
         )
 
         assert response.status_code == 200
-        assert response.json() == expected_response
+        assert response.json() == expected_response.dict()
         mock_get_dataset_info.assert_called_once_with(dataset_metadata)
 
     @patch.object(DataService, "get_dataset_info")
@@ -998,7 +998,7 @@ class TestQuery(BaseClientTest):
 
         assert response.status_code == 400
         assert response.json() == {
-            "details": [f"{input_key} -> extra fields not permitted"]
+            "details": [f"{input_key} -> Extra inputs are not permitted"]
         }
 
 
@@ -1164,7 +1164,7 @@ class TestLargeDatasetQuery(BaseClientTest):
 
         assert response.status_code == 400
         assert response.json() == {
-            "details": [f"{input_key} -> extra fields not permitted"]
+            "details": [f"{input_key} -> Extra inputs are not permitted"]
         }
 
 

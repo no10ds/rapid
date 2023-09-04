@@ -1,4 +1,3 @@
-import json
 import os
 from typing import List
 
@@ -69,18 +68,18 @@ def add_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(RequestValidationError)
     async def pydantic_error_handler(request, exc: RequestValidationError):
         return JSONResponse(
-            content={"details": _generate_pydantic_error_message(exc.json())},
+            content={"details": _generate_pydantic_error_message(exc.errors())},
             status_code=400,
         )
 
-    def _generate_pydantic_error_message(json_message: json) -> List[str]:
-        PYDANTIC_JSON_DECODE_ERROR = "value_error.jsondecode"
-        PATH_STR_REGEX_ERROR = "value_error.str.regex"
+    def _generate_pydantic_error_message(message: dict) -> List[str]:
+        PYDANTIC_JSON_DECODE_ERROR = "json_invalid"
+        PATH_STR_REGEX_ERROR = "string_pattern_mismatch"
         REGEX_ERROR_MAP = {r"^[a-z0-9_\-]+$": "was required to be lowercase only."}
 
         error_messages = []
 
-        for error in json.loads(json_message):
+        for error in message:
             if error.get("type") == PYDANTIC_JSON_DECODE_ERROR:
                 error_output = error.get("msg")
             elif error.get("type") == PATH_STR_REGEX_ERROR:
