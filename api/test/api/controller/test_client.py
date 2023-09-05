@@ -35,7 +35,7 @@ class TestClientCreation(BaseClientTest):
         mock_create_client.assert_called_once_with(client_request)
 
         assert response.status_code == 201
-        assert response.json() == expected_response
+        assert response.json() == expected_response.dict()
 
     @patch.object(SubjectService, "create_client")
     def test_accepts_empty_permissions(self, mock_create_client):
@@ -61,7 +61,7 @@ class TestClientCreation(BaseClientTest):
         mock_create_client.assert_called_once_with(client_request)
 
         assert response.status_code == 201
-        assert response.json() == expected_response
+        assert response.json() == expected_response.dict()
 
     def test_throws_an_exception_when_client_is_empty(self):
         response = self.client.post(
@@ -71,7 +71,7 @@ class TestClientCreation(BaseClientTest):
         )
 
         assert response.status_code == 400
-        assert response.json() == {"details": ["client_name -> field required"]}
+        assert response.json() == {"details": ["client_name -> Field required"]}
 
     @patch.object(SubjectService, "create_client")
     def test_bad_request_when_invalid_permissions(self, mock_create_client):
