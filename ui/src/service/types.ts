@@ -4,7 +4,6 @@ import {
   schemaGenerateSchema,
   SensitivityEnum as schemaSensitivityEnum
 } from './schema'
-import { type } from 'os'
 
 export type SchemaCreate = z.infer<typeof schemaCreateSchema>
 export type SchemaGenerate = z.infer<typeof schemaGenerateSchema>
@@ -174,6 +173,6 @@ export type SubjectPermission = {
 
 export type PermissionUiResponse = {
   [key: string]:
-    | string
-    | { [key: string]: { [key: string]: string | { [key: string]: string } } }
+  | string
+  | { [key: string]: { [key: string]: string | { [key: string]: string } } }
 }
