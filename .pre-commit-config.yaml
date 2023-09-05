@@ -60,7 +60,7 @@ repos:
         name: sdk_test
         language: system
         entry: bash -c 'make sdk-test'
-        files: sdk/*.
+        files: sdk/.*
         pass_filenames: false
 -   repo: local
     hooks:
@@ -68,5 +68,5 @@ repos:
         name: ui_test
         language: system
         entry: bash -c 'cd ./ui; npm run test:all'
-        files: ui/*.
+        files: ui/.*
         pass_filenames: false
