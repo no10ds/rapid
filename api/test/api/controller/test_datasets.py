@@ -961,6 +961,28 @@ class TestQuery(BaseClientTest):
         }
 
     @patch.object(DataService, "query_data")
+    def test_returns_204_if_dataframe_is_empty(self, mock_query_method):
+        mock_query_method.return_value = pd.DataFrame(
+            {
+                "column1": [],
+                "column2": [],
+                "area": [],
+            }
+        )
+
+        query_url = f"{BASE_API_PATH}/datasets/raw/mydomain/mydataset/query?version=6"
+
+        response = self.client.post(
+            query_url, headers={"Authorization": "Bearer test-token"}
+        )
+
+        assert response.status_code == 204
+        assert (
+            response.text
+            == "No rows were returned. Either there is no data or the query is too limiting."
+        )
+
+    @patch.object(DataService, "query_data")
     def test_returns_error_from_query_request_when_format_is_unsupported(
         self, mock_query_method
     ):
