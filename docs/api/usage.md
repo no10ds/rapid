@@ -17,8 +17,6 @@ The first step is to create a dataset, which we can do by uploading a schema. Th
 
 After a schema has been uploaded, data can then be uploaded to the dataset. During the upload process, the API checks if the data matches the schema. This ensures that each of the datasets remain consistent.
 
-<!-- TODO: Update diagrams -->
-
 ## Data upload and query flows
 
 ### No schema exists + upload data + query
