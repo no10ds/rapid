@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 # ---- Start docker service
 sudo service docker start
 

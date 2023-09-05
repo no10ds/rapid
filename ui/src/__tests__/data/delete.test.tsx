@@ -1,12 +1,13 @@
-import {
-  screen,
-  waitFor,
-  waitForElementToBeRemoved,
-} from '@testing-library/react'
+import { screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import fetchMock from 'jest-fetch-mock'
 import DeletePage from '@/pages/data/delete'
-import { mockDataset, mockDataSetsList, renderWithProviders, selectAutocompleteOption } from '@/utils/testing'
+import {
+  mockDataset,
+  mockDataSetsList,
+  renderWithProviders,
+  selectAutocompleteOption
+} from '@/utils/testing'
 import { DeleteDatasetResponse } from '@/service/types'
 
 describe('Page: Delete page', () => {
@@ -25,8 +26,7 @@ describe('Page: Delete page', () => {
     expect(datasetDropdown).toBeVisible()
 
     expect(screen.getByTestId('submit')).toBeInTheDocument()
-  }
-  )
+  })
 
   it('error on fetch', async () => {
     fetchMock.mockReject(new Error('fake error message'))

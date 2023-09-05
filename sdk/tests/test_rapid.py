@@ -19,6 +19,7 @@ from .conftest import RAPID_URL, RAPID_TOKEN
 
 DUMMY_SCHEMA = {
     "metadata": {
+        "layer": "raw",
         "domain": "test",
         "dataset": "rapid_sdk",
         "sensitivity": "PUBLIC",
@@ -105,10 +106,11 @@ class TestRapid:
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
     def test_download_dataframe_success(self, requests_mock: Mocker, rapid: Rapid):
+        layer = "raw"
         domain = "test_domain"
         dataset = "test_dataset"
         requests_mock.post(
-            f"{RAPID_URL}/datasets/{domain}/{dataset}/query",
+            f"{RAPID_URL}/datasets/{layer}/{domain}/{dataset}/query",
             json={
                 "0": {"column1": "value1", "column2": "value2"},
                 "2": {"column1": "value3", "column2": "value4"},
@@ -116,7 +118,7 @@ class TestRapid:
             },
             status_code=200,
         )
-        res = rapid.download_dataframe(domain, dataset)
+        res = rapid.download_dataframe(layer, domain, dataset)
         assert res.shape == (3, 2)
         assert list(res.columns) == ["column1", "column2"]
 
@@ -124,11 +126,12 @@ class TestRapid:
     def test_download_dataframe_success_with_version(
         self, requests_mock: Mocker, rapid: Rapid
     ):
+        layer = "raw"
         domain = "test_domain"
         dataset = "test_dataset"
         version = "5"
         requests_mock.post(
-            f"{RAPID_URL}/datasets/{domain}/{dataset}/query?version=5",
+            f"{RAPID_URL}/datasets/{layer}/{domain}/{dataset}/query?version=5",
             json={
                 "0": {"column1": "value1", "column2": "value2"},
                 "2": {"column1": "value3", "column2": "value4"},
@@ -136,7 +139,7 @@ class TestRapid:
             },
             status_code=200,
         )
-        res = rapid.download_dataframe(domain, dataset, version)
+        res = rapid.download_dataframe(layer, domain, dataset, version)
         assert res.shape == (3, 2)
         assert list(res.columns) == ["column1", "column2"]
 
@@ -144,19 +147,20 @@ class TestRapid:
     def test_upload_dataframe_success_after_waiting(
         self, requests_mock: Mocker, rapid: Rapid
     ):
+        layer = "raw"
         domain = "test_domain"
         dataset = "test_dataset"
         job_id = 1234
         df = DataFrame()
         requests_mock.post(
-            f"{RAPID_URL}/datasets/{domain}/{dataset}",
+            f"{RAPID_URL}/datasets/{layer}/{domain}/{dataset}",
             json={"details": {"job_id": job_id}},
             status_code=202,
         )
         rapid.wait_for_job_outcome = Mock()
         rapid.convert_dataframe_for_file_upload = Mock(return_value={})
 
-        res = rapid.upload_dataframe(domain, dataset, df)
+        res = rapid.upload_dataframe(layer, domain, dataset, df)
         assert res == "Success"
         rapid.wait_for_job_outcome.assert_called_once_with(job_id)
         rapid.convert_dataframe_for_file_upload.assert_called_once_with(df)
@@ -165,67 +169,71 @@ class TestRapid:
     def test_upload_dataframe_success_no_waiting(
         self, requests_mock: Mocker, rapid: Rapid
     ):
+        layer = "raw"
         domain = "test_domain"
         dataset = "test_dataset"
         job_id = 1234
         df = DataFrame()
         requests_mock.post(
-            f"{RAPID_URL}/datasets/{domain}/{dataset}",
+            f"{RAPID_URL}/datasets/{layer}/{domain}/{dataset}",
             json={"details": {"job_id": job_id}},
             status_code=202,
         )
         rapid.convert_dataframe_for_file_upload = Mock(return_value={})
 
-        res = rapid.upload_dataframe(domain, dataset, df, wait_to_complete=False)
+        res = rapid.upload_dataframe(layer, domain, dataset, df, wait_to_complete=False)
         assert res == job_id
         rapid.convert_dataframe_for_file_upload.assert_called_once_with(df)
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
     def test_upload_dataframe_failure(self, requests_mock: Mocker, rapid: Rapid):
+        layer = "raw"
         domain = "test_domain"
         dataset = "test_dataset"
         job_id = 1234
         df = DataFrame()
         requests_mock.post(
-            f"{RAPID_URL}/datasets/{domain}/{dataset}",
+            f"{RAPID_URL}/datasets/{layer}/{domain}/{dataset}",
             json={"details": {"job_id": job_id}},
             status_code=400,
         )
         rapid.convert_dataframe_for_file_upload = Mock(return_value={})
 
         with pytest.raises(DataFrameUploadFailedException):
-            rapid.upload_dataframe(domain, dataset, df, wait_to_complete=False)
+            rapid.upload_dataframe(layer, domain, dataset, df, wait_to_complete=False)
             rapid.convert_dataframe_for_file_upload.assert_called_once_with(df)
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
     def test_generate_info_success(self, requests_mock: Mocker, rapid: Rapid):
+        layer = "raw"
         domain = "test_domain"
         dataset = "test_dataset"
         df = DataFrame()
         mocked_response = {"data": "dummy"}
         requests_mock.post(
-            f"{RAPID_URL}/datasets/{domain}/{dataset}/info",
+            f"{RAPID_URL}/datasets/{layer}/{domain}/{dataset}/info",
             json=mocked_response,
             status_code=200,
         )
 
-        res = rapid.generate_info(df, domain, dataset)
+        res = rapid.generate_info(df, layer, domain, dataset)
         assert res == mocked_response
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
     def test_generate_info_failure(self, requests_mock: Mocker, rapid: Rapid):
+        layer = "raw"
         domain = "test_domain"
         dataset = "test_dataset"
         df = DataFrame()
         mocked_response = {"details": "dummy"}
         requests_mock.post(
-            f"{RAPID_URL}/datasets/{domain}/{dataset}/info",
+            f"{RAPID_URL}/datasets/{layer}/{domain}/{dataset}/info",
             json=mocked_response,
             status_code=422,
         )
 
         with pytest.raises(DatasetInfoFailedException):
-            rapid.generate_info(df, domain, dataset)
+            rapid.generate_info(df, layer, domain, dataset)
 
     @pytest.mark.usefixtures("rapid")
     def test_convert_dataframe_for_file_upload(self, rapid: Rapid):
@@ -238,12 +246,14 @@ class TestRapid:
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
     def test_generate_schema_success(self, requests_mock: Mocker, rapid: Rapid):
+        layer = "raw"
         domain = "test_domain"
         dataset = "test_dataset"
         sensitivity = "PUBLIC"
         df = DataFrame()
         mocked_response = {
             "metadata": {
+                "layer": "raw",
                 "domain": "test",
                 "dataset": "rapid_sdk",
                 "sensitivity": "PUBLIC",
@@ -270,12 +280,13 @@ class TestRapid:
             ],
         }
         requests_mock.post(
-            f"{RAPID_URL}/schema/{sensitivity}/{domain}/{dataset}/generate",
+            f"{RAPID_URL}/schema/{layer}/{sensitivity}/{domain}/{dataset}/generate",
             json=mocked_response,
             status_code=200,
         )
 
-        res = rapid.generate_schema(df, domain, dataset, sensitivity)
+        res = rapid.generate_schema(df, layer, domain, dataset, sensitivity)
+        assert res.metadata.layer == "raw"
         assert res.metadata.domain == "test"
         assert res.metadata.dataset == "rapid_sdk"
         assert res.columns[0].name == "column_a"
@@ -283,18 +294,19 @@ class TestRapid:
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
     def test_generate_schema_failure(self, requests_mock: Mocker, rapid: Rapid):
+        layer = "raw"
         domain = "test_domain"
         dataset = "test_dataset"
         sensitivity = "PUBLIC"
         df = DataFrame()
         mocked_response = {"data": "dummy"}
         requests_mock.post(
-            f"{RAPID_URL}/schema/{sensitivity}/{domain}/{dataset}/generate",
+            f"{RAPID_URL}/schema/{layer}/{sensitivity}/{domain}/{dataset}/generate",
             json=mocked_response,
             status_code=400,
         )
         with pytest.raises(SchemaGenerationFailedException):
-            rapid.generate_schema(df, domain, dataset, sensitivity)
+            rapid.generate_schema(df, layer, domain, dataset, sensitivity)
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
     def test_create_schema_success(self, requests_mock: Mocker, rapid: Rapid):

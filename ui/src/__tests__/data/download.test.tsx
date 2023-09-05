@@ -1,8 +1,4 @@
-import {
-  screen,
-  waitFor,
-  waitForElementToBeRemoved,
-} from '@testing-library/react'
+import { screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import fetchMock from 'jest-fetch-mock'
 import { mockDataset, mockDataSetsList, renderWithProviders } from '@/utils/testing'
@@ -32,8 +28,7 @@ describe('Page: Download page', () => {
     expect(datasetDropdown).toBeVisible()
 
     expect(screen.getByTestId('submit')).toBeInTheDocument()
-  }
-  )
+  })
 
   it('renders dataset-selector', async () => {
     fetchMock.mockResponseOnce(JSON.stringify(mockDataSetsList), { status: 200 })

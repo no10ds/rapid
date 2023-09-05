@@ -59,11 +59,9 @@ There are also these optional inputs:
 
 Once you apply the Terraform, a new instance of the application should be created.
 
-
-
 ## rAPId Full Stack
 
-For teams with no existing infrastructure and just a blank AWS Account, we have ```make``` commands that will set up the necessary infrastructure from scratch with sensible defaults.
+For teams with no existing infrastructure and just a blank AWS Account, we have `make` commands that will set up the necessary infrastructure from scratch with sensible defaults.
 
 ### Pre-requisites
 
@@ -146,7 +144,7 @@ mechanism to ensure infrastructure changes are applied atomically.
 To set up the S3 backend follow these steps:
 
 - Replace the values in `backend.hcl` with your custom values (these can be any value you would like). They will be referenced to create the Terraform state components and used going forwards as the backend config.
-- In the root folder run ```make infra-backend```, this will initialise Terraform by creating both the state bucket and dynamodb table in AWS.
+- In the root folder run `make infra-backend`, this will initialise Terraform by creating both the state bucket and dynamodb table in AWS.
 
 ### IAM User Setup (Optional)
 
@@ -216,14 +214,14 @@ Optional:
 
 Then, run the following command on each block:
 
-- ```make infra-init block=<block-name>``` to initialise Terraform
-- ```make infra-plan block=<block-name>``` to plan (to check the changes ensuring nothing will be run)
-- ```make infra-apply block=<block-name>``` to apply changes, when prompted type ```yes```
+- `make infra-init block=<block-name>` to initialise Terraform
+- `make infra-plan block=<block-name>` to plan (to check the changes ensuring nothing will be run)
+- `make infra-apply block=<block-name>` to apply changes, when prompted type `yes`
 
 Run the blocks in this order:
 
 1. [iam-config](#iam-user-setup-optional)
-> All the users' roles/policies will be handled here and will delete any previous config
+   > All the users' roles/policies will be handled here and will delete any previous config
 2. vpc
 3. s3
 4. auth
