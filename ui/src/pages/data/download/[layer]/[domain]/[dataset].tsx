@@ -36,7 +36,10 @@ function DownloadDataset() {
     isLoading: isDatasetInfoLoading,
     data: datasetInfoData,
     error: datasetInfoError
-  } = useQuery(['datasetInfo', layer, domain, dataset, version ? version : 0], getDatasetInfo)
+  } = useQuery(
+    ['datasetInfo', layer, domain, dataset, version ? version : 0],
+    getDatasetInfo
+  )
 
   const { isLoading, mutate, error } = useMutation<
     Response,
@@ -56,8 +59,7 @@ function DownloadDataset() {
         document.body.appendChild(a)
         a.click()
         window.URL.revokeObjectURL(url)
-      }
-      else if (response.status === 204) {
+      } else if (response.status === 204) {
         setNoContentReturn(true)
       }
     }
@@ -248,11 +250,12 @@ function DownloadDataset() {
 
       {noContentReturn && (
         <Alert severity="error" sx={{ mb: 3 }}>
-          {"No data returned for this query. Please ensure that data has been uploaded and the query is not too restrictive."}
+          {
+            'No data returned for this query. Please ensure that data has been uploaded and the query is not too restrictive.'
+          }
         </Alert>
       )}
       {error && (
-
         <Alert severity="error" sx={{ mb: 3 }}>
           {error?.message}
         </Alert>

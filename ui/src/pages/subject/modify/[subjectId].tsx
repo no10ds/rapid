@@ -18,7 +18,6 @@ import { useEffect } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import PermissionsTable from '@/components/PermissionsTable/PermissionsTable'
 
-
 function SubjectModifyPage() {
   const router = useRouter()
   const { subjectId, name } = router.query
@@ -28,9 +27,9 @@ function SubjectModifyPage() {
   const fieldArrayReturn = useFieldArray({
     control,
     name: 'permissions'
-  });
+  })
 
-  const { append } = fieldArrayReturn;
+  const { append } = fieldArrayReturn
 
   const {
     isLoading: isPermissionsListDataLoading,
@@ -77,20 +76,16 @@ function SubjectModifyPage() {
   return (
     <form
       onSubmit={handleSubmit(async (data) => {
-        const permissions = data.permissions.map((permission) => extractPermissionNames(permission, permissionsListData))
-        await mutate(
-          { subject_id: subjectId as string, permissions })
+        const permissions = data.permissions.map((permission) =>
+          extractPermissionNames(permission, permissionsListData)
+        )
+        await mutate({ subject_id: subjectId as string, permissions })
       })}
       noValidate
     >
       <Card
         action={
-          <Button
-            color="primary"
-            type="submit"
-            loading={isLoading}
-            data-testid="submit"
-          >
+          <Button color="primary" type="submit" loading={isLoading} data-testid="submit">
             Modify
           </Button>
         }
@@ -99,7 +94,11 @@ function SubjectModifyPage() {
           Modify Subject
         </Typography>
         <Typography gutterBottom>Select permissions for {name}</Typography>
-        <PermissionsTable permissionsListData={permissionsListData} fieldArrayReturn={fieldArrayReturn} />
+        <PermissionsTable
+          permissionsListData={permissionsListData}
+          fieldArrayReturn={fieldArrayReturn}
+          isModifyPage={true}
+        />
         {error && (
           <Alert severity="error" sx={{ mb: 3 }}>
             {error?.message}

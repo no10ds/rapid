@@ -1,7 +1,6 @@
 name: rAPId Integration Tests
 
 on:
-
   workflow_dispatch:
 
   pull_request:
@@ -9,7 +8,6 @@ on:
       - opened
 
 jobs:
-
   run-ui-test:
     runs-on: self-hosted
 
@@ -30,11 +28,9 @@ jobs:
           cd ui
           npm install @playwright/test -D
 
-      - name: run playwright tests
-        run: |
-          cd ui
-          npx playwright test ui/playwright
+      - name: Run playwright tests
+        run: make ui-test-e2e
         env:
-          DOMAIN: "https://${{ secrets.DOMAIN_NAME }}"
+          DOMAIN_NAME: 'https://${{ secrets.DOMAIN_NAME }}'
           RESOURCE_PREFIX: ${{ secrets.RESOURCE_PREFIX }}
           AWS_REGION: ${{ secrets.AWS_REGION }}

@@ -12,17 +12,14 @@ As a maintainer of a rAPId you can create new clients to interact with the API t
 
 ### Inputs
 
-| Parameters       | Usage               | Example values   | Definition                                                                |
-|------------------|---------------------|------------------|---------------------------------------------------------------------------|
-| `client details` | JSON Request Body   | See below        | The name of the client application to onboard and the granted permissions |
+| Parameters       | Usage             | Example values | Definition                                                                |
+| ---------------- | ----------------- | -------------- | ------------------------------------------------------------------------- |
+| `client details` | JSON Request Body | See below      | The name of the client application to onboard and the granted permissions |
 
 ```json
 {
-    "client_name": "department_for_education",
-    "permissions": [
-        "READ_ALL",
-        "WRITE_PUBLIC"
-    ]
+  "client_name": "department_for_education",
+  "permissions": ["READ_ALL", "WRITE_PUBLIC"]
 }
 ```
 
@@ -42,10 +39,7 @@ Once the new client has been created, the following information is returned in t
 ```json
 {
   "client_name": "department_for_education",
-  "permissions": [
-    "READ_ALL",
-    "WRITE_PUBLIC"
-  ],
+  "permissions": ["READ_ALL", "WRITE_PUBLIC"],
   "client_id": "1234567890-abcdefghijk",
   "client_secret": "987654321"
 }

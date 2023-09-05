@@ -20,6 +20,7 @@ class Owner(BaseModel):
 
 
 class SchemaMetadata(BaseModel):
+    layer: str
     domain: str
     dataset: str
     sensitivity: SensitivityLevel
@@ -51,6 +52,7 @@ class Schema(BaseModel):
 
             schema = Schema(
                 metadata=SchemaMetadata(
+                    layer='default',
                     domain="domain",
                     dataset="dataset",
                     sensitivity=SensitivityLevel.PUBLIC,

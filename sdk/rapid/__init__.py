@@ -1,2 +1,2 @@
-from rapid.auth import RapidAuth
-from rapid.rapid import Rapid
+from rapid.auth import RapidAuth  # noqa: F401
+from rapid.rapid import Rapid  # noqa: F401

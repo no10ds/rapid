@@ -4,11 +4,14 @@ import AccountLayout from '@/components/Layout/AccountLayout'
 import UploadProgress from '@/components/UploadProgress/UploadProgress'
 import DatasetSelector from '@/components/DatasetSelector/DatasetSelector'
 import { getDatasetsUi, uploadDataset } from '@/service'
-import { Dataset, UploadDatasetResponse, UploadDatasetResponseDetails } from '@/service/types'
+import {
+  Dataset,
+  UploadDatasetResponse,
+  UploadDatasetResponseDetails
+} from '@/service/types'
 import { Typography, LinearProgress } from '@mui/material'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-
 
 function UploadDataset({ datasetInput = null }: { datasetInput?: Dataset }) {
   const [file, setFile] = useState<File | undefined>()
@@ -53,14 +56,24 @@ function UploadDataset({ datasetInput = null }: { datasetInput?: Dataset }) {
         event.preventDefault()
         const formData = new FormData()
         formData.append('file', file)
-        await mutate({ path: `${dataset.layer}/${dataset.domain}/${dataset.dataset}?version=${dataset.version}`, data: formData })
+        await mutate({
+          path: `${dataset.layer}/${dataset.domain}/${dataset.dataset}?version=${dataset.version}`,
+          data: formData
+        })
       }}
     >
       <Card
-        action={!disable &&
-          <Button color="primary" type="submit" loading={isLoading} data-testid="submit">
-            Upload dataset
-          </Button>
+        action={
+          !disable && (
+            <Button
+              color="primary"
+              type="submit"
+              loading={isLoading}
+              data-testid="submit"
+            >
+              Upload dataset
+            </Button>
+          )
         }
       >
         <Typography variant="body1" gutterBottom>
@@ -68,10 +81,13 @@ function UploadDataset({ datasetInput = null }: { datasetInput?: Dataset }) {
           been uploaded for the data source and the data to upload matches this schema.
         </Typography>
 
-        <DatasetSelector datasetsList={datasetsList} setParentDataset={setDataset}></DatasetSelector>
+        <DatasetSelector
+          datasetsList={datasetsList}
+          setParentDataset={setDataset}
+        ></DatasetSelector>
 
         <Row>
-          {!disable &&
+          {!disable && (
             <input
               name="file"
               id="file"
@@ -80,11 +96,15 @@ function UploadDataset({ datasetInput = null }: { datasetInput?: Dataset }) {
               onChange={(event) => setFile(event.target.files[0])}
               // This key changing resets the file so that after an upload event it is removed
               key={`file-upload-${disable.toString()}`}
-            />}
+            />
+          )}
         </Row>
 
         {uploadSuccessDetails ? (
-          <UploadProgress uploadSuccessDetails={uploadSuccessDetails} setDisableUpload={setDisable} />
+          <UploadProgress
+            uploadSuccessDetails={uploadSuccessDetails}
+            setDisableUpload={setDisable}
+          />
         ) : null}
 
         {error && (
@@ -93,7 +113,7 @@ function UploadDataset({ datasetInput = null }: { datasetInput?: Dataset }) {
           </Alert>
         )}
       </Card>
-    </form >
+    </form>
   )
 }
 

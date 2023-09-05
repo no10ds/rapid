@@ -3,4 +3,3 @@ terraform {
     key = "pipeline-ami/terraform.tfstate"
   }
 }
-
