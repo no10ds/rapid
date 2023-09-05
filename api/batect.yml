@@ -64,19 +64,19 @@ tasks:
       ports:
         - local: 8000
           container: 8000
-      command: "uvicorn api.entry:app --host 0.0.0.0 --port 8000 --reload"
+      command: 'uvicorn api.entry:app --host 0.0.0.0 --port 8000 --reload'
 
   test-unit:
     description: Run unit tests
     run:
       container: service-image
-      command: "pytest test/api -vv -s"
+      command: 'pytest test/api -vv -s'
 
   test-unit-focus:
     description: Run unit tests
     run:
       container: service-image
-      command: "pytest test/api -vv -m focus"
+      command: 'pytest test/api -vv -m focus'
 
   test-e2e:
     description: Run E2E tests
@@ -86,7 +86,7 @@ tasks:
         AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
         AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
         AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:-}
-      command: "pytest test/e2e -v"
+      command: 'pytest test/e2e -v'
 
   test-e2e-focus:
     description: Run E2E tests in focus mode
@@ -96,28 +96,28 @@ tasks:
         AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
         AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
         AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:-}
-      command: "pytest test/e2e -v -m focus"
+      command: 'pytest test/e2e -v -m focus'
 
   test-coverage:
     description: Run all tests with coverage report for source code only
     run:
       container: service-image
-      command: "pytest --durations=5 --cov=api --cov-report term-missing test/api"
+      command: 'pytest --durations=5 --cov=api --cov-report term-missing test/api'
 
   lint:
     description: Lint the source and test code
     run:
       container: service-image
-      command: "flake8 api test"
+      command: 'flake8 api test'
 
   format:
     description: Format the source and test code
     run:
       container: service-image
-      command: "black api test"
+      command: 'black api test'
 
   generate_latest_changelog:
     description: Parse the changelog file for the release's changes
     run:
       container: service-image
-      command: "python get_latest_release_changelog.py"
+      command: 'python get_latest_release_changelog.py'

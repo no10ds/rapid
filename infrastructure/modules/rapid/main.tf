@@ -7,8 +7,8 @@ module "app_cluster" {
   support_emails_for_cloudwatch_alerts            = var.support_emails_for_cloudwatch_alerts
   cognito_user_login_app_credentials_secrets_name = module.auth.cognito_user_app_secret_manager_name
   cognito_user_pool_id                            = module.auth.cognito_user_pool_id
-  permissions_table                               = module.auth.user_permission_table_name
   permissions_table_arn                           = module.auth.user_permission_table_arn
+  schema_table_arn                                = module.data_workflow.schema_table_arn
   domain_name                                     = var.domain_name
   allowed_email_domains                           = var.allowed_email_domains
   rapid_ecr_url                                   = var.rapid_ecr_url
