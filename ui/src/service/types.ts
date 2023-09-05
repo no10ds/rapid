@@ -4,6 +4,7 @@ import {
   schemaGenerateSchema,
   SensitivityEnum as schemaSensitivityEnum
 } from './schema'
+import { type } from 'os'
 
 export type SchemaCreate = z.infer<typeof schemaCreateSchema>
 export type SchemaGenerate = z.infer<typeof schemaGenerateSchema>
@@ -151,6 +152,8 @@ export type MetadataItem = {
   version: string
   matching_field: 'columns' | 'description' | 'dataset'
 }
+
+export type MetadataSearchRequest = { search: string }
 
 export type MetadataSearchResponse = MetadataItem[]
 
