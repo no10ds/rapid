@@ -90,6 +90,7 @@ resource "aws_kms_key" "access_logs_key" {
 }
 
 resource "aws_cloudwatch_log_group" "access_logs_log_group" {
+  # checkov:skip=CKV_AWS_338: No need for 1 year log retention
   count             = var.enable_cloudtrail ? 1 : 0
   depends_on        = [aws_kms_key.access_logs_key]
   name              = "${var.resource-name-prefix}_access_logs"
@@ -165,6 +166,9 @@ resource "aws_s3_bucket" "access_logs" {
   #checkov:skip=CKV_AWS_144:No need for cross region replication
   #checkov:skip=CKV_AWS_145:No need for non default key
   #checkov:skip=CKV_AWS_19:No need for securely encrypted at rest
+  #checkov:skip=CKV2_AWS_6:Public blocking applied via resource
+  #checkov:skip=CKV2_AWS_62:No need for event notifications
+  #checkov:skip=CKV2_AWS_61:No need for lifecycle configuration
   count         = var.enable_cloudtrail ? 1 : 0
   bucket        = "${var.resource-name-prefix}-access-logs"
   force_destroy = true
@@ -242,6 +246,7 @@ POLICY
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "access_logs_lifecycle" {
+  # checkov:skip=CKV_AWS_300: No need for aborting failed rule
   count  = var.enable_cloudtrail ? 1 : 0
   bucket = aws_s3_bucket.access_logs[0].id
 
@@ -270,6 +275,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "access_logs_s3_en
 
 resource "aws_cloudtrail" "access_logs_trail" {
   # checkov:skip=CKV_AWS_252:No need for an SNS topic
+  # checkov:skip=CKV2_AWS_10:No need for cloudtrail logs to be intergrated with cloudwatch
   count = var.enable_cloudtrail ? 1 : 0
   depends_on = [
     aws_s3_bucket_policy.access_logs_bucket_policy, # Policy for S3 that cloudtrail dumps too

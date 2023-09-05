@@ -52,7 +52,7 @@ repos:
     rev: 2.3.261
     hooks:
       - id: checkov
-        args: [--quiet, --compact]
+        args: [--quiet, --compact, --skip-check, 'CKV2_GHA_1']
         exclude: '^(?!infrastructure/).*'
   - repo: local
     hooks:

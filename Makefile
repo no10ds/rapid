@@ -29,7 +29,7 @@ detect-vulnerabilities:
 # API Testing --------------------
 api-test:			## Run api python unit tests
 	@cd api/; ./batect test-unit
- 
+
 api-test-coverage:		## Run api python unit tests with coverage report
 	@cd api/; ./batect test-coverage
 
