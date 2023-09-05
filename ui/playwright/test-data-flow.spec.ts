@@ -89,11 +89,7 @@ test('test', async ({ page }) => {
   await page.getByRole('option', { name: datasetName }).click()
   await page.getByTestId('submit').click()
 
-  const datasetDeletedElement = await page.waitForSelector('.MuiAlertTitle-root', {
-    text: `Dataset deleted: default/ui_test_domain/${datasetName}`
-  })
-
-  expect(await datasetDeletedElement.innerText()).toEqual(
+  expect(await page.getByTestId('delete-status').innerText()).toEqual(
     `Dataset deleted: default/ui_test_domain/${datasetName}`
   )
 })

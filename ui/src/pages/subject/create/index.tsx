@@ -78,7 +78,7 @@ function CreateUserPage() {
   if (permissionsListData) {
     return (
       <form
-        onSubmit={handleSubmit(async (data) => {
+        onSubmit={handleSubmit(async (data: UserCreate) => {
           const permissions = data.permissions.map((permission) =>
             extractPermissionNames(permission, permissionsListData)
           )
