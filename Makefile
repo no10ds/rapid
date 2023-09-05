@@ -175,10 +175,10 @@ ui-create-static-out:
 ui-zip-contents:
 	@cd ui/; $(MAKE) zip-contents tag=${tag};
 
-ui-release:		## Zip and release prod static ui site
+ui-release:
 	@cd ui/; $(MAKE) upload-to-release-prod tag=${tag}
 
-ui-zip-and-release: ui-zip-contents ui-release
+ui-zip-and-release: ui-zip-contents ui-release ## Zip and release prod static ui site
 
 
 ##
