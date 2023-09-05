@@ -37,21 +37,21 @@ function GetSearch() {
   }
 
   const getChipLabel = (type) => {
-    if (type === 'Columns') {
+    if (type === 'columns') {
       return 'Column'
-    } else if (type === 'Dataset') {
+    } else if (type === 'dataset') {
       return 'Dataset Title'
-    } else if (type === 'Description') {
+    } else if (type === 'description') {
       return 'Description'
     }
   }
 
   const getChipColor = (type) => {
-    if (type === 'Columns') {
+    if (type === 'columns') {
       return 'error'
-    } else if (type === 'Dataset') {
+    } else if (type === 'dataset') {
       return 'primary'
-    } else if (type === 'Description') {
+    } else if (type === 'description') {
       return 'warning'
     }
   }
