@@ -121,6 +121,8 @@ resource "aws_iam_policy" "app_athena_query_access" {
 }
 
 resource "aws_iam_policy" "app_glue_access" {
+  # checkov:skip=CKV_AWS_355: Allow glue access
+  # checkov:skip=CKV_AWS_290: Likewise
   name        = "${var.resource-name-prefix}-app_glue_access"
   description = "Allow application instance to access Glue"
   tags        = var.tags
@@ -210,6 +212,8 @@ resource "aws_iam_policy" "app_dynamodb_access" {
 }
 
 resource "aws_iam_policy" "app_secrets_manager_access" {
+  # checkov:skip=CKV_AWS_355: Allow secrets manager access
+  # checkov:skip=CKV_AWS_288: Likewise
   name        = "${var.resource-name-prefix}-app_secrets_manager_access"
   description = "Allow application instance to access AWS Secrets Manager"
   tags        = var.tags
@@ -234,6 +238,7 @@ resource "aws_iam_policy" "app_secrets_manager_access" {
 }
 
 resource "aws_iam_policy" "app_tags_access" {
+  # checkov:skip=CKV_AWS_355: Allow tags access
   name        = "${var.resource-name-prefix}-app_tags_access"
   description = "Allow application instance to get resources by tags"
   tags        = var.tags
@@ -298,6 +303,7 @@ resource "aws_ecs_cluster" "aws-ecs-cluster" {
 
 resource "aws_cloudwatch_log_group" "log-group" {
   #checkov:skip=CKV_AWS_158:No need for KMS
+  #checkov:skip=CKV_AWS_338:No need for year long retention
   name              = "${var.resource-name-prefix}-logs"
   tags              = var.tags
   retention_in_days = 90

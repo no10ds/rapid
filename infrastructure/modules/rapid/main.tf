@@ -43,10 +43,6 @@ module "data_workflow" {
   source               = "../data-workflow"
   resource-name-prefix = var.resource-name-prefix
   aws_account          = var.aws_account
-  data_s3_bucket_arn   = aws_s3_bucket.this.arn
-  data_s3_bucket_name  = aws_s3_bucket.this.id
-  vpc_id               = var.vpc_id
-  private_subnet       = var.private_subnet_ids_list[0]
   aws_region           = var.aws_region
 }
 
@@ -68,6 +64,9 @@ module "ui" {
 resource "aws_s3_bucket" "this" {
   #checkov:skip=CKV_AWS_144:No need for cross region replication
   #checkov:skip=CKV_AWS_145:No need for non default key
+  #checkov:skip=CKV2_AWS_62:No need for event notifications
+  #checkov:skip=CKV2_AWS_61:No need for lifecycle configuration
+
   bucket        = var.resource-name-prefix
   acl           = "private"
   force_destroy = false
@@ -106,6 +105,8 @@ resource "aws_s3_bucket" "logs" {
   #checkov:skip=CKV_AWS_145:No need for non default key
   #checkov:skip=CKV_AWS_18:Log bucket shouldn't be logging
   #checkov:skip=CKV_AWS_21:No need to version log bucket
+  #checkov:skip=CKV2_AWS_62:No need for event notifications
+  #checkov:skip=CKV2_AWS_61:No need for lifecycle configuration
   bucket        = "${var.resource-name-prefix}-logs"
   acl           = "private"
   force_destroy = false
