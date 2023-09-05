@@ -472,7 +472,12 @@ def upload_data(
         204: {
             "description": "Empty response",
             "content": {
-                "plain/text": "No rows were returned. Either there is no data or the query is too limiting."
+                "text/plain": {
+                    "schema": {
+                        "type": "string",
+                        "example": "No rows were returned. Either there is no data or the query is too limiting.",
+                    }
+                }
             },
         },
     },
