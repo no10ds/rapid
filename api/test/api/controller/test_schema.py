@@ -61,10 +61,10 @@ class TestSchemaUpload(BaseClientTest):
         assert response.status_code == 400
         assert response.json() == {
             "details": [
-                "metadata: layer -> field required",
-                "metadata: domain -> field required",
-                "metadata: dataset -> field required",
-                "metadata: sensitivity -> field required",
+                "layer -> Field required",
+                "domain -> Field required",
+                "dataset -> Field required",
+                "sensitivity -> Field required",
             ]
         }
 
@@ -232,10 +232,10 @@ class TestSchemaUpdate(BaseClientTest):
         assert response.status_code == 400
         assert response.json() == {
             "details": [
-                "metadata: layer -> field required",
-                "metadata: domain -> field required",
-                "metadata: dataset -> field required",
-                "metadata: sensitivity -> field required",
+                "layer -> Field required",
+                "domain -> Field required",
+                "dataset -> Field required",
+                "sensitivity -> Field required",
             ]
         }
 
@@ -412,7 +412,7 @@ class TestSchemaGeneration(BaseClientTest):
         )
 
         assert response.status_code == 200
-        assert response.json() == expected_response
+        assert response.json() == expected_response.dict()
 
     @patch.object(SchemaInferService, "infer_schema")
     @patch("api.controller.schema.store_file_to_disk")
@@ -466,7 +466,7 @@ class TestSchemaGeneration(BaseClientTest):
         )
 
         assert response.status_code == 200
-        assert response.json() == expected_response
+        assert response.json() == expected_response.dict()
 
     def test_bad_request_when_filetype_is_invalid(self):
         file_content = b"some content"

@@ -38,8 +38,6 @@ def partitioned_dataframe(df: pd.DataFrame, partitions: List[str]) -> List[Parti
     partitioned_data = []
     grouped = df.groupby(by=partitions)
     for group_spec, group_data in grouped:
-        group_spec = (group_spec,) if len(partitions) == 1 else group_spec
-
         cleaned_dataframe = drop_columns(df=group_data, columns=partitions).reset_index(
             drop=True
         )
