@@ -1,5 +1,6 @@
 awswrangler
 boto3
+cryptography
 fastapi
 gunicorn
 httpx
@@ -9,5 +10,6 @@ psutil
 pyjwt
 pydantic[email]
 python-multipart
+uvicorn
 requests
 strenum
