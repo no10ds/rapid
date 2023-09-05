@@ -12,7 +12,7 @@ repos:
     rev: 1.7.5
     hooks:
       - id: bandit
-        exclude: '(test|docs)/*'
+        exclude: '(test|docs)/.*'
   - repo: https://github.com/psf/black
     rev: 22.6.0
     hooks:

@@ -13,6 +13,7 @@ from api.application.services.dataset_validation import (
     dataset_has_acceptable_null_values,
     dataset_has_correct_data_types,
     dataset_has_no_illegal_characters_in_partition_columns,
+    dataset_has_rows,
 )
 from api.common.custom_exceptions import (
     DatasetValidationError,
@@ -127,6 +128,22 @@ class TestDatasetValidation:
         except UnprocessableDatasetError as error:
             assert error.message == [
                 "Expected columns: ['colname1', 'colname2', 'colname3'], received: ['wrongcolumn', 'colname2', 'colname3']",
+            ]
+
+    def test_no_rows(self):
+        dataframe = pd.DataFrame(
+            {
+                "wrongcolumn": [],
+                "colname2": [],
+                "colname3": [],
+            }
+        )
+
+        try:
+            build_validated_dataframe(self.valid_schema, dataframe)
+        except UnprocessableDatasetError as error:
+            assert error.message == [
+                "Dataset has no rows, it cannot be processed",
             ]
 
     def test_invalid_when_partition_column_with_illegal_characters(self):
@@ -348,7 +365,7 @@ class TestDatasetValidation:
                 ),
             ],
         )
-        print("This test is starting")
+
         try:
             build_validated_dataframe(schema, dataframe)
         except DatasetValidationError:
@@ -396,6 +413,15 @@ class TestDatasetValidation:
             ),
         ):
             dataset_has_correct_columns(df, schema)
+
+    def test_return_error_message_when_dataset_has_no_rows(self):
+        df = pd.DataFrame(columns=["a", "b"])
+
+        with pytest.raises(
+            UnprocessableDatasetError,
+            match=re.escape("Dataset has no rows, it cannot be processed"),
+        ):
+            dataset_has_rows(df)
 
     def test_return_error_message_when_not_accepted_null_values(self):
         df = pd.DataFrame(
