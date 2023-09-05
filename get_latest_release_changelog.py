@@ -1,6 +1,6 @@
 import re
 
-with open("CHANGELOG.md", "r") as changelog_file:
+with open("./docs/changelog.md", "r") as changelog_file:
     changelog_lines = changelog_file.readlines()
 
 parsed_lines = []

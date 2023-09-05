@@ -67,19 +67,8 @@ function AccountIndexPage() {
           <Link color="inherit" href={`/api/docs`} variant="body1">
             View the API docs
           </Link>
-          <Link
-            color="inherit"
-            href="https://github.com/no10ds/rapid-api"
-            variant="body1"
-          >
+          <Link color="inherit" href="https://github.com/no10ds/rapid" variant="body1">
             See the source code
-          </Link>
-          <Link
-            color="inherit"
-            href="https://github.com/no10ds/rapid-api/blob/main/docs/guides/usage/usage.md"
-            variant="body1"
-          >
-            View the rAPId Architecture
           </Link>
           <Link
             color="inherit"

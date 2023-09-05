@@ -34,7 +34,7 @@ nav:
       - infrastructure/certificates.md
       - infrastructure/domains_subdomains.md
   - UI:
-      - ui/getting_started.md
+      - ui/usage.md
   - SDK:
       - sdk/usage.md
       - sdk/useful_patterns.md
@@ -46,7 +46,7 @@ nav:
               - sdk/api/items/schema.md
           - Patterns:
               - sdk/api/patterns/data.md
-  - Releases: releases.md
+  - Releases: changelog.md
   - Contributing: contributing.md
 
 plugins:
