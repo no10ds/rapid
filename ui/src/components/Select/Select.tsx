@@ -10,8 +10,7 @@ import SelectCheckbox from './SelectCheckbox'
 import FormControl from '../FormControl/FormControl'
 import { Props } from './types'
 
-
-const StyledBasicSelect = styled(BasicSelect) <ComponentProps<typeof BasicSelect>>`
+const StyledBasicSelect = styled(BasicSelect)<ComponentProps<typeof BasicSelect>>`
   .MuiInputBase-input {
     padding: 4px 15px 0px 15px;
     height: 100%;

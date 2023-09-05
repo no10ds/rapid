@@ -2,6 +2,7 @@
 <img src="./logo.png" display=block margin-left=auto margin-right=auto width=80%;/>
 
 # Project rAPId
+
 ![Deployment Pipeline](https://github.com/no10ds/rapid/actions/workflows/main.yml/badge.svg)
 
 <a href="https://ukgovernmentdigital.slack.com/archives/C03E5GV2LQM"><img src="https://user-images.githubusercontent.com/609349/63558739-f60a7e00-c502-11e9-8434-c8a95b03ce62.png" width=160px; /></a>
@@ -37,9 +38,11 @@ Or you can consult the [Infrastructure Repo](https://github.com/no10ds/rapid/tre
 # Developing
 
 This is a quick guide to running rAPId locally for development.
+
 ## Prerequisites
 
 Install all the required tools
+
 - jq (use Homebrew)
 - Git
 - [pre-commit](https://pre-commit.com)

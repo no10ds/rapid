@@ -1,72 +1,77 @@
 exclude: '^ui'
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.3.0
     hooks:
-    -   id: check-yaml
-    -   id: check-json
-    -   id: check-merge-conflict
-    -   id: end-of-file-fixer
-    -   id: trailing-whitespace
--   repo: https://github.com/PyCQA/bandit
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/PyCQA/bandit
     rev: 1.7.5
     hooks:
-    -   id: bandit
+      - id: bandit
         exclude: '(test|docs)/*'
--   repo: https://github.com/psf/black
+  - repo: https://github.com/psf/black
     rev: 22.6.0
     hooks:
-    -   id: black
--   repo: https://github.com/Yelp/detect-secrets
+      - id: black
+  - repo: https://github.com/Yelp/detect-secrets
     rev: v1.3.0
     hooks:
-    -   id: detect-secrets
+      - id: detect-secrets
         exclude: docs/
--   repo: https://github.com/asottile/blacken-docs
+  - repo: https://github.com/asottile/blacken-docs
     rev: v1.12.1
     hooks:
-    -   id: blacken-docs
--   repo: https://github.com/PyCQA/flake8
+      - id: blacken-docs
+  - repo: https://github.com/PyCQA/flake8
     rev: 4.0.1
     hooks:
-    -   id: flake8
+      - id: flake8
         args: ['--config', 'api/.flake8']
         exclude: (docs/|get_latest_release_changelog.py)
-# -   repo: https://github.com/PyCQA/pylint
-#     rev: v2.15.5
-#     hooks:
-#     -   id: pylint
-#         exclude: (docs/|get_latest_release_changelog.py)
--   repo: https://github.com/antonbabenko/pre-commit-terraform
+  # -   repo: https://github.com/PyCQA/pylint
+  #     rev: v2.15.5
+  #     hooks:
+  #     -   id: pylint
+  #         exclude: (docs/|get_latest_release_changelog.py)
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
     rev: v1.81.0
     hooks:
-    -   id: terraform_fmt
+      - id: terraform_fmt
         exclude: '^(?!infrastructure/).*'
-    -   id: terraform_validate
+      - id: terraform_validate
         exclude: '^(?!infrastructure/).*'
-    -   id: terraform_docs
+      - id: terraform_docs
         args:
-            - markdown table --recursive --output-file README.md .
+          - markdown table --recursive --output-file README.md .
         exclude: '^(?!infrastructure/).*'
--   repo: https://github.com/bridgecrewio/checkov.git
+  - repo: https://github.com/bridgecrewio/checkov.git
     rev: 2.3.261
     hooks:
-    -   id: checkov
+      - id: checkov
         args: [--quiet, --compact]
         exclude: '^(?!infrastructure/).*'
--   repo: local
+  - repo: local
     hooks:
-    -   id: sdk_test
+      - id: sdk_test
         name: sdk_test
         language: system
         entry: bash -c 'make sdk-test'
         files: sdk/.*
         pass_filenames: false
--   repo: local
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.0.3
     hooks:
-    -   id: ui_test
+      - id: prettier
+        args: ['--config', 'ui/.prettierrc.json', './ui']
+  - repo: local
+    hooks:
+      - id: ui_test
         name: ui_test
         language: system
-        entry: bash -c 'cd ./ui; npm run test:all'
         files: ui/.*
+        entry: bash -c 'cd ./ui; npm install; npm run test:all'
         pass_filenames: false

@@ -1,4 +1,9 @@
-import { createSchema, schemaCreateSchema, GlobalSensitivities, ProtectedSensitivity } from '@/service'
+import {
+  createSchema,
+  schemaCreateSchema,
+  GlobalSensitivities,
+  ProtectedSensitivity
+} from '@/service'
 import {
   CreateSchemaResponse,
   GenerateSchemaResponse,
@@ -18,25 +23,29 @@ import Select from './Select/Select'
 import SimpleTable from './SimpleTable/SimpleTable'
 import TextField from './TextField/TextField'
 
-
 const dataTypes = [
-  "bigint",
-  "boolean",
-  "char",
-  "date",
-  "decimal",
-  "double",
-  "float",
-  "int",
-  "smallint",
-  "string",
-  "timestamp",
-  "tinyint",
-  "varchar"
+  'bigint',
+  'boolean',
+  'char',
+  'date',
+  'decimal',
+  'double',
+  'float',
+  'int',
+  'smallint',
+  'string',
+  'timestamp',
+  'tinyint',
+  'varchar'
 ]
 
-
-function CreateSchema({ schemaData, layersData }: { schemaData: GenerateSchemaResponse, layersData: string[] }) {
+function CreateSchema({
+  schemaData,
+  layersData
+}: {
+  schemaData: GenerateSchemaResponse
+  layersData: string[]
+}) {
   const [newSchemaData, setNewSchemaData] = useState<GenerateSchemaResponse>(schemaData)
   const [keyValueTag, setKeyValueTag] = useState({ key: '', value: '' })
   const [valueTag, setValueTag] = useState('')
@@ -134,9 +143,7 @@ function CreateSchema({ schemaData, layersData }: { schemaData: GenerateSchemaRe
           <Controller
             name="layer"
             control={control}
-            defaultValue={
-              newSchemaData.metadata.layer
-            }
+            defaultValue={newSchemaData.metadata.layer}
             render={({ field, fieldState: { error } }) => (
               <>
                 <Typography variant="caption">Dataset Layer</Typography>

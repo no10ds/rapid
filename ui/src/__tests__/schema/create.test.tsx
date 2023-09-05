@@ -1,4 +1,9 @@
-import { fireEvent, screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react'
+import {
+  fireEvent,
+  screen,
+  waitFor,
+  waitForElementToBeRemoved
+} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import fetchMock from 'jest-fetch-mock'
 import { renderWithProviders } from '@/utils/testing'
@@ -58,7 +63,6 @@ describe('Page: Upload page', () => {
   })
 
   describe('on submit', () => {
-
     const file = new File(['test'], 'testfile.txt', { type: 'text/plain' })
     const formData = new FormData()
     formData.append('file', file)

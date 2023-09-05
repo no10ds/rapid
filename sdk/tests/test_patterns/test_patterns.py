@@ -13,6 +13,7 @@ from rapid import Rapid
 from tests.conftest import RAPID_URL
 
 metadata = SchemaMetadata(
+    layer="raw",
     domain="test",
     dataset="rapid_sdk",
     sensitivity=SensitivityLevel.PUBLIC,
@@ -21,6 +22,7 @@ metadata = SchemaMetadata(
 
 mock_response = {
     "metadata": {
+        "layer": "raw",
         "domain": "test",
         "dataset": "rapid_sdk",
         "sensitivity": "PUBLIC",
@@ -68,7 +70,7 @@ df = DataFrame(
 class TestUtils:
     def test_upload_and_create_dataframe(self, requests_mock: Mocker, rapid: Rapid):
         requests_mock.post(
-            f"{RAPID_URL}/schema/{metadata.sensitivity}/{metadata.domain}"
+            f"{RAPID_URL}/schema/{metadata.layer}/{metadata.sensitivity}/{metadata.domain}"
             + f"/{metadata.dataset}/generate",
             json=mock_response,
         )
@@ -79,14 +81,14 @@ class TestUtils:
         upload_and_create_dataframe(rapid, metadata, df)
 
         rapid.upload_dataframe.assert_called_once_with(
-            metadata.domain, metadata.dataset, df
+            metadata.layer, metadata.domain, metadata.dataset, df
         )
 
     def test_upload_and_create_dataframe_fails(
         self, requests_mock: Mocker, rapid: Rapid
     ):
         requests_mock.post(
-            f"{RAPID_URL}/schema/{metadata.sensitivity}/{metadata.domain}"
+            f"{RAPID_URL}/schema/{metadata.layer}/{metadata.sensitivity}/{metadata.domain}"
             + f"/{metadata.dataset}/generate",
             json=mock_response,
         )
@@ -101,7 +103,7 @@ class TestUtils:
         self, mocked_update_schema_dataframe, requests_mock: Mocker, rapid: Rapid
     ):
         requests_mock.post(
-            f"{RAPID_URL}/schema/{metadata.sensitivity}/{metadata.domain}"
+            f"{RAPID_URL}/schema/{metadata.layer}/{metadata.sensitivity}/{metadata.domain}"
             + f"/{metadata.dataset}/generate",
             json=mock_response,
         )
@@ -136,7 +138,7 @@ class TestUtils:
             ),
         ]
         requests_mock.post(
-            f"{RAPID_URL}/datasets/{metadata.domain}/{metadata.dataset}/info",
+            f"{RAPID_URL}/datasets/{metadata.layer}/{metadata.domain}/{metadata.dataset}/info",
             json=mock_response,
         )
         requests_mock.put(f"{RAPID_URL}/schema", json={"dummy": "data"})
@@ -144,7 +146,7 @@ class TestUtils:
 
     def test_update_schema_dataframe_fail(self, requests_mock: Mocker, rapid: Rapid):
         requests_mock.post(
-            f"{RAPID_URL}/datasets/{metadata.domain}/{metadata.dataset}/info",
+            f"{RAPID_URL}/datasets/{metadata.layer}/{metadata.domain}/{metadata.dataset}/info",
             json=mock_response,
         )
         requests_mock.put(f"{RAPID_URL}/schema", json={"dummy": "data"})

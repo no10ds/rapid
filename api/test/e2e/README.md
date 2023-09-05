@@ -9,7 +9,7 @@ performed that require the relevant resources to be available in AWS (files in S
 
 Run [this](./setup_e2e_tests.py) script, passing in values for the environment variables listed below.
 
-``` bash
+```bash
 CLIENT_ID
 CLIENT_SECRET
 BASE_URL

@@ -35,7 +35,10 @@ function DownloadDataset() {
     isLoading: isDatasetInfoLoading,
     data: datasetInfoData,
     error: datasetInfoError
-  } = useQuery(['datasetInfo', layer, domain, dataset, version ? version : 0], getDatasetInfo)
+  } = useQuery(
+    ['datasetInfo', layer, domain, dataset, version ? version : 0],
+    getDatasetInfo
+  )
 
   const { isLoading, mutate, error } = useMutation<
     Response,
