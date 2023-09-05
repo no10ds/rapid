@@ -30,6 +30,7 @@ function DownloadDataset() {
     aggregation_conditions: '',
     limit: ''
   })
+  const [noContentReturn, setNoContentReturn] = useState(false)
 
   const {
     isLoading: isDatasetInfoLoading,
@@ -44,15 +45,21 @@ function DownloadDataset() {
   >({
     mutationFn: queryDataset,
     onSuccess: async (response, { dataFormat }) => {
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.style.display = 'none'
-      a.href = url
-      a.download = `${layer}_${domain}_${dataset}_${version}.${dataFormat}`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
+      if (response.status === 200) {
+        setNoContentReturn(false)
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.style.display = 'none'
+        a.href = url
+        a.download = `${layer}_${domain}_${dataset}_${version}.${dataFormat}`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+      }
+      else if (response.status === 204) {
+        setNoContentReturn(true)
+      }
     }
   })
 
@@ -239,7 +246,13 @@ function DownloadDataset() {
         />
       </Row>
 
+      {noContentReturn && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {"No data returned for this query. Please ensure that data has been uploaded and the query is not too restrictive."}
+        </Alert>
+      )}
       {error && (
+
         <Alert severity="error" sx={{ mb: 3 }}>
           {error?.message}
         </Alert>
