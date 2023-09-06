@@ -73,5 +73,5 @@ repos:
         name: ui_test
         language: system
         entry: bash -c 'cd ./ui; npm install; npm run test:all'
-        files: ui/*.
+        files: 'ui/*.'
         pass_filenames: false
