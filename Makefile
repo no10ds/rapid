@@ -29,7 +29,7 @@ detect-vulnerabilities:
 # API Testing --------------------
 api-test:			## Run api python unit tests
 	@cd api/; ./batect test-unit
- 
+
 api-test-coverage:		## Run api python unit tests with coverage report
 	@cd api/; ./batect test-coverage
 
@@ -122,6 +122,9 @@ infra-destroy:			## Terraform destory entire infrastructure: make infra-destroy 
 
 infra-output:			## Print infrastructure output: make infra-output block=<infra-block>
 	@cd infrastructure/; ./scripts/infra_make_helper.sh run_tf output "${block}" "${env}"
+
+infra-scan:			## Print infrastructure output: make infra-output block=<infra-block>
+	@cd infrastructure/; ./batect security-scan
 
 ##
 ##----- SDK -----
