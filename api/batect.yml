@@ -121,3 +121,9 @@ tasks:
     run:
       container: service-image
       command: 'python get_latest_release_changelog.py'
+
+  migrate-v7:
+    description: Run the rAPId migration script
+    run:
+      container: service-image
+      command: 'python migrations/scripts/v7_layer_migration.py'
