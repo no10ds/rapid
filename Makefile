@@ -187,3 +187,9 @@ release:
 	@python get_latest_release_changelog.py
 	@gh release create ${version} -F latest_release_changelog.md
 	@rm -rf latest_release_changelog.md
+
+
+# Migration --------------------
+##
+migrate-v7:			## Run the migration
+	@cd api/; ./batect migrate-v7 -- "--layer ${layer} --all-layers ${all-layers}"

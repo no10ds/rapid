@@ -47,6 +47,7 @@ nav:
           - Patterns:
               - sdk/api/patterns/data.md
   - Releases: changelog.md
+  - Migration: migration.md
   - Contributing: contributing.md
 
 plugins:
