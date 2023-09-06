@@ -80,13 +80,13 @@ resource "aws_cognito_user_pool_domain" "rapid_cognito_domain" {
 
 resource "aws_secretsmanager_secret" "client_secrets_cognito" {
   # checkov:skip=CKV_AWS_149:AWS Managed Key is sufficient
-  # checkov:skip=CKV2_AWS_57:DIsable automatic rotation enabled
+  # checkov:skip=CKV2_AWS_57:Disable automatic rotation enabled
   name = "${var.resource-name-prefix}_client_secrets_cognito"
 }
 
 resource "aws_secretsmanager_secret" "user_secrets_cognito" {
   # checkov:skip=CKV_AWS_149:AWS Managed Key is sufficient
-  # checkov:skip=CKV2_AWS_57:DIsable automatic rotation enabled
+  # checkov:skip=CKV2_AWS_57:Disable automatic rotation enabled
   name = "${var.resource-name-prefix}_user_secrets_cognito"
 }
 
