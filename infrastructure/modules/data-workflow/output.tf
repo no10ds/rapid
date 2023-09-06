@@ -8,6 +8,11 @@ output "athena_workgroup_arn" {
   description = "Query workgroup for Athena"
 }
 
+output "catalogue_db_arn" {
+  value       = aws_glue_catalog_database.catalogue_db.arn
+  description = "The ARN of the Glue Catalogue database"
+}
+
 output "schema_table_arn" {
   value       = aws_dynamodb_table.schema_table.arn
   description = "The ARN of the DynamoDB schema table"

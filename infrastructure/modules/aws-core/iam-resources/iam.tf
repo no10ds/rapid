@@ -173,6 +173,7 @@ resource "aws_iam_policy" "user_no_vpc_access_policy" {
 
 # Policy attachments for roles
 resource "aws_iam_policy_attachment" "admin_access_policy_attachment" {
+  # checkov:skip=CKV_AWS_274: Allow for AWS Administator Access
   name       = "admin_access_policy_attachment"
   roles      = [aws_iam_role.admin_access_role.name]
   policy_arn = local.administrator_access_policy_arn

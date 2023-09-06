@@ -7,7 +7,8 @@ terraform {
 resource "aws_s3_bucket" "rapid_data_storage" {
   #checkov:skip=CKV_AWS_144:No need for cross region replication
   #checkov:skip=CKV_AWS_145:No need for non default key
-
+  #checkov:skip=CKV2_AWS_62:No need for event notifications
+  #checkov:skip=CKV2_AWS_61:No need for lifecycle configuration
   bucket        = var.data_bucket_name
   acl           = "private"
   force_destroy = false
@@ -44,6 +45,8 @@ resource "aws_s3_bucket" "logs" {
   #checkov:skip=CKV_AWS_145:No need for non default key
   #checkov:skip=CKV_AWS_18:Log bucket shouldn't be logging
   #checkov:skip=CKV_AWS_21:No need to version log bucket
+  #checkov:skip=CKV2_AWS_62:No need for event notifications
+  #checkov:skip=CKV2_AWS_61:No need for lifecycle configuration
   bucket        = var.log_bucket_name
   acl           = "private"
   force_destroy = false

@@ -65,6 +65,7 @@ data "aws_ec2_managed_prefix_list" "cloudwatch" {
   name = "com.amazonaws.global.cloudfront.origin-facing"
 }
 resource "aws_security_group" "load_balancer_security_group" {
+  # checkov:skip=CKV_AWS_260: Limits by prefix list ID's
   vpc_id      = var.vpc_id
   description = "ALB Security Group"
   ingress {
