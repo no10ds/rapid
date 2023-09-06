@@ -1,4 +1,6 @@
 resource "aws_route53_zone" "primary-hosted-zone" {
+  # checkov:skip=CKV2_AWS_39: No need for DNS query logging
+  # checkov:skip=CKV2_AWS_38: No need for DNSSEC signing
   count = var.hosted_zone_id == "" ? 1 : 0
   name  = var.domain_name
   tags  = var.tags

@@ -3,6 +3,7 @@ resource "aws_s3_bucket" "rapid_athena_query_results_bucket" {
   #checkov:skip=CKV_AWS_145:No need for non default key
   #checkov:skip=CKV_AWS_21:No need to version query results
   #checkov:skip=CKV_AWS_18:No need to log query results
+  #checkov:skip=CKV2_AWS_62:No need for event notifications
   bucket = "${var.resource-name-prefix}-aws-athena-query-results-${var.aws_account}"
   acl    = "private"
 

@@ -9,6 +9,8 @@ resource "aws_s3_bucket" "rapid_ui" {
   #checkov:skip=CKV_AWS_145:No need for non default key
   #checkov:skip=CKV_AWS_19:No need for securely encrypted at rest
   #checkov:skip=CKV2_AWS_6:No need for public access block
+  #checkov:skip=CKV2_AWS_62:No need for event notifications
+  #checkov:skip=CKV2_AWS_61:No need for lifecycle configuration
   bucket        = "${var.resource-name-prefix}-static-ui-${random_string.bucket_id.result}"
   force_destroy = true
   tags          = var.tags

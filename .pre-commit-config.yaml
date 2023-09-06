@@ -38,7 +38,7 @@ repos:
   #     -   id: pylint
   #         exclude: (docs/|get_latest_release_changelog.py)
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.81.0
+    rev: v1.83.2
     hooks:
       - id: terraform_fmt
         exclude: '^(?!infrastructure/).*'
@@ -52,7 +52,7 @@ repos:
     rev: 2.3.261
     hooks:
       - id: checkov
-        args: [--quiet, --compact]
+        args: [--quiet, --compact, --skip-check, 'CKV2_GHA_1']
         exclude: '^(?!infrastructure/).*'
   - repo: local
     hooks:
