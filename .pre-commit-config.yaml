@@ -12,7 +12,7 @@ repos:
     rev: 1.7.5
     hooks:
       - id: bandit
-        exclude: '(test|docs)/*'
+        exclude: '(test|docs)/.*'
   - repo: https://github.com/psf/black
     rev: 22.6.0
     hooks:
@@ -60,7 +60,7 @@ repos:
         name: sdk_test
         language: system
         entry: bash -c 'make sdk-test'
-        files: sdk/*.
+        exclude: '^(?!sdk/).*'
         pass_filenames: false
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.0.3
@@ -72,6 +72,6 @@ repos:
       - id: ui_test
         name: ui_test
         language: system
+        exclude: '^(?!ui/).*'
         entry: bash -c 'cd ./ui; npm install; npm run test:all'
-        files: 'ui/*.'
         pass_filenames: false

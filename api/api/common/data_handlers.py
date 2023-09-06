@@ -77,11 +77,11 @@ def construct_chunked_dataframe(
             file_path, encoding=CONTENT_ENCODING, sep=",", chunksize=CHUNK_SIZE
         )
         return chunk
-        # return get_dataframe_from_chunk_type(chunk)
+
     elif extension == "parquet":
         parquet_file = pq.ParquetFile(file_path.as_posix())
         chunk = parquet_file.iter_batches(batch_size=CHUNK_SIZE)
-        # return get_dataframe_from_chunk_type(chunk)
+
         return chunk
 
 

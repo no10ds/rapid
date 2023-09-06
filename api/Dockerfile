@@ -10,7 +10,8 @@ RUN apt install -y gcc
 RUN apt install -y g++
 
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+COPY requirements-dev.txt .
+RUN pip install -r requirements-dev.txt
 
 COPY api api
 COPY static static

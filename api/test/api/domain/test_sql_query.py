@@ -64,7 +64,7 @@ class TestSQLQuery:
                     SQLQueryOrderBy(column="col1"),
                     SQLQueryOrderBy(column="col2", direction="DESC"),
                 ],
-                "10",
+                10,
                 "SELECT col1,col2,col3 FROM test_domain WHERE col2 = 123 GROUP BY col4,col5 HAVING col4 in ('some value', 'another value') ORDER BY col1 ASC,col2 DESC LIMIT 10",
             ),
             (
@@ -73,7 +73,7 @@ class TestSQLQuery:
                 ["col4", "col5"],
                 None,
                 [],
-                "10",
+                10,
                 "SELECT * FROM test_domain WHERE col2 = 123 GROUP BY col4,col5 LIMIT 10",
             ),
             (
@@ -82,7 +82,7 @@ class TestSQLQuery:
                 ["col4", "col5"],
                 "",
                 [],
-                "10",
+                10,
                 "SELECT * FROM test_domain WHERE col2 = 123 GROUP BY col4,col5 LIMIT 10",
             ),
             (
@@ -91,7 +91,7 @@ class TestSQLQuery:
                 ["col4", "col5"],
                 None,
                 [],
-                "50",
+                50,
                 "SELECT avg(col2) FROM test_domain WHERE col2 >= 100 GROUP BY col4,col5 LIMIT 50",
             ),
             (
@@ -100,7 +100,7 @@ class TestSQLQuery:
                 ["col4", "col5"],
                 "",
                 [],
-                "50",
+                50,
                 "SELECT avg(col2) FROM test_domain WHERE col2 >= 100 GROUP BY col4,col5 LIMIT 50",
             ),
             (
@@ -109,7 +109,7 @@ class TestSQLQuery:
                 ["col1"],
                 "",
                 [],
-                "675",
+                675,
                 "SELECT col1,avg(col2) FROM test_domain GROUP BY col1 LIMIT 675",
             ),
             (
@@ -118,7 +118,7 @@ class TestSQLQuery:
                 ["col1"],
                 "",
                 [],
-                "",
+                None,
                 "SELECT col1,avg(col2) FROM test_domain GROUP BY col1",
             ),
         ],

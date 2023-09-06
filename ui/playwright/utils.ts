@@ -2,8 +2,7 @@ import { SecretsManager } from 'aws-sdk'
 
 const client = new SecretsManager({ region: process.env.AWS_REGION })
 
-const baseDomain = process.env.DOMAIN_NAME
-export const domain = `https://${baseDomain.replace('/api', '')}`
+export const domain = `https://${process.env.DOMAIN_NAME.replace('/api', '')}`
 
 export async function makeAPIRequest(
   path: string,
@@ -12,7 +11,7 @@ export async function makeAPIRequest(
   authToken?: string,
   optionalHeaders = {}
 ): Promise<any> {
-  const response = await fetch(`https://${baseDomain}/${path}`, {
+  const response = await fetch(`${domain}/api/${path}`, {
     method,
     headers: {
       'Content-Type': 'application/json',
@@ -21,7 +20,7 @@ export async function makeAPIRequest(
     },
     body: JSON.stringify(body)
   })
-  return response.json()
+  return await response.json()
 }
 
 export async function getSecretValue(secretName: string): Promise<string | void> {
@@ -43,7 +42,7 @@ export async function generateRapidAuthToken(): Promise<any> {
     'CLIENT_SECRET'
   ]
   const credentialsSecret = btoa(`${clientId}:${clientSecret}`)
-  return makeAPIRequest(
+  return await makeAPIRequest(
     'oauth2/token',
     'POST',
     {

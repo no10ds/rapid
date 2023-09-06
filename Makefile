@@ -175,8 +175,14 @@ ui-test-e2e-headed:
 ui-create-static-out:
 	@cd ui/; $(MAKE) create-static-out
 
-ui-zip-and-release:		## Zip and release prod static ui site
-	@cd ui/; $(MAKE) zip-contents tag=${tag}; $(MAKE) upload-to-release-prod tag=${tag}
+ui-zip-contents:
+	@cd ui/; $(MAKE) zip-contents tag=${tag};
+
+ui-release:
+	@cd ui/; $(MAKE) upload-to-release-prod tag=${tag}
+
+ui-zip-and-release: ui-zip-contents ui-release ## Zip and release prod static ui site
+
 
 ##
 release:
