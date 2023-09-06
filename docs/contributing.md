@@ -120,8 +120,6 @@ To scan for security vulnerabilities run `make security-check`
 
 #### Infrastructure flaws
 
-<!-- TODO: Replace with a make command -->
-
 To launch a static scan on the infrastructure, you can run `checkov -d ./infrastructure`.
 
 [checkov](https://www.checkov.io/) is used to check for flaws in the AWS architecture.
@@ -181,4 +179,4 @@ Performing a release involves tagging the repository with a new version number s
 
 > Ensure the version number follows the format `vX.X.X` with full-stops in the same places
 
-Now the reelase pipeline will run automatically, build all images and packages off that version of the code and tag it within GitHub.
+Now the release pipeline will run automatically, build all images and packages off that version of the code and tag it within GitHub.

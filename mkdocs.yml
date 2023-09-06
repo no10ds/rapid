@@ -33,6 +33,7 @@ nav:
       - infrastructure/alerting_monitoring.md
       - infrastructure/certificates.md
       - infrastructure/domains_subdomains.md
+      - infrastructure/overview.md
   - UI:
       - ui/usage.md
   - SDK:

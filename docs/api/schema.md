@@ -208,7 +208,7 @@ Once all the values have been set up, just upload the json using the POST `/sche
 
 ## Auto-generated
 
-Use the POST `/schema/{my_domain_name}/{my_datase_name}/generate` endpoint to automatically generate a draft for the schema.
+Use the POST `/schema/{my_domain_name}/{my_dataset_name}/generate` endpoint to automatically generate a draft for the schema.
 
 Consider the following:
 
@@ -227,7 +227,7 @@ date_column_name, object_column_name, int_column_name, bool_column_name
 21/10/2021      , "a second string" , None           , NA
 ```
 
-After calling POST `/schema/my_domain_name/my_datase_name/generate` with `my_file.csv` in the body, the generated schema will be:
+After calling POST `/schema/my_domain_name/my_dataset_name/generate` with `my_file.csv` in the body, the generated schema will be:
 
 ```json
 {
