@@ -31,7 +31,7 @@ RESOURCE_PREFIX=
 ALLOWED_EMAIL_DOMAINS=
 ```
 
-You can then run the followitng commands from within the root project direcory:
+You can then run the following commands from within the root project directory:
 
 `make api-run` runs Batect to bring up a locally running version of the API within a Docker container.
 
@@ -122,7 +122,7 @@ To scan for security vulnerabilities run `make security-check`
 
 <!-- TODO: Replace with a make command -->
 
-To launch a staic scan on the infrastructure, you can run `checkov -d ./infrastructure`.
+To launch a static scan on the infrastructure, you can run `checkov -d ./infrastructure`.
 
 [checkov](https://www.checkov.io/) is used to check for flaws in the AWS architecture.
 
