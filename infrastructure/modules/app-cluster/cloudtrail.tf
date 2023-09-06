@@ -275,7 +275,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "access_logs_s3_en
 
 resource "aws_cloudtrail" "access_logs_trail" {
   # checkov:skip=CKV_AWS_252:No need for an SNS topic
-  # checkov:skip=CKV2_AWS_10:No need for cloudtrail logs to be intergrated with cloudwatch
+  # checkov:skip=CKV2_AWS_10:Cloudwatch logs are enabled
   count = var.enable_cloudtrail ? 1 : 0
   depends_on = [
     aws_s3_bucket_policy.access_logs_bucket_policy, # Policy for S3 that cloudtrail dumps too
@@ -308,7 +308,7 @@ resource "aws_cloudtrail" "access_logs_trail" {
   }
 
   # CloudTrail requires the Log Stream wildcard
-  cloud_watch_logs_group_arn = "${aws_cloudwatch_log_group.access_logs_log_group[0].arn}:*" # Needs to be created
+  cloud_watch_logs_group_arn = "${aws_cloudwatch_log_group.access_logs_log_group[0].arn}:*"
   cloud_watch_logs_role_arn  = aws_iam_role.cloud_trail_role[0].arn
 
   tags = var.tags

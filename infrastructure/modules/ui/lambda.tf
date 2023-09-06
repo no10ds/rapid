@@ -18,8 +18,6 @@ resource "aws_iam_role" "this" {
 }
 
 data "aws_iam_policy_document" "this" {
-  #checkov:skip=CKV_AWS_111:No need to not allow write without constraint
-  #checkov:skip=CKV_AWS_356:No need for limit resource access
   statement {
     effect = "Allow"
     actions = [
@@ -27,7 +25,7 @@ data "aws_iam_policy_document" "this" {
       "logs:CreateLogStream",
       "logs:PutLogEvents"
     ]
-    resources = ["*"]
+    resources = ["arn:aws:logs:*:*:*"]
   }
 }
 
