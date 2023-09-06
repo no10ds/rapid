@@ -6,6 +6,7 @@ import {
   getSubjectPermissions,
   updateSubjectPermissions
 } from '@/service'
+import { Permission } from '@/service'
 import { extractPermissionNames } from '@/service/permissions'
 import {
   UpdateSubjectPermissionsBody,
@@ -17,6 +18,9 @@ import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import PermissionsTable from '@/components/PermissionsTable/PermissionsTable'
+import { z } from 'zod'
+
+type PermissionType = z.infer<typeof Permission>
 
 function SubjectModifyPage() {
   const router = useRouter()
@@ -75,7 +79,7 @@ function SubjectModifyPage() {
 
   return (
     <form
-      onSubmit={handleSubmit(async (data) => {
+      onSubmit={handleSubmit(async (data: { permissions: PermissionType[] }) => {
         const permissions = data.permissions.map((permission) =>
           extractPermissionNames(permission, permissionsListData)
         )

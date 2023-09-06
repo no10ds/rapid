@@ -152,6 +152,8 @@ export type MetadataItem = {
   matching_field: 'columns' | 'description' | 'dataset'
 }
 
+export type MetadataSearchRequest = { search: string }
+
 export type MetadataSearchResponse = MetadataItem[]
 
 export type Dataset = {
@@ -171,6 +173,6 @@ export type SubjectPermission = {
 
 export type PermissionUiResponse = {
   [key: string]:
-    | string
-    | { [key: string]: { [key: string]: string | { [key: string]: string } } }
+  | string
+  | { [key: string]: { [key: string]: string | { [key: string]: string } } }
 }

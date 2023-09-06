@@ -100,7 +100,7 @@ function CreateSchema({
 
   return (
     <form
-      onSubmit={handleSubmit(async (_data) => {
+      onSubmit={handleSubmit(async (_data: SchemaCreate) => {
         const data = { ...newSchemaData }
         data.metadata.owners = [{ email: _data.ownerEmail, name: _data.ownerName }]
         data.metadata.sensitivity = _data.sensitivity
