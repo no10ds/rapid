@@ -88,7 +88,7 @@ class TestGetSubjectPermissions:
         self.dynamo_adapter.get_permission_keys_for_subject.assert_called_once_with(
             subject_id
         )
-        assert actual_response == expected_response
+        assert [item.dict() for item in actual_response] == expected_response
 
 
 class TestGetUIPermissions:

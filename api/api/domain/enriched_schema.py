@@ -7,7 +7,7 @@ from api.domain.schema_metadata import SchemaMetadata
 
 
 class EnrichedColumn(Column):
-    statistics: Optional[Dict[str, str]]
+    statistics: Optional[Dict[str, str]] = None
 
 
 class EnrichedSchemaMetadata(SchemaMetadata):
