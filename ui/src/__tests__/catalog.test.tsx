@@ -15,11 +15,11 @@ jest.mock('next/router', () => ({
 
 const mockMetadataSearchResponse: MetadataSearchResponse = [
   {
-    data: 'mock_data',
-    data_type: 'column_name',
     dataset: 'dataset',
     domain: 'domain',
-    version: '1'
+    version: '1',
+    matching_data: 'a',
+    matching_field: 'Columns'
   }
 ]
 
@@ -46,7 +46,6 @@ describe('Page: Catalog page', () => {
       expect(screen.getByText(item.domain)).toBeVisible()
       expect(screen.getByText(item.dataset)).toBeVisible()
       expect(screen.getByText(item.version)).toBeVisible()
-      expect(screen.getByText(item.data)).toBeVisible()
       expect(screen.getByText('Column')).toBeVisible()
     })
   })

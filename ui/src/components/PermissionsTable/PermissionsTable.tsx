@@ -109,7 +109,7 @@ const PermissionsTable = ({
       }
     }
     setFilteredPermissionsListData(amendedPermissions)
-  }, [fields, permissionsListData])
+  }, [fields, permissionsListData, isModifyPage])
 
   // Set Permissions at max
   useEffect(() => {
