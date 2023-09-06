@@ -6,7 +6,7 @@ upload, these are sent back in the response to facilitate you fixing the issues.
 
 ### Permissions
 
-You will need a relevant `WRITE` permission that matches the dataset senstivity level, e.g.: `WRITE_ALL`, `WRITE_PUBLIC`, `WRITE_PRIVATE`, `WRITE_PROTECTED_{DOMAIN}`.
+You will need a relevant `WRITE` permission that matches the dataset sensitivity level, e.g.: `WRITE_ALL`, `WRITE_PUBLIC`, `WRITE_PRIVATE`, `WRITE_PROTECTED_{DOMAIN}`.
 
 ### Path
 
@@ -77,7 +77,7 @@ When a valid file in the `layer/domain/dataset/version` is deleted, a success me
 
 ### Permissions
 
-You will need a relevant `WRITE` permission that matches the dataset senstivity level, e.g.: `WRITE_ALL`, `WRITE_PUBLIC`, `WRITE_PRIVATE`, `WRITE_PROTECTED_{DOMAIN}`.
+You will need a relevant `WRITE` permission that matches the dataset sensitivity level, e.g.: `WRITE_ALL`, `WRITE_PUBLIC`, `WRITE_PRIVATE`, `WRITE_PROTECTED_{DOMAIN}`.
 
 ### Path
 
