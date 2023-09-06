@@ -120,9 +120,7 @@ To scan for security vulnerabilities run `make security-check`
 
 #### Infrastructure flaws
 
-<!-- TODO: Replace with a make command -->
-
-To launch a static scan on the infrastructure, you can run `checkov -d ./infrastructure`.
+To launch a static scan on the infrastructure, you can run `make infra-scan`.
 
 [checkov](https://www.checkov.io/) is used to check for flaws in the AWS architecture.
 
