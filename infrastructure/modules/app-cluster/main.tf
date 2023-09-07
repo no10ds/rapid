@@ -141,7 +141,7 @@ resource "aws_iam_policy" "app_glue_access" {
           "glue:CreateTable"
         ],
         "Resource" : [
-          "*"
+          var.catalogue_db_arn
         ]
       },
     ]
@@ -210,6 +210,8 @@ resource "aws_iam_policy" "app_dynamodb_access" {
 }
 
 resource "aws_iam_policy" "app_secrets_manager_access" {
+  # checkov:skip=CKV_AWS_355: Allow secrets manager access
+  # checkov:skip=CKV_AWS_288: Likewise
   name        = "${var.resource-name-prefix}-app_secrets_manager_access"
   description = "Allow application instance to access AWS Secrets Manager"
   tags        = var.tags
@@ -232,24 +234,6 @@ resource "aws_iam_policy" "app_secrets_manager_access" {
     "Version" : "2012-10-17"
   })
 }
-
-resource "aws_iam_policy" "app_tags_access" {
-  name        = "${var.resource-name-prefix}-app_tags_access"
-  description = "Allow application instance to get resources by tags"
-  tags        = var.tags
-
-  policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
-      {
-        Effect : "Allow",
-        Action : ["tag:GetResources"],
-        Resource : "*"
-      }
-    ]
-  })
-}
-
 
 resource "aws_iam_role_policy_attachment" "role_s3_access_policy_attachment" {
   role       = aws_iam_role.ecsTaskExecutionRole.name
@@ -276,11 +260,6 @@ resource "aws_iam_role_policy_attachment" "role_glue_access_policy_attachment" {
   policy_arn = aws_iam_policy.app_glue_access.arn
 }
 
-resource "aws_iam_role_policy_attachment" "role_tags_access_policy_attachment" {
-  role       = aws_iam_role.ecsTaskExecutionRole.name
-  policy_arn = aws_iam_policy.app_tags_access.arn
-}
-
 resource "aws_iam_role_policy_attachment" "role_dynamodb_access_policy_attachment" {
   role       = aws_iam_role.ecsTaskExecutionRole.name
   policy_arn = aws_iam_policy.app_dynamodb_access.arn
@@ -298,6 +277,7 @@ resource "aws_ecs_cluster" "aws-ecs-cluster" {
 
 resource "aws_cloudwatch_log_group" "log-group" {
   #checkov:skip=CKV_AWS_158:No need for KMS
+  #checkov:skip=CKV_AWS_338:No need for year long retention
   name              = "${var.resource-name-prefix}-logs"
   tags              = var.tags
   retention_in_days = 90

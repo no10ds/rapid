@@ -145,6 +145,7 @@ resource "aws_iam_account_alias" "iam_account_alias" {
 
 # Users
 resource "aws_iam_user" "users" {
+  # checkov:skip=CKV_AWS_273: Allow for iam defined users
   for_each = var.iam_users
   name     = each.key
 }

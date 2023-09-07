@@ -230,13 +230,12 @@ def _set_security_headers(response) -> None:
         "default-src 'self' "
         f"{IDENTITY_PROVIDER_BASE_URL}; "
         "script-src 'self' 'unsafe-inline' "
-        "cdn.jsdelivr.net/npm/swagger-ui-dist@4/swagger-ui-bundle.js; "
+        "cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js; "
         "style-src 'self' "
-        "cdn.jsdelivr.net/npm/swagger-ui-dist@4/swagger-ui.css; "
+        "cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css; "
         "img-src 'self' data: "
         "fastapi.tiangolo.com/img/favicon.png;"
     )
-    response.headers["Content-Security-Policy-Report-Only"] = "default-src 'self'"
     response.headers[
         "Strict-Transport-Security"
     ] = "max-age=31536000 ; includeSubDomains"

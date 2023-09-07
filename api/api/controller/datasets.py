@@ -141,7 +141,7 @@ async def get_dataset_info(
     layer: Layer,
     dataset: str,
     domain: str = FastApiPath(
-        default="", regex=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
+        ..., pattern=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
     ),
     version: Optional[int] = None,
 ):
@@ -202,7 +202,7 @@ async def list_raw_files(
     dataset: str,
     version: int,
     domain: str = FastApiPath(
-        default="", regex=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
+        ..., pattern=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
     ),
 ):
     """
@@ -302,7 +302,7 @@ async def delete_data_file(
     version: int,
     filename: str,
     domain: str = FastApiPath(
-        default="", regex=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
+        ..., pattern=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
     ),
 ):
     """
@@ -364,7 +364,7 @@ def upload_data(
     request: Request,
     response: Response,
     domain: str = FastApiPath(
-        default="", regex=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
+        ..., pattern=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
     ),
     version: Optional[int] = None,
     file: UploadFile = File(...),
@@ -468,7 +468,18 @@ def upload_data(
                 },
                 "application/octet-stream": {},
             }
-        }
+        },
+        204: {
+            "description": "Empty response",
+            "content": {
+                "text/plain": {
+                    "schema": {
+                        "type": "string",
+                        "example": "No rows were returned. Either there is no data or the query is too limiting.",
+                    }
+                }
+            },
+        },
     },
 )
 async def query_dataset(
@@ -476,7 +487,7 @@ async def query_dataset(
     dataset: str,
     request: Request,
     domain: str = FastApiPath(
-        default="", regex=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
+        ..., pattern=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
     ),
     version: Optional[int] = None,
     query: Optional[SQLQuery] = SQLQuery(),
@@ -542,6 +553,12 @@ async def query_dataset(
 
     We recommend using this in a programmatic sense.
 
+    ### Empty response
+
+    If there are no rows to return then a 204 response will be returned.
+
+    This can the case either when there is no data, or if the query is too limiting.
+
     ### Accepted permissions
 
     In order to use this endpoint you need a `READ` permission with appropriate sensitivity level permission,
@@ -553,10 +570,17 @@ async def query_dataset(
     df = data_service.query_data(
         construct_dataset_metadata(layer, domain, dataset, version), query
     )
-    string_df = df.astype("string")
-    output_format = request.headers.get("Accept")
-    mime_type = MimeType.to_mimetype(output_format)
-    return _format_query_output(string_df, mime_type)
+    if df.shape[0] == 0:
+        # Return 204 if dataframe is empty
+        return PlainTextResponse(
+            status_code=204,
+            content="No rows were returned. Either there is no data or the query is too limiting.",
+        )
+    else:
+        string_df = df.astype("string")
+        output_format = request.headers.get("Accept")
+        mime_type = MimeType.to_mimetype(output_format)
+        return _format_query_output(string_df, mime_type)
 
 
 @datasets_router.post(
@@ -569,7 +593,7 @@ async def query_large_dataset(
     dataset: str,
     request: Request,
     domain: str = FastApiPath(
-        default="", regex=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
+        ..., pattern=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
     ),
     version: Optional[int] = None,
     query: Optional[SQLQuery] = SQLQuery(),

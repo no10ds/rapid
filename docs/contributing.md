@@ -179,4 +179,4 @@ Performing a release involves tagging the repository with a new version number s
 
 > Ensure the version number follows the format `vX.X.X` with full-stops in the same places
 
-Now the reelase pipeline will run automatically, build all images and packages off that version of the code and tag it within GitHub.
+Now the release pipeline will run automatically, build all images and packages off that version of the code and tag it within GitHub.

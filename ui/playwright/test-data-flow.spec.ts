@@ -70,6 +70,14 @@ test('test', async ({ page }) => {
     err ? console.error(err) : console.log('Download deleted')
   })
 
+  // Search for dataset
+  await page.getByRole('button', { name: 'Search Catalog' }).click()
+  await page.getByPlaceholder('Catalog Search Term').click()
+  await page.getByPlaceholder('Catalog Search Term').fill(datasetName)
+  await page.getByPlaceholder('Catalog Search Term').press('Enter')
+
+  expect(await page.getByRole('table').innerText()).toContain(datasetName)
+
   // Delete the dataset
   await page.getByRole('button', { name: 'Delete data' }).click()
   await page.locator('div[role="button"]:has-text("Delete data")').click()
@@ -81,11 +89,7 @@ test('test', async ({ page }) => {
   await page.getByRole('option', { name: datasetName }).click()
   await page.getByTestId('submit').click()
 
-  const datasetDeletedElement = await page.waitForSelector('.MuiAlertTitle-root', {
-    text: `Dataset deleted: default/ui_test_domain/${datasetName}`
-  })
-
-  expect(await datasetDeletedElement.innerText()).toEqual(
+  expect(await page.getByTestId('delete-status').innerText()).toEqual(
     `Dataset deleted: default/ui_test_domain/${datasetName}`
   )
 })
