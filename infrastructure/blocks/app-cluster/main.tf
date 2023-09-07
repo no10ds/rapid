@@ -15,7 +15,7 @@ module "app_cluster" {
   cognito_user_login_app_credentials_secrets_name = data.terraform_remote_state.auth-state.outputs.cognito_user_app_secret_manager_name
   permissions_table_arn                           = data.terraform_remote_state.auth-state.outputs.user_permission_table_arn
   schema_table_arn                                = data.terraform_remote_state.data-workflow-state.outputs.schema_table_arn
-  catalogue_db_arn                                = data.terraform_remote_state.data-workflow-state.outputs.catalogue_db_arn
+  catalogue_db_name                               = data.terraform_remote_state.data-workflow-state.outputs.catalogue_db_name
 
   application_version                  = var.application_version
   domain_name                          = var.domain_name

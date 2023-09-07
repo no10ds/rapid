@@ -133,9 +133,9 @@ variable "schema_table_arn" {
   description = "The ARN of the schema table in dynamoDB"
 }
 
-variable "catalogue_db_arn" {
+variable "catalogue_db_name" {
   type        = string
-  description = "The ARN of the catalogue db in dynamoDB"
+  description = "The name of the catalogue db in dynamoDB"
 }
 
 variable "cognito_user_pool_id" {

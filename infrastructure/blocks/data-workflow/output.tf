@@ -13,9 +13,9 @@ output "schema_table_arn" {
   description = "The ARN of the DynamoDB schema table"
 }
 
-output "catalogue_db_arn" {
-  value       = module.data_workflow.catalogue_db_arn
-  description = "The ARN of the Glue Catalogue database"
+output "catalogue_db_name" {
+  value       = module.data_workflow.catalogue_db_name
+  description = "The name of the Glue Catalogue database"
 }
 
 output "tags" {
