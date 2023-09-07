@@ -32,7 +32,7 @@ async def create_user(user_request: UserRequest):
 
     ```json
     {
-    "username": "jhon_doe",
+    "username": "john_doe",
     "email": "jhon.doe@email.com",
     "permissions": [
         "READ_ALL",

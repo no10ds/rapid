@@ -377,7 +377,7 @@ class TestDatasetAccessEvaluator:
 
         with pytest.raises(
             AuthorisationError,
-            match="User abc-123 does not have enough permisisons to access the dataset layer \\[layer\\], domain \\[domain\\] and dataset \\[dataset\\]",
+            match="User abc-123 does not have enough permissions to access the dataset layer \\[layer\\], domain \\[domain\\] and dataset \\[dataset\\]",
         ):
             self.evaluator.can_access_dataset(dataset, subject_id, [Action.READ])
 

@@ -18,8 +18,8 @@ As a maintainer of a rAPId you can create new users to interact with the API to 
 
 ```json
 {
-  "username": "jhon_doe",
-  "email": "jhon.doe@email.com",
+  "username": "john_doe",
+  "email": "john.doe@email.com",
   "permissions": ["READ_ALL", "WRITE_PUBLIC"]
 }
 ```
