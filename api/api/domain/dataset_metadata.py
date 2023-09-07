@@ -79,7 +79,7 @@ class DatasetMetadata(BaseModel):
         return self.version
 
     def dataset_identifier(self, with_version: bool = True) -> str:
-        """Dataset unqiue path, lower the case of dataset to make the paths that it uses case insensitive."""
+        """Dataset unique path, lower the case of dataset to make the paths that it uses case insensitive."""
         if with_version:
             return f"{self.layer}/{self.domain}/{self.dataset.lower()}/{self.version}"
         else:

@@ -1,7 +1,7 @@
 from typing import Optional
 
 from pydantic import BaseModel
-from api.common.config.auth import Action, LayerPermissions, SensitivityPermisisons
+from api.common.config.auth import Action, LayerPermissions, SensitivityPermissions
 
 
 class PermissionItem(BaseModel):
@@ -15,13 +15,13 @@ class PermissionItem(BaseModel):
         return hash(self.id)
 
     def is_protected_permission(self) -> bool:
-        return self.sensitivity == SensitivityPermisisons.PROTECTED
+        return self.sensitivity == SensitivityPermissions.PROTECTED
 
     def is_global_data_permission(self) -> bool:
         return self.sensitivity in [
-            SensitivityPermisisons.PUBLIC,
-            SensitivityPermisisons.PRIVATE,
-            SensitivityPermisisons.ALL,
+            SensitivityPermissions.PUBLIC,
+            SensitivityPermissions.PRIVATE,
+            SensitivityPermissions.ALL,
         ]
 
     def is_admin_permission(self) -> bool:

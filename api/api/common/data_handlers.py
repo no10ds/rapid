@@ -69,7 +69,7 @@ def construct_chunked_dataframe(
 ) -> TextFileReader | Any | None:
     # Loads the file from the local path and splits into each dataframe chunk for processing
     # when loading csv Pandas returns an IO iterable TextFileReader but for a Pyarrow chunking
-    # it retuns an iterable of pyarrow.RecordBatch, we then pass this through the extra function
+    # it returns an iterable of pyarrow.RecordBatch, we then pass this through the extra function
     # to return a dataframe compatiable format
     extension = file_path.as_posix().split(".")[-1].lower()
     if extension == "csv":
