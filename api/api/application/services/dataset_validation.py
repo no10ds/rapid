@@ -25,6 +25,7 @@ def build_validated_dataframe(schema: Schema, dataframe: pd.DataFrame) -> pd.Dat
 def transform_and_validate(schema: Schema, data: pd.DataFrame) -> pd.DataFrame:
     validation_context = (
         ValidationContext(data)
+        .pipe(dataset_has_rows)
         .pipe(remove_empty_rows)
         .pipe(clean_column_headers)
         .pipe(dataset_has_correct_columns, schema)
@@ -38,6 +39,14 @@ def transform_and_validate(schema: Schema, data: pd.DataFrame) -> pd.DataFrame:
         raise DatasetValidationError(validation_context.errors())
 
     return validation_context.get_dataframe()
+
+
+def dataset_has_rows(df: pd.DataFrame) -> Tuple[pd.DataFrame, list[str]]:
+    if df.shape[0] == 0:
+        # Cannot proceed if there are no rows
+        raise UnprocessableDatasetError(["Dataset has no rows, it cannot be processed"])
+
+    return df, []
 
 
 def dataset_has_correct_columns(

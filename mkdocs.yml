@@ -33,6 +33,7 @@ nav:
       - infrastructure/alerting_monitoring.md
       - infrastructure/certificates.md
       - infrastructure/domains_subdomains.md
+      - infrastructure/overview.md
   - UI:
       - ui/usage.md
   - SDK:
@@ -47,6 +48,7 @@ nav:
           - Patterns:
               - sdk/api/patterns/data.md
   - Releases: changelog.md
+  - Migration: migration.md
   - Contributing: contributing.md
 
 plugins:

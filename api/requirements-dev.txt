@@ -1,0 +1,6 @@
+flake8
+pytest
+pytest-cov
+python-dotenv
+
+-r ./requirements.txt

@@ -1,3 +1,6 @@
+#checkov:skip=CKV_DOCKER_9: Allow for use of apt
+#checkov:skip=CKV_DOCKER_2: No need for healthcheck in container
+#checkov:skip=CKV_DOCKER_3: No need for user in container
 FROM python:3.10-slim
 
 WORKDIR /app
@@ -7,7 +10,8 @@ RUN apt install -y gcc
 RUN apt install -y g++
 
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+COPY requirements-dev.txt .
+RUN pip install -r requirements-dev.txt
 
 COPY api api
 COPY static static

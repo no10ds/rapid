@@ -60,7 +60,7 @@ function CreateSchema() {
 
   return (
     <form
-      onSubmit={handleSubmit(async (data) => {
+      onSubmit={handleSubmit(async (data: SchemaGenerate) => {
         const formData = new FormData()
         formData.append('file', file)
         const path = `${data.layer}/${data.sensitivity}/${data.domain}/${data.title}/generate`

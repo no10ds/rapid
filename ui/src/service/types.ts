@@ -149,8 +149,10 @@ export type MetadataItem = {
   domain: string
   matching_data: string
   version: string
-  matching_field: 'Columns' | 'Description' | 'Dataset'
+  matching_field: 'columns' | 'description' | 'dataset'
 }
+
+export type MetadataSearchRequest = { search: string }
 
 export type MetadataSearchResponse = MetadataItem[]
 

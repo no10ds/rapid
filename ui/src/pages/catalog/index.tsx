@@ -1,3 +1,4 @@
+import { MetadataSearchRequest } from '@/service/types'
 import { AccountLayout, Button, Row, Card, TextField } from '@/components'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Typography } from '@mui/material'
@@ -8,7 +9,7 @@ import { z } from 'zod'
 function CatalogPage() {
   const router = useRouter()
 
-  const { control, handleSubmit } = useForm<{ search: string }>({
+  const { control, handleSubmit } = useForm<MetadataSearchRequest>({
     resolver: zodResolver(
       z.object({
         search: z.string()
@@ -18,7 +19,7 @@ function CatalogPage() {
 
   return (
     <form
-      onSubmit={handleSubmit(async (data) => {
+      onSubmit={handleSubmit(async (data: MetadataSearchRequest) => {
         router.push(`/catalog/${data.search}`)
       })}
     >

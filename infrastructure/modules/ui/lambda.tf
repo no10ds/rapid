@@ -18,7 +18,6 @@ resource "aws_iam_role" "this" {
 }
 
 data "aws_iam_policy_document" "this" {
-  #checkov:skip=CKV_AWS_111:No need to not allow write without constraint
   statement {
     effect = "Allow"
     actions = [
@@ -26,7 +25,7 @@ data "aws_iam_policy_document" "this" {
       "logs:CreateLogStream",
       "logs:PutLogEvents"
     ]
-    resources = ["*"]
+    resources = ["arn:aws:logs:*:*:*"]
   }
 }
 
@@ -39,6 +38,7 @@ resource "aws_iam_role_policy" "github_runner_lambda" {
 resource "aws_lambda_function" "this" {
   #checkov:skip=CKV_AWS_116:No need for lambda dead letter queue
   #checkov:skip=CKV_AWS_117:No need for vpc
+  #checkov:skip=CKV_AWS_272:No need for lambda code-signing validation
   provider                       = aws.us_east
   function_name                  = "${var.resource-name-prefix}-cloudfront-router"
   role                           = aws_iam_role.this.arn

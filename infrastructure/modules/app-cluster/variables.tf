@@ -133,6 +133,11 @@ variable "schema_table_arn" {
   description = "The ARN of the schema table in dynamoDB"
 }
 
+variable "catalogue_db_arn" {
+  type        = string
+  description = "The ARN of the catalogue db in dynamoDB"
+}
+
 variable "cognito_user_pool_id" {
   type        = string
   description = "User pool id for cognito"
