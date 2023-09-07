@@ -63,6 +63,7 @@ module "ui" {
   ui_version                         = var.ui_version
   load_balancer_dns                  = module.app_cluster.load_balancer_dns
   route_53_validation_record_fqdns   = module.app_cluster.route_53_validation_record_fqdns
+  geo_restriction_locations          = var.geo_restriction_locations
 }
 
 resource "aws_s3_bucket" "this" {
