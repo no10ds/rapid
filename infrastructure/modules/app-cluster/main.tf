@@ -141,7 +141,9 @@ resource "aws_iam_policy" "app_glue_access" {
           "glue:CreateTable"
         ],
         "Resource" : [
-          var.catalogue_db_arn
+          "arn:aws:glue:${var.aws_region}:${var.aws_account}:catalog",
+          "arn:aws:glue:${var.aws_region}:${var.aws_account}:database/${var.catalogue_db_name}",
+          "arn:aws:glue:${var.aws_region}:${var.aws_account}:table/${var.catalogue_db_name}/*"
         ]
       },
     ]
