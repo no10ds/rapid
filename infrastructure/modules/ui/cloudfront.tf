@@ -97,7 +97,7 @@ resource "aws_cloudfront_distribution" "rapid_ui" {
   restrictions {
     geo_restriction {
       restriction_type = "whitelist"
-      locations        = ["GB"]
+      locations        = var.geo_restriction_locations
     }
   }
 
