@@ -37,6 +37,7 @@ resource "aws_iam_policy" "aws_access_key_self_service" {
 }
 
 resource "aws_iam_account_password_policy" "strict" {
+  # checkov:skip=CKV_AWS_9:Let users determine their own password policy
   # checkov:skip=CKV_AWS_11:Let users determine their own password policy
   # checkov:skip=CKV_AWS_12:Let users determine their own password policy
   # checkov:skip=CKV_AWS_13:Let users determine their own password policy
