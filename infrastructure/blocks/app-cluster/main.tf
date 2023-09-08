@@ -17,6 +17,7 @@ module "app_cluster" {
   schema_table_arn                                = data.terraform_remote_state.data-workflow-state.outputs.schema_table_arn
   catalogue_db_name                               = data.terraform_remote_state.data-workflow-state.outputs.catalogue_db_name
 
+  layers                               = var.layers
   application_version                  = var.application_version
   domain_name                          = var.domain_name
   allowed_email_domains                = var.allowed_email_domains
