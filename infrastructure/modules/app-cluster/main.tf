@@ -3,7 +3,7 @@ locals {
     "AWS_ACCOUNT" : var.aws_account,
     "DATA_BUCKET" : var.data_s3_bucket_name,
     "DOMAIN_NAME" : var.domain_name,
-    "LAYERS" : var.layers,
+    "LAYERS" : join(",", var.layers),
     "CATALOG_DISABLED" : tostring(var.catalog_disabled),
     "ALLOWED_EMAIL_DOMAINS" : var.allowed_email_domains,
     "COGNITO_USER_POOL_ID" : var.cognito_user_pool_id,
