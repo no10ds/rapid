@@ -196,3 +196,9 @@ variable "ecs_cluster_name" {
   default     = null
   description = "ECS cluster name to attach the rAPId api to"
 }
+
+variable "layers" {
+  type        = list(string)
+  description = "A list of the layers that the rAPId instance will contain"
+  default     = ["default"]
+}

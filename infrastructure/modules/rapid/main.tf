@@ -10,6 +10,7 @@ module "app_cluster" {
   permissions_table_arn                           = module.auth.user_permission_table_arn
   schema_table_arn                                = module.data_workflow.schema_table_arn
   catalogue_db_name                               = module.data_workflow.catalogue_db_name
+  layers                                          = var.layers
   domain_name                                     = var.domain_name
   allowed_email_domains                           = var.allowed_email_domains
   rapid_ecr_url                                   = var.rapid_ecr_url
@@ -38,6 +39,7 @@ module "auth" {
   domain_name          = var.domain_name
   resource-name-prefix = var.resource-name-prefix
   password_policy      = var.password_policy
+  layers               = var.layers
 }
 
 module "data_workflow" {
