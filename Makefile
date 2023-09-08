@@ -123,6 +123,9 @@ infra-destroy:			## Terraform destory entire infrastructure: make infra-destroy 
 infra-output:			## Print infrastructure output: make infra-output block=<infra-block>
 	@cd infrastructure/; ./scripts/infra_make_helper.sh run_tf output "${block}" "${env}"
 
+infra-scan:			## Print infrastructure output: make infra-output block=<infra-block>
+	@cd infrastructure/; ./batect security-scan
+
 ##
 ##----- SDK -----
 ##
@@ -190,3 +193,9 @@ release:
 	@python get_latest_release_changelog.py
 	@gh release create ${version} -F latest_release_changelog.md
 	@rm -rf latest_release_changelog.md
+
+
+# Migration --------------------
+##
+migrate-v7:			## Run the migration
+	@cd api/; ./batect migrate-v7 -- "--layer ${layer} --all-layers ${all-layers}"

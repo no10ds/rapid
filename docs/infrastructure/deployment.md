@@ -208,7 +208,7 @@ Optional:
 - `hosted_zone_id` - if provided, will add an alias for the application load balancer to use the provided domain using
   that HZ. Otherwise, it will create a HZ and the alias
 - `certificate_validation_arn` - if provided, will link the certificate to the load-balancer https-listener. Otherwise,
-  will create a new certificate and link it. ([managing certificates](/infrastructure/certificates/)
+  will create a new certificate and link it. [managing certificates](/infrastructure/certificates/)
 - `tags` - if provided, it will tag the resources with the defined value. Otherwise, it will default to "Resource = '
   data-f1-rapid'"
 

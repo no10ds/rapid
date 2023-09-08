@@ -1,4 +1,5 @@
 resource "aws_iam_policy" "pipeline_ecr_access" {
+  # checkov:skip=CKV_AWS_355: GetAuthorizationToken has no resource constraint
   name        = "pipeline_ecr_access"
   description = "Allow pipeline to access ECR"
   tags        = var.tags
@@ -53,6 +54,7 @@ resource "aws_iam_policy" "pipeline_ecr_access" {
 }
 
 resource "aws_iam_policy" "pipeline_ecr_public_access" {
+  # checkov:skip=CKV_AWS_355: GetAuthorizationToken has no resource constraint
   name        = "pipeline_ecr_public_access"
   description = "Allow pipeline to access the public ECR"
   tags        = var.tags
@@ -128,6 +130,8 @@ resource "aws_iam_policy" "pipeline_s3_access" {
 }
 
 resource "aws_iam_policy" "pipeline_secrets_manager_access" {
+  # checkov:skip=CKV_AWS_355: Allow secrets manager access
+  # checkov:skip=CKV_AWS_288: Likewise
   name        = "pipeline_secrets_manager_access"
   description = "Allow pipeline to access AWS Secrets Manager"
   tags        = var.tags
@@ -152,6 +156,8 @@ resource "aws_iam_policy" "pipeline_secrets_manager_access" {
 }
 
 resource "aws_iam_policy" "pipeline_dynamodb_access" {
+  # checkov:skip=CKV_AWS_290: Allow dynamodb access
+  # checkov:skip=CKV_AWS_355: Likewise
   name        = "pipeline_dynamodb_access"
   description = "Allow pipeline to access DynamoDB"
   tags        = var.tags
@@ -172,6 +178,8 @@ resource "aws_iam_policy" "pipeline_dynamodb_access" {
 }
 
 resource "aws_iam_policy" "pipeline_glue_access" {
+  # checkov:skip=CKV_AWS_290: Allow glue access
+  # checkov:skip=CKV_AWS_355: Likewise
   name        = "pipeline_glue_access"
   description = "Allow pipeline to access Glue"
   tags        = var.tags

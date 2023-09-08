@@ -55,6 +55,9 @@ resource "aws_cloudfront_origin_request_policy" "rapid_ui_lb" {
 
 resource "aws_cloudfront_distribution" "rapid_ui" {
   # checkov:skip=CKV2_AWS_32: No need for strict security headers
+  # checkov:skip=CKV_AWS_310: Skip cloudfront failover configuration
+  # checkov:skip=CKV_AWS_192: Log4J is prevented by AWSManagedRulesKnownBadInputsRuleSet within WAF
+  # checkov:skip=CKV2_AWS_47: Log4J is prevented by AWSManagedRulesKnownBadInputsRuleSet within WAF
   enabled             = true
   is_ipv6_enabled     = true
   default_root_object = "index.html"
@@ -97,7 +100,7 @@ resource "aws_cloudfront_distribution" "rapid_ui" {
   restrictions {
     geo_restriction {
       restriction_type = "whitelist"
-      locations        = ["GB"]
+      locations        = var.geo_restriction_locations
     }
   }
 

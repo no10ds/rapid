@@ -133,6 +133,11 @@ variable "schema_table_arn" {
   description = "The ARN of the schema table in dynamoDB"
 }
 
+variable "catalogue_db_name" {
+  type        = string
+  description = "The name of the catalogue db in dynamoDB"
+}
+
 variable "cognito_user_pool_id" {
   type        = string
   description = "User pool id for cognito"
@@ -190,4 +195,10 @@ variable "ecs_cluster_name" {
   type        = string
   default     = null
   description = "ECS cluster name to attach the rAPId api to"
+}
+
+variable "layers" {
+  type        = list(string)
+  description = "A list of the layers that the rAPId instance will contain"
+  default     = ["default"]
 }

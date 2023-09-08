@@ -83,8 +83,8 @@ class Sensitivity(StrEnum):
 
 
 # Creates the possible Sensitivity Level Permissions from the existing Layer Enum
-SensitivityPermisisons = StrEnum(
-    "SensitivityPermisisons",
+SensitivityPermissions = StrEnum(
+    "SensitivityPermissions",
     dict([(sensitivity, sensitivity) for sensitivity in [*list(Sensitivity), ALL]]),
 )
 

@@ -14,6 +14,7 @@ resource "aws_cognito_user_pool_client" "e2e_test_client_user_admin" {
 
 resource "aws_secretsmanager_secret" "e2e_test_client_user_admin" {
   # checkov:skip=CKV_AWS_149:AWS Managed Key is sufficient
+  # checkov:skip=CKV2_AWS_57:Disable automatic rotation enabled
   name                    = "${var.resource-name-prefix}_E2E_TEST_CLIENT_USER_ADMIN"
   recovery_window_in_days = 0
 }
@@ -43,6 +44,7 @@ resource "aws_cognito_user_pool_client" "e2e_test_client_data_admin" {
 
 resource "aws_secretsmanager_secret" "e2e_test_client_data_admin" {
   # checkov:skip=CKV_AWS_149:AWS Managed Key is sufficient
+  # checkov:skip=CKV2_AWS_57:Disable automatic rotation enabled
   name                    = "${var.resource-name-prefix}_E2E_TEST_CLIENT_DATA_ADMIN"
   recovery_window_in_days = 0
 }
@@ -72,6 +74,7 @@ resource "aws_cognito_user_pool_client" "e2e_test_client_read_and_write" {
 
 resource "aws_secretsmanager_secret" "e2e_test_client_read_and_write" {
   # checkov:skip=CKV_AWS_149:AWS Managed Key is sufficient
+  # checkov:skip=CKV2_AWS_57:Disable automatic rotation enabled
   name                    = "${var.resource-name-prefix}_E2E_TEST_CLIENT_READ_ALL_WRITE_ALL"
   recovery_window_in_days = 0
 }
@@ -101,6 +104,7 @@ resource "aws_cognito_user_pool_client" "e2e_test_client_write_all" {
 
 resource "aws_secretsmanager_secret" "e2e_test_client_write_all" {
   # checkov:skip=CKV_AWS_149:AWS Managed Key is sufficient
+  # checkov:skip=CKV2_AWS_57:Disable automatic rotation enabled
   name                    = "${var.resource-name-prefix}_E2E_TEST_CLIENT_WRITE_ALL"
   recovery_window_in_days = 0
 }
@@ -132,6 +136,7 @@ resource "aws_cognito_user" "ui_test_user" {
 
 resource "aws_secretsmanager_secret" "ui_test_user" {
   # checkov:skip=CKV_AWS_149:AWS Managed Key is sufficient
+  # checkov:skip=CKV2_AWS_57:Disable automatic rotation enabled
   name                    = "${var.resource-name-prefix}_UI_TEST_USER"
   recovery_window_in_days = 0
 }

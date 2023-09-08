@@ -173,6 +173,6 @@ export type SubjectPermission = {
 
 export type PermissionUiResponse = {
   [key: string]:
-  | string
-  | { [key: string]: { [key: string]: string | { [key: string]: string } } }
+    | string
+    | { [key: string]: { [key: string]: string | { [key: string]: string } } }
 }

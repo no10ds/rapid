@@ -65,9 +65,11 @@ resource "aws_iam_role_policy_attachment" "allow_s3_access_for_aws_config_attach
 
 # S3 buckets
 resource "aws_s3_bucket" "config_with_lifecycle" {
-  # checkov:skip=CKV_AWS_144:No need for cross region replication
-  # checkov:skip=CKV_AWS_18:No need for logging
-
+  #checkov:skip=CKV_AWS_144:No need for cross region replication
+  #checkov:skip=CKV_AWS_18:No need for logging
+  #checkov:skip=CKV2_AWS_62:No need for event notifications
+  #checkov:skip=CKV2_AWS_6:Public blocking applied via resource
+  #checkov:skip=CKV2_AWS_61:No need for lifecycle configuration
   count         = var.enable_lifecycle_management_for_s3 ? 1 : 0
   bucket_prefix = var.bucket_prefix
   acl           = "private"
@@ -115,9 +117,10 @@ resource "aws_s3_bucket_public_access_block" "config_with_lifecycle" {
 
 
 resource "aws_s3_bucket" "config_without_lifecycle" {
-  # checkov:skip=CKV_AWS_144:No need for cross region replication
-  # checkov:skip=CKV_AWS_18:No need for logging
-
+  #checkov:skip=CKV_AWS_144:No need for cross region replication
+  #checkov:skip=CKV_AWS_18:No need for logging
+  #checkov:skip=CKV2_AWS_61:No need for lifecycle configuration
+  #checkov:skip=CKV2_AWS_62:No need for event notifications
   count         = var.enable_lifecycle_management_for_s3 ? 0 : 1
   bucket_prefix = var.bucket_prefix
   acl           = "private"

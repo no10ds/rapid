@@ -1,4 +1,4 @@
-The sdk is a standalone Python library that can provide easy programmatic access to the core rAPId functionality. It can handle programmatic schema creation and updation using modern Python classes and data structures.
+The sdk is a standalone Python library that can provide easy programmatic access to the core rAPId functionality. It can handle programmatic schema creation and updating using modern Python classes and data structures.
 
 ## Installation
 
@@ -66,7 +66,7 @@ data = rapid.download_dataframe(domain="domain", dataset="dataset", version=1)
 print(data.info())
 ```
 
-It is possible to pass a query to get more granular information about a dataset. We provide a Pydantic query class that can get passed into the download function. For more information on writing rAPId compatiable queries see [the documentation]() and the example below.
+It is possible to pass a query to get more granular information about a dataset. We provide a Pydantic query class that can get passed into the download function. For more information on writing rAPId compatible queries see [the documentation]() and the example below.
 
 ```python
 import pandas as pd
@@ -78,7 +78,7 @@ query = Query(
 )
 
 data = rapid.download_dataframe(
-    domain="domain", dataset="dataset", verson=1, query=query
+    domain="domain", dataset="dataset", version=1, query=query
 )
 
 print(data.info())

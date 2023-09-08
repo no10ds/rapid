@@ -77,6 +77,12 @@ variable "enable_cloudtrail" {
   default     = true
 }
 
+variable "geo_restriction_locations" {
+  description = "The ISO 3166-1-alpha-2 codes for which you want CloudFront either to distribute your content (whitelist)."
+  type        = list(string)
+  default     = ["GB"]
+}
+
 variable "password_policy" {
   type = object({
     minimum_length                   = number
@@ -152,4 +158,10 @@ variable "ecs_cluster_name" {
   type        = string
   default     = null
   description = "ECS cluster name to attach the rAPId api to"
+}
+
+variable "layers" {
+  type        = list(string)
+  description = "A list of the layers that the rAPId instance will contain"
+  default     = ["default"]
 }
