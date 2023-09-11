@@ -1,3 +1,4 @@
+-include .env
 export
 
 ECS_SERVICE=rapid-preprod-ecs-service
