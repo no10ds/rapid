@@ -11,8 +11,6 @@ from requests.auth import HTTPBasicAuth
 from api.common.config.aws import (
     DATA_BUCKET,
     DOMAIN_NAME,
-    AWS_REGION,
-    AWS_ACCOUNT,
     RESOURCE_PREFIX,
 )
 from api.common.config.constants import CONTENT_ENCODING
