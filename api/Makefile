@@ -1,3 +1,5 @@
+export
+
 ECS_SERVICE=rapid-preprod-ecs-service
 ECS_CLUSTER=rapid-preprod-cluster
 LATEST_COMMIT_HASH=$(shell git rev-parse --short HEAD)
