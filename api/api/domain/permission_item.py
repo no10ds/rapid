@@ -24,5 +24,8 @@ class PermissionItem(BaseModel):
             SensitivityPermissions.ALL,
         ]
 
+    def get_domain(self) -> str:
+        return self.domain.lower()
+
     def is_admin_permission(self) -> bool:
         return self.type in Action.admin_actions()

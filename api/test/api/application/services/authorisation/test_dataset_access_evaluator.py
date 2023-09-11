@@ -195,7 +195,7 @@ class TestDatasetAccessEvaluator:
                     type="WRITE",
                     layer="RAW",
                     sensitivity="PROTECTED",
-                    domain="test",
+                    domain="TEST",
                 ),
                 True,
             ),

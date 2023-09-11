@@ -290,7 +290,9 @@ class TestUpdateSchema:
 
         self.glue_adapter.create_table.assert_called_once_with(new_schema)
         self.dynamodb_adapter.store_schema.assert_called_once_with(expected_schema)
-        self.dynamodb_adapter.deprecate_schema.assert_called_once_with(original_schema)
+        self.dynamodb_adapter.deprecate_schema.assert_called_once_with(
+            original_schema.metadata
+        )
         assert result == "raw/testdomain/testdataset/3"
 
     def test_update_schema_enforces_sensitivity_consistency(self):
@@ -325,7 +327,9 @@ class TestUpdateSchema:
 
         self.glue_adapter.create_table.assert_called_once_with(expected_schema)
         self.dynamodb_adapter.store_schema.assert_called_once_with(expected_schema)
-        self.dynamodb_adapter.deprecate_schema.assert_called_once_with(original_schema)
+        self.dynamodb_adapter.deprecate_schema.assert_called_once_with(
+            original_schema.metadata
+        )
         assert result == "raw/testdomain/testdataset/2"
 
 

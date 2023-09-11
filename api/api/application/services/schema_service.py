@@ -120,7 +120,7 @@ class SchemaService:
         self.glue_adapter.create_table(schema)
 
         self.dynamodb_adapter.store_schema(schema)
-        self.dynamodb_adapter.deprecate_schema(original_schema)
+        self.dynamodb_adapter.deprecate_schema(original_schema.metadata)
         return schema.metadata.dataset_identifier()
 
     def check_for_protected_domain(self, schema: Schema) -> str:

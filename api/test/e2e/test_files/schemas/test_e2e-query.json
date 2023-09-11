@@ -14,7 +14,8 @@
         "name": "query",
         "email": "query@test.com"
       }
-    ]
+    ],
+    "update_behaviour": "OVERWRITE"
   },
   "columns": [
     {

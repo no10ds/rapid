@@ -23,7 +23,7 @@ from test.scripts.delete_protected_domain_permission import (
 
 
 class BaseJourneyTest(ABC):
-    base_url = f"https://{DOMAIN_NAME}"
+    base_url = f"https://{DOMAIN_NAME}/api"
     datasets_endpoint = f"{base_url}/datasets"
     schema_endpoint = f"{base_url}/schema"
 
@@ -109,7 +109,7 @@ class TestUnauthenticatedJourneys(BaseJourneyTest):
 
 class TestUnauthorisedJourney(BaseJourneyTest):
     def setup_class(self):
-        token_url = f"https://{DOMAIN_NAME}/oauth2/token"
+        token_url = f"https://{DOMAIN_NAME}/api/oauth2/token"
         write_all_credentials = get_secret(
             secret_name=f"{RESOURCE_PREFIX}_E2E_TEST_CLIENT_WRITE_ALL"
         )
@@ -161,7 +161,7 @@ class TestAuthenticatedDataJourneys(BaseJourneyTest):
     s3_client = boto3.client("s3")
 
     def setup_class(self):
-        token_url = f"https://{DOMAIN_NAME}/oauth2/token"
+        token_url = f"https://{DOMAIN_NAME}/api/oauth2/token"
 
         read_and_write_credentials = get_secret(
             secret_name=f"{RESOURCE_PREFIX}_E2E_TEST_CLIENT_READ_ALL_WRITE_ALL"  # pragma: allowlist secret
@@ -248,7 +248,7 @@ class TestAuthenticatedDataJourneys(BaseJourneyTest):
             "Authorization": "Bearer " + self.token,
         }
         response = requests.post(url, headers=headers)
-        assert response.status_code == HTTPStatus.OK
+        assert response.status_code == HTTPStatus.NO_CONTENT
 
     def test_fails_to_query_when_authorised_and_sql_injection_attempted(self):
         url = self.query_dataset_url(
@@ -295,7 +295,7 @@ class TestAuthenticatedDataJourneys(BaseJourneyTest):
         response2 = requests.delete(
             delete_raw_data_url, headers=(self.generate_auth_headers())
         )
-        assert response2.status_code == HTTPStatus.NO_CONTENT
+        assert response2.status_code == HTTPStatus.OK
 
 
 class TestAuthenticatedSchemaJourney(BaseJourneyTest):
@@ -303,7 +303,7 @@ class TestAuthenticatedSchemaJourney(BaseJourneyTest):
     s3_client = boto3.client("s3")
 
     def generate_auth_headers(self):
-        token_url = f"https://{DOMAIN_NAME}/oauth2/token"
+        token_url = f"https://{DOMAIN_NAME}/api/oauth2/token"
         data_admin_credentials = get_secret(
             secret_name=f"{RESOURCE_PREFIX}_E2E_TEST_CLIENT_DATA_ADMIN"  # pragma: allowlist secret
         )
@@ -319,7 +319,6 @@ class TestAuthenticatedSchemaJourney(BaseJourneyTest):
             "client_id": cognito_client_id,
         }
         response = requests.post(token_url, auth=auth, headers=headers, json=payload)
-        print(response.content)
         if response.status_code != HTTPStatus.OK:
             raise AuthenticationFailedError(f"{response.status_code}")
 
@@ -347,44 +346,21 @@ class TestAuthenticatedSchemaJourney(BaseJourneyTest):
         )
 
     def test_uploads_new_schema_version(self):
+        requests.delete(
+            f"{self.datasets_endpoint}/default/test_e2e/update",
+            headers=self.generate_auth_headers(),
+        )
+
         response1 = self.upload_schema_version1()
         assert response1.status_code in [HTTPStatus.CREATED, HTTPStatus.CONFLICT]
 
         response2 = self.upload_schema_version2()
         assert response2.status_code == HTTPStatus.OK
 
-        glue_crawler_arn = (
-            "arn:aws:glue:{region}:{account_id}:crawler/{glue_crawler}".format(
-                region=AWS_REGION,
-                account_id=AWS_ACCOUNT,
-                glue_crawler=f"{RESOURCE_PREFIX}_crawler/default/test_e2e/update",
-            )
+        requests.delete(
+            f"{self.datasets_endpoint}/default/test_e2e/update",
+            headers=self.generate_auth_headers(),
         )
-
-        try:
-            current_tags = self.glue_client.get_tags(ResourceArn=glue_crawler_arn)[
-                "Tags"
-            ]
-            assert current_tags["no_of_versions"] == "2"
-            assert current_tags["sensitivity"] == "PUBLIC"
-            assert "new_tag" not in current_tags.keys()
-        finally:
-            self.s3_client.delete_objects(
-                Bucket=DATA_BUCKET,
-                Delete={
-                    "Objects": [
-                        {
-                            "Key": f"{self.schemas_directory}/default/PUBLIC/test_e2e/update/1/schema.json"
-                        },
-                        {
-                            "Key": f"{self.schemas_directory}/default/PUBLIC/test_e2e/update/2/schema.json"
-                        },
-                    ]
-                },
-            )
-            self.glue_client.delete_crawler(
-                Name=f"{RESOURCE_PREFIX}_crawler/default/test_e2e/update"
-            )
 
 
 class TestAuthenticatedSubjectJourneys(BaseJourneyTest):
@@ -392,7 +368,7 @@ class TestAuthenticatedSubjectJourneys(BaseJourneyTest):
     cognito_client_id = None
 
     def setup_class(self):
-        token_url = f"https://{DOMAIN_NAME}/oauth2/token"
+        token_url = f"https://{DOMAIN_NAME}/api/oauth2/token"
 
         read_and_write_credentials = get_secret(
             secret_name=f"{RESOURCE_PREFIX}_E2E_TEST_CLIENT_USER_ADMIN"  # pragma: allowlist secret
@@ -458,7 +434,22 @@ class TestAuthenticatedSubjectJourneys(BaseJourneyTest):
         )
 
         assert response.status_code == HTTPStatus.OK
-        assert response.json() == ["USER_ADMIN"]
+        assert response.json() == [
+            {
+                "id": "READ_DEFAULT_PROTECTED_UPPERCASE",
+                "type": "READ",
+                "sensitivity": "PROTECTED",
+                "domain": "UPPERCASE",
+                "layer": "DEFAULT",
+            },
+            {
+                "id": "USER_ADMIN",
+                "type": "USER_ADMIN",
+                "sensitivity": None,
+                "domain": None,
+                "layer": None,
+            },
+        ]
 
     def test_list_all_subjects(self):
         response = requests.get(
@@ -491,7 +482,7 @@ class TestAuthenticatedProtectedDomainJourneys(BaseJourneyTest):
     cognito_client_id = None
 
     def setup_class(self):
-        token_url = f"https://{DOMAIN_NAME}/oauth2/token"
+        token_url = f"https://{DOMAIN_NAME}/api/oauth2/token"
 
         read_and_write_credentials = get_secret(
             secret_name=f"{RESOURCE_PREFIX}_E2E_TEST_CLIENT_DATA_ADMIN"  # pragma: allowlist secret

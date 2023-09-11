@@ -22,32 +22,38 @@
     {
       "name": "year",
       "data_type": "int",
-      "allow_null": true
+      "allow_null": true,
+      "partition_index": null
     },
     {
       "name": "month",
       "data_type": "int",
-      "allow_null": true
+      "allow_null": true,
+      "partition_index": null
     },
     {
       "name": "destination",
       "data_type": "string",
-      "allow_null": true
+      "allow_null": true,
+      "partition_index": null
     },
     {
       "name": "arrival",
       "data_type": "string",
-      "allow_null": true
+      "allow_null": true,
+      "partition_index": null
     },
     {
       "name": "type",
       "data_type": "string",
-      "allow_null": true
+      "allow_null": true,
+      "partition_index": null
     },
     {
       "name": "status",
       "data_type": "string",
-      "allow_null": true
+      "allow_null": true,
+      "partition_index": null
     }
   ]
 }

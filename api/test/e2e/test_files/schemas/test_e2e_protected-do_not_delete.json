@@ -13,6 +13,7 @@
         "email": "test_e2e_protected@email.com"
       }
     ],
+    "tags": {},
     "update_behaviour": "OVERWRITE"
   },
   "columns": [
