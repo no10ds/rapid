@@ -57,9 +57,22 @@ const SimpleTable = ({
         {Array.isArray(list) &&
           list.map((item, i) => (
             <TableRow key={i}>
-              {item.map((cell, i) => (
-                <TableCell {...cell} key={i} />
-              ))}
+              {item.map((cell, i) => {
+                const content = cell.children
+                return (
+                  <TableCell key={i}>
+                    {Array.isArray(content) ? (
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        {content.map((c, i) => (
+                          <span key={i}>{c}</span>
+                        ))}
+                      </div>
+                    ) : (
+                      content
+                    )}
+                  </TableCell>
+                )
+              })}
             </TableRow>
           ))}
       </TableBody>
