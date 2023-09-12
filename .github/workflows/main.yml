@@ -84,11 +84,14 @@ jobs:
           COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
           RESOURCE_PREFIX: ${{ secrets.RESOURCE_PREFIX }}
           ALLOWED_EMAIL_DOMAINS: ${{ secrets.ALLOWED_EMAIL_DOMAINS }}
-        run: make api-test-e2e
+        run: |
+          # Export AWS credentials to env for e2e tests
+          eval "$(aws configure export-credentials --format env)"
+          make api-test-e2e
 
       - name: API Tag Image as Failure
         if: always() && steps.await-running-app.conclusion == 'failure' || steps.e2e-tests.conclusion == 'failure'
-        run: make
+        run: make api-tag-prod-failure
 
   cleanup:
     needs:
