@@ -17,6 +17,7 @@ raw_data = [{"a": 1, "b": 2, "c": 3}, {"a": 10, "b": 20, "c": 30}]
 df = pd.DataFrame(raw_data)
 
 metadata = SchemaMetadata(
+    layer="default",
     domain="mydomain",
     dataset="mydataset",
     owners=[Owner(name="myname", email="myemail@email.com")],
@@ -48,6 +49,7 @@ raw_data = [{"a": 1, "b": 2, "c": 3}, {"a": 10, "b": 20, "c": 30}]
 df = pd.DataFrame(raw_data)
 
 metadata = SchemaMetadata(
+    layer="default",
     domain="mydomain",
     dataset="mydataset",
     owners=[Owner(name="myname", email="myemail@email.com")],

@@ -46,7 +46,7 @@ raw_data = [{"a": 1, "b": 2, "c": 3}, {"a": 10, "b": 20, "c": 30}]
 df = pd.DataFrame(raw_data)
 
 schema = rapid.generate_schema(
-    df=df, domain="domain", dataset="dataset", sensitivity="PUBLIC"
+    df=df, layer="layer", domain="domain", dataset="dataset", sensitivity="PUBLIC"
 )
 
 print("Domain ", schema.metadata.domain)
@@ -61,7 +61,9 @@ The sdk provides an easy way to automatically download a specific dataset based 
 import pandas as pd
 from rapid import Rapid
 
-data = rapid.download_dataframe(domain="domain", dataset="dataset", version=1)
+data = rapid.download_dataframe(
+    layer="layer", domain="domain", dataset="dataset", version=1
+)
 
 print(data.info())
 ```
@@ -78,7 +80,7 @@ query = Query(
 )
 
 data = rapid.download_dataframe(
-    domain="domain", dataset="dataset", version=1, query=query
+    layer="layer", domain="domain", dataset="dataset", version=1, query=query
 )
 
 print(data.info())
