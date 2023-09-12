@@ -1,26 +1,28 @@
 import json
 import os
 from abc import ABC
+from functools import reduce
 from http import HTTPStatus
 from typing import List
 
 import boto3
+from boto3.dynamodb.conditions import Key, Attr, Or
+from botocore.exceptions import ClientError
 import requests
 from requests import Response
 from requests.auth import HTTPBasicAuth
 
+from api.common.config.aws import AWS_REGION, PERMISSIONS_TABLE_SUFFIX
 
 from api.common.config.constants import CONTENT_ENCODING
 from test.e2e.e2e_test_utils import get_secret, AuthenticationFailedError
-from test.scripts.delete_protected_domain_permission import (
-    delete_protected_domain_permission_from_db,
-)
 
 # Set E2E environment variables
 
 DATA_BUCKET = os.environ["E2E_DATA_BUCKET"]
 DOMAIN_NAME = os.environ["E2E_DOMAIN_NAME"]
 RESOURCE_PREFIX = os.environ["E2E_RESOURCE_PREFIX"]
+DYNAMO_PERMISSIONS_TABLE_NAME = RESOURCE_PREFIX + PERMISSIONS_TABLE_SUFFIX
 
 
 class BaseJourneyTest(ABC):
@@ -514,7 +516,60 @@ class TestAuthenticatedProtectedDomainJourneys(BaseJourneyTest):
 
     @classmethod
     def teardown_class(cls):
-        delete_protected_domain_permission_from_db("test_e2e")
+        """Deletes the protected domain permissions"""
+        domain = "test_e2e"
+
+        # Setup table
+        db_table = boto3.resource("dynamodb", region_name=AWS_REGION).Table(
+            DYNAMO_PERMISSIONS_TABLE_NAME
+        )
+
+        # Get permissions
+        response = db_table.query(
+            KeyConditionExpression=Key("PK").eq("PERMISSION"),
+            FilterExpression=Attr("Domain").eq(domain.upper()),
+        )
+        protected_permissions = [item["SK"] for item in response["Items"]]
+
+        if not protected_permissions:
+            pass
+        else:
+            # Check subjects with permission
+            subjects_with_protected_permissions = db_table.query(
+                KeyConditionExpression=Key("PK").eq("SUBJECT"),
+                FilterExpression=reduce(
+                    Or,
+                    (
+                        [
+                            Attr("Permissions").contains(value)
+                            for value in protected_permissions
+                        ]
+                    ),
+                ),
+            )["Items"]
+        # Delete permissions for users with protected domain and protected domain
+        try:
+            with db_table.batch_writer() as batch:
+                # Remove protected domain permissions from subjects
+                for subject in subjects_with_protected_permissions:
+                    subject["Permissions"].difference_update(protected_permissions)
+
+                    if len(subject["Permissions"]) == 0:
+                        subject["Permissions"] = {}
+
+                    batch.put_item(Item=subject)
+
+                # Remove protected domain permissions from database
+                for permission in protected_permissions:
+                    batch.delete_item(
+                        Key={
+                            "PK": "PERMISSION",
+                            "SK": permission,
+                        }
+                    )
+        except ClientError as error:
+            print(f"Unable to delete {protected_permissions} from db")
+            print(error)
 
     # Utils -------------
     def generate_auth_headers(self):
