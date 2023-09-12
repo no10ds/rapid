@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="rapid-sdk",
-    version="0.0.8",
+    version="0.1.0",
     description="A python sdk for the rAPId API",
     url="https://github.com/no10ds/rapid-sdk",
     author="Lewis Card",
