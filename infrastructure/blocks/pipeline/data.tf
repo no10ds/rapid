@@ -19,6 +19,26 @@ data "terraform_remote_state" "s3-state" {
   }
 }
 
+data "terraform_remote_state" "s3-state-preprod" {
+  backend   = "s3"
+  workspace = "preprod"
+
+  config = {
+    key    = "s3/terraform.tfstate"
+    bucket = var.state_bucket
+  }
+}
+
+data "terraform_remote_state" "s3-state-dev" {
+  backend   = "s3"
+  workspace = "dev"
+
+  config = {
+    key    = "s3/terraform.tfstate"
+    bucket = var.state_bucket
+  }
+}
+
 data "terraform_remote_state" "ecr-state" {
   backend = "s3"
 

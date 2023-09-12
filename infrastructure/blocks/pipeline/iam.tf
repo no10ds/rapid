@@ -106,7 +106,9 @@ resource "aws_iam_policy" "pipeline_s3_access" {
         "Action" : "s3:ListBucket",
         "Effect" : "Allow",
         "Resource" : [
-          data.terraform_remote_state.s3-state.outputs.s3_bucket_arn
+          data.terraform_remote_state.s3-state.outputs.s3_bucket_arn,
+          data.terraform_remote_state.s3-state-preprod.outputs.s3_bucket_arn,
+          data.terraform_remote_state.s3-state-dev.outputs.s3_bucket_arn
         ]
       },
       {
@@ -119,9 +121,12 @@ resource "aws_iam_policy" "pipeline_s3_access" {
         ],
         "Effect" : "Allow",
         "Resource" : [
-          "${data.terraform_remote_state.s3-state.outputs.s3_bucket_arn}/data/test_e2e/*",
-          "${data.terraform_remote_state.s3-state.outputs.s3_bucket_arn}/data/schemas/PUBLIC/test_e2e/*",
-          "${data.terraform_remote_state.s3-state.outputs.s3_bucket_arn}/raw_data/test_e2e/*"
+          "${data.terraform_remote_state.s3-state.outputs.s3_bucket_arn}/data/default/test_e2e/*",
+          "${data.terraform_remote_state.s3-state.outputs.s3_bucket_arn}/raw_data/default/test_e2e/*",
+          "${data.terraform_remote_state.s3-state-preprod.outputs.s3_bucket_arn}/data/default/test_e2e/*",
+          "${data.terraform_remote_state.s3-state-preprod.outputs.s3_bucket_arn}/raw_data/default/test_e2e/*",
+          "${data.terraform_remote_state.s3-state-dev.outputs.s3_bucket_arn}/data/default/test_e2e/*",
+          "${data.terraform_remote_state.s3-state-dev.outputs.s3_bucket_arn}/raw_data/default/test_e2e/*"
         ]
       }
     ],

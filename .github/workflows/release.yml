@@ -44,9 +44,9 @@ jobs:
 
       - name: Populate .env with additional vars
         run: |
-          echo "TWINE_USERNAME=${{ secrets.TWINE_USERNAME_TEST }}" >> .env
-          echo "TWINE_PASSWORD=${{ secrets.TWINE_PASSWORD_TEST }}" >> .env
-          echo TWINE_NON_INTERACTIVE=${{ secrets.TWINE_NON_INTERACTIVE }} >> .env
+          echo TWINE_USERNAME=${{ secrets.TWINE_USERNAME }} >> .env
+          echo TWINE_PASSWORD=${{ secrets.TWINE_PASSWORD }} >> .env
+          echo TWINE_NON_INTERACTIVE=true >> .env
 
       - name: Setup Python
         uses: actions/setup-python@v4
