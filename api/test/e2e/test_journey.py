@@ -1,4 +1,5 @@
 import json
+import os
 from abc import ABC
 from http import HTTPStatus
 from typing import List
@@ -8,16 +9,18 @@ import requests
 from requests import Response
 from requests.auth import HTTPBasicAuth
 
-from api.common.config.aws import (
-    DATA_BUCKET,
-    DOMAIN_NAME,
-    RESOURCE_PREFIX,
-)
+
 from api.common.config.constants import CONTENT_ENCODING
 from test.e2e.e2e_test_utils import get_secret, AuthenticationFailedError
 from test.scripts.delete_protected_domain_permission import (
     delete_protected_domain_permission_from_db,
 )
+
+# Set E2E environment variables
+
+DATA_BUCKET = os.environ["E2E_DATA_BUCKET"]
+DOMAIN_NAME = os.environ["E2E_DOMAIN_NAME"]
+RESOURCE_PREFIX = os.environ["E2E_RESOURCE_PREFIX"]
 
 
 class BaseJourneyTest(ABC):

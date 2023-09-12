@@ -87,6 +87,9 @@ tasks:
         AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
         AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
         AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:-}
+        E2E_DOMAIN_NAME: ${E2E_DOMAIN_NAME:-}
+        E2E_DATA_BUCKET: ${E2E_DATA_BUCKET:-}
+        E2E_RESOURCE_PREFIX: ${E2E_RESOURCE_PREFIX:-}
       command: 'pytest test/e2e -v'
 
   test-e2e-focus:
