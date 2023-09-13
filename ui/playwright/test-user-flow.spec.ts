@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test'
 
 import { makeAPIRequest, generateRapidAuthToken, domain } from './utils'
 
-const user = `${process.env.RESOURCE_PREFIX}_ui_test_user`
+const user = `${process.env.E2E_RESOURCE_PREFIX}_ui_test_user`
 
 test('test', async ({ page }) => {
   await page.goto(domain)
