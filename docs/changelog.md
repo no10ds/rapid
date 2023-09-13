@@ -1,10 +1,11 @@
 # Changelog
 
-## v7.0.1 / v0.1.1 (sdk) - _2023-09-13_
+## v7.0.1 / v0.1.2 (sdk) - _2023-09-13_
 
 ### Fixes
 
-- Fix a bug where date types were being saved as strings.
+- Date types were being stored as strings which caused issues when querying with Athena. They are now stored as date types.
+- Rename the rAPId sdk method `generate_info` to `fetch_dataset_info` and remove an unnecessary argument.
 
 ## v7.0.0 / v0.1.1 (sdk) - _2023-09-12_
 

@@ -137,18 +137,18 @@ class TestUtils:
                 format=None,
             ),
         ]
-        requests_mock.post(
+        requests_mock.get(
             f"{RAPID_URL}/datasets/{metadata.layer}/{metadata.domain}/{metadata.dataset}/info",
             json=mock_response,
         )
         requests_mock.put(f"{RAPID_URL}/schema", json={"dummy": "data"})
-        update_schema_dataframe(rapid, metadata, df, new_columns)
+        update_schema_dataframe(rapid, metadata, new_columns)
 
     def test_update_schema_dataframe_fail(self, requests_mock: Mocker, rapid: Rapid):
-        requests_mock.post(
+        requests_mock.get(
             f"{RAPID_URL}/datasets/{metadata.layer}/{metadata.domain}/{metadata.dataset}/info",
             json=mock_response,
         )
         requests_mock.put(f"{RAPID_URL}/schema", json={"dummy": "data"})
         with pytest.raises(ColumnNotDifferentException):
-            update_schema_dataframe(rapid, metadata, df, mock_response["columns"])
+            update_schema_dataframe(rapid, metadata, mock_response["columns"])
