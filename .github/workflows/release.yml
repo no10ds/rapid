@@ -84,6 +84,7 @@ jobs:
       - name: UI Zip and Release
         env:
           TAG: ${{ github.event.release.tag_name }}
+          GH_TOKEN: ${{ github.token }}
         run: make ui-zip-and-release tag=$TAG
 
   cleanup:
