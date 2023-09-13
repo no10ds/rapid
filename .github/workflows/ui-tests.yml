@@ -26,11 +26,12 @@ jobs:
       - name: Install playwright browsers
         run: |
           cd ui
+          npx playwright install-deps
           npm install @playwright/test -D
 
       - name: Run playwright tests
         run: make ui-test-e2e
         env:
-          DOMAIN_NAME: 'https://${{ secrets.DOMAIN_NAME }}'
-          RESOURCE_PREFIX: ${{ secrets.RESOURCE_PREFIX }}
+          E2E_DOMAIN_NAME: ${{ secrets.E2E_DOMAIN_NAME }}
+          E2E_RESOURCE_PREFIX: ${{ secrets.E2E_RESOURCE_PREFIX }}
           AWS_REGION: ${{ secrets.AWS_REGION }}

@@ -190,27 +190,25 @@ class Rapid:
             data["details"],
         )
 
-    def generate_info(self, df: DataFrame, layer: str, domain: str, dataset: str):
+    def fetch_dataset_info(self, layer: str, domain: str, dataset: str):
         """
-        Generates metadata information for a pandas DataFrame and a specified dataset in the API.
+        Fetches information about the specified dataset in the API.
 
         Args:
-            df (DataFrame): The pandas DataFrame to generate metadata for.
-            layer (str): The layer of the dataset to generate metadata for.
-            domain (str): The domain of the dataset to generate metadata for.
-            dataset (str): The name of the dataset to generate metadata for.
+            layer (str): The layer of the dataset to fetch metadata for.
+            domain (str): The domain of the dataset to fetch metadata for.
+            dataset (str): The name of the dataset to fetch metadata for.
 
         Raises:
-            rapid.exceptions.DatasetInfoFailedException: If an error occurs while generating the metadata information.
+            rapid.exceptions.DatasetInfoFailedException: If an error occurs while fetching the dataset information.
 
         Returns:
-            A dictionary containing the metadata information for the DataFrame and dataset.
+            A dictionary containing the metadata information for the dataset.
         """
         url = f"{self.auth.url}/datasets/{layer}/{domain}/{dataset}/info"
-        response = requests.post(
+        response = requests.get(
             url,
             headers=self.generate_headers(),
-            files=self.convert_dataframe_for_file_upload(df),
             timeout=TIMEOUT_PERIOD,
         )
         data = json.loads(response.content.decode("utf-8"))

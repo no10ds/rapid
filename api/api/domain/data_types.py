@@ -36,6 +36,7 @@ class StringType(StrEnum):
 class DateType(StrEnum):
     DATE = "date"
     DATETIME = "datetime"
+    DATETIME64 = "datetime64"
 
 
 class TimestampType(StrEnum):
@@ -46,6 +47,7 @@ class PandasDataType(StrEnum):
     BOOLEAN = BooleanType.BOOLEAN
     DATE = DateType.DATE
     DATETIME = DateType.DATETIME
+    DATETIME64 = DateType.DATETIME64
     DECIMAL = NumericType.DECIMAL
     INTEGER = NumericType.INTEGER
     FLOATING = NumericType.FLOATING
@@ -76,6 +78,7 @@ PANDAS_TO_ATHENA_CONVERTER = {
     PandasDataType.BOOLEAN: AthenaDataType.BOOLEAN,
     PandasDataType.DATE: AthenaDataType.DATE,
     PandasDataType.DATETIME: AthenaDataType.DATE,
+    PandasDataType.DATETIME64: AthenaDataType.DATE,
     PandasDataType.DECIMAL: AthenaDataType.DECIMAL,
     PandasDataType.INTEGER: AthenaDataType.INT,
     PandasDataType.FLOATING: AthenaDataType.DOUBLE,

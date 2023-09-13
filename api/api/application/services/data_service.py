@@ -200,14 +200,13 @@ class DataService:
         )
 
     def upload_data(
-        self, schema: Schema, validated_dataframe: pd.DataFrame, filename: str
+        self,
+        schema: Schema,
+        validated_dataframe: pd.DataFrame,
+        filename: str,
     ):
         partitions = generate_partitioned_data(schema, validated_dataframe)
-        self.s3_adapter.upload_partitioned_data(
-            schema.metadata,
-            filename,
-            partitions,
-        )
+        self.s3_adapter.upload_partitioned_data(schema, filename, partitions)
 
     def load_partitions(self, schema: Schema):
         if schema.get_partition_columns():

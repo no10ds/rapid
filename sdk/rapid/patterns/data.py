@@ -43,7 +43,6 @@ def upload_and_create_dataframe(
 def update_schema_dataframe(
     rapid: Rapid,
     metadata: SchemaMetadata,
-    df: DataFrame,
     new_columns: Union[List[Column], List[dict]],
 ):
     """
@@ -52,14 +51,12 @@ def update_schema_dataframe(
     Args:
         rapid (Rapid): An instance of the rAPId SDK's main class.
         metadata (SchemaMetadata): The metadata for the schema to be updated and the dataset the DataFrame belongs to.
-        df (DataFrame): The pandas DataFrame to generate the original schema columns from.
         new_columns (Union[List[Column], List[dict]]): The new schema columns to update the schema with.
-
     Raises:
         rapid.exceptions.ColumnNotDifferentException: If the new schema columns are the same as the existing schema columns.
         Exception: If an error occurs while generating the schema information, updating the schema, or comparing the schema columns.
     """
-    info = rapid.generate_info(df, metadata.layer, metadata.domain, metadata.dataset)
+    info = rapid.fetch_dataset_info(metadata.layer, metadata.domain, metadata.dataset)
     try:
         schema = Schema(metadata=metadata, columns=info["columns"])
         if schema.are_columns_the_same(new_columns=new_columns):

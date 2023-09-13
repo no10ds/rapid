@@ -2,7 +2,7 @@ import { SecretsManager } from 'aws-sdk'
 
 const client = new SecretsManager({ region: process.env.AWS_REGION })
 
-export const domain = `https://${process.env.DOMAIN_NAME.replace('/api', '')}`
+export const domain = `https://${process.env.E2E_DOMAIN_NAME.replace('/api', '')}`
 
 export async function makeAPIRequest(
   path: string,
@@ -36,7 +36,7 @@ export async function getSecretValue(secretName: string): Promise<string | void>
 }
 
 export async function generateRapidAuthToken(): Promise<any> {
-  const secretName = `${process.env.RESOURCE_PREFIX}_E2E_TEST_CLIENT_USER_ADMIN`
+  const secretName = `${process.env.E2E_RESOURCE_PREFIX}_E2E_TEST_CLIENT_USER_ADMIN`
   const clientId = JSON.parse((await getSecretValue(secretName)) as string)['CLIENT_ID']
   const clientSecret = JSON.parse((await getSecretValue(secretName)) as string)[
     'CLIENT_SECRET'
