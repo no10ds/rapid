@@ -110,7 +110,7 @@ class TestColumn:
                 "loc": ("name",),
                 "msg": "Field required",
                 "type": "missing",
-                "url": "https://errors.pydantic.dev/2.2/v/missing",
+                "url": "https://errors.pydantic.dev/2.3/v/missing",
             }
         ]
 
@@ -136,7 +136,7 @@ class TestColumn:
                 "loc": ("data_type",),
                 "msg": "Field required",
                 "type": "missing",
-                "url": "https://errors.pydantic.dev/2.2/v/missing",
+                "url": "https://errors.pydantic.dev/2.3/v/missing",
             }
         ]
 
