@@ -26,6 +26,7 @@ jobs:
       - name: Install playwright browsers
         run: |
           cd ui
+          npx playwright install-deps
           npm install @playwright/test -D
 
       - name: Run playwright tests
