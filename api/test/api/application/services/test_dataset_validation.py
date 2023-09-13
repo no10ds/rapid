@@ -6,7 +6,7 @@ import pytest
 
 from api.application.services.dataset_validation import (
     build_validated_dataframe,
-    convert_dates_to_ymd,
+    convert_date_columns,
     remove_empty_rows,
     clean_column_headers,
     dataset_has_correct_columns,
@@ -109,6 +109,7 @@ class TestDatasetValidation:
         )
         expected["colname1"] = expected["colname1"].astype(dtype=pd.Int32Dtype())
         expected["colname3"] = expected["colname3"].astype(dtype=pd.BooleanDtype())
+        expected["colname4"] = expected["colname4"].astype(dtype="datetime64[ns]")
 
         validated_dataframe = build_validated_dataframe(full_valid_schema, dataframe)
 
@@ -670,7 +671,7 @@ class TestDatasetTransformation:
             ),
         ],
     )
-    def test_converts_dates_to_ymd(
+    def test_convert_date_columns(
         self,
         date_format: str,
         date_column_data: List[str],
@@ -691,13 +692,16 @@ class TestDatasetTransformation:
             ],
         )
 
-        transformed_df, _ = convert_dates_to_ymd(data, schema)
+        transformed_df, _ = convert_date_columns(data, schema)
 
-        expected_date_column = pd.Series(expected_date_column_data)
+        expected_date_column = pd.Series(
+            expected_date_column_data,
+            dtype="datetime64[ns]",
+        )
 
         assert transformed_df["date"].equals(expected_date_column)
 
-    def test_converts_multiple_date_columns_to_ymd(self):
+    def test_converts_multiple_date_columns(self):
         data = pd.DataFrame(
             {
                 "date1": ["30/01/2008", "31/01/2008", "01/02/2008", "02/02/2008"],
@@ -724,13 +728,15 @@ class TestDatasetTransformation:
                 ),
             ],
         )
-        transformed_df, _ = convert_dates_to_ymd(data, schema)
+        transformed_df, _ = convert_date_columns(data, schema)
 
         expected_date_column_1 = pd.Series(
-            ["2008-01-30", "2008-01-31", "2008-02-01", "2008-02-02"]
+            ["2008-01-30", "2008-01-31", "2008-02-01", "2008-02-02"],
+            dtype="datetime64[ns]",
         )
         expected_date_column_2 = pd.Series(
-            ["2008-05-15", "2008-12-13", "2008-07-09", "2008-03-17"]
+            ["2008-05-15", "2008-12-13", "2008-07-09", "2008-03-17"],
+            dtype="datetime64[ns]",
         )
 
         assert transformed_df["date1"].equals(expected_date_column_1)
@@ -771,7 +777,7 @@ class TestDatasetTransformation:
         )
 
         try:
-            convert_dates_to_ymd(data, schema)
+            convert_date_columns(data, schema)
         except UserError as error:
             assert error.message == [
                 "Column [date1] does not match specified date format in at least one row",

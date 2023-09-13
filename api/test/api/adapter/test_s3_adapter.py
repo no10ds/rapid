@@ -1,12 +1,13 @@
 from pathlib import Path
 from unittest.mock import Mock, call
 
+from botocore.exceptions import ClientError
 import pandas as pd
 import pytest
-from botocore.exceptions import ClientError
 
 from api.adapter.s3_adapter import S3Adapter
 from api.application.services.partitioning_service import Partition
+from api.common.config.auth import Sensitivity
 from api.common.config.aws import OUTPUT_QUERY_BUCKET
 from api.common.custom_exceptions import (
     UserError,
@@ -14,6 +15,7 @@ from api.common.custom_exceptions import (
 )
 from api.domain.dataset_metadata import DatasetMetadata
 from api.domain.schema_metadata import SchemaMetadata
+from api.domain.schema import Schema, Column
 from test.test_utils import (
     mock_list_schemas_response,
 )
@@ -94,8 +96,28 @@ class TestS3AdapterUpload:
             Partition(keys=[2020, 2], path="year=2020/month=2", df=partition_2),
         ]
 
+        schema = Schema(
+            metadata=SchemaMetadata(
+                layer=layer,
+                domain=domain,
+                dataset=dataset,
+                version=version,
+                sensitivity=Sensitivity.PRIVATE,
+            ),
+            columns=[
+                Column(
+                    name="colname2",
+                    data_type="string",
+                    allow_null=True,
+                    partition_index=None,
+                )
+            ],
+        )
+
         self.persistence_adapter.upload_partitioned_data(
-            DatasetMetadata(layer, domain, dataset, version), filename, partitioned_data
+            schema,
+            filename,
+            partitioned_data,
         )
 
         partition_1_parquet = partition_1.to_parquet(compression="gzip", index=False)

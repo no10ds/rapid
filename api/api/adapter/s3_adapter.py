@@ -20,6 +20,7 @@ from api.common.custom_exceptions import AWSServiceError, UserError
 from api.common.logger import AppLogger
 from api.domain.dataset_metadata import DatasetMetadata
 from api.domain.schema_metadata import SchemaMetadata
+from api.domain.schema import Schema
 
 
 class S3Adapter:
@@ -54,13 +55,18 @@ class S3Adapter:
                 raise UserError(f"The file [{filename}] does not exist")
 
     def upload_partitioned_data(
-        self, dataset: Type[DatasetMetadata], filename: str, partitions: List[Partition]
+        self,
+        schema: Schema,
+        filename: str,
+        partitions: List[Partition],
     ):
         for partition in partitions:
             upload_path = self._construct_partitioned_data_path(
-                partition.path, filename, dataset
+                partition.path, filename, schema.metadata
             )
-            data_content = partition.df.to_parquet(compression="gzip", index=False)
+            data_content = partition.df.to_parquet(
+                compression="gzip", index=False, schema=schema.generate_storage_schema()
+            )
             self.store_data(upload_path, data_content)
 
     def upload_raw_data(
@@ -185,7 +191,7 @@ class S3Adapter:
         return file_key.rsplit("/", 1)[-1].split(".")[0]
 
     def _construct_partitioned_data_path(
-        self, partition_path: str, filename: str, dataset: DatasetMetadata
+        self, partition_path: str, filename: str, dataset: Type[DatasetMetadata]
     ) -> str:
         return os.path.join(dataset.dataset_location(), partition_path, filename)
 

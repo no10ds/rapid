@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from typing import List, Any
+from typing import List
 from unittest.mock import Mock, patch, MagicMock, call
 
 import pandas as pd
@@ -66,10 +66,6 @@ class TestUploadDataset:
                 ),
             ],
         )
-
-    def generator(self, data_list: List[Any]):
-        for element in data_list:
-            yield element
 
     def chunked_dataframe_values(
         self, mock_construct_chunked_dataframe, dataframes: List[pd.DataFrame]
@@ -497,7 +493,6 @@ class TestUploadDataset:
 
         dataframe = pd.DataFrame({})
         filename = "11111111_22222222.parquet"
-
         partitioned_dataframe = [
             ("some/path1", pd.DataFrame({})),
             ("some/path2", pd.DataFrame({})),
@@ -509,7 +504,9 @@ class TestUploadDataset:
 
         # Then
         self.s3_adapter.upload_partitioned_data.assert_called_once_with(
-            schema.metadata, filename, partitioned_dataframe
+            schema,
+            filename,
+            partitioned_dataframe,
         )
 
     def test_load_partitions(self):

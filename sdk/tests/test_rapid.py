@@ -204,36 +204,34 @@ class TestRapid:
             rapid.convert_dataframe_for_file_upload.assert_called_once_with(df)
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
-    def test_generate_info_success(self, requests_mock: Mocker, rapid: Rapid):
+    def test_fetch_dataset_info_success(self, requests_mock: Mocker, rapid: Rapid):
         layer = "raw"
         domain = "test_domain"
         dataset = "test_dataset"
-        df = DataFrame()
         mocked_response = {"data": "dummy"}
-        requests_mock.post(
+        requests_mock.get(
             f"{RAPID_URL}/datasets/{layer}/{domain}/{dataset}/info",
             json=mocked_response,
             status_code=200,
         )
 
-        res = rapid.generate_info(df, layer, domain, dataset)
+        res = rapid.fetch_dataset_info(layer, domain, dataset)
         assert res == mocked_response
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
-    def test_generate_info_failure(self, requests_mock: Mocker, rapid: Rapid):
+    def test_fetch_dataset_info_failure(self, requests_mock: Mocker, rapid: Rapid):
         layer = "raw"
         domain = "test_domain"
         dataset = "test_dataset"
-        df = DataFrame()
         mocked_response = {"details": "dummy"}
-        requests_mock.post(
+        requests_mock.get(
             f"{RAPID_URL}/datasets/{layer}/{domain}/{dataset}/info",
             json=mocked_response,
             status_code=422,
         )
 
         with pytest.raises(DatasetInfoFailedException):
-            rapid.generate_info(df, layer, domain, dataset)
+            rapid.fetch_dataset_info(layer, domain, dataset)
 
     @pytest.mark.usefixtures("rapid")
     def test_convert_dataframe_for_file_upload(self, rapid: Rapid):
