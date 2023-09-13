@@ -1,4 +1,6 @@
 from unittest.mock import Mock
+
+import pyarrow as pa
 import pytest
 
 from api.adapter.s3_adapter import S3Adapter
@@ -119,6 +121,18 @@ class TestSchema:
     )
     def test_get_column_names_by_type(self, type, expected):
         res = self.schema.get_column_names_by_type(type)
+        assert res == expected
+
+    def test_generates_storage_schema(self):
+        res = self.schema.generate_storage_schema()
+
+        expected = pa.schema(
+            [
+                pa.field("colname1", pa.int32()),
+                pa.field("colname2", pa.string()),
+                pa.field("colname3", pa.bool_()),
+            ]
+        )
         assert res == expected
 
 

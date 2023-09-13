@@ -29,7 +29,7 @@ def transform_and_validate(schema: Schema, data: pd.DataFrame) -> pd.DataFrame:
         .pipe(remove_empty_rows)
         .pipe(clean_column_headers)
         .pipe(dataset_has_correct_columns, schema)
-        .pipe(convert_dates_to_ymd, schema)
+        .pipe(convert_date_columns, schema)
         .pipe(dataset_has_acceptable_null_values, schema)
         .pipe(dataset_has_correct_data_types, schema)
         .pipe(dataset_has_no_illegal_characters_in_partition_columns, schema)
@@ -80,6 +80,24 @@ def dataset_has_acceptable_null_values(
     return data_frame, error_list
 
 
+def convert_date_columns(
+    data_frame: pd.DataFrame, schema: Schema
+) -> Tuple[pd.DataFrame, list[str]]:
+    error_list = []
+
+    for column in schema.get_columns_by_type(DateType):
+        try:
+            data_frame[column.name] = pd.to_datetime(
+                data_frame[column.name], format=column.format
+            )
+        except ValueError:
+            error_list.append(
+                f"Column [{column.name}] does not match specified date format in at least one row"
+            )
+
+    return data_frame, error_list
+
+
 def dataset_has_correct_data_types(
     data_frame: pd.DataFrame, schema: Schema
 ) -> Tuple[pd.DataFrame, list[str]]:
@@ -120,20 +138,6 @@ def dataset_has_no_illegal_characters_in_partition_columns(
     return data_frame, error_list
 
 
-def convert_dates_to_ymd(
-    df: pd.DataFrame, schema: Schema
-) -> Tuple[pd.DataFrame, list[str]]:
-    error_list = []
-    for column in schema.get_columns_by_type(DateType):
-        df[column.name], error = convert_date_column_to_ymd(
-            column.name, df[column.name], column.format
-        )
-        if error is not None:
-            error_list.append(error)
-
-    return df, error_list
-
-
 def remove_empty_rows(df: pd.DataFrame) -> Tuple[pd.DataFrame, list[str]]:
     error_list = []
     try:
@@ -169,5 +173,8 @@ def format_timestamp_as_ymd(timestamp: Timestamp) -> str:
 
 
 def is_valid_custom_dtype(actual_type: str, expected_type: str) -> bool:
+    """
+    Custom data types should be validated separately, rather than by column type comparisons
+    """
     is_custom_dtype = expected_type in list(DateType)
     return is_custom_dtype and actual_type in list(StringType)

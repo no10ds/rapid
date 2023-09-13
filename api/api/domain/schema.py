@@ -1,7 +1,9 @@
 from strenum import StrEnum
 from typing import List, Dict, Optional, Set
 
+import awswrangler as wr
 from pydantic.main import BaseModel
+import pyarrow as pa
 
 from api.domain.schema_metadata import Owner, SchemaMetadata, UpdateBehaviour
 
@@ -96,4 +98,12 @@ class Schema(BaseModel):
         return sorted(
             [column for column in self.columns if column.partition_index is not None],
             key=lambda x: x.partition_index,
+        )
+
+    def generate_storage_schema(self) -> pa.schema:
+        return pa.schema(
+            [
+                pa.field(column.name, wr._data_types.athena2pyarrow(column.data_type))
+                for column in self.columns
+            ]
         )

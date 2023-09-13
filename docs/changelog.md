@@ -1,5 +1,11 @@
 # Changelog
 
+## v7.0.1 / v0.1.1 (sdk) - _2023-09-13_
+
+### Fixes
+
+- Fix a bug where date types were being saved as strings.
+
 ## v7.0.0 / v0.1.1 (sdk) - _2023-09-12_
 
 ### Features
@@ -20,5 +26,6 @@
 
 - See the [migration doc](migration.md) for details on how to migrate to v7 from v6.
 
-[Unreleased changes]: https://github.com/no10ds/rapid/compare/v7.0.0...HEAD
+[Unreleased changes]: https://github.com/no10ds/rapid/compare/v7.0.1...HEAD
+[v7.0.1 / v0.1.1 (sdk)]: https://github.com/no10ds/rapid/v7.0.0...v7.0.1
 [v7.0.0 / v0.1.1 (sdk)]: https://github.com/no10ds/rapid/v7.0.0
