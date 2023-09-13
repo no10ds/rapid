@@ -9,7 +9,8 @@ adding = False
 
 for line in changelog_lines:
     if re.match(
-        f"##\\sv\\d+\\.\\d+\\.\\d+\\s-\\s_\\d{{4}}-\\d{{2}}-\\d{{2}}_$",  # noqa: F541
+        # Match for the release version number e.g. ## v7.0.0
+        f"##\s+v\d+\.\d+\.\d+",  # noqa: F541
         line,
     ):
         adding = not adding
@@ -22,4 +23,4 @@ if not parsed_lines:
     )
 else:
     with open("latest_release_changelog.md", "w+") as latest_changelog:
-        latest_changelog.writelines(parsed_lines[4:])
+        latest_changelog.writelines(parsed_lines)

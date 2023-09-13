@@ -1,8 +1,6 @@
 # Changelog
 
-## v7.0.0 / v0.1.0 (sdk) - _2023-09-12_
-
-See [v7.0.0 / v0.1.0 (sdk)] changes.
+## v7.0.0 / v0.1.1 (sdk) - _2023-09-12_
 
 ### Features
 
@@ -23,4 +21,4 @@ See [v7.0.0 / v0.1.0 (sdk)] changes.
 - See the [migration doc](migration.md) for details on how to migrate to v7 from v6.
 
 [Unreleased changes]: https://github.com/no10ds/rapid/compare/v7.0.0...HEAD
-[v7.0.0 / v0.1.0 (sdk)]: https://github.com/no10ds/rapid/v7.0.0
+[v7.0.0 / v0.1.1 (sdk)]: https://github.com/no10ds/rapid/v7.0.0
