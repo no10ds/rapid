@@ -2,7 +2,7 @@ IMAGE_NAME=ui-f1-registry
 LATEST_COMMIT_HASH=$(shell git rev-parse --short HEAD)
 ZIP_PATH=$(IMAGE_NAME)-$(LATEST_COMMIT_HASH)
 
-LATEST_TAG=$(shell gh api /repos/no10ds/rapid-ui/releases/latest | jq -r ".tag_name")
+LATEST_TAG=$(shell gh api /repos/no10ds/rapid/releases/latest | jq -r ".tag_name")
 ifeq ($(LATEST_TAG), null)
 	TAG_NAME="$(IMAGE_NAME)-$(LATEST_COMMIT_HASH)"
 else
