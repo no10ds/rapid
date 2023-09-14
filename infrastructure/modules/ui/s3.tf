@@ -52,7 +52,7 @@ resource "aws_s3_bucket_website_configuration" "rapid_ui_website" {
 }
 
 locals {
-  ui_registry_url = "https://github.com/no10ds/rapid-ui/releases/download/${var.ui_version}"
+  ui_registry_url = "https://github.com/no10ds/rapid/releases/download/${var.ui_version}"
 }
 
 resource "null_resource" "download_static_ui" {
