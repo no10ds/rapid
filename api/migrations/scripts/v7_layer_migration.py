@@ -13,10 +13,11 @@ The resources that get changed are the:
 
 Please ensure that none of the crawlers are running when you start this script.
 """
+import sys
+import os
 import argparse
 from copy import deepcopy
 import json
-import os
 from typing import List
 import re
 from pprint import pprint
@@ -26,10 +27,15 @@ import dotenv
 
 dotenv.load_dotenv()
 
+# Add api to PYTHONPATH
+current_dir = os.path.dirname(os.path.abspath(__file__))
+target_dir = os.path.abspath(os.path.join(current_dir, "..", ".."))
+sys.path.append(target_dir)
 
 from api.domain.schema import Schema  # noqa: E402
 from api.application.services.schema_service import SchemaService  # noqa: E402
 from api.adapter.athena_adapter import AthenaAdapter  # noqa: E402
+from api.common.custom_exceptions import ConflictError  # noqa: E402
 
 
 AWS_REGION = os.environ["AWS_REGION"]
@@ -54,10 +60,10 @@ def main(
     athena_adapter,
 ):
     migrate_files(layer, s3_client)
+    migrate_permissions(layer, all_layers, dynamodb_client)
     schema_errors = migrate_schemas(layer, schema_service, glue_client)
     migrate_tables(layer, glue_client, athena_adapter)
     migrate_crawlers(glue_client, resource_client)
-    migrate_permissions(layer, all_layers, dynamodb_client)
 
     if schema_errors:
         print("- These were the schema errors that need to be addressed manually")
@@ -204,54 +210,10 @@ def migrate_tables(layer: str, glue_client, athena_adapter: AthenaAdapter):
             DatabaseName=GLUE_DB,
             TableName=table["Name"],
         )
-
-        glue_client.create_table(
-            DatabaseName=GLUE_DB,
-            TableInput={
-                "Name": f"{layer}_{table['Name']}",
-                "Owner": "hadoop",
-                "StorageDescriptor": {
-                    "Columns": table["StorageDescriptor"]["Columns"],
-                    "Location": table["StorageDescriptor"]["Location"].replace(
-                        "/data/", f"/data/{layer}/"
-                    ),
-                    "InputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
-                    "OutputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
-                    "Compressed": False,
-                    "SerdeInfo": {
-                        "SerializationLibrary": "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
-                        "Parameters": {"serialization.format": "1"},
-                    },
-                    "NumberOfBuckets": -1,
-                    "StoredAsSubDirectories": False,
-                },
-                "PartitionKeys": table["PartitionKeys"],
-                "TableType": "EXTERNAL_TABLE",
-                "Parameters": {
-                    "classification": "parquet",
-                    "typeOfData": "file",
-                    "compressionType": "none",
-                    "EXTERNAL": "TRUE",
-                },
-            },
-            PartitionIndexes=[
-                {
-                    "Keys": [
-                        key["Name"]
-                        for key in partition_indexes["PartitionIndexDescriptorList"][0][
-                            "Keys"
-                        ]
-                    ],
-                    "IndexName": partition_indexes["PartitionIndexDescriptorList"][0][
-                        "IndexName"
-                    ],
-                }
-            ]
-            if partition_indexes["PartitionIndexDescriptorList"]
-            else [],
-        )
-
-        athena_adapter.query_sql_async(f"MSCK REPAIR TABLE `f{layer}_{table['Name']}`;")
+        if partition_indexes:
+            athena_adapter.query_sql_async(
+                f"MSCK REPAIR TABLE `f{layer}_{table['Name']}`;"
+            )
         glue_client.delete_table(Name=table["Name"], DatabaseName=GLUE_DB)
 
 
@@ -325,14 +287,10 @@ def migrate_schemas(layer, schema_service: SchemaService, glue_client):
             for column in schema.columns:
                 column.data_type = glue_column_types[column.name]
 
-            schema_service.store_schema(schema)
-            latest_version = schema_service.get_latest_schema(schema.metadata)
-
-            if (
-                latest_version.dataset_identifier()
-                != schema.metadata.dataset_identifier()
-            ):
-                schema_service.deprecate_schema(schema.metadata)
+            try:
+                schema_service.upload_schema(schema)
+            except ConflictError:
+                schema_service.update_schema(schema)
 
             s3_client.delete_object(Bucket=DATA_BUCKET, Key=file["Key"])
 
