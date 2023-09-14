@@ -201,4 +201,4 @@ release:
 # Migration --------------------
 ##
 migrate-v7:			## Run the migration
-	@cd api/; ./batect migrate-v7 -- "--layer ${layer} --all-layers ${all-layers}"
+	@cd api/; ./batect migrate-v7 -- --layer ${layer} --all-layers ${all-layers}

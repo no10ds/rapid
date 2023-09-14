@@ -1,5 +1,11 @@
 # Changelog
 
+## v7.0.3 / v0.1.2 (sdk) - _2023-09-14_
+
+### Fixes
+
+- Migration script and docs tweaks.
+
 ## v7.0.2 / v0.1.2 (sdk) - _2023-09-14_
 
 ### Fixes
