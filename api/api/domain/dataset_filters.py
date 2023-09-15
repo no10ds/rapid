@@ -45,7 +45,7 @@ class DatasetFilters(BaseModel):
             self.build_key_only_tags(),
             self.build_generic_filter(SENSITIVITY, self.sensitivity),
             self.build_generic_filter(LAYER, self.layer),
-            self.build_generic_filter(DOMAIN, self.domain),
+            self.build_generic_filter(DOMAIN, self.domain.lower()),
         ]
 
     @combine_conditions
