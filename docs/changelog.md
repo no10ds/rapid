@@ -10,12 +10,14 @@
 ### Fixes
 
 - Updated terraform default `application_version` and `ui_version` variables.
+- Migration script and documentation.
 
 ## v7.0.3 / v0.1.2 (sdk) - _2023-09-15_
 
 ### Fixes
 
 - Fixes issue where permissions were not being correctly read and causing api functionality to fail
+
 
 ## v7.0.2 / v0.1.2 (sdk) - _2023-09-14_
 
