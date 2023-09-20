@@ -5,7 +5,12 @@ output "athena_query_output_bucket_arn" {
 
 output "athena_workgroup_arn" {
   value       = module.data_workflow.athena_workgroup_arn
-  description = "Query workgroup for Athena"
+  description = "The ARN of the Query workgroup for Athena"
+}
+
+output "athena_workgroup_name" {
+  value       = module.data_workflow.athena_workgroup_name
+  description = "The name of the Query workgroup for Athena"
 }
 
 output "schema_table_arn" {

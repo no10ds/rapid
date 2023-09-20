@@ -1,10 +1,23 @@
 # Changelog
 
+## v7.0.4 / v0.1.2 (sdk) - _2023-09-20_
+
+### Features
+
+- Improved release process
+- Added Athena workgroup and database as outputs of the rAPId module.
+
+### Fixes
+
+- Updated terraform default `application_version` and `ui_version` variables.
+- Migration script and documentation.
+
 ## v7.0.3 / v0.1.2 (sdk) - _2023-09-15_
 
 ### Fixes
 
 - Fixes issue where permissions were not being correctly read and causing api functionality to fail
+
 
 ## v7.0.2 / v0.1.2 (sdk) - _2023-09-14_
 
@@ -39,7 +52,8 @@
 
 - See the [migration doc](migration.md) for details on how to migrate to v7 from v6.
 
-[Unreleased changes]: https://github.com/no10ds/rapid/compare/v7.0.3...HEAD
+[Unreleased changes]: https://github.com/no10ds/rapid/compare/v7.0.4...HEAD
+[v7.0.4 / v0.1.2 (sdk)]: https://github.com/no10ds/rapid/v7.0.3...v7.0.4
 [v7.0.3 / v0.1.2 (sdk)]: https://github.com/no10ds/rapid/v7.0.2...v7.0.3
 [v7.0.2 / v0.1.2 (sdk)]: https://github.com/no10ds/rapid/v7.0.1...v7.0.2
 [v7.0.1 / v0.1.2 (sdk)]: https://github.com/no10ds/rapid/v7.0.0...v7.0.1
