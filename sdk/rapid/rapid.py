@@ -24,6 +24,7 @@ from rapid.exceptions import (
     UnableToFetchJobStatusException,
     DatasetInfoFailedException,
     DatasetNotFoundException,
+    InvalidPermissionsException,
 )
 
 
@@ -319,3 +320,30 @@ class Rapid:
         if response.status_code == 200:
             return data
         raise SchemaUpdateFailedException("Could not update schema", data)
+
+    def create_client(self, client_name: str, client_permissions: list[str]):
+        """
+        Creates a new client on the API with the specified permissions.
+
+        Args:
+            client_name (str): The name of the client to create.
+            client_permissions (list[str]): The permissions of the client to create.
+
+        Raises:
+            rapid.exceptions.InvalidPermissionsException: If an error occurs while trying to create the client.
+        """
+        url = f"{self.auth.url}/client"
+        response = requests.post(
+            url,
+            headers=self.generate_headers(),
+            data=json.dumps(
+                {"client_name": client_name, "permissions": client_permissions}
+            ),
+            timeout=TIMEOUT_PERIOD,
+        )
+        data = json.loads(response.content.decode("utf-8"))
+        if response.status_code == 200:
+            return data
+        raise InvalidPermissionsException(
+            "One or more of the provided permissions is invalid or duplicated"
+        )

@@ -68,3 +68,7 @@ class SchemaInitialisationException(Exception):
 
 class ColumnNotDifferentException(Exception):
     pass
+
+
+class InvalidPermissionsException(Exception):
+    pass

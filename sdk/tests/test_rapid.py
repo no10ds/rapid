@@ -14,6 +14,7 @@ from rapid.exceptions import (
     SchemaUpdateFailedException,
     UnableToFetchJobStatusException,
     DatasetInfoFailedException,
+    InvalidPermissionsException,
 )
 from .conftest import RAPID_URL, RAPID_TOKEN
 
@@ -347,3 +348,22 @@ class TestRapid:
         requests_mock.put(f"{RAPID_URL}/schema", json=mocked_response, status_code=400)
         with pytest.raises(SchemaUpdateFailedException):
             rapid.update_schema(schema)
+
+    @pytest.mark.usefixtures("requests_mock", "rapid")
+    def test_create_client_success(self, requests_mock: Mocker, rapid: Rapid):
+        mocked_response = {
+            "client_name": "client",
+            "permissions": ["READ_ALL"],
+            "client_id": "xxx-yyy-zzz",
+            "client_secret": "1234567",
+        }
+        requests_mock.post(f"{RAPID_URL}/client", json=mocked_response, status_code=200)
+        res = rapid.create_client("client", ["READ_ALL"])
+        assert res == mocked_response
+
+    @pytest.mark.usefixtures("requests_mock", "rapid")
+    def test_create_client_failure(self, requests_mock: Mocker, rapid: Rapid):
+        mocked_response = {"data": "dummy"}
+        requests_mock.post(f"{RAPID_URL}/client", json=mocked_response, status_code=400)
+        with pytest.raises(InvalidPermissionsException):
+            rapid.create_client("client", ["READ_ALL"])
