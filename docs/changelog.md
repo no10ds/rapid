@@ -1,5 +1,16 @@
 # Changelog
 
+## v7.0.4 / v0.1.2 (sdk) - _2023-09-14_
+
+### Features
+
+- Improved release process
+- Added Athena workgroup and database as outputs of the rAPId module.
+
+### Fixes
+
+- Updated terraform default `application_version` and `ui_version` variables.
+
 ## v7.0.3 / v0.1.2 (sdk) - _2023-09-15_
 
 ### Fixes
