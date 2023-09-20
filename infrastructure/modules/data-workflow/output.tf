@@ -5,7 +5,12 @@ output "athena_query_result_output_bucket_arn" {
 
 output "athena_workgroup_arn" {
   value       = aws_athena_workgroup.rapid_athena_workgroup.arn
-  description = "Query workgroup for Athena"
+  description = "The arn of the Query workgroup for Athena"
+}
+
+output "athena_workgroup_name" {
+  value       = aws_athena_workgroup.rapid_athena_workgroup.name
+  description = "The name of the Query workgroup for Athena"
 }
 
 output "catalogue_db_name" {
