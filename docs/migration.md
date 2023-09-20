@@ -13,12 +13,6 @@ To execute it, you'll need to decide:
 
 ### Prerequisites
 
-#### Infrastructure changes
-
-The v7.0.0 infrastructure changes need to be applied to your rAPId instance.
-
-Update the version of the rAPId terraform module that you are using and apply the terraform.
-
 #### Local requirements
 
 You will need the ability to run `Batect`, the requirements for which are listed [here](https://batect.dev/docs/getting-started/requirements/).
@@ -48,14 +42,14 @@ Within the rAPId repo, set the following variables in the `.env` file to match t
 
 ```
 # rAPId instance variables
-- AWS_REGION=
-- DATA_BUCKET=
-- RESOURCE_PREFIX=
+AWS_REGION=
+DATA_BUCKET=
+RESOURCE_PREFIX=
 
 # AWS environment variables
-- AWS_ACCESS_KEY_ID=
-- AWS_SECRET_ACCESS_KEY=
-- AWS_SESSION_TOKEN=
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_SESSION_TOKEN=
 ```
 
 #### Run the migration script
