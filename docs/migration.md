@@ -25,11 +25,22 @@ You will need the ability to run `Batect`, the requirements for which are listed
 
 ### Steps:
 
+#### Make the infrastructure changes
+
+The v7 infrastructure changes need to be applied to your rAPId instance.
+
+1. Add the `layers` variable to the rAPId cluster module. `layers` will be a list of the layers you wish to use in your rAPId instance. You can omit this if you just want to use the `default` layer.
+2. Change the rAPId module source to:
+   `git@github.com:no10ds/rapid.git//infrastructure/modules/rapid`
+3. Update both the application_version and ui_version variables to `v7.0.4`
+
+Apply these changes.
+
 #### Clone the repo
 
 To do this, run:
 
-`git clone -b v7.0.0 git@github.com:no10ds/rapid.git`
+`git clone -b v7.0.4 git@github.com:no10ds/rapid.git`
 
 #### Set your environment variables
 
