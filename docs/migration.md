@@ -13,23 +13,28 @@ To execute it, you'll need to decide:
 
 ### Prerequisites
 
-#### Infrastructure changes
-
-The v7.0.0 infrastructure changes need to be applied to your rAPId instance.
-
-Update the version of the rAPId terraform module that you are using and apply the terraform.
-
 #### Local requirements
 
 You will need the ability to run `Batect`, the requirements for which are listed [here](https://batect.dev/docs/getting-started/requirements/).
 
 ### Steps:
 
+#### Make the infrastructure changes
+
+The v7 infrastructure changes need to be applied to your rAPId instance.
+
+1. Add the `layers` variable to the rAPId cluster module. `layers` will be a list of the layers you wish to use in your rAPId instance. You can omit this if you just want to use the `default` layer.
+2. Change the rAPId module source to:
+   `git@github.com:no10ds/rapid.git//infrastructure/modules/rapid`
+3. Update both the application_version and ui_version variables to `v7.0.4`
+
+Apply these changes.
+
 #### Clone the repo
 
 To do this, run:
 
-`git clone -b v7.0.0 git@github.com:no10ds/rapid.git`
+`git clone -b v7.0.4 git@github.com:no10ds/rapid.git`
 
 #### Set your environment variables
 
@@ -37,14 +42,14 @@ Within the rAPId repo, set the following variables in the `.env` file to match t
 
 ```
 # rAPId instance variables
-- AWS_REGION=
-- DATA_BUCKET=
-- RESOURCE_PREFIX=
+AWS_REGION=
+DATA_BUCKET=
+RESOURCE_PREFIX=
 
 # AWS environment variables
-- AWS_ACCESS_KEY_ID=
-- AWS_SECRET_ACCESS_KEY=
-- AWS_SESSION_TOKEN=
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_SESSION_TOKEN=
 ```
 
 #### Run the migration script

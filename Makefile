@@ -189,11 +189,12 @@ ui-zip-and-release: ui-zip-contents ui-release ## Zip and release prod static ui
 
 ##
 release:
+	@python release.py --operation check
 	@git checkout ${commit}
 	@git tag -a "${version}" -m "Release tag for version ${version}"
 	@git checkout -
 	@git push origin ${version}
-	@python get_latest_release_changelog.py
+	@python release.py --operation create-changelog
 	@gh release create ${version} -F latest_release_changelog.md
 	@rm -rf latest_release_changelog.md
 
@@ -201,4 +202,4 @@ release:
 # Migration --------------------
 ##
 migrate-v7:			## Run the migration
-	@cd api/; ./batect migrate-v7 -- "--layer ${layer} --all-layers ${all-layers}"
+	@cd api/; ./batect migrate-v7 -- --layer ${layer} --all-layers ${all-layers}
