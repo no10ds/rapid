@@ -100,18 +100,7 @@ class TestColumn:
             Column(**_column)
 
         assert exc_info.value.errors() == [
-            {
-                "input": {
-                    "partition_index": None,
-                    "data_type": "object",
-                    "allow_null": True,
-                    "format": None,
-                },
-                "loc": ("name",),
-                "msg": "Field required",
-                "type": "missing",
-                "url": "https://errors.pydantic.dev/2.3/v/missing",
-            }
+            {"loc": ("name",), "msg": "field required", "type": "value_error.missing"}
         ]
 
     def test_create_columns_fails_data_type_none(self):
@@ -127,16 +116,9 @@ class TestColumn:
 
         assert exc_info.value.errors() == [
             {
-                "input": {
-                    "name": "column_a",
-                    "partition_index": None,
-                    "allow_null": True,
-                    "format": None,
-                },
                 "loc": ("data_type",),
-                "msg": "Field required",
-                "type": "missing",
-                "url": "https://errors.pydantic.dev/2.3/v/missing",
+                "msg": "field required",
+                "type": "value_error.missing",
             }
         ]
 

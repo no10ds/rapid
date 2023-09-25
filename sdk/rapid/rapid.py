@@ -25,6 +25,8 @@ from rapid.exceptions import (
     DatasetInfoFailedException,
     DatasetNotFoundException,
     InvalidPermissionsException,
+    SubjectAlreadyExistsException,
+    SubjectNotFoundException,
 )
 
 
@@ -342,8 +344,61 @@ class Rapid:
             timeout=TIMEOUT_PERIOD,
         )
         data = json.loads(response.content.decode("utf-8"))
+        if response.status_code == 201:
+            return data
+        elif response.status_code == 400:
+            raise SubjectAlreadyExistsException(
+                f"The client {client_name} already exists"
+            )
+        raise InvalidPermissionsException(
+            "One or more of the provided permissions is invalid or duplicated"
+        )
+
+    def delete_client(self, client_id: str) -> None:
+        """
+        Deletes a client from the API based on their id
+
+        Args:
+            client_id (str): The id of the client to delete.
+
+        Raises:
+            rapid.exceptions.SubjectNotFoundException: If the client does not exist.
+        """
+        url = f"{self.auth.url}/client/{client_id}"
+        response = requests.delete(
+            url,
+            headers=self.generate_headers(),
+            timeout=TIMEOUT_PERIOD,
+        )
+        if response.status_code == 200:
+            return None
+
+        raise SubjectNotFoundException(
+            f"Failed to delete client with id: {client_id}, ensure it exists."
+        )
+
+    def update_subject_permissions(self, subject_id: str, permissions: list[str]):
+        """
+        Updates the permissions of a subject on the API.
+
+        Args:
+            subject_id (str): The id of the subject to update.
+            permissions (list[str]): The permissions to update the subject with.
+
+        Raises:
+            rapid.exceptions.InvalidPermissionsException: If an error occurs while trying to create the client.
+        """
+        url = f"{self.auth.url}/subject/permissions"
+        response = requests.put(
+            url,
+            headers=self.generate_headers(),
+            data=json.dumps({"subject_id": subject_id, "permissions": permissions}),
+            timeout=TIMEOUT_PERIOD,
+        )
+        data = json.loads(response.content.decode("utf-8"))
         if response.status_code == 200:
             return data
+
         raise InvalidPermissionsException(
             "One or more of the provided permissions is invalid or duplicated"
         )
