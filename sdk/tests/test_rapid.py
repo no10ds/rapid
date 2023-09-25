@@ -15,6 +15,8 @@ from rapid.exceptions import (
     UnableToFetchJobStatusException,
     DatasetInfoFailedException,
     InvalidPermissionsException,
+    SubjectNotFoundException,
+    SubjectAlreadyExistsException,
 )
 from .conftest import RAPID_URL, RAPID_TOKEN
 
@@ -357,7 +359,7 @@ class TestRapid:
             "client_id": "xxx-yyy-zzz",
             "client_secret": "1234567",
         }
-        requests_mock.post(f"{RAPID_URL}/client", json=mocked_response, status_code=200)
+        requests_mock.post(f"{RAPID_URL}/client", json=mocked_response, status_code=201)
         res = rapid.create_client("client", ["READ_ALL"])
         assert res == mocked_response
 
@@ -365,5 +367,41 @@ class TestRapid:
     def test_create_client_failure(self, requests_mock: Mocker, rapid: Rapid):
         mocked_response = {"data": "dummy"}
         requests_mock.post(f"{RAPID_URL}/client", json=mocked_response, status_code=400)
-        with pytest.raises(InvalidPermissionsException):
+        with pytest.raises(SubjectAlreadyExistsException):
             rapid.create_client("client", ["READ_ALL"])
+
+    @pytest.mark.usefixtures("requests_mock", "rapid")
+    def test_delete_client_success(self, requests_mock: Mocker, rapid: Rapid):
+        mocked_response = {"data": "dummy"}
+        requests_mock.delete(
+            f"{RAPID_URL}/client/xxx-yyy-zzz", json=mocked_response, status_code=200
+        )
+        res = rapid.delete_client("xxx-yyy-zzz")
+        assert res is None
+
+    @pytest.mark.usefixtures("requests_mock", "rapid")
+    def test_delete_client_failure(self, requests_mock: Mocker, rapid: Rapid):
+        mocked_response = {"data": "dummy"}
+        requests_mock.delete(
+            f"{RAPID_URL}/client/xxx-yyy-zzz", json=mocked_response, status_code=400
+        )
+        with pytest.raises(SubjectNotFoundException):
+            rapid.delete_client("xxx-yyy-zzz")
+
+    @pytest.mark.usefixtures("requests_mock", "rapid")
+    def update_subject_permissions_success(self, requests_mock: Mocker, rapid: Rapid):
+        mocked_response = {"data": "dummy"}
+        requests_mock.put(
+            f"{RAPID_URL}/subject/permissions", json=mocked_response, status_code=200
+        )
+        res = rapid.update_subject_permissions("xxx-yyy-zzz", ["READ_ALL"])
+        assert res == mocked_response
+
+    @pytest.mark.usefixtures("requests_mock", "rapid")
+    def update_subject_permissions_failure(self, requests_mock: Mocker, rapid: Rapid):
+        mocked_response = {"data": "dummy"}
+        requests_mock.put(
+            f"{RAPID_URL}/subject/permissions", json=mocked_response, status_code=400
+        )
+        with pytest.raises(InvalidPermissionsException):
+            rapid.update_subject_permissions("xxx-yyy-zzz", ["READ_ALL"])

@@ -72,3 +72,15 @@ class ColumnNotDifferentException(Exception):
 
 class InvalidPermissionsException(Exception):
     pass
+
+
+class SubjectAlreadyExistsException(Exception):
+    pass
+
+
+class SubjectNotFoundException(Exception):
+    pass
+
+
+class SubjectDeletionFailedException(Exception):
+    pass
