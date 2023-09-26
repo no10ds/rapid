@@ -76,6 +76,7 @@ class TestUtils:
         )
         requests_mock.post(
             f"{RAPID_URL}/schema",
+            status_code=201,
         )
         rapid.upload_dataframe = Mock()
         upload_and_create_dataframe(rapid, metadata, df)
@@ -92,7 +93,7 @@ class TestUtils:
             + f"/{metadata.dataset}/generate",
             json=mock_response,
         )
-        requests_mock.post(f"{RAPID_URL}/schema")
+        requests_mock.post(f"{RAPID_URL}/schema", status_code=201)
         rapid.upload_dataframe = Mock(side_effect=DataFrameUploadValidationException)
 
         with pytest.raises(DataFrameUploadValidationException):
@@ -107,7 +108,7 @@ class TestUtils:
             + f"/{metadata.dataset}/generate",
             json=mock_response,
         )
-        requests_mock.post(f"{RAPID_URL}/schema")
+        requests_mock.post(f"{RAPID_URL}/schema", status_code=201)
         rapid.upload_dataframe = Mock(side_effect=DataFrameUploadValidationException)
 
         upload_and_create_dataframe(rapid, metadata, df, upgrade_schema_on_fail=True)
