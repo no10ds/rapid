@@ -99,7 +99,9 @@ class TestColumn:
         with pytest.raises(ValidationError) as exc_info:
             Column(**_column)
 
-        assert exc_info.value.errors() == [
+        errors = exc_info.value.errors()
+        del errors[0]["url"]
+        assert errors == [
             {
                 "type": "missing",
                 "loc": ("name",),
@@ -110,7 +112,6 @@ class TestColumn:
                     "allow_null": True,
                     "format": None,
                 },
-                "url": "https://errors.pydantic.dev/2.2/v/missing",
             }
         ]
 
@@ -125,7 +126,9 @@ class TestColumn:
         with pytest.raises(ValidationError) as exc_info:
             Column(**_column)
 
-        assert exc_info.value.errors() == [
+        errors = exc_info.value.errors()
+        del errors[0]["url"]
+        assert errors == [
             {
                 "type": "missing",
                 "loc": ("data_type",),
@@ -136,7 +139,6 @@ class TestColumn:
                     "allow_null": True,
                     "format": None,
                 },
-                "url": "https://errors.pydantic.dev/2.2/v/missing",
             }
         ]
 
