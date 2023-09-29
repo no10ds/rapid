@@ -201,3 +201,26 @@ export const createSchema = async (
   })
   return res.json()
 }
+
+export const deleteClient = async ({ clientId }: { clientId: string }) => {
+  const res = await api(`/api/client/${clientId}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  return res.json()
+}
+
+export const deleteUser = async ({
+  userId,
+  username
+}: {
+  userId: string
+  username: string
+}) => {
+  const res = await api('/api/user', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id: userId, username })
+  })
+  return res.json()
+}
