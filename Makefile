@@ -138,7 +138,7 @@ sdk-setup:			## Setup Python required for the sdk
 # SDK Testing --------------------
 ##
 sdk-test:			## Run sdk unit tests
-	@cd sdk/; pytest -vv -s
+	@cd sdk/; . .venv/bin/activate && pytest -vv -s
 
 # SDK Release --------------------
 ##
