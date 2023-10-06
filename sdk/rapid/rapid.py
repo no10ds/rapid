@@ -137,7 +137,7 @@ class Rapid:
             return pd.read_json(json.dumps(data), orient="index")
 
         raise DatasetNotFoundException(
-            f"Could not find dataset, {domain}/{dataset} to download", data
+            f"Could not find dataset, {layer}/{domain}/{dataset} to download", data
         )
 
     def upload_dataframe(
@@ -184,11 +184,15 @@ class Rapid:
             raise DataFrameUploadValidationException(
                 "Could not upload dataframe due to an incorrect schema definition"
             )
-
-        raise DataFrameUploadFailedException(
-            "Encountered an unexpected error, could not upload dataframe",
-            data["details"],
-        )
+        elif response.status_code == 404:
+            raise DatasetNotFoundException(
+                "Could not find dataset: {layer}/{domain}/{dataset}", data
+            )
+        else:
+            raise DataFrameUploadFailedException(
+                "Encountered an unexpected error, could not upload dataframe",
+                data["details"],
+            )
 
     def fetch_dataset_info(self, layer: str, domain: str, dataset: str):
         """
@@ -214,6 +218,11 @@ class Rapid:
         data = json.loads(response.content.decode("utf-8"))
         if response.status_code == 200:
             return data
+
+        if response.status_code == 404:
+            raise DatasetNotFoundException(
+                f"Could not find dataset, {layer}/{domain}/{dataset} to get info", data
+            )
 
         raise DatasetInfoFailedException(
             "Failed to gather the dataset info", data["details"]
