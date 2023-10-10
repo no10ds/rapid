@@ -356,7 +356,8 @@ resource "aws_ecs_service" "aws-ecs-service" {
     assign_public_ip = false
     security_groups = [
       aws_security_group.service_security_group.id,
-      aws_security_group.load_balancer_security_group.id
+      aws_security_group.load_balancer_security_group_http.id,
+      aws_security_group.load_balancer_security_group_https.id
     ]
   }
 
@@ -376,7 +377,7 @@ resource "aws_security_group" "service_security_group" {
     from_port       = 0
     to_port         = 0
     protocol        = "-1"
-    security_groups = [aws_security_group.load_balancer_security_group.id]
+    security_groups = [aws_security_group.load_balancer_security_group_http.id,aws_security_group.load_balancer_security_group_https.id]
     description     = "Allow traffic from load balancer"
   }
 
