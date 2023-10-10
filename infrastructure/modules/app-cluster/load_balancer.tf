@@ -5,7 +5,7 @@ resource "aws_alb" "application_load_balancer" {
   internal                   = false
   load_balancer_type         = "application"
   subnets                    = var.public_subnet_ids_list
-  security_groups            = [aws_security_group.load_balancer_security_group.id]
+  security_groups            = [aws_security_group.load_balancer_security_group_http.id,aws_security_group.load_balancer_security_group_https.id]
   drop_invalid_header_fields = true
   enable_deletion_protection = true
 
@@ -64,7 +64,7 @@ POLICY
 data "aws_ec2_managed_prefix_list" "cloudwatch" {
   name = "com.amazonaws.global.cloudfront.origin-facing"
 }
-resource "aws_security_group" "load_balancer_security_group" {
+resource "aws_security_group" "load_balancer_security_group_http" {
   # checkov:skip=CKV_AWS_260: Limits by prefix list ID's
   vpc_id      = var.vpc_id
   description = "ALB Security Group"
@@ -75,6 +75,24 @@ resource "aws_security_group" "load_balancer_security_group" {
     prefix_list_ids = [data.aws_ec2_managed_prefix_list.cloudwatch.id]
     description     = "Allow HTTP ingress"
   }
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+    description      = "Allow all egress"
+  }
+  tags = var.tags
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+resource "aws_security_group" "load_balancer_security_group_https" {
+  # checkov:skip=CKV_AWS_260: Limits by prefix list ID's
+  vpc_id      = var.vpc_id
+  description = "ALB Security Group"
   ingress {
     from_port       = 443
     to_port         = 443
@@ -96,7 +114,6 @@ resource "aws_security_group" "load_balancer_security_group" {
     create_before_destroy = true
   }
 }
-
 resource "aws_lb_target_group" "target_group" {
   name        = "${var.resource-name-prefix}-tg"
   port        = 80
