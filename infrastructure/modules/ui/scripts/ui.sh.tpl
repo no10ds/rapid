@@ -14,4 +14,3 @@ aws s3 cp . s3://${BUCKET_ID} --recursive
 cd ..
 
 rm -rf ./out
-
