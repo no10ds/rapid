@@ -1,5 +1,11 @@
 # Changelog
 
+## v7.0.5 / v0.1.3 (sdk) - _2023-09-20_
+
+### Fixes
+
+- Fix the behaviour of the dataset pattern functions in the SDK.
+
 ## v7.0.4 / v0.1.2 (sdk) - _2023-09-20_
 
 ### Features
@@ -17,7 +23,6 @@
 ### Fixes
 
 - Fixes issue where permissions were not being correctly read and causing api functionality to fail
-
 
 ## v7.0.2 / v0.1.2 (sdk) - _2023-09-14_
 
