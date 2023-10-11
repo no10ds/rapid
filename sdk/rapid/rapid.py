@@ -159,8 +159,9 @@ class Rapid:
             wait_to_complete (bool, optional): Whether to wait for the upload job to complete before returning. Defaults to True.
 
         Raises:
-        rapid.exceptions.DataFrameUploadValidationException: If the DataFrame's schema is incorrect.
-        rapid.exceptions.DataFrameUploadFailedException: If an unexpected error occurs while uploading the DataFrame.
+            rapid.exceptions.DataFrameUploadValidationException: If the DataFrame's schema is incorrect.
+            rapid.exceptions.DataFrameUploadFailedException: If an unexpected error occurs while uploading the DataFrame.
+            rapid.exceptions.DatasetNotFoundException: If the specified dataset does not exist.
 
         Returns:
             If wait_to_complete is True, returns "Success" if the upload is successful.
@@ -205,6 +206,7 @@ class Rapid:
 
         Raises:
             rapid.exceptions.DatasetInfoFailedException: If an error occurs while fetching the dataset information.
+            rapid.exceptions.DatasetNotFoundException: If the specified dataset does not exist.
 
         Returns:
             A dictionary containing the metadata information for the dataset.
