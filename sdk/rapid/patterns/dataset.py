@@ -21,7 +21,6 @@ def upload_and_create_dataset(
 
     Raises:
         rapid.exceptions.DataFrameUploadValidationException: If the DataFrame's schema is incorrect and upgrade_schema_on_fail is False.
-        Exception: If an error occurs while generating the schema, creating the schema, or uploading the DataFrame.
     """
     try:
         rapid.upload_dataframe(
