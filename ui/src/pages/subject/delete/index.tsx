@@ -1,4 +1,4 @@
-import { AccountLayout, Card, Button, Row, Select } from '@/components'
+import { AccountLayout, Card, Button, Row, Select, TextField } from '@/components'
 import { getSubjectsListUi } from '@/service'
 import {
   DialogActions,
@@ -20,6 +20,7 @@ function DeleteSubject() {
   const [filteredSubjectListData, setFilteredSubjectListData] =
     useState<FilteredSubjectList>({ ClientApps: [], Users: [] })
   const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = useState(false)
+  const [userConfirmation, setUserConfirmation] = useState('')
 
   const {
     isLoading: isSubjectsListLoading,
@@ -56,6 +57,12 @@ function DeleteSubject() {
     }
   }, [subjectsListData])
 
+  useEffect(() => {
+    if (isConfirmDeleteDialogOpen) {
+      setUserConfirmation('')
+    }
+  }, [isConfirmDeleteDialogOpen])
+
   const closeConfirmationAndRefetchUsers = () => {
     setIsConfirmDeleteDialogOpen(false)
     setSelectedSubjectId('')
@@ -70,6 +77,11 @@ function DeleteSubject() {
     if (type === 'CLIENT') deleteClient({ clientId: subject_id })
     if (type === 'USER')
       deleteUser({ userId: subject_id, username: subject.subject_name })
+  }
+
+  const getCurrentSelectedSubjectName = () => {
+    return subjectsListData.filter((item) => item.subject_id === selectedSubjectId)[0]
+      .subject_name
   }
 
   if (subjectsListError) {
@@ -135,23 +147,32 @@ function DeleteSubject() {
       >
         <DialogContent dividers>
           <Typography variant="body1" gutterBottom>
-            Are you sure you want to delete this subject?
+            This action cannot be undone. Please type in the name of the subject to
+            confirm.
           </Typography>
-          <Typography variant="body1" style={{ fontWeight: 'bold' }} gutterBottom>
-            {
-              subjectsListData.filter((item) => item.subject_id === selectedSubjectId)[0]
-                .subject_name
-            }
+          <Typography variant="body2" style={{ fontStyle: 'italic' }} gutterBottom>
+            {getCurrentSelectedSubjectName()}
           </Typography>
+          <TextField
+            fullWidth
+            size="small"
+            variant="outlined"
+            inputProps={{
+              'data-testid': 'field-user-confirmation'
+            }}
+            value={userConfirmation}
+            onChange={(e) => setUserConfirmation(e.target.value)}
+          />
         </DialogContent>
         <DialogActions>
           <Button color="secondary" onClick={() => setIsConfirmDeleteDialogOpen(false)}>
             Cancel
           </Button>
           <Button
-            color="error"
+            color="primary"
             onClick={deleteSubject}
             loading={isUserDeleting || isClientDeleting}
+            disabled={userConfirmation !== getCurrentSelectedSubjectName()}
             data-testid="delete-confirmation-dialog-delete-button"
           >
             Delete
