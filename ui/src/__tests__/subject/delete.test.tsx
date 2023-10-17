@@ -79,6 +79,7 @@ describe('DeleteSubject Component', () => {
     await waitFor(async () => {
       expect(screen.getByTestId('delete-confirmation-dialog')).toBeInTheDocument()
     })
+    expect(screen.getByTestId('delete-confirmation-dialog-delete-button')).toBeDisabled()
   })
 
   it('should delete a client', async () => {
@@ -98,6 +99,9 @@ describe('DeleteSubject Component', () => {
     await waitFor(async () => {
       expect(screen.getByTestId('delete-confirmation-dialog')).toBeInTheDocument()
     })
+
+    await userEvent.type(screen.getByTestId('field-user-confirmation'), 'client_title_0')
+    expect(screen.getByTestId('delete-confirmation-dialog-delete-button')).toBeEnabled()
 
     fetchMock.mockResponseOnce(JSON.stringify(mockData), { status: 200 })
     userEvent.click(screen.getByTestId('delete-confirmation-dialog-delete-button'))
@@ -129,6 +133,9 @@ describe('DeleteSubject Component', () => {
     await waitFor(async () => {
       expect(screen.getByTestId('delete-confirmation-dialog')).toBeInTheDocument()
     })
+
+    await userEvent.type(screen.getByTestId('field-user-confirmation'), 'user_title_0')
+    expect(screen.getByTestId('delete-confirmation-dialog-delete-button')).toBeEnabled()
 
     fetchMock.mockResponseOnce(JSON.stringify(mockData), { status: 200 })
     userEvent.click(screen.getByTestId('delete-confirmation-dialog-delete-button'))
