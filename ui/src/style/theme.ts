@@ -31,9 +31,9 @@ const theme = createTheme({
       dark: colors.pink3
     },
     secondary: {
-      main: colors.blue2,
-      light: colors.blue1,
-      dark: colors.blue3
+      main: colors.grey3,
+      light: colors.grey1,
+      dark: colors.grey4
     }
   },
   typography: {
@@ -255,6 +255,15 @@ const theme = createTheme({
           h1: 'h1',
           body1: 'p',
           body2: 'p'
+        }
+      }
+    },
+    MuiDialog: {
+      styleOverrides: {
+        root: {
+          '.MuiDialogTitle-root': {
+            fontWeight: 600
+          }
         }
       }
     }

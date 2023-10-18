@@ -99,21 +99,23 @@ class TestColumn:
         with pytest.raises(ValidationError) as exc_info:
             Column(**_column)
 
-        errors = exc_info.value.errors()
-        del errors[0]["url"]
-        assert errors == [
-            {
-                "type": "missing",
-                "loc": ("name",),
-                "msg": "Field required",
-                "input": {
-                    "partition_index": None,
-                    "data_type": "object",
-                    "allow_null": True,
-                    "format": None,
-                },
-            }
-        ]
+        expected_error = {
+            "input": {
+                "partition_index": None,
+                "data_type": "object",
+                "allow_null": True,
+                "format": None,
+            },
+            "loc": ("name",),
+            "msg": "Field required",
+            "type": "missing",
+        }
+
+        assert len(exc_info.value.errors()) == 1
+
+        actual_error = exc_info.value.errors()[0]
+        for key, value in expected_error.items():
+            assert actual_error[key] == value
 
     def test_create_columns_fails_data_type_none(self):
         _column = {
@@ -126,21 +128,23 @@ class TestColumn:
         with pytest.raises(ValidationError) as exc_info:
             Column(**_column)
 
-        errors = exc_info.value.errors()
-        del errors[0]["url"]
-        assert errors == [
-            {
-                "type": "missing",
-                "loc": ("data_type",),
-                "msg": "Field required",
-                "input": {
-                    "name": "column_a",
-                    "partition_index": None,
-                    "allow_null": True,
-                    "format": None,
-                },
-            }
-        ]
+        expected_error = {
+            "input": {
+                "name": "column_a",
+                "partition_index": None,
+                "allow_null": True,
+                "format": None,
+            },
+            "loc": ("data_type",),
+            "msg": "Field required",
+            "type": "missing",
+        }
+
+        assert len(exc_info.value.errors()) == 1
+
+        actual_error = exc_info.value.errors()[0]
+        for key, value in expected_error.items():
+            assert actual_error[key] == value
 
     def test_returns_dictionary_of_model(self):
         _column = {

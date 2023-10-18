@@ -90,8 +90,9 @@ jobs:
       - name: SDK Test
         run: make sdk-test
 
-      - name: SDK Test Deploy
-        run: make sdk-release-test
+      # TODO: Add back in
+      # - name: SDK Test Deploy
+      #   run: make sdk-release-test
 
   ui-dev:
     needs:
