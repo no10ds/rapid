@@ -27,7 +27,8 @@ test('test', async ({ page }) => {
   // even though they might have conflicting permissions within the filtering logic
   const { access_token } = await generateRapidAuthToken()
   const url = page.url()
-  const subjectId = url.split('/').pop()
+  let subjectId = url.split('/').pop()
+  subjectId = subjectId.split('?')[0]
   await makeAPIRequest(
     'subjects/permissions',
     'PUT',
