@@ -133,7 +133,7 @@ infra-scan:			## Print infrastructure output: make infra-output block=<infra-blo
 ##----- SDK -----
 ##
 sdk-setup:			## Setup Python required for the sdk
-	@cd sdk/; $(MAKE) python; $(MAKE) venv;
+	@cd sdk/; $(MAKE) venv; . .venv/bin/activate; $(MAKE) reqs
 
 # SDK Testing --------------------
 ##
@@ -143,10 +143,10 @@ sdk-test:			## Run sdk unit tests
 # SDK Release --------------------
 ##
 sdk-release-test:		## Build and release sdk to testpypi
-	@cd sdk/; $(MAKE) deploy-test
+	@cd sdk/; . .venv/bin/activate; $(MAKE) deploy-test
 
 sdk-release:			## Build and release sdk to pypi
-	@cd sdk/; $(MAKE) deploy
+	@cd sdk/; . .venv/bin/activate; $(MAKE) deploy
 
 ##
 ##----- UI -----
