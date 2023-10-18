@@ -1,9 +1,6 @@
 venv:
-	pyenv install --skip-existing $(PYTHON_VERSION)
-	echo 'eval "$(pyenv init --path)"' >> ~/.bashrc
-	pyenv local $(PYTHON_VERSION)
-	pyenv exec python -m venv .venv
-	. ./.venv/bin/activate
+	python3 -m venv .venv
+	. .venv/bin/activate
 
 reqs:
 	pip install -r requirements.txt
