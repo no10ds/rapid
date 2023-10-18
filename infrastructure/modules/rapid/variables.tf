@@ -13,13 +13,13 @@ variable "app-replica-count-max" {
 variable "application_version" {
   type        = string
   description = "The version number for the application image (e.g.: v1.0.4, v1.0.x-latest, etc.)"
-  default     = "v6.2.1"
+  default     = "v7.0.5"
 }
 
 variable "ui_version" {
   type        = string
   description = "The version number for the static ui (e.g.: v1.0.0, etc.)"
-  default     = "v6.0.1"
+  default     = "v7.0.5"
 }
 
 variable "catalog_disabled" {

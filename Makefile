@@ -133,20 +133,20 @@ infra-scan:			## Print infrastructure output: make infra-output block=<infra-blo
 ##----- SDK -----
 ##
 sdk-setup:			## Setup Python required for the sdk
-	@cd sdk/; $(MAKE) python; $(MAKE) venv;
+	@cd sdk/; $(MAKE) venv; . .venv/bin/activate; $(MAKE) reqs
 
 # SDK Testing --------------------
 ##
 sdk-test:			## Run sdk unit tests
-	@cd sdk/; pytest -vv -s
+	@cd sdk/; . .venv/bin/activate && pytest -vv -s
 
 # SDK Release --------------------
 ##
 sdk-release-test:		## Build and release sdk to testpypi
-	@cd sdk/; $(MAKE) deploy-test
+	@cd sdk/; . .venv/bin/activate; $(MAKE) deploy-test
 
 sdk-release:			## Build and release sdk to pypi
-	@cd sdk/; $(MAKE) deploy
+	@cd sdk/; . .venv/bin/activate; $(MAKE) deploy
 
 ##
 ##----- UI -----
@@ -189,11 +189,12 @@ ui-zip-and-release: ui-zip-contents ui-release ## Zip and release prod static ui
 
 ##
 release:
+	@python release.py --operation check
 	@git checkout ${commit}
 	@git tag -a "${version}" -m "Release tag for version ${version}"
 	@git checkout -
 	@git push origin ${version}
-	@python get_latest_release_changelog.py
+	@python release.py --operation create-changelog
 	@gh release create ${version} -F latest_release_changelog.md
 	@rm -rf latest_release_changelog.md
 
@@ -201,4 +202,4 @@ release:
 # Migration --------------------
 ##
 migrate-v7:			## Run the migration
-	@cd api/; ./batect migrate-v7 -- "--layer ${layer} --all-layers ${all-layers}"
+	@cd api/; ./batect migrate-v7 -- --layer ${layer} --all-layers ${all-layers}
