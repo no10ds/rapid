@@ -74,7 +74,7 @@ The behaviour of the API when a new file is uploaded to the dataset. The possibl
 - `APPEND` - New files will be added to the dataset, there are no duplication checks so new data must be unique. This is the default behaviour.
 - `OVERWRITE` - Any new file will overwrite the current content. The overwrite will happen on the partitions, so if there is an old partition that is not included in the new dataset, that will not be overwritten.
 
-### Column headings
+### Column heading style guide
 
 Column heading names should follow a strict format. The [requirements](https://docs.aws.amazon.com/glue/latest/dg/add-classifier.html) are:
 
