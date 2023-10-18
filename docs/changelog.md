@@ -1,5 +1,18 @@
 # Changelog
 
+## v7.0.6 / v0.1.4 (sdk) - _2023-10-18_
+
+### Features
+
+- New UI page that allows for the ability to delete users and clients easily.
+- Clients can now be created and deleted via the sdk.
+
+### Fixes
+
+- Fixed an issue with the sdk not showing schemas were created successfully due to a wrong response code.
+- Where dataset info was being called on columns with a date type, this was causing an issue with the Pydantic validation.
+- Tweaked the documentation to implement searching for column heading style guide to match what the API returns in the error message.
+
 ## v7.0.5 / v0.1.3 (sdk) - _2023-09-20_
 
 ### Fixes
@@ -57,7 +70,9 @@
 
 - See the [migration doc](migration.md) for details on how to migrate to v7 from v6.
 
-[Unreleased changes]: https://github.com/no10ds/rapid/compare/v7.0.4...HEAD
+[Unreleased changes]: https://github.com/no10ds/rapid/compare/v7.0.6...HEAD
+[v7.0.6 / v0.1.4 (sdk)]: https://github.com/no10ds/rapid/v7.0.5...v7.0.6
+[v7.0.5 / v0.1.3 (sdk)]: https://github.com/no10ds/rapid/v7.0.4...v7.0.5
 [v7.0.4 / v0.1.2 (sdk)]: https://github.com/no10ds/rapid/v7.0.3...v7.0.4
 [v7.0.3 / v0.1.2 (sdk)]: https://github.com/no10ds/rapid/v7.0.2...v7.0.3
 [v7.0.2 / v0.1.2 (sdk)]: https://github.com/no10ds/rapid/v7.0.1...v7.0.2
