@@ -140,7 +140,7 @@ class Rapid:
             return pd.read_json(json.dumps(data), orient="index")
 
         raise DatasetNotFoundException(
-            f"Could not find dataset, {domain}/{dataset} to download", data
+            f"Could not find dataset, {layer}/{domain}/{dataset} to download", data
         )
 
     def upload_dataframe(
@@ -162,8 +162,9 @@ class Rapid:
             wait_to_complete (bool, optional): Whether to wait for the upload job to complete before returning. Defaults to True.
 
         Raises:
-        rapid.exceptions.DataFrameUploadValidationException: If the DataFrame's schema is incorrect.
-        rapid.exceptions.DataFrameUploadFailedException: If an unexpected error occurs while uploading the DataFrame.
+            rapid.exceptions.DataFrameUploadValidationException: If the DataFrame's schema is incorrect.
+            rapid.exceptions.DataFrameUploadFailedException: If an unexpected error occurs while uploading the DataFrame.
+            rapid.exceptions.DatasetNotFoundException: If the specified dataset does not exist.
 
         Returns:
             If wait_to_complete is True, returns "Success" if the upload is successful.
@@ -187,11 +188,15 @@ class Rapid:
             raise DataFrameUploadValidationException(
                 "Could not upload dataframe due to an incorrect schema definition"
             )
-
-        raise DataFrameUploadFailedException(
-            "Encountered an unexpected error, could not upload dataframe",
-            data["details"],
-        )
+        elif response.status_code == 404:
+            raise DatasetNotFoundException(
+                "Could not find dataset: {layer}/{domain}/{dataset}", data
+            )
+        else:
+            raise DataFrameUploadFailedException(
+                "Encountered an unexpected error, could not upload dataframe",
+                data["details"],
+            )
 
     def fetch_dataset_info(self, layer: str, domain: str, dataset: str):
         """
@@ -204,6 +209,7 @@ class Rapid:
 
         Raises:
             rapid.exceptions.DatasetInfoFailedException: If an error occurs while fetching the dataset information.
+            rapid.exceptions.DatasetNotFoundException: If the specified dataset does not exist.
 
         Returns:
             A dictionary containing the metadata information for the dataset.
@@ -217,6 +223,11 @@ class Rapid:
         data = json.loads(response.content.decode("utf-8"))
         if response.status_code == 200:
             return data
+
+        if response.status_code == 404:
+            raise DatasetNotFoundException(
+                f"Could not find dataset, {layer}/{domain}/{dataset} to get info", data
+            )
 
         raise DatasetInfoFailedException(
             "Failed to gather the dataset info", data["details"]

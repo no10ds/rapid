@@ -25,7 +25,7 @@ metadata = SchemaMetadata(
 )
 
 try:
-    data.upload_and_create_dataframe(
+    data.upload_and_create_dataset(
         rapid=rapid, df=df, metadata=metadata, upgrade_schema_on_fail=False
     )
 except DataFrameUploadValidationException:
@@ -57,7 +57,7 @@ metadata = SchemaMetadata(
 )
 
 try:
-    data.update_schema_dataframe(
+    data.update_schema_to_dataframe(
         rapid=rapid,
         df=df,
         metadata=metadata,
