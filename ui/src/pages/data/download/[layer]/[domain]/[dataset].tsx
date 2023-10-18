@@ -41,6 +41,8 @@ function DownloadDataset() {
     getDatasetInfo
   )
 
+  console.log(datasetInfoData)
+
   const { isLoading, mutate, error } = useMutation<
     Response,
     Error,
@@ -156,8 +158,8 @@ function DownloadDataset() {
             { children: column.name },
             { children: column.data_type },
             { children: column.allow_null ? 'True' : 'False' },
-            { children: '-' },
-            { children: '-' }
+            { children: column.statistics ? column.statistics.max : '-' },
+            { children: column.statistics ? column.statistics.min : '-' }
           ]
         })}
       />
