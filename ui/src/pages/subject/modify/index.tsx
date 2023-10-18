@@ -7,6 +7,7 @@ import { FormControl, Typography, LinearProgress } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import { filterSubjectList } from '@/pages/subject/utils'
 
 function SubjectModifyPage() {
   const router = useRouter()
@@ -17,26 +18,13 @@ function SubjectModifyPage() {
   const {
     isLoading: isSubjectsListLoading,
     data: subjectsListData,
-    error: subjectListError
+    error: subjectsListError
   } = useQuery(['subjectsList'], getSubjectsListUi)
 
   useEffect(() => {
     if (subjectsListData) {
-      const users = subjectsListData
-        .filter((subject) => subject['type'] === 'USER')
-        .map((subject) => ({
-          subjectId: subject['subject_id'],
-          subjectName: subject['subject_name']
-        }))
-        .sort((a, b) => a.subjectName.localeCompare(b.subjectName))
-
-      const clients = subjectsListData
-        .filter((subject) => subject['type'] === 'CLIENT')
-        .map((subject) => ({
-          subjectId: subject['subject_id'],
-          subjectName: subject['subject_name']
-        }))
-        .sort((a, b) => a.subjectName.localeCompare(b.subjectName))
+      const users = filterSubjectList(subjectsListData, 'USER')
+      const clients = filterSubjectList(subjectsListData, 'CLIENT')
 
       setFilteredSubjectListData({ ClientApps: clients, Users: users })
       setSelectedSubjectId(clients[0].subjectId)
@@ -47,8 +35,8 @@ function SubjectModifyPage() {
     return <LinearProgress />
   }
 
-  if (subjectListError) {
-    return <ErrorCard error={subjectListError as Error} />
+  if (subjectsListError) {
+    return <ErrorCard error={subjectsListError as Error} />
   }
 
   return (
