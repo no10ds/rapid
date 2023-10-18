@@ -313,7 +313,7 @@ class TestRapid:
     def test_create_schema_success(self, requests_mock: Mocker, rapid: Rapid):
         schema = Schema(**DUMMY_SCHEMA)
         mocked_response = {"data": "dummy"}
-        requests_mock.post(f"{RAPID_URL}/schema", json=mocked_response, status_code=200)
+        requests_mock.post(f"{RAPID_URL}/schema", json=mocked_response, status_code=201)
         res = rapid.create_schema(schema)
         assert res is None
 
