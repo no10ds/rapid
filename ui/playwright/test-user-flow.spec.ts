@@ -26,8 +26,9 @@ test('test', async ({ page }) => {
   // Test unique condition where we correctly display permissions when modifying a user
   // even though they might have conflicting permissions within the filtering logic
   const { access_token } = await generateRapidAuthToken()
-  const url = new URL(page.url())
-  const subjectId = url.pathname.split('/').pop()
+  const url = page.url()
+  let subjectId = url.split('/').pop()
+  subjectId = subjectId.split('?')[0]
   await makeAPIRequest(
     'subjects/permissions',
     'PUT',

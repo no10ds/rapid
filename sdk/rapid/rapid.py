@@ -303,7 +303,7 @@ class Rapid:
             data=json.dumps(schema_dict),
             timeout=TIMEOUT_PERIOD,
         )
-        if response.status_code == 200:
+        if response.status_code == 201:
             pass
         elif response.status_code == 409:
             raise SchemaAlreadyExistsException("The schema already exists")
