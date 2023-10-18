@@ -269,8 +269,14 @@ class DataService:
     def _build_query(self, schema: Schema) -> SQLQuery:
         date_columns = schema.get_columns_by_type(DateType)
         date_range_queries = [
-            *[f"max({column.name}) as max_{column.name}" for column in date_columns],
-            *[f"min({column.name}) as min_{column.name}" for column in date_columns],
+            *[
+                f"cast(max({column.name}) as date) as max_{column.name}"
+                for column in date_columns
+            ],
+            *[
+                f"cast(min({column.name}) as date) as min_{column.name}"
+                for column in date_columns
+            ],
         ]
         columns_to_query = [
             "count(*) as data_size",
@@ -292,14 +298,19 @@ class DataService:
     def _enrich_columns(
         self, schema: Schema, statistics_dataframe: pd.DataFrame
     ) -> List[EnrichedColumn]:
+        strftime_format = "%Y-%m-%d"
         enriched_columns = []
         date_columns = schema.get_columns_by_type(DateType)
         for column in schema.columns:
             statistics = None
             if column in date_columns:
                 statistics = {
-                    "max": statistics_dataframe.at[0, f"max_{column.name}"],
-                    "min": statistics_dataframe.at[0, f"min_{column.name}"],
+                    "max": statistics_dataframe.at[0, f"max_{column.name}"].strftime(
+                        strftime_format
+                    ),
+                    "min": statistics_dataframe.at[0, f"min_{column.name}"].strftime(
+                        strftime_format
+                    ),
                 }
             enriched_columns.append(
                 EnrichedColumn(**column.dict(), statistics=statistics)

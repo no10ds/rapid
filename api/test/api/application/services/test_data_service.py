@@ -667,8 +667,8 @@ class TestDatasetInfoRetrieval:
         self.athena_adapter.query.return_value = pd.DataFrame(
             {
                 "data_size": [48718],
-                "max_date": ["2021-07-01"],
-                "min_date": ["2014-01-01"],
+                "max_date": [pd.to_datetime("2021-07-01")],
+                "min_date": [pd.to_datetime("2014-01-01")],
             }
         )
         dataset_metadata = DatasetMetadata("raw", "some", "other", 2)
@@ -679,8 +679,8 @@ class TestDatasetInfoRetrieval:
             SQLQuery(
                 select_columns=[
                     "count(*) as data_size",
-                    "max(date) as max_date",
-                    "min(date) as min_date",
+                    "cast(max(date) as date) as max_date",
+                    "cast(min(date) as date) as min_date",
                 ]
             ),
         )
@@ -761,10 +761,10 @@ class TestDatasetInfoRetrieval:
         self.athena_adapter.query.return_value = pd.DataFrame(
             {
                 "data_size": [48718],
-                "max_date": ["2021-07-01"],
-                "min_date": ["2014-01-01"],
-                "max_date2": ["2020-07-01"],
-                "min_date2": ["2015-01-01"],
+                "max_date": [pd.to_datetime("2021-07-01")],
+                "min_date": [pd.to_datetime("2014-01-01")],
+                "max_date2": [pd.to_datetime("2020-07-01")],
+                "min_date2": [pd.to_datetime("2015-01-01")],
             }
         )
 
@@ -778,10 +778,10 @@ class TestDatasetInfoRetrieval:
             SQLQuery(
                 select_columns=[
                     "count(*) as data_size",
-                    "max(date) as max_date",
-                    "max(date2) as max_date2",
-                    "min(date) as min_date",
-                    "min(date2) as min_date2",
+                    "cast(max(date) as date) as max_date",
+                    "cast(max(date2) as date) as max_date2",
+                    "cast(min(date) as date) as min_date",
+                    "cast(min(date2) as date) as min_date2",
                 ]
             ),
         )

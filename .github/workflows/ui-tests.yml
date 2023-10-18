@@ -28,6 +28,7 @@ jobs:
           cd ui
           npx playwright install-deps
           npm install @playwright/test -D
+          npx playwright install
 
       - name: Run playwright tests
         run: make ui-test-e2e
