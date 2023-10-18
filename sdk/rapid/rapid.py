@@ -24,6 +24,9 @@ from rapid.exceptions import (
     UnableToFetchJobStatusException,
     DatasetInfoFailedException,
     DatasetNotFoundException,
+    InvalidPermissionsException,
+    SubjectAlreadyExistsException,
+    SubjectNotFoundException,
 )
 
 
@@ -137,7 +140,7 @@ class Rapid:
             return pd.read_json(json.dumps(data), orient="index")
 
         raise DatasetNotFoundException(
-            f"Could not find dataset, {domain}/{dataset} to download", data
+            f"Could not find dataset, {layer}/{domain}/{dataset} to download", data
         )
 
     def upload_dataframe(
@@ -159,8 +162,9 @@ class Rapid:
             wait_to_complete (bool, optional): Whether to wait for the upload job to complete before returning. Defaults to True.
 
         Raises:
-        rapid.exceptions.DataFrameUploadValidationException: If the DataFrame's schema is incorrect.
-        rapid.exceptions.DataFrameUploadFailedException: If an unexpected error occurs while uploading the DataFrame.
+            rapid.exceptions.DataFrameUploadValidationException: If the DataFrame's schema is incorrect.
+            rapid.exceptions.DataFrameUploadFailedException: If an unexpected error occurs while uploading the DataFrame.
+            rapid.exceptions.DatasetNotFoundException: If the specified dataset does not exist.
 
         Returns:
             If wait_to_complete is True, returns "Success" if the upload is successful.
@@ -184,11 +188,15 @@ class Rapid:
             raise DataFrameUploadValidationException(
                 "Could not upload dataframe due to an incorrect schema definition"
             )
-
-        raise DataFrameUploadFailedException(
-            "Encountered an unexpected error, could not upload dataframe",
-            data["details"],
-        )
+        elif response.status_code == 404:
+            raise DatasetNotFoundException(
+                "Could not find dataset: {layer}/{domain}/{dataset}", data
+            )
+        else:
+            raise DataFrameUploadFailedException(
+                "Encountered an unexpected error, could not upload dataframe",
+                data["details"],
+            )
 
     def fetch_dataset_info(self, layer: str, domain: str, dataset: str):
         """
@@ -201,6 +209,7 @@ class Rapid:
 
         Raises:
             rapid.exceptions.DatasetInfoFailedException: If an error occurs while fetching the dataset information.
+            rapid.exceptions.DatasetNotFoundException: If the specified dataset does not exist.
 
         Returns:
             A dictionary containing the metadata information for the dataset.
@@ -214,6 +223,11 @@ class Rapid:
         data = json.loads(response.content.decode("utf-8"))
         if response.status_code == 200:
             return data
+
+        if response.status_code == 404:
+            raise DatasetNotFoundException(
+                f"Could not find dataset, {layer}/{domain}/{dataset} to get info", data
+            )
 
         raise DatasetInfoFailedException(
             "Failed to gather the dataset info", data["details"]
@@ -319,3 +333,83 @@ class Rapid:
         if response.status_code == 200:
             return data
         raise SchemaUpdateFailedException("Could not update schema", data)
+
+    def create_client(self, client_name: str, client_permissions: list[str]):
+        """
+        Creates a new client on the API with the specified permissions.
+
+        Args:
+            client_name (str): The name of the client to create.
+            client_permissions (list[str]): The permissions of the client to create.
+
+        Raises:
+            rapid.exceptions.InvalidPermissionsException: If an error occurs while trying to create the client.
+        """
+        url = f"{self.auth.url}/client"
+        response = requests.post(
+            url,
+            headers=self.generate_headers(),
+            data=json.dumps(
+                {"client_name": client_name, "permissions": client_permissions}
+            ),
+            timeout=TIMEOUT_PERIOD,
+        )
+        data = json.loads(response.content.decode("utf-8"))
+        if response.status_code == 201:
+            return data
+        elif response.status_code == 400:
+            raise SubjectAlreadyExistsException(
+                f"The client {client_name} already exists"
+            )
+        raise InvalidPermissionsException(
+            "One or more of the provided permissions is invalid or duplicated"
+        )
+
+    def delete_client(self, client_id: str) -> None:
+        """
+        Deletes a client from the API based on their id
+
+        Args:
+            client_id (str): The id of the client to delete.
+
+        Raises:
+            rapid.exceptions.SubjectNotFoundException: If the client does not exist.
+        """
+        url = f"{self.auth.url}/client/{client_id}"
+        response = requests.delete(
+            url,
+            headers=self.generate_headers(),
+            timeout=TIMEOUT_PERIOD,
+        )
+        if response.status_code == 200:
+            return None
+
+        raise SubjectNotFoundException(
+            f"Failed to delete client with id: {client_id}, ensure it exists."
+        )
+
+    def update_subject_permissions(self, subject_id: str, permissions: list[str]):
+        """
+        Updates the permissions of a subject on the API.
+
+        Args:
+            subject_id (str): The id of the subject to update.
+            permissions (list[str]): The permissions to update the subject with.
+
+        Raises:
+            rapid.exceptions.InvalidPermissionsException: If an error occurs while trying to create the client.
+        """
+        url = f"{self.auth.url}/subject/permissions"
+        response = requests.put(
+            url,
+            headers=self.generate_headers(),
+            data=json.dumps({"subject_id": subject_id, "permissions": permissions}),
+            timeout=TIMEOUT_PERIOD,
+        )
+        data = json.loads(response.content.decode("utf-8"))
+        if response.status_code == 200:
+            return data
+
+        raise InvalidPermissionsException(
+            "One or more of the provided permissions is invalid or duplicated"
+        )

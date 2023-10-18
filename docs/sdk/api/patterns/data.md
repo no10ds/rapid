@@ -1,1 +1,1 @@
-::: rapid.patterns.data
+::: rapid.patterns.dataset
