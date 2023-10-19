@@ -8,7 +8,7 @@ import {
   Typography
 } from '@mui/material'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { filterSubjectList } from '@/pages/subject/utils'
+import { filterSubjectList } from '@/utils/subject'
 import { useEffect, useState } from 'react'
 import { FilteredSubjectList } from '@/service/types'
 import { deleteUser as deleteUserFn, deleteClient as deleteClientFn } from '@/service'
