@@ -41,8 +41,6 @@ function DownloadDataset() {
     getDatasetInfo
   )
 
-  console.log(datasetInfoData)
-
   const { isLoading, mutate, error } = useMutation<
     Response,
     Error,
