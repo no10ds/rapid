@@ -119,6 +119,7 @@ const PermissionsTable = ({
     } else {
       setPermissionsAtMax(false)
     }
+    // console.log(filteredPermissionsListData)
   }, [filteredPermissionsListData])
 
   const generateOptions = (items) =>
@@ -129,6 +130,31 @@ const PermissionsTable = ({
         </option>
       )
     })
+
+  const [isDisabled, setIsDisabled] = useState<boolean>(false)
+  useEffect(() => {
+    const permissionToAdd = watch()
+
+    if (permissionToAdd.sensitivity !== "PROTECTED") {
+      delete permissionToAdd.domain
+    }
+    let allValuesDefined = true
+    for (const key in permissionToAdd) {
+      if (permissionToAdd[key] === undefined) {
+        allValuesDefined = false;
+        break; // No need to continue checking once one undefined value is found
+      }
+    }
+    console.log(permissionToAdd)
+
+    if (allValuesDefined || permissionToAdd.type === "DATA_ADMIN" || permissionToAdd.type === "USER_ADMIN") {
+      setIsDisabled(false)
+    } else {
+      setIsDisabled(true)
+    }
+  })
+
+
 
   return (
     <TableContainer>
@@ -149,9 +175,7 @@ const PermissionsTable = ({
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
               <TableCell>
-                <IconButton color="primary" onClick={() => remove(index)}>
-                  <Button>Remove</Button>
-                </IconButton>
+                <Button color="secondary" onClick={() => remove(index)}>Remove</Button>
               </TableCell>
               <TableCell>
                 <Typography key={`permissions.${index}.type`}>{item.type}</Typography>
@@ -175,6 +199,7 @@ const PermissionsTable = ({
                 <>
                   <Button
                     color="primary"
+                    disabled={isDisabled}
                     onClick={() => {
                       const result = trigger(undefined, { shouldFocus: true })
                       if (result) {
@@ -245,7 +270,7 @@ const PermissionsTable = ({
                         }}
                       >
                         <option key={''} value={''}>
-                          Layer
+                          Select a layer...
                         </option>
                         {generateOptions(
                           Object.keys(filteredPermissionsListData[watch('type')])
@@ -279,7 +304,7 @@ const PermissionsTable = ({
                           setValue('sensitivity', event.target.value as SensitivityType)
                         }}
                       >
-                        <option value={''}>Sensitivity</option>
+                        <option value={''}>Select a sensitivity level...</option>
                         {generateOptions(
                           Object.keys(
                             filteredPermissionsListData[watch('type')][watch('layer')]
@@ -309,7 +334,7 @@ const PermissionsTable = ({
                           'data-testid': 'domain'
                         }}
                       >
-                        <option value={''}>Domain</option>
+                        <option value={''}>Select a data domain...</option>
                         {isDataPermission(watch()) &&
                           generateOptions(
                             Object.keys(
