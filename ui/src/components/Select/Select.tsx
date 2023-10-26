@@ -10,7 +10,7 @@ import SelectCheckbox from './SelectCheckbox'
 import FormControl from '../FormControl/FormControl'
 import { Props } from './types'
 
-const StyledBasicSelect = styled(BasicSelect)<ComponentProps<typeof BasicSelect>>`
+const StyledBasicSelect = styled(BasicSelect) <ComponentProps<typeof BasicSelect>>`
   .MuiInputBase-input {
     padding: 4px 15px 0px 15px;
     height: 100%;
@@ -35,13 +35,13 @@ const Select: FC<Props> = forwardRef<FC, Props>(
       data,
       ref
     }
-
+    data
     return (
       <FormControl error={!!error} fullWidth={fullWidth}>
         <InputLabel id={labelId} />
 
         {checkboxes ? (
-          <SelectCheckbox {...newProps} />
+          <SelectCheckbox {...newProps} value="hi" />
         ) : (
           <StyledBasicSelect {...newProps}>
             {data.map((item) => (
