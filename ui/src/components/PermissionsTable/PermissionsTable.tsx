@@ -1,4 +1,5 @@
 import { Select } from '@/components'
+import { Button } from '@/components'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Typography } from '@mui/material'
 import { Controller, useForm, FieldValues } from 'react-hook-form'
@@ -149,7 +150,7 @@ const PermissionsTable = ({
             >
               <TableCell>
                 <IconButton color="primary" onClick={() => remove(index)}>
-                  <RemoveIcon />
+                  <Button>Remove</Button>
                 </IconButton>
               </TableCell>
               <TableCell>
@@ -171,33 +172,33 @@ const PermissionsTable = ({
           {!permissionsAtMax && (
             <TableRow>
               <TableCell>
-                <IconButton
-                  color="primary"
-                  onClick={() => {
-                    const result = trigger(undefined, { shouldFocus: true })
-                    if (result) {
-                      const permissionToAdd = watch()
-                      // Triggers an error if the domain is not set for protected sensitivity
-                      if (
-                        isDataPermission(permissionToAdd) &&
-                        permissionToAdd.sensitivity === 'PROTECTED' &&
-                        permissionToAdd.domain === undefined
-                      ) {
-                        setError('domain', { type: 'custom', message: 'Required' })
-                      } else {
-                        append(permissionToAdd)
-                        reset({
-                          type: undefined,
-                          layer: undefined,
-                          sensitivity: undefined,
-                          domain: undefined
-                        })
+                <>
+                  <Button
+                    color="primary"
+                    onClick={() => {
+                      const result = trigger(undefined, { shouldFocus: true })
+                      if (result) {
+                        const permissionToAdd = watch()
+                        // Triggers an error if the domain is not set for protected sensitivity
+                        if (
+                          isDataPermission(permissionToAdd) &&
+                          permissionToAdd.sensitivity === 'PROTECTED' &&
+                          permissionToAdd.domain === undefined
+                        ) {
+                          setError('domain', { type: 'custom', message: 'Required' })
+                        } else {
+                          append(permissionToAdd)
+                          reset({
+                            type: undefined,
+                            layer: undefined,
+                            sensitivity: undefined,
+                            domain: undefined
+                          })
+                        }
                       }
-                    }
-                  }}
-                >
-                  <AddIcon />
-                </IconButton>
+                    }}
+                  > Add </Button>
+                </>
               </TableCell>
               <TableCell>
                 <Controller
@@ -219,7 +220,7 @@ const PermissionsTable = ({
                         setValue('type', event.target.value as ActionType)
                       }}
                     >
-                      <option value={''}>Action</option>
+                      <option value={''} >Select a permission type...</option>
                       {generateOptions(Object.keys(filteredPermissionsListData))}
                     </Select>
                   )}
@@ -313,7 +314,7 @@ const PermissionsTable = ({
                           generateOptions(
                             Object.keys(
                               filteredPermissionsListData[watch('type')][watch('layer')][
-                                watch('sensitivity')
+                              watch('sensitivity')
                               ]
                             )
                           )}
