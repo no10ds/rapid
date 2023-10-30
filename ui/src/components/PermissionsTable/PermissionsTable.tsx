@@ -34,6 +34,7 @@ const PermissionsTable = ({
 }) => {
   const [filteredPermissionsListData, setFilteredPermissionsListData] = useState({})
   const [permissionsAtMax, setPermissionsAtMax] = useState<boolean>(false)
+  const [isDisabled, setIsDisabled] = useState<boolean>(false)
 
   const removePermissionAsAnOption = (
     permission: PermissionType,
@@ -131,10 +132,10 @@ const PermissionsTable = ({
       )
     })
 
-  const [isDisabled, setIsDisabled] = useState<boolean>(false)
   useEffect(() => {
     const permissionToAdd = watch()
 
+    // If the permission is not protected, remove the domain key
     if (permissionToAdd.sensitivity !== "PROTECTED") {
       delete permissionToAdd.domain
     }
@@ -142,10 +143,9 @@ const PermissionsTable = ({
     for (const key in permissionToAdd) {
       if (permissionToAdd[key] === undefined) {
         allValuesDefined = false;
-        break; // No need to continue checking once one undefined value is found
+        break;
       }
     }
-    console.log(permissionToAdd)
 
     if (allValuesDefined || permissionToAdd.type === "DATA_ADMIN" || permissionToAdd.type === "USER_ADMIN") {
       setIsDisabled(false)
@@ -175,7 +175,7 @@ const PermissionsTable = ({
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
               <TableCell>
-                <Button color="secondary" onClick={() => remove(index)}>Remove</Button>
+                <Button color="info" size='small' onClick={() => remove(index)}>Remove</Button>
               </TableCell>
               <TableCell>
                 <Typography key={`permissions.${index}.type`}>{item.type}</Typography>
