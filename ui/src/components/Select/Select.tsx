@@ -35,13 +35,13 @@ const Select: FC<Props> = forwardRef<FC, Props>(
       data,
       ref
     }
-    data
+
     return (
       <FormControl error={!!error} fullWidth={fullWidth}>
         <InputLabel id={labelId} />
 
         {checkboxes ? (
-          <SelectCheckbox {...newProps} value="hi" />
+          <SelectCheckbox {...newProps} />
         ) : (
           <StyledBasicSelect {...newProps}>
             {data.map((item) => (
