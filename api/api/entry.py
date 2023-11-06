@@ -121,7 +121,7 @@ def info():
                     "url": PROJECT_URL,
                     "contact": PROJECT_CONTACT,
                     "organisation": PROJECT_ORGANISATION,
-                    "documentation-url": "https://github.com/no10ds/rapid-api",
+                    "documentation-url": "https://rapid.readthedocs.io/en/latest/",
                 },
             }
         ],
