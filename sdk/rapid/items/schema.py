@@ -26,8 +26,8 @@ class SchemaMetadata(BaseModel):
     sensitivity: SensitivityLevel
     owners: List[Owner]
     version: Optional[int] = None
-    key_value_tags: Optional[Dict[str, str]] = None
-    key_only_tags: Optional[List[str]] = None
+    key_value_tags: Optional[Dict[str, str]] = {}
+    key_only_tags: Optional[List[str]] = []
 
     class Config:
         use_enum_values = True
