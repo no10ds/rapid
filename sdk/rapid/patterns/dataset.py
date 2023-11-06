@@ -31,7 +31,6 @@ def upload_and_create_dataset(
             df, metadata.layer, metadata.domain, metadata.dataset, metadata.sensitivity
         )
         schema.metadata = metadata
-        print(schema)
         rapid.create_schema(schema)
         rapid.upload_dataframe(
             metadata.layer, metadata.domain, metadata.dataset, df, wait_to_complete=True
