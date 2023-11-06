@@ -7,7 +7,7 @@ Below is a simple example for uploading a Pandas DataFrame to the API.
 ```python
 import pandas as pd
 from rapid import Rapid
-from rapid.patterns import data
+from rapid.patterns import dataset
 from rapid.items.schema import SchemaMetadata, SensitivityLevel, Owner
 from rapid.exceptions import DataFrameUploadValidationException
 
@@ -25,7 +25,7 @@ metadata = SchemaMetadata(
 )
 
 try:
-    data.upload_and_create_dataset(
+    dataset.upload_and_create_dataset(
         rapid=rapid, df=df, metadata=metadata, upgrade_schema_on_fail=False
     )
 except DataFrameUploadValidationException:
@@ -39,7 +39,7 @@ Now going forward say for instance we now expect that for column c we can expect
 ```python
 import pandas as pd
 from rapid import Rapid
-from rapid.patterns import data
+from rapid.patterns import dataset
 from rapid.items.schema import SchemaMetadata, SensitivityLevel, Owner, Column
 from rapid.exceptions import ColumnNotDifferentException
 
@@ -57,7 +57,7 @@ metadata = SchemaMetadata(
 )
 
 try:
-    data.update_schema_to_dataframe(
+    dataset.update_schema_to_dataframe(
         rapid=rapid,
         df=df,
         metadata=metadata,
