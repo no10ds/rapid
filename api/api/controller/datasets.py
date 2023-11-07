@@ -90,7 +90,7 @@ async def list_all_datasets(
     | Parameters    | Required| Usage                                   | Example values                                                                                         | Definition            |
     |---------------|---------|-----------------------------------------|------------------------------------------------------------------------------------------------------- |-----------------------|
     | enriched      | False   | Boolean Query parameter                 | True                                                                                                   | enriches the metadata |
-    | query         | False   | JSON Request Body                       | Consult the [docs](https://github.com/no10ds/rapid-api/blob/main/docs/guides/usage/usage.md#examples-2)| the filtering query   |
+    | query         | False   | JSON Request Body                       | Consult the [docs](https://rapid.readthedocs.io/en/latest/api/routes/dataset/#filtering-query)         | the filtering query   |
 
     ### Accepted permissions
 
@@ -505,7 +505,7 @@ async def query_dataset(
     | `domain`      | True         | URL parameter           | `space`                                                                                                                     | domain of the dataset         |
     | `dataset`     | True         | URL parameter           | `rocket_launches`                                                                                                           | dataset title                 |
     | `version`     | False        | Query parameter         | '3'                                                                                                                         | dataset version               |
-    | `query`       | False        | JSON Request Body       | Consult the [docs](https://github.com/no10ds/rapid-api/blob/main/docs/guides/usage/usage.md#how-to-construct-a-query-object)| the query object              |
+    | `query`       | False        | JSON Request Body       | Consult the [docs](https://rapid.readthedocs.io/en/latest/api/query/)                                                       | the query object              |
 
     #### Layer
 
@@ -616,7 +616,7 @@ async def query_large_dataset(
     | `domain`      | True         | URL parameter           | `space`                                                                                                                     | domain of the dataset         |
     | `dataset`     | True         | URL parameter           | `rocket_launches`                                                                                                           | dataset title                 |
     | `version`     | False        | Query parameter         | '3'                                                                                                                         | dataset version               |
-    | `query`       | False        | JSON Request Body       | Consult the [docs](https://github.com/no10ds/rapid-api/blob/main/docs/guides/usage/usage.md#how-to-construct-a-query-object)| the query object              |
+    | `query`       | False        | JSON Request Body       | Consult the [docs](https://rapid.readthedocs.io/en/latest/api/query/)                                                       | the query object              |
 
     #### Layer
 
