@@ -51,7 +51,7 @@ async def generate_schema(
 
     In order to upload the dataset for the first time, you need to define its schema. This endpoint is provided for your
     convenience to generate a schema based on an existing dataset. Alternatively you can consult
-    the [schema writing guide](https://github.com/no10ds/rapid-api/blob/main/docs/guides/usage/schema_creation.md) if you would like to create the schema yourself. You can then use the
+    the [schema writing guide](https://rapid.readthedocs.io/en/latest/api/schema/) if you would like to create the schema yourself. You can then use the
     output of this endpoint in the Schema Upload endpoint.
 
     ⚠️ WARNING:
@@ -109,7 +109,7 @@ async def upload_schema(schema: Schema):
 
     When you have a schema definition you can use this endpoint to upload it. This will allow you to subsequently upload
     datasets that match the schema. If you do not yet have a schema definition, you can craft this yourself (see
-    the [schema writing guide](https://github.com/no10ds/rapid-api/blob/main/docs/guides/usage/schema_creation.md)) or use the Schema Generation endpoint (see above).
+    the [schema writing guide](https://rapid.readthedocs.io/en/latest/api/schema/)) or use the Schema Generation endpoint (see above).
 
     ### Inputs
 
@@ -159,7 +159,7 @@ async def update_schema(schema: Schema):
 
     This endpoint is for uploading an updated schema definition. This will allow you to subsequently upload
     datasets that match the updated schema. To create a schema definition (see
-    the [schema writing guide](https://github.com/no10ds/rapid-api/blob/main/docs/guides/usage/schema_creation.md)) or use the Schema Generation endpoint (see above).
+    the [schema writing guide](https://rapid.readthedocs.io/en/latest/api/schema/)) or use the Schema Generation endpoint (see above).
 
     ### Inputs
 
