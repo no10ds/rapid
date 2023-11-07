@@ -82,10 +82,7 @@ function FilePage() {
 
       <Typography variant="body2" gutterBottom>
         For further information on writing queries consult the{' '}
-        <Link
-          href="https://github.com/no10ds/rapid-api/blob/main/docs/guides/usage/usage.md#query-structure"
-          target="_blank"
-        >
+        <Link href="https://rapid.readthedocs.io/en/latest/api/query/" target="_blank">
           query writing guide
         </Link>
       </Typography>

@@ -118,7 +118,7 @@ function CreateUserPage() {
           <Typography variant="body1" gutterBottom>
             Create a new user or client using the rAPId instance. Simply fill out the form
             with the required information, which can be found in more detail at the link{' '}
-            <a href="https://github.com/no10ds/rapid-api/blob/main/docs/guides/usage/usage.md#create-user">
+            <a href="https://rapid.readthedocs.io/en/latest/api/routes/user/#create">
               provided.
             </a>
           </Typography>

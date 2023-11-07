@@ -263,8 +263,8 @@ class TestSchema:
                 "sensitivity": "PUBLIC",
                 "owners": [{"name": "Test", "email": "test@email.com"}],
                 "version": None,
-                "key_value_tags": None,
-                "key_only_tags": None,
+                "key_value_tags": {},
+                "key_only_tags": [],
             },
             "columns": [
                 {

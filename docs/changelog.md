@@ -1,5 +1,20 @@
 # Changelog
 
+## v7.0.7 / v0.1.5 (sdk) - _2023-11-07_
+
+### Fixes
+
+- Issue within the sdk `upload_and_create_dataset` function where schema metadata wasn't being correctly overridden.
+- Hitting maximum security group rules for the load balancer.
+- Documentation improvements and removes any references to the old deprecated repositories.
+
+### Closes relevant GitHub issues
+
+- https://github.com/no10ds/rapid/issues/50
+- https://github.com/no10ds/rapid/issues/59
+- https://github.com/no10ds/rapid/issues/54
+- https://github.com/no10ds/rapid/issues/51
+
 ## v7.0.6 / v0.1.4 (sdk) - _2023-10-18_
 
 ### Features
@@ -70,7 +85,8 @@
 
 - See the [migration doc](migration.md) for details on how to migrate to v7 from v6.
 
-[Unreleased changes]: https://github.com/no10ds/rapid/compare/v7.0.6...HEAD
+[Unreleased changes]: https://github.com/no10ds/rapid/compare/v7.0.7...HEAD
+[v7.0.7 / v0.1.5 (sdk)]: https://github.com/no10ds/rapid/v7.0.6...v7.0.7
 [v7.0.6 / v0.1.4 (sdk)]: https://github.com/no10ds/rapid/v7.0.5...v7.0.6
 [v7.0.5 / v0.1.3 (sdk)]: https://github.com/no10ds/rapid/v7.0.4...v7.0.5
 [v7.0.4 / v0.1.2 (sdk)]: https://github.com/no10ds/rapid/v7.0.3...v7.0.4
