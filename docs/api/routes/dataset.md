@@ -122,10 +122,57 @@ None
 
 ### Inputs
 
-| Parameters | Required | Usage                   | Example values                                                                                          | Definition            |
-| ---------- | -------- | ----------------------- | ------------------------------------------------------------------------------------------------------- | --------------------- |
-| enriched   | False    | Boolean Query parameter | True                                                                                                    | enriches the metadata |
-| query      | False    | JSON Request Body       | Consult the [docs](https://github.com/no10ds/rapid-api/blob/main/docs/guides/usage/usage.md#examples-2) | the filtering query   |
+| Parameters | Required | Usage                   | Example values                                                                                 | Definition            |
+| ---------- | -------- | ----------------------- | ---------------------------------------------------------------------------------------------- | --------------------- |
+| enriched   | False    | Boolean Query parameter | True                                                                                           | enriches the metadata |
+| query      | False    | JSON Request Body       | Consult the [docs](https://rapid.readthedocs.io/en/latest/api/routes/dataset/#filtering-query) | the filtering query   |
+
+#### Filtering Query
+
+**Example 1 - Filtering by tags**
+
+Here we retrieve all datasets that have a tag with key `tag1` with any value and `tag2` with value `value2`.
+
+```json
+{
+  "key_value_tags": {
+    "tag1": null,
+    "tag2": "value2"
+  }
+}
+```
+
+**Example 2 - Filtering by sensitivity**
+
+```json
+{
+  "sensitivity": "PUBLIC"
+}
+```
+
+**Example 3 - Filtering by tags and sensitivity**
+
+```json
+{
+  "sensitivity": "PUBLIC",
+  "key_value_tags": {
+    "tag1": null,
+    "tag2": "value2"
+  }
+}
+```
+
+**Example 4 - Filtering by key value tags and key only tags**
+
+```json
+{
+  "sensitivity": "PUBLIC",
+  "key_value_tags": {
+    "tag2": "value2"
+  },
+  "key_only_tags": ["tag1"]
+}
+```
 
 ### Outputs
 
@@ -208,13 +255,13 @@ You will need `READ` permission appropriate to the dataset sensitivity level, e.
 
 ### Inputs
 
-| Parameters | Required | Usage             | Example values                                                                                                               | Definition            |
-| ---------- | -------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| `layer`    | True     | URL parameter     | `raw`                                                                                                                        | layer of the dataset  |
-| `domain`   | True     | URL parameter     | `space`                                                                                                                      | domain of the dataset |
-| `dataset`  | True     | URL parameter     | `rocket_launches`                                                                                                            | dataset title         |
-| `version`  | False    | Query parameter   | '3'                                                                                                                          | dataset version       |
-| `query`    | False    | JSON Request Body | Consult the [docs](https://github.com/no10ds/rapid-api/blob/main/docs/guides/usage/usage.md#how-to-construct-a-query-object) | the query object      |
+| Parameters | Required | Usage             | Example values                                                        | Definition            |
+| ---------- | -------- | ----------------- | --------------------------------------------------------------------- | --------------------- |
+| `layer`    | True     | URL parameter     | `raw`                                                                 | layer of the dataset  |
+| `domain`   | True     | URL parameter     | `space`                                                               | domain of the dataset |
+| `dataset`  | True     | URL parameter     | `rocket_launches`                                                     | dataset title         |
+| `version`  | False    | Query parameter   | '3'                                                                   | dataset version       |
+| `query`    | False    | JSON Request Body | Consult the [docs](https://rapid.readthedocs.io/en/latest/api/query/) | the query object      |
 
 ### Outputs
 
@@ -258,13 +305,13 @@ You will need a `READ` permission appropriate to the dataset sensitivity level, 
 
 ### Inputs
 
-| Parameters | Required | Usage             | Example values                                                                                                               | Definition            |
-| ---------- | -------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| `layer`    | True     | URL parameter     | `raw`                                                                                                                        | layer of the dataset  |
-| `domain`   | True     | URL parameter     | `space`                                                                                                                      | domain of the dataset |
-| `dataset`  | True     | URL parameter     | `rocket_launches`                                                                                                            | dataset title         |
-| `version`  | False    | Query parameter   | '3'                                                                                                                          | dataset version       |
-| `query`    | False    | JSON Request Body | Consult the [docs](https://github.com/no10ds/rapid-api/blob/main/docs/guides/usage/usage.md#how-to-construct-a-query-object) | the query object      |
+| Parameters | Required | Usage             | Example values                                                        | Definition            |
+| ---------- | -------- | ----------------- | --------------------------------------------------------------------- | --------------------- |
+| `layer`    | True     | URL parameter     | `raw`                                                                 | layer of the dataset  |
+| `domain`   | True     | URL parameter     | `space`                                                               | domain of the dataset |
+| `dataset`  | True     | URL parameter     | `rocket_launches`                                                     | dataset title         |
+| `version`  | False    | Query parameter   | '3'                                                                   | dataset version       |
+| `query`    | False    | JSON Request Body | Consult the [docs](https://rapid.readthedocs.io/en/latest/api/query/) | the query object      |
 
 ### Outputs
 

@@ -234,10 +234,7 @@ function CreateSchema({
 
         <Typography gutterBottom>
           Consult the{' '}
-          <Link
-            href="https://github.com/no10ds/rapid-api/blob/main/docs/guides/usage/schema_creation.md"
-            target="_blank"
-          >
+          <Link href="https://rapid.readthedocs.io/en/latest/api/schema/" target="_blank">
             schema writing guide
           </Link>{' '}
           for further information.
