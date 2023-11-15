@@ -64,5 +64,6 @@ plugins:
 markdown_extensions:
   - pymdownx.highlight
   - pymdownx.extra
+  - pymdownx.magiclink
   - pymdownx.tabbed:
       alternate_style: true
