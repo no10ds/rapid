@@ -1,5 +1,22 @@
 # Changelog
 
+## v7.0.8 / v0.1.6 (sdk) - _2023-11-15_
+
+### Fixes
+
+- Issue with date types when editing a schema on the UI because of no option to apply format column and therefore getting an _all fields are required_ error.
+- Tweaked UI design when adding permissions to subject.
+- SDK not uploading a Pandas Dataframe with a date field set correctly.
+- Updated NextJS and Zod package version.
+
+### Features
+
+- Data bucket now has EventBridge notifications enabled by default.
+
+### Closes relevant GitHub issues
+
+- https://github.com/no10ds/rapid/issues/57
+
 ## v7.0.7 / v0.1.5 (sdk) - _2023-11-07_
 
 ### Fixes
@@ -85,7 +102,8 @@
 
 - See the [migration doc](migration.md) for details on how to migrate to v7 from v6.
 
-[Unreleased changes]: https://github.com/no10ds/rapid/compare/v7.0.7...HEAD
+[Unreleased changes]: https://github.com/no10ds/rapid/compare/v7.0.8...HEAD
+[v7.0.8 / v0.1.6 (sdk)]: https://github.com/no10ds/rapid/v7.0.7...v7.0.8
 [v7.0.7 / v0.1.5 (sdk)]: https://github.com/no10ds/rapid/v7.0.6...v7.0.7
 [v7.0.6 / v0.1.4 (sdk)]: https://github.com/no10ds/rapid/v7.0.5...v7.0.6
 [v7.0.5 / v0.1.3 (sdk)]: https://github.com/no10ds/rapid/v7.0.4...v7.0.5
