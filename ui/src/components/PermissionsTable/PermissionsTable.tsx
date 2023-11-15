@@ -9,9 +9,6 @@ import { isDataPermission } from '@/service/permissions'
 import { PermissionUiResponse } from '@/service/types'
 import { useEffect, useState } from 'react'
 import { cloneDeep } from 'lodash'
-import IconButton from '@mui/material/IconButton'
-import AddIcon from '@mui/icons-material/Add'
-import RemoveIcon from '@mui/icons-material/Remove'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -136,25 +133,17 @@ const PermissionsTable = ({
     const permissionToAdd = watch()
 
     // If the permission is not protected, remove the domain key
-    if (permissionToAdd.sensitivity !== "PROTECTED") {
+    if (permissionToAdd.sensitivity !== 'PROTECTED') {
       delete permissionToAdd.domain
     }
-    let allValuesDefined = true
-    for (const key in permissionToAdd) {
-      if (permissionToAdd[key] === undefined) {
-        allValuesDefined = false;
-        break;
-      }
-    }
 
-    if (allValuesDefined || permissionToAdd.type === "DATA_ADMIN" || permissionToAdd.type === "USER_ADMIN") {
-      setIsDisabled(false)
-    } else {
-      setIsDisabled(true)
-    }
+    const allValuesDefined = Object.values(permissionToAdd).every(
+      (value) => value !== undefined
+    )
+    const isAdminPermission = ['DATA_ADMIN', 'USER_ADMIN'].includes(permissionToAdd.type)
+
+    setIsDisabled(!(allValuesDefined || isAdminPermission))
   })
-
-
 
   return (
     <TableContainer>
@@ -175,7 +164,9 @@ const PermissionsTable = ({
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
               <TableCell>
-                <Button color="info" size='small' onClick={() => remove(index)}>Remove</Button>
+                <Button color="info" size="small" onClick={() => remove(index)}>
+                  Remove
+                </Button>
               </TableCell>
               <TableCell>
                 <Typography key={`permissions.${index}.type`}>{item.type}</Typography>
@@ -200,6 +191,7 @@ const PermissionsTable = ({
                   <Button
                     color="primary"
                     disabled={isDisabled}
+                    data-testid="add-permission"
                     onClick={() => {
                       const result = trigger(undefined, { shouldFocus: true })
                       if (result) {
@@ -222,7 +214,9 @@ const PermissionsTable = ({
                         }
                       }
                     }}
-                  > Add </Button>
+                  >
+                    Add
+                  </Button>
                 </>
               </TableCell>
               <TableCell>
@@ -245,7 +239,7 @@ const PermissionsTable = ({
                         setValue('type', event.target.value as ActionType)
                       }}
                     >
-                      <option value={''} >Select a permission type...</option>
+                      <option value={''}>Select a permission type...</option>
                       {generateOptions(Object.keys(filteredPermissionsListData))}
                     </Select>
                   )}
@@ -339,7 +333,7 @@ const PermissionsTable = ({
                           generateOptions(
                             Object.keys(
                               filteredPermissionsListData[watch('type')][watch('layer')][
-                              watch('sensitivity')
+                                watch('sensitivity')
                               ]
                             )
                           )}
