@@ -9,6 +9,6 @@ setup(
     author_email="lcard@no10.gov.uk",
     license="MIT",
     packages=find_packages(include=["rapid", "rapid.*"], exclude=["tests"]),
-    install_requires=["pandas", "requests", "deepdiff"],
+    install_requires=["pandas", "requests", "deepdiff", "pyarrow", "pydantic"],
     include_package_data=True,
 )
