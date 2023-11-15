@@ -7,6 +7,7 @@ httpx
 jinja2
 pandas
 psutil
+pyarrow
 pyjwt
 pydantic[email]
 python-multipart

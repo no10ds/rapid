@@ -98,6 +98,11 @@ function CreateSchema({
     )
   }
 
+  // Used to conditionally show the format field if we have a date data type in the table
+  const doesTypesContainData = newSchemaData.columns.some(
+    (cols) => cols.data_type === 'date'
+  )
+
   return (
     <form
       onSubmit={handleSubmit(async (_data: SchemaCreate) => {
@@ -133,6 +138,7 @@ function CreateSchema({
                   error={!!error}
                   helperText={error?.message}
                   onChange={(e) => field.onChange(e.target.value)}
+                  inputProps={{ 'data-testid': 'sensitivity' }}
                 />
               </>
             )}
@@ -153,6 +159,7 @@ function CreateSchema({
                   error={!!error}
                   helperText={error?.message}
                   onChange={(e) => field.onChange(e.target.value)}
+                  inputProps={{ 'data-testid': 'layer' }}
                 />
               </>
             )}
@@ -175,6 +182,7 @@ function CreateSchema({
                   error={!!error}
                   helperText={error?.message}
                   onChange={(e) => field.onChange(e.target.value)}
+                  inputProps={{ 'data-testid': 'domain' }}
                 />
               </>
             )}
@@ -197,6 +205,7 @@ function CreateSchema({
                   error={!!error}
                   helperText={error?.message}
                   onChange={(e) => field.onChange(e.target.value)}
+                  inputProps={{ 'data-testid': 'dataset' }}
                 />
               </>
             )}
@@ -222,6 +231,7 @@ function CreateSchema({
                   helperText={error?.message}
                   placeholder="Enter a human readable descriptive to describe the dataset..."
                   onChange={(e) => field.onChange(e.target.value)}
+                  inputProps={{ 'data-testid': 'description' }}
                 />
               </>
             )}
@@ -258,6 +268,24 @@ function CreateSchema({
                     />
                   </FormControl>
                 )
+              },
+              {
+                children:
+                  item.data_type === 'date' ? (
+                    <TextField
+                      inputProps={{ 'data-testid': 'date-format' }}
+                      size="small"
+                      variant="outlined"
+                      type="text"
+                      placeholder="%Y-%m-%d"
+                      required
+                      onChange={(e) =>
+                        setNewSchemaDataColumn(item.name, 'format', e.target.value)
+                      }
+                    />
+                  ) : (
+                    ''
+                  )
               },
               {
                 children: (
@@ -299,6 +327,7 @@ function CreateSchema({
           headers={[
             { children: 'Name' },
             { children: 'Data Type' },
+            { children: doesTypesContainData ? 'Data Format' : '' },
             { children: 'Allows Null' },
             { children: 'Partition Index (Optional)' }
           ]}
