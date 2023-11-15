@@ -13,9 +13,11 @@ from api.common.data_handlers import (
 )
 from api.common.value_transformers import clean_column_name
 
-from api.domain.data_types import extract_athena_types
+from api.domain.data_types import extract_athena_types, is_date_type
 from api.domain.schema import Schema, Column
 from api.domain.schema_metadata import Owner, SchemaMetadata
+
+DEFAULT_DATE_FORMAT = "%Y-%m-%d"
 
 
 class SchemaInferService:
@@ -67,7 +69,7 @@ class SchemaInferService:
                 partition_index=None,
                 data_type=_type,
                 allow_null=True,
-                format=None,
+                format=DEFAULT_DATE_FORMAT if is_date_type(_type) else None,
             )
             for name, _type in extract_athena_types(dataframe).items()
         ]
