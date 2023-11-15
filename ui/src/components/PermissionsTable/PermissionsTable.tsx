@@ -1,4 +1,5 @@
 import { Select } from '@/components'
+import { Button } from '@/components'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Typography } from '@mui/material'
 import { Controller, useForm, FieldValues } from 'react-hook-form'
@@ -8,9 +9,6 @@ import { isDataPermission } from '@/service/permissions'
 import { PermissionUiResponse } from '@/service/types'
 import { useEffect, useState } from 'react'
 import { cloneDeep } from 'lodash'
-import IconButton from '@mui/material/IconButton'
-import AddIcon from '@mui/icons-material/Add'
-import RemoveIcon from '@mui/icons-material/Remove'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -33,6 +31,7 @@ const PermissionsTable = ({
 }) => {
   const [filteredPermissionsListData, setFilteredPermissionsListData] = useState({})
   const [permissionsAtMax, setPermissionsAtMax] = useState<boolean>(false)
+  const [isDisabled, setIsDisabled] = useState<boolean>(false)
 
   const removePermissionAsAnOption = (
     permission: PermissionType,
@@ -118,6 +117,7 @@ const PermissionsTable = ({
     } else {
       setPermissionsAtMax(false)
     }
+    // console.log(filteredPermissionsListData)
   }, [filteredPermissionsListData])
 
   const generateOptions = (items) =>
@@ -128,6 +128,22 @@ const PermissionsTable = ({
         </option>
       )
     })
+
+  useEffect(() => {
+    const permissionToAdd = watch()
+
+    // If the permission is not protected, remove the domain key
+    if (permissionToAdd.sensitivity !== 'PROTECTED') {
+      delete permissionToAdd.domain
+    }
+
+    const allValuesDefined = Object.values(permissionToAdd).every(
+      (value) => value !== undefined
+    )
+    const isAdminPermission = ['DATA_ADMIN', 'USER_ADMIN'].includes(permissionToAdd.type)
+
+    setIsDisabled(!(allValuesDefined || isAdminPermission))
+  })
 
   return (
     <TableContainer>
@@ -148,9 +164,9 @@ const PermissionsTable = ({
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
               <TableCell>
-                <IconButton color="primary" onClick={() => remove(index)}>
-                  <RemoveIcon />
-                </IconButton>
+                <Button color="info" size="small" onClick={() => remove(index)}>
+                  Remove
+                </Button>
               </TableCell>
               <TableCell>
                 <Typography key={`permissions.${index}.type`}>{item.type}</Typography>
@@ -171,33 +187,37 @@ const PermissionsTable = ({
           {!permissionsAtMax && (
             <TableRow>
               <TableCell>
-                <IconButton
-                  color="primary"
-                  onClick={() => {
-                    const result = trigger(undefined, { shouldFocus: true })
-                    if (result) {
-                      const permissionToAdd = watch()
-                      // Triggers an error if the domain is not set for protected sensitivity
-                      if (
-                        isDataPermission(permissionToAdd) &&
-                        permissionToAdd.sensitivity === 'PROTECTED' &&
-                        permissionToAdd.domain === undefined
-                      ) {
-                        setError('domain', { type: 'custom', message: 'Required' })
-                      } else {
-                        append(permissionToAdd)
-                        reset({
-                          type: undefined,
-                          layer: undefined,
-                          sensitivity: undefined,
-                          domain: undefined
-                        })
+                <>
+                  <Button
+                    color="primary"
+                    disabled={isDisabled}
+                    data-testid="add-permission"
+                    onClick={() => {
+                      const result = trigger(undefined, { shouldFocus: true })
+                      if (result) {
+                        const permissionToAdd = watch()
+                        // Triggers an error if the domain is not set for protected sensitivity
+                        if (
+                          isDataPermission(permissionToAdd) &&
+                          permissionToAdd.sensitivity === 'PROTECTED' &&
+                          permissionToAdd.domain === undefined
+                        ) {
+                          setError('domain', { type: 'custom', message: 'Required' })
+                        } else {
+                          append(permissionToAdd)
+                          reset({
+                            type: undefined,
+                            layer: undefined,
+                            sensitivity: undefined,
+                            domain: undefined
+                          })
+                        }
                       }
-                    }
-                  }}
-                >
-                  <AddIcon />
-                </IconButton>
+                    }}
+                  >
+                    Add
+                  </Button>
+                </>
               </TableCell>
               <TableCell>
                 <Controller
@@ -219,7 +239,7 @@ const PermissionsTable = ({
                         setValue('type', event.target.value as ActionType)
                       }}
                     >
-                      <option value={''}>Action</option>
+                      <option value={''}>Select a permission type...</option>
                       {generateOptions(Object.keys(filteredPermissionsListData))}
                     </Select>
                   )}
@@ -244,7 +264,7 @@ const PermissionsTable = ({
                         }}
                       >
                         <option key={''} value={''}>
-                          Layer
+                          Select a layer...
                         </option>
                         {generateOptions(
                           Object.keys(filteredPermissionsListData[watch('type')])
@@ -278,7 +298,7 @@ const PermissionsTable = ({
                           setValue('sensitivity', event.target.value as SensitivityType)
                         }}
                       >
-                        <option value={''}>Sensitivity</option>
+                        <option value={''}>Select a sensitivity level...</option>
                         {generateOptions(
                           Object.keys(
                             filteredPermissionsListData[watch('type')][watch('layer')]
@@ -308,7 +328,7 @@ const PermissionsTable = ({
                           'data-testid': 'domain'
                         }}
                       >
-                        <option value={''}>Domain</option>
+                        <option value={''}>Select a data domain...</option>
                         {isDataPermission(watch()) &&
                           generateOptions(
                             Object.keys(
