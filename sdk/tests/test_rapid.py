@@ -1,6 +1,7 @@
 from mock import Mock, call
-from pandas import DataFrame
 import pytest
+import io
+import pandas as pd
 from requests_mock import Mocker
 
 from rapid import Rapid
@@ -154,7 +155,7 @@ class TestRapid:
         domain = "test_domain"
         dataset = "test_dataset"
         job_id = 1234
-        df = DataFrame()
+        df = pd.DataFrame()
         requests_mock.post(
             f"{RAPID_URL}/datasets/{layer}/{domain}/{dataset}",
             json={"details": {"job_id": job_id}},
@@ -176,7 +177,7 @@ class TestRapid:
         domain = "test_domain"
         dataset = "test_dataset"
         job_id = 1234
-        df = DataFrame()
+        df = pd.DataFrame()
         requests_mock.post(
             f"{RAPID_URL}/datasets/{layer}/{domain}/{dataset}",
             json={"details": {"job_id": job_id}},
@@ -194,7 +195,7 @@ class TestRapid:
         domain = "test_domain"
         dataset = "test_dataset"
         job_id = 1234
-        df = DataFrame()
+        df = pd.DataFrame()
         requests_mock.post(
             f"{RAPID_URL}/datasets/{layer}/{domain}/{dataset}",
             json={"details": {"job_id": job_id}},
@@ -238,12 +239,14 @@ class TestRapid:
 
     @pytest.mark.usefixtures("rapid")
     def test_convert_dataframe_for_file_upload(self, rapid: Rapid):
-        df = DataFrame()
+        df = pd.DataFrame()
         res = rapid.convert_dataframe_for_file_upload(df)
         filename = res["file"][0]
-        data = res["file"][1]
-        assert filename.startswith("rapid-sdk") and filename.endswith(".csv")
-        assert data == "\n"
+        data = io.BytesIO(res["file"][1])
+        df = pd.read_parquet(data)
+
+        assert filename.startswith("rapid-sdk") and filename.endswith(".parquet")
+        assert len(df) == 0
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
     def test_generate_schema_success(self, requests_mock: Mocker, rapid: Rapid):
@@ -251,7 +254,7 @@ class TestRapid:
         domain = "test_domain"
         dataset = "test_dataset"
         sensitivity = "PUBLIC"
-        df = DataFrame()
+        df = pd.DataFrame()
         mocked_response = {
             "metadata": {
                 "layer": "raw",
@@ -299,7 +302,7 @@ class TestRapid:
         domain = "test_domain"
         dataset = "test_dataset"
         sensitivity = "PUBLIC"
-        df = DataFrame()
+        df = pd.DataFrame()
         mocked_response = {"data": "dummy"}
         requests_mock.post(
             f"{RAPID_URL}/schema/{layer}/{sensitivity}/{domain}/{dataset}/generate",
