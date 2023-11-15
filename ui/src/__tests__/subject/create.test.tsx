@@ -62,7 +62,7 @@ describe('Page: Subject Create', () => {
       userEvent.selectOptions(screen.getByTestId('select-type'), 'WRITE')
       userEvent.selectOptions(screen.getByTestId('select-layer'), 'ALL')
       userEvent.selectOptions(screen.getByTestId('select-sensitivity'), 'ALL')
-      await userEvent.click(screen.getByTestId('AddIcon'))
+      await userEvent.click(screen.getByTestId('add-permission'))
       await userEvent.click(screen.getByTestId('submit'))
 
       fetchMock.mockResponseOnce(JSON.stringify(mockData), { status: 200 })
@@ -108,7 +108,7 @@ describe('Page: Subject Create', () => {
       userEvent.selectOptions(screen.getByTestId('select-type'), 'WRITE')
       userEvent.selectOptions(screen.getByTestId('select-layer'), 'ALL')
       userEvent.selectOptions(screen.getByTestId('select-sensitivity'), 'ALL')
-      await userEvent.click(screen.getByTestId('AddIcon'))
+      await userEvent.click(screen.getByTestId('add-permission'))
       await new Promise((r) => setTimeout(r, 2000))
       await userEvent.click(screen.getByTestId('submit'))
       fetchMock.mockResponseOnce(JSON.stringify(mockData), { status: 200 })
@@ -147,7 +147,7 @@ describe('Page: Subject Create', () => {
       userEvent.selectOptions(screen.getByTestId('select-type'), 'WRITE')
       userEvent.selectOptions(screen.getByTestId('select-layer'), 'ALL')
       userEvent.selectOptions(screen.getByTestId('select-sensitivity'), 'ALL')
-      await userEvent.click(screen.getByTestId('AddIcon'))
+      await userEvent.click(screen.getByTestId('add-permission'))
       await userEvent.click(screen.getByTestId('submit'))
 
       fetchMock.mockReject(new Error(error))

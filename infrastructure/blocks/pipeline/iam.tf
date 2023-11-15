@@ -55,6 +55,7 @@ resource "aws_iam_policy" "pipeline_ecr_access" {
 
 resource "aws_iam_policy" "pipeline_ecr_public_access" {
   # checkov:skip=CKV_AWS_355: GetAuthorizationToken has no resource constraint
+  # checkov:skip=CKV_AWS_287: GetServiceBearerToken has no resource constraint
   name        = "pipeline_ecr_public_access"
   description = "Allow pipeline to access the public ECR"
   tags        = var.tags

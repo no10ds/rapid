@@ -3,6 +3,9 @@ import os
 from pathlib import Path
 from unittest.mock import patch
 
+import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
 import pytest
 
 from api.application.services.schema_infer_service import SchemaInferService
@@ -60,6 +63,44 @@ class TestSchemaInfer:
         path = Path(temp_out_path)
         with open(path, "wb") as file:
             file.write(file_content)
+
+        actual_schema = self.infer_schema_service.infer_schema(
+            "raw", "mydomain", "mydataset", "PUBLIC", path
+        )
+        assert actual_schema == expected_schema
+        os.remove(temp_out_path)
+
+    def test_infer_schema_with_date(self):
+        expected_schema = Schema(
+            metadata=SchemaMetadata(
+                layer="raw",
+                domain="mydomain",
+                dataset="mydataset",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="change_me", email="change_me@email.com")],
+            ),
+            columns=[
+                Column(
+                    name="colname1",
+                    partition_index=None,
+                    data_type="string",
+                    allow_null=True,
+                    format=None,
+                ),
+                Column(
+                    name="colname2",
+                    partition_index=None,
+                    data_type="date",
+                    allow_null=True,
+                    format="%Y-%m-%d",
+                ),
+            ],
+        ).dict(exclude={"metadata": {"version"}})
+        df = pd.DataFrame(data={"colname1": ["something"], "colname2": ["2021-01-01"]})
+        df["colname2"] = pd.to_datetime(df["colname2"])
+        temp_out_path = tempfile.mkstemp(suffix=".parquet")[1]
+        path = Path(temp_out_path)
+        pq.write_table(pa.Table.from_pandas(df), path)
 
         actual_schema = self.infer_schema_service.infer_schema(
             "raw", "mydomain", "mydataset", "PUBLIC", path
