@@ -245,8 +245,8 @@ class Rapid:
         """
         return {
             "file": (
-                f"rapid-sdk-{int(datetime.now().timestamp())}.csv",
-                df.to_csv(index=False),
+                f"rapid-sdk-{int(datetime.now().timestamp())}.parquet",
+                df.to_parquet(index=False),
             )
         }
 

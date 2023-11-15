@@ -7,3 +7,4 @@ requests
 requests-mock
 twine
 pydantic
+pyarrow

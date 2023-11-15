@@ -109,6 +109,8 @@ the day (%d) is optional and a separator ('/' or '-') must be in place. Accepted
 - %Y-%m -> 2021-01
 - %m-%Y -> 01-2021
 
+> When using the generate schema endpoint, rAPId will automatically detect a valid date column and specify a default date format of `%Y-%m-%d`, this can be changed before a schema upload if required.
+
 ### Booleans
 
 In order to handle nullables we have introduced [pandas' boolean nullable data type](https://pandas.pydata.org/pandas-docs/stable/user_guide/boolean.html),
