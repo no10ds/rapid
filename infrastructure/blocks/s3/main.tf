@@ -40,6 +40,11 @@ resource "aws_s3_bucket_public_access_block" "rapid_data_storage" {
 }
 
 
+resource "aws_s3_bucket_notification" "rapid_data_storage" {
+  bucket      = aws_s3_bucket.rapid_data_storage.id
+  eventbridge = true
+}
+
 resource "aws_s3_bucket" "logs" {
   #checkov:skip=CKV_AWS_144:No need for cross region replication
   #checkov:skip=CKV_AWS_145:No need for non default key
