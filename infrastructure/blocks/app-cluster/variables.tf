@@ -104,3 +104,15 @@ variable "layers" {
   description = "A list of the layers that the rAPId instance will contain"
   default     = ["default"]
 }
+
+variable "task_memory" {
+  type        = string
+  description = "rapid ecs task memory"
+  default     = "512"
+}
+
+variable "task_cpu" {
+  type        = string
+  description = "rapid ecs task cpu"
+  default     = "256"
+}
