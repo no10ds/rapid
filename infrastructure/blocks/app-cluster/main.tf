@@ -39,6 +39,8 @@ module "app_cluster" {
   enable_cloudtrail                    = var.enable_cloudtrail
   support_emails_for_cloudwatch_alerts = var.support_emails_for_cloudwatch_alerts
   tags                                 = var.tags
+  task_cpu                             = var.task_cpu
+  task_memory                          = var.task_memory
 }
 
 data "terraform_remote_state" "vpc-state" {
