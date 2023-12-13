@@ -31,8 +31,8 @@ module "app_cluster" {
   ecs_cluster_arn                                 = var.ecs_cluster_arn
   ecs_cluster_name                                = var.ecs_cluster_name
   ecs_cluster_id                                  = var.ecs_cluster_id
-  task_cpu = var.task_cpu
-  task_memory = var.task_memory
+  task_cpu                                        = var.task_cpu
+  task_memory                                     = var.task_memory
 }
 
 module "auth" {

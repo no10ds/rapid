@@ -106,13 +106,13 @@ variable "layers" {
 }
 
 variable "task_memory" {
-  type        = string
-  description = "rapid ecs task memory"
-  default     = "512"
+  type        = number
+  description = "rAPId ecs task memory"
+  default     = 512
 }
 
 variable "task_cpu" {
-  type        = string
-  description = "rapid ecs task cpu"
-  default     = "256"
+  type        = number
+  description = "rAPId ecs task cpu"
+  default     = 256
 }
