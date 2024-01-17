@@ -248,6 +248,7 @@ class TestCognitoAdapterClientApps(BaseCognitoAdapter):
 
 class TestCognitoAdapterUsers(BaseCognitoAdapter):
     def test_create_user(self):
+        CUSTOM_USERNAME_REGEX = "[a-zA-Z][a-zA-Z0-9@._-]{2,127}"
         cognito_response = {
             "User": {
                 "Username": "user-name",

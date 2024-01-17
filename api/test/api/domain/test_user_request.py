@@ -4,16 +4,6 @@ from api.common.custom_exceptions import UserError
 from api.domain.user import UserRequest
 
 
-@pytest.fixture
-def custom_user_regex_default():
-    return "[a-zA-Z][a-zA-Z0-9@._-]{2,127}"
-
-
-@pytest.fixture
-def custom_user_regex_non_default():
-    return "^[A-Z][A-Za-z0-9]{3,50}$"
-
-
 class TestUserRequest:
     @pytest.mark.parametrize(
         "provided_username",
@@ -30,9 +20,10 @@ class TestUserRequest:
         request = UserRequest(username=provided_username, email="user@email.com")
 
         # Overrwrite env variable on fn import
-        CUSTOM_USERNAME_REGEX = custom_user_regex_default
         try:
-            validated_name = request.get_validated_username()
+            validated_name = request.get_validated_username(
+                custom_username_regex=custom_user_regex_default
+            )
             assert validated_name == provided_username
         except UserError:
             pytest.fail("An unexpected UserError was thrown")
@@ -57,9 +48,13 @@ class TestUserRequest:
     ):
         request = UserRequest(username=provided_username, email="user@email.com")
         # Overrwrite env variable on fn import
-        CUSTOM_USERNAME_REGEX = custom_user_regex_default
-        with pytest.raises(UserError, match="Invalid username provided"):
-            request.get_validated_username()
+        with pytest.raises(
+            UserError,
+            match="This username is invalid. Please check the username and try again",
+        ):
+            request.get_validated_username(
+                custom_username_regex=custom_user_regex_default
+            )
 
     @pytest.mark.parametrize(
         "provided_username",
@@ -74,10 +69,11 @@ class TestUserRequest:
     def test_get_validated_username_custom_regex(
         self, provided_username, custom_user_regex_non_default
     ):
-        CUSTOM_USERNAME_REGEX = custom_user_regex_non_default
         request = UserRequest(username=provided_username, email="user@email.com")
         try:
-            validated_name = request.get_validated_username()
+            validated_name = request.get_validated_username(
+                custom_username_regex=custom_user_regex_non_default
+            )
             assert validated_name == provided_username
         except UserError:
             pytest.fail("An unexpected UserError was thrown")
@@ -85,27 +81,25 @@ class TestUserRequest:
     @pytest.mark.parametrize(
         "provided_username",
         [
-            "",
-            " ",
-            "SOme naME",
-            "sOMe!name",
-            "-some-nAMe",
-            "(some)namE",
-            "1234",
-            "....",
-            "A" * 2,
-            "A" * 129,
+            "username_name",
+            "username_name2",
+            "username@email.com",
+            "VA.li_d@na-mE",
+            "A....",
         ],
     )
-    def test_raises_error_when_invalid_username(
+    def test_raises_error_when_invalid_username_custom_regex(
         self, provided_username, custom_user_regex_non_default
     ):
-        CUSTOM_USERNAME_REGEX = custom_user_regex_non_default
-
         request = UserRequest(username=provided_username, email="user@email.com")
 
-        with pytest.raises(UserError, match="Invalid username provided"):
-            request.get_validated_username()
+        with pytest.raises(
+            UserError,
+            match="Your username does not match the requirements specified by your organisation",
+        ):
+            request.get_validated_username(
+                custom_username_regex=custom_user_regex_non_default
+            )
 
     @pytest.mark.parametrize(
         "provided_email",

@@ -15,25 +15,24 @@ from api.common.config.constants import (
 )
 from api.common.custom_exceptions import UserError
 
-print(CUSTOM_USERNAME_REGEX)
-
 
 class UserRequest(BaseModel):
     username: str
     email: str
     permissions: Optional[List[str]] = DEFAULT_PERMISSION
 
-    def get_validated_username(self):
+    def get_validated_username(
+        self, custom_username_regex=os.environ.get("CUSTOM_USERNAME_REGEX")
+    ):
         """
         We restrict further beyond Cognito limits:
         https://docs.aws.amazon.com/cognito/latest/developerguide/limits.html
         """
         if self.username is not None and re.fullmatch(USERNAME_REGEX, self.username):
-            if re.fullmatch(CUSTOM_USERNAME_REGEX, self.username):
+            if re.fullmatch(custom_username_regex, self.username):
                 return self.username
-            # I don't know if these messages need to be substantially different from a user point of view, but have tried for now anyways.
             raise UserError(
-                "Your username does not match the requirements specified by your organisation. Please check the username and try again"
+                "Your username does not match the requirements specified by your organisation"
             )
         raise UserError(
             "This username is invalid. Please check the username and try again"
