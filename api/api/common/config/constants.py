@@ -1,5 +1,3 @@
-import os
-
 BASE_API_PATH = "/api"
 BASE_REGEX = "^[a-zA-Z0-9_-]"
 FILENAME_WITH_TIMESTAMP_REGEX = r"[a-zA-Z0-9:_\-]+.csv$"
