@@ -202,3 +202,16 @@ variable "layers" {
   description = "A list of the layers that the rAPId instance will contain"
   default     = ["default"]
 }
+
+variable "custom_username_regex" {
+  type        = list(string)
+  description = "A list containing the regex expression for conditional user validation and a string to test against."
+  default     = ["[a-zA-Z][a-zA-Z0-9@._-]{2,127}", "AUser1"]
+
+  validation {
+    condition     = can(regex(var.regex_expression[0], var.regex_expression[1]))
+    error_message = "Your regex expression cannot be evaluated against your test string. Please check the expression and the test string."
+  }
+}
+
+

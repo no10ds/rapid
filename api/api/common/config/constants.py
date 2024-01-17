@@ -1,3 +1,5 @@
+import os
+
 BASE_API_PATH = "/api"
 BASE_REGEX = "^[a-zA-Z0-9_-]"
 FILENAME_WITH_TIMESTAMP_REGEX = r"[a-zA-Z0-9:_\-]+.csv$"
@@ -22,7 +24,6 @@ EMAIL_REGEX = (
 )
 
 USERNAME_REGEX = "[a-zA-Z][a-zA-Z0-9@._-]{2,127}"
-
 DEFAULT_JOB_EXPIRY_DAYS = 1
 UPLOAD_JOB_EXPIRY_DAYS = 7
 QUERY_JOB_EXPIRY_DAYS = 1

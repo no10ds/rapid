@@ -1,11 +1,16 @@
 import re
 from typing import Optional, List
-
+import os
 from pydantic import BaseModel
 
 from api.common.config.auth import DEFAULT_PERMISSION, ALLOWED_EMAIL_DOMAINS
-from api.common.config.constants import EMAIL_REGEX, USERNAME_REGEX
+from api.common.config.constants import (
+    EMAIL_REGEX,
+    USERNAME_REGEX,
+)
 from api.common.custom_exceptions import UserError
+
+CUSTOM_USERNAME_REGEX = os.environ.get("CUSTOM_USERNAME_REGEX")
 
 
 class UserRequest(BaseModel):
@@ -19,8 +24,15 @@ class UserRequest(BaseModel):
         https://docs.aws.amazon.com/cognito/latest/developerguide/limits.html
         """
         if self.username is not None and re.fullmatch(USERNAME_REGEX, self.username):
-            return self.username
-        raise UserError("Invalid username provided")
+            if re.fullmatch(CUSTOM_USERNAME_REGEX, self.username):
+                return self.username
+            # I don't know if these messages need to be substantially different from a user point of view, but have tried for now anyways.
+            raise UserError(
+                "Your username does not match the requirements specified by your organisation. Please check the username and try again"
+            )
+        raise UserError(
+            "This username is invalid. Please check the username and try again"
+        )
 
     def get_permissions(self) -> List[str]:
         return self.permissions
