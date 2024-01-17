@@ -4,11 +4,7 @@ import os
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
-from api.common.config.auth import (
-    DEFAULT_PERMISSION,
-    ALLOWED_EMAIL_DOMAINS,
-    CUSTOM_USERNAME_REGEX,
-)
+from api.common.config.auth import DEFAULT_PERMISSION, ALLOWED_EMAIL_DOMAINS
 from api.common.config.constants import (
     EMAIL_REGEX,
     USERNAME_REGEX,
@@ -21,14 +17,13 @@ class UserRequest(BaseModel):
     email: str
     permissions: Optional[List[str]] = DEFAULT_PERMISSION
 
-    def get_validated_username(
-        self, custom_username_regex=os.environ.get("CUSTOM_USERNAME_REGEX")
-    ):
+    def get_validated_username(self):
         """
         We restrict further beyond Cognito limits:
         https://docs.aws.amazon.com/cognito/latest/developerguide/limits.html
         """
         if self.username is not None and re.fullmatch(USERNAME_REGEX, self.username):
+            custom_username_regex = os.environ.get("CUSTOM_USERNAME_REGEX")
             if re.fullmatch(custom_username_regex, self.username):
                 return self.username
             raise UserError(

@@ -1,8 +1,9 @@
 from abc import ABC
 from unittest.mock import Mock
-
+from unittest import mock
 import pytest
 from botocore.exceptions import ClientError
+import os
 
 from api.adapter.cognito_adapter import CognitoAdapter
 from api.common.config.auth import COGNITO_USER_POOL_ID, COGNITO_RESOURCE_SERVER_ID
@@ -247,6 +248,9 @@ class TestCognitoAdapterClientApps(BaseCognitoAdapter):
 
 
 class TestCognitoAdapterUsers(BaseCognitoAdapter):
+    @mock.patch.dict(
+        os.environ, {"CUSTOM_USERNAME_REGEX": "[a-zA-Z][a-zA-Z0-9@._-]{2,127}"}
+    )
     def test_create_user(self):
         CUSTOM_USERNAME_REGEX = "[a-zA-Z][a-zA-Z0-9@._-]{2,127}"
         cognito_response = {
@@ -321,6 +325,9 @@ class TestCognitoAdapterUsers(BaseCognitoAdapter):
         ):
             self.cognito_adapter.delete_user("my_user")
 
+    @mock.patch.dict(
+        os.environ, {"CUSTOM_USERNAME_REGEX": "[a-zA-Z][a-zA-Z0-9@._-]{2,127}"}
+    )
     def test_create_user_fails_in_aws(self):
         request = UserRequest(
             username="user-name",
@@ -338,6 +345,9 @@ class TestCognitoAdapterUsers(BaseCognitoAdapter):
         ):
             self.cognito_adapter.create_user(request)
 
+    @mock.patch.dict(
+        os.environ, {"CUSTOM_USERNAME_REGEX": "[a-zA-Z][a-zA-Z0-9@._-]{2,127}"}
+    )
     def test_create_user_fails_when_the_user_already_exist(self):
         request = UserRequest(
             username="user-name",

@@ -2,16 +2,8 @@ import pytest
 
 from api.common.custom_exceptions import UserError
 from api.domain.user import UserRequest
-
-
-@pytest.fixture
-def custom_user_regex_default():
-    return "[a-zA-Z][a-zA-Z0-9@._-]{2,127}"
-
-
-@pytest.fixture
-def custom_user_regex_non_default():
-    return "^[A-Z][A-Za-z0-9]{3,50}$"
+from unittest import mock
+import os
 
 
 class TestUserRequest:
@@ -26,14 +18,15 @@ class TestUserRequest:
             "S1234",
         ],
     )
-    def test_get_validated_username(self, provided_username, custom_user_regex_default):
+    @mock.patch.dict(
+        os.environ, {"CUSTOM_USERNAME_REGEX": "[a-zA-Z][a-zA-Z0-9@._-]{2,127}"}
+    )
+    def test_get_validated_username(self, provided_username):
         request = UserRequest(username=provided_username, email="user@email.com")
 
         # Overrwrite env variable on fn import
         try:
-            validated_name = request.get_validated_username(
-                custom_username_regex=custom_user_regex_default
-            )
+            validated_name = request.get_validated_username()
             assert validated_name == provided_username
         except UserError:
             pytest.fail("An unexpected UserError was thrown")
@@ -53,18 +46,17 @@ class TestUserRequest:
             "A" * 129,
         ],
     )
-    def test_raises_error_when_invalid_username(
-        self, provided_username, custom_user_regex_default
-    ):
+    @mock.patch.dict(
+        os.environ, {"CUSTOM_USERNAME_REGEX": "[a-zA-Z][a-zA-Z0-9@._-]{2,127}"}
+    )
+    def test_raises_error_when_invalid_username(self, provided_username):
         request = UserRequest(username=provided_username, email="user@email.com")
         # Overrwrite env variable on fn import
         with pytest.raises(
             UserError,
             match="This username is invalid. Please check the username and try again",
         ):
-            request.get_validated_username(
-                custom_username_regex=custom_user_regex_default
-            )
+            request.get_validated_username()
 
     @pytest.mark.parametrize(
         "provided_username",
@@ -76,14 +68,11 @@ class TestUserRequest:
             "S1234",
         ],
     )
-    def test_get_validated_username_custom_regex(
-        self, provided_username, custom_user_regex_non_default
-    ):
+    @mock.patch.dict(os.environ, {"CUSTOM_USERNAME_REGEX": "^[A-Z][A-Za-z0-9]{3,50}$"})
+    def test_get_validated_username_custom_regex(self, provided_username):
         request = UserRequest(username=provided_username, email="user@email.com")
         try:
-            validated_name = request.get_validated_username(
-                custom_username_regex=custom_user_regex_non_default
-            )
+            validated_name = request.get_validated_username()
             assert validated_name == provided_username
         except UserError:
             pytest.fail("An unexpected UserError was thrown")
@@ -98,18 +87,15 @@ class TestUserRequest:
             "A....",
         ],
     )
-    def test_raises_error_when_invalid_username_custom_regex(
-        self, provided_username, custom_user_regex_non_default
-    ):
+    @mock.patch.dict(os.environ, {"CUSTOM_USERNAME_REGEX": "^[A-Z][A-Za-z0-9]{3,50}$"})
+    def test_raises_error_when_invalid_username_custom_regex(self, provided_username):
         request = UserRequest(username=provided_username, email="user@email.com")
 
         with pytest.raises(
             UserError,
             match="Your username does not match the requirements specified by your organisation",
         ):
-            request.get_validated_username(
-                custom_username_regex=custom_user_regex_non_default
-            )
+            request.get_validated_username()
 
     @pytest.mark.parametrize(
         "provided_email",
