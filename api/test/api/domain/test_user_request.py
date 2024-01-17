@@ -4,6 +4,16 @@ from api.common.custom_exceptions import UserError
 from api.domain.user import UserRequest
 
 
+@pytest.fixture
+def custom_user_regex_default():
+    return "[a-zA-Z][a-zA-Z0-9@._-]{2,127}"
+
+
+@pytest.fixture
+def custom_user_regex_non_default():
+    return "^[A-Z][A-Za-z0-9]{3,50}$"
+
+
 class TestUserRequest:
     @pytest.mark.parametrize(
         "provided_username",
