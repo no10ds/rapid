@@ -2,15 +2,20 @@ import re
 from typing import Optional, List
 import os
 from pydantic import BaseModel
+from dotenv import load_dotenv
 
-from api.common.config.auth import DEFAULT_PERMISSION, ALLOWED_EMAIL_DOMAINS
+from api.common.config.auth import (
+    DEFAULT_PERMISSION,
+    ALLOWED_EMAIL_DOMAINS,
+    CUSTOM_USERNAME_REGEX,
+)
 from api.common.config.constants import (
     EMAIL_REGEX,
     USERNAME_REGEX,
 )
 from api.common.custom_exceptions import UserError
 
-CUSTOM_USERNAME_REGEX = os.environ.get("CUSTOM_USERNAME_REGEX")
+print(CUSTOM_USERNAME_REGEX)
 
 
 class UserRequest(BaseModel):

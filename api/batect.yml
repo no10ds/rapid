@@ -23,7 +23,7 @@ containers:
       ALLOWED_EMAIL_DOMAINS: ${ALLOWED_EMAIL_DOMAINS:-}
       RESOURCE_PREFIX: ${RESOURCE_PREFIX:-prefix}
       LAYERS: ${LAYERS:-}
-
+      CUSTOM_USERNAME_REGEX: ${CUSTOM_USERNAME_REGEX:-}
 tasks:
   runtime-environment:
     description: Build runtime environment
