@@ -534,7 +534,7 @@ class Rapid:
             timeout=TIMEOUT_PERIOD,
         )
         data = json.loads(response.content.decode("utf-8"))
-        if response.status_code == 200:
+        if response.status_code == 202:
             return data
 
         raise DatasetNotFoundException(

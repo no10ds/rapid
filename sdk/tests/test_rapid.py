@@ -18,6 +18,7 @@ from rapid.exceptions import (
     InvalidPermissionsException,
     SubjectNotFoundException,
     SubjectAlreadyExistsException,
+    DatasetNotFoundException
 )
 from .conftest import RAPID_URL, RAPID_TOKEN
 
@@ -447,4 +448,56 @@ class TestRapid:
             f"{RAPID_URL}/user", json=mocked_response, status_code=400
         )
         with pytest.raises(SubjectNotFoundException):
-            rapid.delete_client("user", "xxx-yyy-zzz")
+            rapid.delete_user("user", "xxx-yyy-zzz")
+
+    @pytest.mark.usefixtures("requests_mock", "rapid")
+    def test_list_subjects(self, requests_mock: Mocker, rapid: Rapid):
+        expected = {"response": "dummy"}
+        requests_mock.post(f"{RAPID_URL}/datasets", json=expected)
+
+        res = rapid.list_subjects()
+        assert res == expected
+
+    @pytest.mark.usefixtures("requests_mock", "rapid")
+    def test_list_layers(self, requests_mock: Mocker, rapid: Rapid):
+        expected = {"response": "dummy"}
+        requests_mock.post(f"{RAPID_URL}/layers", json=expected)
+
+        res = rapid.list_layers()
+        assert res == expected
+
+    @pytest.mark.usefixtures("requests_mock", "rapid")
+    def test_list_protected_domains(self, requests_mock: Mocker, rapid: Rapid):
+        expected = {"response": "dummy"}
+        requests_mock.post(f"{RAPID_URL}/protected_domains", json=expected)
+
+        res = rapid.list_protected_domains()
+        assert res == expected
+
+    @pytest.mark.usefixtures("requests_mock", "rapid")
+    def test_delete_dataset_success(self, requests_mock: Mocker, rapid: Rapid):
+        layer = "raw"
+        domain = "test_domain"
+        dataset = "test_dataset"
+        mocked_response = {'details': '{dataset} has been deleted.'}
+        requests_mock.delete(
+            f"{RAPID_URL}/datasets/{layer}/{domain}/{dataset}",
+              json=mocked_response, 
+              status_code=202
+        )
+        res = rapid.delete_dataset(layer, domain, dataset)
+        assert res == mocked_response
+
+    @pytest.mark.usefixtures("requests_mock", "rapid")
+    def test_delete_dataset_failure(self, requests_mock: Mocker, rapid: Rapid):
+        layer = "raw"
+        domain = "test_domain"
+        dataset = "test_dataset"
+        mocked_response = {"response": "dummy"}
+        requests_mock.delete(
+            f"{RAPID_URL}/datasets/{layer}/{domain}/{dataset}", 
+            json=mocked_response, 
+            status_code=400
+        )
+        with pytest.raises(DatasetNotFoundException):
+            rapid.delete_dataset(layer, domain, dataset)
