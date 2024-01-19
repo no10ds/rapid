@@ -408,3 +408,43 @@ class TestRapid:
         )
         with pytest.raises(InvalidPermissionsException):
             rapid.update_subject_permissions("xxx-yyy-zzz", ["READ_ALL"])
+
+    @pytest.mark.usefixtures("requests_mock", "rapid")
+    def test_create_user_success(self, requests_mock: Mocker, rapid: Rapid):
+        mocked_response = {
+            "username": "user",
+            "email": "user",
+            "permissions": ["READ_ALL"],
+            "user_id": "xxx-yyy-zzz"
+        }
+        requests_mock.post(f"{RAPID_URL}/user", json=mocked_response, status_code=201)
+        res = rapid.create_user("user", "user@user.com", ["READ_ALL"])
+        assert res == mocked_response
+
+    @pytest.mark.usefixtures("requests_mock", "rapid")
+    def test_create_user_failure(self, requests_mock: Mocker, rapid: Rapid):
+        mocked_response = {"data": "dummy"}
+        requests_mock.post(f"{RAPID_URL}/user", json=mocked_response, status_code=400)
+        with pytest.raises(SubjectAlreadyExistsException):
+            rapid.create_user("user", "user@user.com", ["READ_ALL"])
+
+    @pytest.mark.usefixtures("requests_mock", "rapid")
+    def test_delete_user_success(self, requests_mock: Mocker, rapid: Rapid):
+        mocked_response = {
+            "username": "user",
+            "user_id": "xxx-yyy-zzz"
+        }
+        requests_mock.delete(
+            f"{RAPID_URL}/user", json=mocked_response, status_code=200
+        )
+        res = rapid.delete_user("user", "xxx-yyy-zzz")
+        assert res == mocked_response
+
+    @pytest.mark.usefixtures("requests_mock", "rapid")
+    def test_delete_user_failure(self, requests_mock: Mocker, rapid: Rapid):
+        mocked_response = {"data": "dummy"}
+        requests_mock.delete(
+            f"{RAPID_URL}/user", json=mocked_response, status_code=400
+        )
+        with pytest.raises(SubjectNotFoundException):
+            rapid.delete_client("user", "xxx-yyy-zzz")
