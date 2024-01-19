@@ -446,7 +446,7 @@ class Rapid:
             "One or more of the provided permissions is invalid or duplicated"
         )
     
-    def delete_user(self, user_name: str, user_id: str) -> None:
+    def delete_user(self, user_name: str, user_id: str):
         """
         Deletes a client from the API based on their id
 
@@ -465,9 +465,78 @@ class Rapid:
             ),
             timeout=TIMEOUT_PERIOD,
         )
+        data = json.loads(response.content.decode("utf-8"))
         if response.status_code == 200:
-            return None
+            return data
 
         raise SubjectNotFoundException(
             f"Failed to delete user with id: {user_id}, ensure it exists."
+        )
+    
+    def list_subjects(self):
+        """
+        List all current subjects within rAPId instance.
+
+        Returns:
+            A JSON response of the API's response.
+        """
+        response = requests.get(
+            f"{self.auth.url}/subjects",
+            headers=self.generate_headers(),
+            timeout=TIMEOUT_PERIOD,
+        )
+        return json.loads(response.content.decode("utf-8"))
+    
+    def list_layers(self):
+        """
+        List all current layers within rAPId instance.
+
+        Returns:
+            A JSON response of the API's response.
+        """
+        response = requests.get(
+            f"{self.auth.url}/layers",
+            headers=self.generate_headers(),
+            timeout=TIMEOUT_PERIOD,
+        )
+        return json.loads(response.content.decode("utf-8"))
+    
+    def list_protected_domains(self):
+        """
+        List all current protected domains within rAPId instance.
+
+        Returns:
+            A JSON response of the API's response.
+        """
+        response = requests.get(
+            f"{self.auth.url}/protected_domains",
+            headers=self.generate_headers(),
+            timeout=TIMEOUT_PERIOD,
+        )
+        return json.loads(response.content.decode("utf-8"))
+    
+    def delete_dataset(self, layer: str, domain: str, dataset: str):
+        """
+        Deletes a dataset from the API based on their id
+
+        Args:
+            layer (str): The dataset layer to delete.
+            domain (str): The dataset domain to delete.
+            dataset (str): The dataset to delete.
+
+        Raises:
+            rapid.exceptions.DatasetNotFoundException: If the dataset does not exist.
+        """
+        url = f"{self.auth.url}/datasets/{layer}/{domain}/{dataset}"
+        response = requests.delete(
+            url,
+            headers=self.generate_headers(),
+            timeout=TIMEOUT_PERIOD,
+        )
+        data = json.loads(response.content.decode("utf-8"))
+        if response.status_code == 200:
+            return data
+
+        raise DatasetNotFoundException(
+            f"Could not find dataset, {layer}/{domain}/{dataset} to delete", data
         )
