@@ -453,7 +453,7 @@ class TestRapid:
     @pytest.mark.usefixtures("requests_mock", "rapid")
     def test_list_subjects(self, requests_mock: Mocker, rapid: Rapid):
         expected = {"response": "dummy"}
-        requests_mock.get(f"{RAPID_URL}/datasets", json=expected)
+        requests_mock.get(f"{RAPID_URL}/subjects", json=expected)
 
         res = rapid.list_subjects()
         assert res == expected
