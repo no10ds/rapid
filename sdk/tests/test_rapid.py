@@ -453,7 +453,7 @@ class TestRapid:
     @pytest.mark.usefixtures("requests_mock", "rapid")
     def test_list_subjects(self, requests_mock: Mocker, rapid: Rapid):
         expected = {"response": "dummy"}
-        requests_mock.post(f"{RAPID_URL}/datasets", json=expected)
+        requests_mock.get(f"{RAPID_URL}/datasets", json=expected)
 
         res = rapid.list_subjects()
         assert res == expected
@@ -461,7 +461,7 @@ class TestRapid:
     @pytest.mark.usefixtures("requests_mock", "rapid")
     def test_list_layers(self, requests_mock: Mocker, rapid: Rapid):
         expected = {"response": "dummy"}
-        requests_mock.post(f"{RAPID_URL}/layers", json=expected)
+        requests_mock.get(f"{RAPID_URL}/layers", json=expected)
 
         res = rapid.list_layers()
         assert res == expected
@@ -469,7 +469,7 @@ class TestRapid:
     @pytest.mark.usefixtures("requests_mock", "rapid")
     def test_list_protected_domains(self, requests_mock: Mocker, rapid: Rapid):
         expected = {"response": "dummy"}
-        requests_mock.post(f"{RAPID_URL}/protected_domains", json=expected)
+        requests_mock.get(f"{RAPID_URL}/protected_domains", json=expected)
 
         res = rapid.list_protected_domains()
         assert res == expected
