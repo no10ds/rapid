@@ -47,6 +47,9 @@ nav:
               - sdk/api/items/schema.md
           - Patterns:
               - sdk/api/patterns/data.md
+  - Changelog:
+      - changelog/sdk.md
+      - changelog/api.md
   - Releases: changelog.md
   - Migration: migration.md
   - Contributing: contributing.md
