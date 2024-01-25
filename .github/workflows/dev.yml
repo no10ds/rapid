@@ -90,9 +90,10 @@ jobs:
       - name: SDK Test
         run: make sdk-test
 
-      # TODO: Add back in
-      # - name: SDK Test Deploy
-      #   run: make sdk-release-test
+      - name: SDK Test Deploy
+        run: make sdk-release-test
+        env:
+          TEST_SDK_VERSION: "0.0.${{ github.sha }}"
 
   ui-dev:
     needs:
