@@ -187,16 +187,26 @@ ui-release:
 ui-zip-and-release: ui-zip-contents ui-release ## Zip and release prod static ui site
 
 
-##
-release:
+release-api:
 	@python release.py --operation check
 	@git checkout ${commit}
 	@git tag -a "${version}" -m "Release tag for version ${version}"
 	@git checkout -
 	@git push origin ${version}
 	@python release.py --operation create-changelog
-	@gh release create ${version} -F latest_release_changelog.md
+	@gh release create ${version} -F latest_release_changelog.md -t "API Release"
 	@rm -rf latest_release_changelog.md
+
+release-sdk:
+	@python release.py --operation check
+	@git checkout ${commit}
+	@git tag -a "${version}" -m "Release tag for version ${version}"
+	@git checkout -
+	@git push origin ${version}
+	@python release.py --operation create-changelog
+	@gh release create ${version} -F latest_release_changelog.md -t "SDK Release"
+	@rm -rf latest_release_changelog.md
+
 
 
 # Migration --------------------
