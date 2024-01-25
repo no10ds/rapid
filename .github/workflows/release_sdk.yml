@@ -14,26 +14,6 @@ jobs:
       - name: Log commit SHA
         run: echo $GITHUB_SHA
 
-  api-release:
-    needs:
-      - setup
-    runs-on: self-hosted
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Populate .env with additional vars
-        run: |
-          cp ./.github/.github.env .env
-          echo AWS_ACCOUNT=${{ secrets.AWS_ACCOUNT }} >> .env
-          echo AWS_REGION=${{ secrets.AWS_REGION }} >> .env
-
-      - name: Build API Image
-        run: make api-create-image
-
-      - name: API Tag and Upload Release Image
-        run: make api-tag-and-upload-release-image
-
   sdk-release:
     needs:
       - setup
@@ -62,37 +42,10 @@ jobs:
       - name: SDK Release
         run: make sdk-release
 
-  ui-release:
-    needs:
-      - setup
-    runs-on: self-hosted
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 19
-
-      - name: Install UI Packages
-        run: make ui-setup
-
-      - name: UI Build Static Files
-        run: make ui-create-static-out
-
-      - name: UI Zip and Release
-        env:
-          TAG: ${{ github.event.release.tag_name }}
-          GH_TOKEN: ${{ github.token }}
-        run: make ui-zip-and-release tag=$TAG
-
   cleanup:
     needs:
       - setup
-      - api-release
       - sdk-release
-      - ui-release
     runs-on: self-hosted
     steps:
       - name: Checkout
