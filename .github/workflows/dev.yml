@@ -124,9 +124,9 @@ jobs:
     needs:
       - setup
       - security-check
-      - api-dev
+      # - api-dev
       - sdk-dev
-      - ui-dev
+      # - ui-dev
     runs-on: self-hosted
     steps:
       - name: Checkout
