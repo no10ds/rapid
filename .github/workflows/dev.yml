@@ -33,33 +33,33 @@ jobs:
       - name: Run security checks
         run: make security-check
 
-  # api-dev:
-  #   needs:
-  #     - setup
-  #     - security-check
-  #   runs-on: self-hosted
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
+  api-dev:
+    needs:
+      - setup
+      - security-check
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
-  #     - name: Populate .env with additional vars
-  #       run: |
-  #         cp ./.github/.github.env .env
-  #         echo AWS_ACCOUNT=${{ secrets.AWS_ACCOUNT }} >> .env
-  #         echo AWS_REGION=${{ secrets.AWS_REGION }} >> .env
-  #         echo AWS_DEFAULT_REGION=${{ secrets.AWS_REGION }} >> .env
+      - name: Populate .env with additional vars
+        run: |
+          cp ./.github/.github.env .env
+          echo AWS_ACCOUNT=${{ secrets.AWS_ACCOUNT }} >> .env
+          echo AWS_REGION=${{ secrets.AWS_REGION }} >> .env
+          echo AWS_DEFAULT_REGION=${{ secrets.AWS_REGION }} >> .env
 
-  #     - name: Build API Image
-  #       run: make api-create-image
+      - name: Build API Image
+        run: make api-create-image
 
-  #     - name: API Static Analysis
-  #       run: make api-lint
+      - name: API Static Analysis
+        run: make api-lint
 
-  #     - name: API Tests
-  #       run: make api-test
+      - name: API Tests
+        run: make api-test
 
-  #     - name: API Tag and Upload
-  #       run: make api-tag-and-upload
+      - name: API Tag and Upload
+        run: make api-tag-and-upload
 
   sdk-dev:
     needs:
@@ -100,33 +100,33 @@ jobs:
         env:
           TEST_SDK_VERSION: "0.0.0.${{ steps.version.outputs.TEST_SDK_VERSION }}"
 
-  # ui-dev:
-  #   needs:
-  #     - setup
-  #     - security-check
-  #   runs-on: self-hosted
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
+  ui-dev:
+    needs:
+      - setup
+      - security-check
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
-  #     - name: Setup Node
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: 19
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 19
 
-  #     - name: Install UI Packages
-  #       run: make ui-setup
+      - name: Install UI Packages
+        run: make ui-setup
 
-  #     - name: UI Test
-  #       run: make ui-test
+      - name: UI Test
+        run: make ui-test
 
   cleanup:
     needs:
       - setup
       - security-check
-      # - api-dev
+      - api-dev
       - sdk-dev
-      # - ui-dev
+      - ui-dev
     runs-on: self-hosted
     steps:
       - name: Checkout
