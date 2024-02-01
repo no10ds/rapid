@@ -2,12 +2,7 @@ import re
 from typing import Optional, List
 import os
 from pydantic import BaseModel
-from dotenv import load_dotenv
 
-try:
-    load_dotenv()
-except:
-    pass
 from api.common.config.auth import DEFAULT_PERMISSION, ALLOWED_EMAIL_DOMAINS
 from api.common.config.constants import (
     EMAIL_REGEX,
