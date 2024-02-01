@@ -3,14 +3,13 @@ from unittest.mock import Mock
 from unittest import mock
 import pytest
 from botocore.exceptions import ClientError
-import os
 
 from api.adapter.cognito_adapter import CognitoAdapter
 from api.common.config.auth import COGNITO_USER_POOL_ID, COGNITO_RESOURCE_SERVER_ID
 from api.common.config.aws import DOMAIN_NAME
 from api.common.custom_exceptions import AWSServiceError, UserError
 from api.domain.client import ClientRequest, ClientResponse
-from api.domain.user import UserResponse, UserRequest, CUSTOM_USER_NAME_REGEX
+from api.domain.user import UserResponse, UserRequest
 
 
 class BaseCognitoAdapter(ABC):

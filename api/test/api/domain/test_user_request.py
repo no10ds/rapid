@@ -3,7 +3,6 @@ import pytest
 from api.common.custom_exceptions import UserError
 from api.domain.user import UserRequest
 from unittest import mock
-import os
 
 
 class TestUserRequest:
