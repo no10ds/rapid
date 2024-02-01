@@ -203,16 +203,9 @@ variable "layers" {
   default     = ["default"]
 }
 
-variable "custom_username_regex" {
-  type        = list(string)
-  description = "A list containing the regex expression for conditional user validation and a string to test against. The input must be a terraform list variable composed of two strings. The first string is the regex expression and the second string is the test string for said regular expression."
-  # Set default to a regex expression for basic api username validation
-  default = ["[a-zA-Z][a-zA-Z0-9@._-]{2,127}", "AUser1"]
-
-  validation {
-    condition     = can(regex(var.custom_username_regex[0], var.custom_username_regex[1]))
-    error_message = "Your regex expression cannot be evaluated against your test string. Please check the expression and the test string."
-  }
+variable "custom_user_name_regex" {
+  type        = string
+  description = "A regex expression for conditional user validation."
+  default     = null
+  nullable    = true
 }
-
-

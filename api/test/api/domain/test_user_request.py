@@ -18,13 +18,13 @@ class TestUserRequest:
             "S1234",
         ],
     )
-    @mock.patch.dict(
-        os.environ, {"CUSTOM_USERNAME_REGEX": "[a-zA-Z][a-zA-Z0-9@._-]{2,127}"}
+    @mock.patch(
+        "api.domain.user.CUSTOM_USER_NAME_REGEX", "[a-zA-Z][a-zA-Z0-9@._-]{2,127}"
     )
     def test_get_validated_username(self, provided_username):
         request = UserRequest(username=provided_username, email="user@email.com")
 
-        # Overrwrite env variable on fn import
+        # Overwrite env variable on fn import
         try:
             validated_name = request.get_validated_username()
             assert validated_name == provided_username
@@ -46,8 +46,8 @@ class TestUserRequest:
             "A" * 129,
         ],
     )
-    @mock.patch.dict(
-        os.environ, {"CUSTOM_USERNAME_REGEX": "[a-zA-Z][a-zA-Z0-9@._-]{2,127}"}
+    @mock.patch(
+        "api.domain.user.CUSTOM_USER_NAME_REGEX", "[a-zA-Z][a-zA-Z0-9@._-]{2,127}"
     )
     def test_raises_error_when_invalid_username(self, provided_username):
         request = UserRequest(username=provided_username, email="user@email.com")
@@ -68,7 +68,7 @@ class TestUserRequest:
             "S1234",
         ],
     )
-    @mock.patch.dict(os.environ, {"CUSTOM_USERNAME_REGEX": "^[A-Z][A-Za-z0-9]{3,50}$"})
+    @mock.patch("api.domain.user.CUSTOM_USER_NAME_REGEX", "^[A-Z][A-Za-z0-9]{3,50}$")
     def test_get_validated_username_custom_regex(self, provided_username):
         request = UserRequest(username=provided_username, email="user@email.com")
         try:
@@ -87,7 +87,7 @@ class TestUserRequest:
             "A....",
         ],
     )
-    @mock.patch.dict(os.environ, {"CUSTOM_USERNAME_REGEX": "^[A-Z][A-Za-z0-9]{3,50}$"})
+    @mock.patch("api.domain.user.CUSTOM_USER_NAME_REGEX", "^[A-Z][A-Za-z0-9]{3,50}$")
     def test_raises_error_when_invalid_username_custom_regex(self, provided_username):
         request = UserRequest(username=provided_username, email="user@email.com")
 

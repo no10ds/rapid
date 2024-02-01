@@ -12,6 +12,7 @@ from api.common.config.auth import DEFAULT_PERMISSION, ALLOWED_EMAIL_DOMAINS
 from api.common.config.constants import (
     EMAIL_REGEX,
     USERNAME_REGEX,
+    CUSTOM_USER_NAME_REGEX,
 )
 from api.common.custom_exceptions import UserError
 
@@ -27,12 +28,14 @@ class UserRequest(BaseModel):
         https://docs.aws.amazon.com/cognito/latest/developerguide/limits.html
         """
         if self.username is not None and re.fullmatch(USERNAME_REGEX, self.username):
-            custom_username_regex = os.environ.get("CUSTOM_USERNAME_REGEX")
-            if re.fullmatch(custom_username_regex, self.username):
+            if CUSTOM_USER_NAME_REGEX is None:
                 return self.username
-            raise UserError(
-                "Your username does not match the requirements specified by your organisation"
-            )
+            else:
+                if re.fullmatch(CUSTOM_USER_NAME_REGEX, self.username):
+                    return self.username
+                raise UserError(
+                    "Your username does not match the requirements specified by your organisation."
+                )
         raise UserError(
             "This username is invalid. Please check the username and try again"
         )
