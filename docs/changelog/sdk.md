@@ -1,4 +1,4 @@
-# SDK Changes
+# SDK Changelog
 
 ## v0.1.6 - _2023-11-15_
 

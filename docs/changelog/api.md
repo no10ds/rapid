@@ -1,4 +1,4 @@
-# API Changes
+# API Changelog
 
 # Changelog
 

@@ -90,15 +90,10 @@ jobs:
       - name: SDK Test
         run: make sdk-test
 
-      - name: Create Test Version
-        run: |
-          echo "TEST_SDK_VERSION=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
-        id: version
-
       - name: SDK Test Deploy
         run: make sdk-release-test
         env:
-          TEST_SDK_VERSION: "0.0.0.${{ steps.version.outputs.TEST_SDK_VERSION }}"
+          TEST_SDK_VERSION: "$(date +%Y%m%d%H%M%S)"
 
   ui-dev:
     needs:

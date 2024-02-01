@@ -3,7 +3,7 @@ import argparse
 
 
 def create_changelog(type):
-    with open("./docs/changelog/" + type + ".md", "r") as changelog_file:
+    with open(f"./docs/changelog/{type}.md", "r") as changelog_file:
         changelog_lines = changelog_file.readlines()
 
     parsed_lines = []
@@ -25,7 +25,7 @@ def create_changelog(type):
             "It looks like there is no release information in the changelog. Please check it."
         )
     else:
-        with open("latest_release_changelog_" + type + ".md", "w+") as latest_changelog:
+        with open(f"latest_release_changelog_{type}.md", "w+") as latest_changelog:
             latest_changelog.writelines(parsed_lines)
 
 
