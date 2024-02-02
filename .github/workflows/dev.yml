@@ -48,7 +48,6 @@ jobs:
           echo AWS_ACCOUNT=${{ secrets.AWS_ACCOUNT }} >> .env
           echo AWS_REGION=${{ secrets.AWS_REGION }} >> .env
           echo AWS_DEFAULT_REGION=${{ secrets.AWS_REGION }} >> .env
-          echo CUSTOM_USER_NAME_REGEX=[a-zA-Z][a-zA-Z0-9@._-]{2,127} >> .env
 
       - name: Build API Image
         run: make api-create-image
