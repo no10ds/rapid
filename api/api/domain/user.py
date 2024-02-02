@@ -29,6 +29,7 @@ class UserRequest(BaseModel):
                     return self.username
                 raise UserError(
                     "Your username does not match the requirements specified by your organisation."
+                    + CUSTOM_USER_NAME_REGEX
                 )
         raise UserError(
             "This username is invalid. Please check the username and try again"
