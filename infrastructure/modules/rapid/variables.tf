@@ -165,3 +165,11 @@ variable "layers" {
   description = "A list of the layers that the rAPId instance will contain"
   default     = ["default"]
 }
+
+
+variable "custom_user_name_regex" {
+  type        = string
+  description = "A regex expression for conditional user validation."
+  default     = null
+  nullable    = true
+}
