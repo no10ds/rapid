@@ -17,26 +17,26 @@ jobs:
       - name: Log commit SHA
         run: echo $GITHUB_SHA
 
-  # security-check:
-  #   needs:
-  #     - setup
-  #   runs-on: self-hosted
-  #   steps:
-  #     - name: Setup Python
-  #       uses: actions/setup-python@v4
-  #       with:
-  #         python-version: '3.10'
-  #         cache: 'pip'
+  security-check:
+    needs:
+      - setup
+    runs-on: self-hosted
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
 
-  #     - run: pip install -r requirements.txt
+      - run: pip install -r requirements.txt
 
-  #     - name: Run security checks
-  #       run: make security-check
+      - name: Run security checks
+        run: make security-check
 
   api-dev:
     needs:
       - setup
-      # - security-check
+      - security-check
     runs-on: self-hosted
     steps:
       - name: Checkout
@@ -48,6 +48,7 @@ jobs:
           echo AWS_ACCOUNT=${{ secrets.AWS_ACCOUNT }} >> .env
           echo AWS_REGION=${{ secrets.AWS_REGION }} >> .env
           echo AWS_DEFAULT_REGION=${{ secrets.AWS_REGION }} >> .env
+          echo CUSTOM_USER_NAME_REGEX=[a-zA-Z][a-zA-Z0-9@._-]{2,127} >> .env
 
       - name: Build API Image
         run: make api-create-image
@@ -61,66 +62,66 @@ jobs:
       - name: API Tag and Upload
         run: make api-tag-and-upload
 
-  # sdk-dev:
-  #   needs:
-  #     - setup
-  #     - security-check
-  #   runs-on: self-hosted
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
+  sdk-dev:
+    needs:
+      - setup
+      - security-check
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
-  #     - name: Populate .env with additional vars
-  #       run: |
-  #         echo "TWINE_USERNAME=${{ secrets.TWINE_USERNAME_TEST }}" >> .env
-  #         echo "TWINE_PASSWORD=${{ secrets.TWINE_PASSWORD_TEST }}" >> .env
-  #         echo "TWINE_NON_INTERACTIVE=true" >> .env
+      - name: Populate .env with additional vars
+        run: |
+          echo "TWINE_USERNAME=${{ secrets.TWINE_USERNAME_TEST }}" >> .env
+          echo "TWINE_PASSWORD=${{ secrets.TWINE_PASSWORD_TEST }}" >> .env
+          echo "TWINE_NON_INTERACTIVE=true" >> .env
 
-  #     - name: Setup Python
-  #       uses: actions/setup-python@v4
-  #       with:
-  #         python-version: '3.10'
-  #         cache: 'pip'
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
 
-  #     - name: Setup Python Environment
-  #       run: |
-  #         make sdk-setup
-  #         source sdk/.venv/bin/activate
+      - name: Setup Python Environment
+        run: |
+          make sdk-setup
+          source sdk/.venv/bin/activate
 
-  #     - name: SDK Test
-  #       run: make sdk-test
+      - name: SDK Test
+        run: make sdk-test
 
-  #     # TODO: Add back in
-  #     # - name: SDK Test Deploy
-  #     #   run: make sdk-release-test
+      # TODO: Add back in
+      # - name: SDK Test Deploy
+      #   run: make sdk-release-test
 
-  # ui-dev:
-  #   needs:
-  #     - setup
-  #     - security-check
-  #   runs-on: self-hosted
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
+  ui-dev:
+    needs:
+      - setup
+      - security-check
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
-  #     - name: Setup Node
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: 19
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 19
 
-  #     - name: Install UI Packages
-  #       run: make ui-setup
+      - name: Install UI Packages
+        run: make ui-setup
 
-  #     - name: UI Test
-  #       run: make ui-test
+      - name: UI Test
+        run: make ui-test
 
   cleanup:
     needs:
       - setup
       - security-check
       - api-dev
-      # - sdk-dev
-      # - ui-dev
+      - sdk-dev
+      - ui-dev
     runs-on: self-hosted
     steps:
       - name: Checkout
