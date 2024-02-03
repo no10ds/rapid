@@ -6,7 +6,7 @@ on:
 
 jobs:
   setup:
-    if: github.event.release.name == 'SDK Release'
+    if: github.event.release.name == 'sdk release'
     runs-on: self-hosted
     steps:
       - name: Checkout

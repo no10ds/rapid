@@ -41,9 +41,13 @@ def ask_yes_no_question(question):
             print("Please answer yes or no.")
 
 
-def check():
-    ask_yes_no_question("Have you updated the application and ui version in Terraform?")
-    ask_yes_no_question("Have you updated the changelog for this release?")
+def check(type):
+    if type == "api":
+        ask_yes_no_question("Have you updated the API, UI and Terraform version?")
+        ask_yes_no_question("Have you updated the changelog for this release?")
+    elif type == "sdk":
+        ask_yes_no_question("Have you updated the changelog for this release?")
+        ask_yes_no_question("Have you updated the SDK?")
 
 
 if __name__ == "__main__":
