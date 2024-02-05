@@ -56,7 +56,7 @@ There are also these optional inputs:
 - `catalog_disabled` - if set to `true` it will disable the rAPId internal data catalogue
 - `tags` - if provided, it will tag the resources with the defined value. Otherwise, it will default to "Resource = '
   data-f1-rapid'"
-- `custom_user_name_regex` - Regex to allow custom filtering of usernames supplied when creating a new user. Defaults to null, in which case rAPId will default to its basic username validity checks.
+- `custom_user_name_regex` - Regex that when supplied usernames must conform to when creating a new user. Defaults to none, in which case rAPId will default to it's basic username validity checks.
 Once you apply the Terraform, a new instance of the application should be created.
 
 ## rAPId Full Stack
