@@ -184,7 +184,7 @@ class DataService:
 
     def get_last_updated_time(self, metadata: DatasetMetadata) -> str:
         last_updated = self.s3_adapter.get_last_updated_time(
-            metadata.s3_file_location()
+            metadata.dataset_location()
         )
         return last_updated or "Never updated"
 
