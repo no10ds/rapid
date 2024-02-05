@@ -209,3 +209,15 @@ variable "custom_user_name_regex" {
   default     = null
   nullable    = true
 }
+
+variable "task_memory" {
+  type        = number
+  description = "rAPId ecs task memory"
+  default     = 512
+}
+
+variable "task_cpu" {
+  type        = number
+  description = "rAPId ecs task cpu"
+  default     = 256
+}

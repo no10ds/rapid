@@ -103,12 +103,14 @@ class S3Adapter:
         paginator = self.__s3_client.get_paginator("list_objects_v2")
         page_iterator = paginator.paginate(Bucket=self.__s3_bucket, Prefix=file_path)
         try:
-            return max(
-                [
-                    item["LastModified"]
-                    for page in page_iterator
-                    for item in page["Contents"]
-                ]
+            return str(
+                max(
+                    [
+                        item["LastModified"]
+                        for page in page_iterator
+                        for item in page["Contents"]
+                    ]
+                )
             )
         except KeyError:
             return None
