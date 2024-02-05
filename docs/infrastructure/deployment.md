@@ -56,8 +56,9 @@ There are also these optional inputs:
 - `catalog_disabled` - if set to `true` it will disable the rAPId internal data catalogue
 - `tags` - if provided, it will tag the resources with the defined value. Otherwise, it will default to "Resource = '
   data-f1-rapid'"
-- `task_cpu` - If provided, will update CPU resource allocated to the ECS task running rAPId instance. Otherwise will default to 256
-- `task_memory` - If provided, will update memory resource allocated to the ECS task running rAPId instance. Otherwise will default to 512
+- `custom_user_name_regex` - Regex that when supplied usernames must conform to when creating a new user. Defaults to none, in which case rAPId will default to it's basic username validity checks.
+- `task_cpu` - If provided, will update CPU resource allocated to the ECS task running rAPId instance. Otherwise will default to 256.
+- `task_memory` - If provided, will update memory resource allocated to the ECS task running rAPId instance. Otherwise will default to 512.
 
 Once you apply the Terraform, a new instance of the application should be created.
 

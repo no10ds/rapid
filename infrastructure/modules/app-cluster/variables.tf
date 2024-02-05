@@ -203,6 +203,13 @@ variable "layers" {
   default     = ["default"]
 }
 
+variable "custom_user_name_regex" {
+  type        = string
+  description = "A regex expression for conditional user validation."
+  default     = null
+  nullable    = true
+}
+
 variable "task_memory" {
   type        = number
   description = "rAPId ecs task memory"
