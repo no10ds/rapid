@@ -73,4 +73,4 @@ if __name__ == "__main__":
         case "create-changelog":
             create_changelog(args.type)
         case "check":
-            check()
+            check(args.type)
