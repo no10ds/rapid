@@ -177,7 +177,7 @@ Performing a release involves tagging the repository with a new version number s
    the [template](https://github.com/no10ds/rapid/blob/main/changelog_release_template/md)). You'll need to separate SDK and API changes into their respective changelogs, under docs/changelog. 
    1. Bundle API, UI and terraform changes as part of the API changelog.
    2. Insert SDK changes into the SDK changelog.
-3. Run `make release commit=<commit_hash> type=<sdk|api>version=vX.X.X`
+3. Run `make release commit=<commit_hash> type=<sdk|api> version=vX.X.X`
 
 > Ensure the version number follows the format `vX.X.X` with full-stops in the same places for both API and SDK changes. 
 
