@@ -90,11 +90,12 @@ jobs:
       - name: SDK Test
         run: make sdk-test
 
+      - name: Set env variable
+        run: echo "TEST_SDK_VERSION=$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
+
       - name: SDK Test Deploy
         run: make sdk-release-test
-        env:
-          TEST_SDK_VERSION: "$(date +%Y%m%d%H%M%S)"
-
+        
   ui-dev:
     needs:
       - setup
