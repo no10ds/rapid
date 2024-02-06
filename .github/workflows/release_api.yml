@@ -6,7 +6,7 @@ on:
 
 jobs:
   setup:
-    if: github.event.release.name == 'api release'
+    if: "${{ startsWith(github.event.release.name, 'API: ') }}"
     runs-on: self-hosted
     steps:
       - name: Checkout

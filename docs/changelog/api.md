@@ -2,6 +2,26 @@
 
 # Changelog
 
+## v7.0.9 - _2024-02-06_
+
+See [v7.0.9] changes
+
+### Features
+
+- Ability to pass a custom regex for username validation. See the documentation on the [`custom_user_name_regex`](https://rapid.readthedocs.io/en/latest/infrastructure/deployment/#usage) variable.
+- Decoupled API & SDK into separate releases.
+- New optional infrastructure variables to increase cpu and memory limits for the API container. See the [infrastructure variables for more information](https://rapid.readthedocs.io/en/latest/infrastructure/deployment/#usage).
+- Upgraded `browserify-sign` from 4.2.1 to 4.2.2.
+- Upgraded `@adobe/css-tools` from 4.3.1 to 4.3.2.
+
+### Fixes
+
+- Issue with the last updated date on datasets being 'Never Updated'.
+
+### Breaking Changes
+
+### Migration
+
 ## v7.0.8 - _2023-11-15_
 
 ### Fixes
@@ -93,7 +113,8 @@
 
 - See the [migration doc](migration.md) for details on how to migrate to v7 from v6.
 
-[Unreleased changes]: https://github.com/no10ds/rapid/compare/v7.0.8...HEAD
+[Unreleased changes]: https://github.com/no10ds/rapid/compare/v7.0.9...HEAD
+[v7.0.9]: https://github.com/no10ds/rapid/compare/v7.0.8...v7.0.9
 [v7.0.8 / v0.1.6 (sdk)]: https://github.com/no10ds/rapid/v7.0.7...v7.0.8
 [v7.0.7 / v0.1.5 (sdk)]: https://github.com/no10ds/rapid/v7.0.6...v7.0.7
 [v7.0.6 / v0.1.4 (sdk)]: https://github.com/no10ds/rapid/v7.0.5...v7.0.6

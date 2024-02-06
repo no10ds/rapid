@@ -6,7 +6,7 @@ on:
 
 jobs:
   setup:
-    if: github.event.release.name == 'sdk release'
+    if: "${{ startsWith(github.event.release.name, 'SDK: ') }}"
     runs-on: self-hosted
     steps:
       - name: Checkout

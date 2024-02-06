@@ -193,8 +193,8 @@ release:
 	@git checkout -
 	@git push origin ${version}
 	@python release.py --operation create-changelog --type ${type}
-	@gh release create ${version} -F latest_release_changelog_${type}.md -t "${type} release"
-	@rm -rf latest_release_changelog_${type}.md
+	@gh release create ${version} -F latest_release_changelog_${type}.md -t "${type^^} ${version}"
+	@rm -rf latest_release_changelog_${type}.mds
 
 # Migration --------------------
 ##
