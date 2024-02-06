@@ -186,6 +186,7 @@ ui-release:
 
 ui-zip-and-release: ui-zip-contents ui-release ## Zip and release prod static ui site
 
+RELEASE_TYPE_UC=$(shell echo ${type} | tr  '[:lower:]' '[:upper:]')
 release:
 	@python release.py --operation check --type ${type}
 	@git checkout ${commit}
@@ -193,8 +194,8 @@ release:
 	@git checkout -
 	@git push origin ${version}
 	@python release.py --operation create-changelog --type ${type}
-	@gh release create ${version} -F latest_release_changelog_${type}.md -t "${type^^} ${version}"
-	@rm -rf latest_release_changelog_${type}.mds
+	@gh release create ${version} -F latest_release_changelog_${type}.md -t "$(RELEASE_TYPE_UC): ${version}"
+	@rm -rf latest_release_changelog_${type}.md
 
 # Migration --------------------
 ##
