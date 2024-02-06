@@ -163,7 +163,7 @@ rAPId has several core components that are all versioned when a release is creat
 3. A public pypi package of the built rAPId-sdk that provides an easy and pythonic way to interact with the API.
 4. A terraform module that can be used to create the AWS services necessary for running the various components of rAPId.
 
-Performing a release involves tagging the repository with a new version number so that the API image, UI, SDK and Terraform all get versioned.
+Performing a release involves tagging the repository with a new version number so that the API image, UI, SDK and Terraform all get versioned. Note that the API and SDK can be versioned and released independently, so you can conserve the API version number if just releasing an update to the SDK.
 
 ### Prerequisites
 
@@ -172,11 +172,13 @@ Performing a release involves tagging the repository with a new version number s
 
 ### Steps
 
-1. Decide on the new version number following the [semantic versioning approach](https://semver.org/)
+1. Decide on the new version number for the API and the UI and/or the SDK following the [semantic versioning approach](https://semver.org/).
 2. Update and commit the Changelog (you can follow
-   the [template](https://github.com/no10ds/rapid/blob/main/changelog_release_template/md))
-3. Run `make release commit=<commit_hash> version=vX.X.X`
+   the [template](https://github.com/no10ds/rapid/blob/main/changelog_release_template/md)). You'll need to separate SDK and API changes into their respective changelogs, under docs/changelog. 
+   1. Bundle API, UI and terraform changes as part of the API changelog.
+   2. Insert SDK changes into the SDK changelog.
+3. Run `make release commit=<commit_hash> type=<sdk|api>version=vX.X.X`
 
-> Ensure the version number follows the format `vX.X.X` with full-stops in the same places
+> Ensure the version number follows the format `vX.X.X` with full-stops in the same places for both API and SDK changes. 
 
 Now the release pipeline will run automatically, build all images and packages off that version of the code and tag it within GitHub.
