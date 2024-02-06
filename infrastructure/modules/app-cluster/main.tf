@@ -9,6 +9,7 @@ locals {
     "COGNITO_USER_POOL_ID" : var.cognito_user_pool_id,
     "RESOURCE_PREFIX" : var.resource-name-prefix,
     "COGNITO_USER_LOGIN_APP_CREDENTIALS_SECRETS_NAME" : var.cognito_user_login_app_credentials_secrets_name
+    "CUSTOM_USER_NAME_REGEX" : var.custom_user_name_regex
   }, var.project_information)
 }
 
@@ -321,8 +322,8 @@ resource "aws_ecs_task_definition" "aws-ecs-task" {
           "protocol": "${var.protocol}"
         }
       ],
-      "cpu": 256,
-      "memory": 512,
+      "cpu": ${var.task_cpu},
+      "memory": ${var.task_memory},
       "networkMode": "awsvpc"
     }
   ]
@@ -330,8 +331,8 @@ resource "aws_ecs_task_definition" "aws-ecs-task" {
 
 requires_compatibilities = ["FARGATE"]
 network_mode             = "awsvpc"
-memory                   = "512"
-cpu                      = "256"
+memory                   = var.task_memory
+cpu                      = var.task_cpu
 execution_role_arn       = aws_iam_role.ecsTaskExecutionRole.arn
 task_role_arn            = aws_iam_role.ecsTaskExecutionRole.arn
 

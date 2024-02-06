@@ -1,12 +1,13 @@
+# API Changelog
+
 # Changelog
 
-## v7.0.8 / v0.1.6 (sdk) - _2023-11-15_
+## v7.0.8 - _2023-11-15_
 
 ### Fixes
 
 - Issue with date types when editing a schema on the UI because of no option to apply format column and therefore getting an _all fields are required_ error.
 - Tweaked UI design when adding permissions to subject.
-- SDK not uploading a Pandas Dataframe with a date field set correctly.
 - Updated NextJS and Zod package version.
 
 ### Features
@@ -17,11 +18,10 @@
 
 - https://github.com/no10ds/rapid/issues/57
 
-## v7.0.7 / v0.1.5 (sdk) - _2023-11-07_
+## v7.0.7 - _2023-11-07_
 
 ### Fixes
 
-- Issue within the sdk `upload_and_create_dataset` function where schema metadata wasn't being correctly overridden.
 - Hitting maximum security group rules for the load balancer.
 - Documentation improvements and removes any references to the old deprecated repositories.
 
@@ -32,7 +32,7 @@
 - https://github.com/no10ds/rapid/issues/54
 - https://github.com/no10ds/rapid/issues/51
 
-## v7.0.6 / v0.1.4 (sdk) - _2023-10-18_
+## v7.0.6 - _2023-10-18_
 
 ### Features
 
@@ -41,17 +41,10 @@
 
 ### Fixes
 
-- Fixed an issue with the sdk not showing schemas were created successfully due to a wrong response code.
 - Where dataset info was being called on columns with a date type, this was causing an issue with the Pydantic validation.
 - Tweaked the documentation to implement searching for column heading style guide to match what the API returns in the error message.
 
-## v7.0.5 / v0.1.3 (sdk) - _2023-09-20_
-
-### Fixes
-
-- Fix the behaviour of the dataset pattern functions in the SDK.
-
-## v7.0.4 / v0.1.2 (sdk) - _2023-09-20_
+## v7.0.4 - _2023-09-20_
 
 ### Features
 
@@ -63,26 +56,25 @@
 - Updated terraform default `application_version` and `ui_version` variables.
 - Migration script and documentation.
 
-## v7.0.3 / v0.1.2 (sdk) - _2023-09-15_
+## v7.0.3 - _2023-09-15_
 
 ### Fixes
 
 - Fixes issue where permissions were not being correctly read and causing api functionality to fail
 
-## v7.0.2 / v0.1.2 (sdk) - _2023-09-14_
+## v7.0.2 - _2023-09-14_
 
 ### Fixes
 
 - Update UI repo references.
 
-## v7.0.1 / v0.1.2 (sdk) - _2023-09-13_
+## v7.0.1 - _2023-09-13_
 
 ### Fixes
 
 - Date types were being stored as strings which caused issues when querying with Athena. They are now stored as date types.
-- Rename the rAPId sdk method `generate_info` to `fetch_dataset_info` and remove an unnecessary argument.
 
-## v7.0.0 / v0.1.1 (sdk) - _2023-09-12_
+## v7.0.0 - _2023-09-12_
 
 ### Features
 
@@ -96,7 +88,6 @@
 ### Breaking Changes
 
 - All dataset endpoints will be prefixed with `layer`. Typically going from `domain/dataset` to `layer/domain/dataset`.
-- All sdk functions that interact with datasets will now require an argument for layer.
 
 ### Migration
 

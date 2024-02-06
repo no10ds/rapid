@@ -6,6 +6,7 @@ on:
 
 jobs:
   setup:
+    if: github.event.release.name == 'api release'
     runs-on: self-hosted
     steps:
       - name: Checkout
@@ -33,34 +34,6 @@ jobs:
 
       - name: API Tag and Upload Release Image
         run: make api-tag-and-upload-release-image
-
-  sdk-release:
-    needs:
-      - setup
-    runs-on: self-hosted
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Populate .env with additional vars
-        run: |
-          echo TWINE_USERNAME=${{ secrets.TWINE_USERNAME }} >> .env
-          echo TWINE_PASSWORD=${{ secrets.TWINE_PASSWORD }} >> .env
-          echo TWINE_NON_INTERACTIVE=true >> .env
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-          cache: 'pip'
-
-      - name: Setup Python Environment
-        run: |
-          make sdk-setup
-          source sdk/.venv/bin/activate
-
-      - name: SDK Release
-        run: make sdk-release
 
   ui-release:
     needs:
@@ -91,7 +64,6 @@ jobs:
     needs:
       - setup
       - api-release
-      - sdk-release
       - ui-release
     runs-on: self-hosted
     steps:

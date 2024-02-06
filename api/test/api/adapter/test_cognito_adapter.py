@@ -1,6 +1,6 @@
 from abc import ABC
 from unittest.mock import Mock
-
+from unittest import mock
 import pytest
 from botocore.exceptions import ClientError
 
@@ -250,6 +250,50 @@ class TestCognitoAdapterUsers(BaseCognitoAdapter):
     def test_create_user(self):
         cognito_response = {
             "User": {
+                "Username": "TtestUser1",
+                "Attributes": [
+                    {"Name": "sub", "Value": "some-uu-id-b226-e5fd18c59b85"},
+                    {"Name": "email_verified", "Value": "True"},
+                    {"Name": "email", "Value": "user-name@example1.com"},
+                ],
+            },
+            "ResponseMetadata": {
+                "RequestId": "the-request-id-b368-fae5cebb746f",
+                "HTTPStatusCode": 200,
+            },
+        }
+        expected_response = UserResponse(
+            username="TtestUser1",
+            email="user-name@example1.com",
+            permissions=["WRITE_PUBLIC", "READ_PRIVATE"],
+            user_id="some-uu-id-b226-e5fd18c59b85",
+        )
+        request = UserRequest(
+            username="TtestUser1",
+            email="TtestUser1@example1.com",
+            permissions=["WRITE_PUBLIC", "READ_PRIVATE"],
+        )
+        self.cognito_boto_client.admin_create_user.return_value = cognito_response
+
+        actual_response = self.cognito_adapter.create_user(request)
+        self.cognito_boto_client.admin_create_user.assert_called_once_with(
+            UserPoolId=COGNITO_USER_POOL_ID,
+            Username="TtestUser1",
+            UserAttributes=[
+                {"Name": "email", "Value": "TtestUser1@example1.com"},
+                {"Name": "email_verified", "Value": "True"},
+            ],
+            DesiredDeliveryMediums=[
+                "EMAIL",
+            ],
+        )
+
+        assert actual_response == expected_response
+
+    @mock.patch("api.domain.user.CUSTOM_USER_NAME_REGEX", None)
+    def test_create_user_no_custom_regex(self):
+        cognito_response = {
+            "User": {
                 "Username": "user-name",
                 "Attributes": [
                     {"Name": "sub", "Value": "some-uu-id-b226-e5fd18c59b85"},
@@ -322,8 +366,8 @@ class TestCognitoAdapterUsers(BaseCognitoAdapter):
 
     def test_create_user_fails_in_aws(self):
         request = UserRequest(
-            username="user-name",
-            email="user-name@example1.com",
+            username="TtestUser1",
+            email="TtestUser1@example1.com",
             permissions=["WRITE_PUBLIC", "READ_PRIVATE"],
         )
 
@@ -333,14 +377,14 @@ class TestCognitoAdapterUsers(BaseCognitoAdapter):
         )
 
         with pytest.raises(
-            AWSServiceError, match="The user 'user-name' could not be created"
+            AWSServiceError, match="The user 'TtestUser1' could not be created"
         ):
             self.cognito_adapter.create_user(request)
 
     def test_create_user_fails_when_the_user_already_exist(self):
         request = UserRequest(
-            username="user-name",
-            email="user-name@example1.com",
+            username="TtestUser1",
+            email="TtestUser1@example1.com",
             permissions=["WRITE_PUBLIC", "READ_PRIVATE"],
         )
 
@@ -351,7 +395,7 @@ class TestCognitoAdapterUsers(BaseCognitoAdapter):
 
         with pytest.raises(
             UserError,
-            match="The user 'user-name' or email 'user-name@example1.com' already exist",
+            match="The user 'TtestUser1' or email 'TtestUser1@example1.com' already exist",
         ):
             self.cognito_adapter.create_user(request)
 
