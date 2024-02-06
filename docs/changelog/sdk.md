@@ -1,5 +1,11 @@
 # SDK Changelog
 
+## v0.1.7 - _2023-02-06_
+
+### Features
+
+- Ability to now create a protected domain via the sdk.
+
 ## v0.1.6 - _2023-11-15_
 
 ### Fixes
@@ -10,13 +16,12 @@
 
 - https://github.com/no10ds/rapid/issues/57
 
-## v0.1.5  - _2023-11-07_
+## v0.1.5 - _2023-11-07_
 
 ### Fixes
 
 - Issue within the sdk `upload_and_create_dataset` function where schema metadata wasn't being correctly overridden.
 - Documentation improvements and removes any references to the old deprecated repositories.
-
 
 ## v0.1.4 - _2023-10-18_
 
