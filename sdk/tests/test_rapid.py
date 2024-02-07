@@ -423,10 +423,17 @@ class TestRapid:
         assert res == mocked_response
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
-    def test_create_user_failure(self, requests_mock: Mocker, rapid: Rapid):
-        mocked_response = {"data": "dummy"}
+    def test_create_user_failure_subjectalreadyexists(self, requests_mock: Mocker, rapid: Rapid):
+        mocked_response = {"details": "The user 'user' or email 'user@user.com' already exist"}
         requests_mock.post(f"{RAPID_URL}/user", json=mocked_response, status_code=400)
         with pytest.raises(SubjectAlreadyExistsException):
+            rapid.create_user("user", "user@user.com", ["READ_ALL"])
+    
+    @pytest.mark.usefixtures("requests_mock", "rapid")
+    def test_create_user_failure_invalidpermissions(self, requests_mock: Mocker, rapid: Rapid):
+        mocked_response = {"details": "One or more of the provided permissions is invalid or duplicated"}
+        requests_mock.post(f"{RAPID_URL}/user", json=mocked_response, status_code=400)
+        with pytest.raises(InvalidPermissionsException):
             rapid.create_user("user", "user@user.com", ["READ_ALL"])
 
     @pytest.mark.usefixtures("requests_mock", "rapid")

@@ -439,12 +439,20 @@ class Rapid:
         if response.status_code == 201:
             return data
         elif response.status_code == 400:
-            raise SubjectAlreadyExistsException(
-                f"The user {user_name} already exists"
-            )
-        raise InvalidPermissionsException(
-            "One or more of the provided permissions is invalid or duplicated"
-        )
+            if data["details"] == 'One or more of the provided permissions is invalid or duplicated':
+                raise InvalidPermissionsException(
+                    "One or more of the provided permissions is invalid or duplicated"
+                )
+            else:
+                raise SubjectAlreadyExistsException(
+                    data["details"]
+                )
+        elif response.status_code == 401:
+            raise Exception(# User doesnt have 'USER_ADMIN' permissions
+                    data["details"]
+                )
+        else:
+            raise Exception(data["details"])
     
     def delete_user(self, user_name: str, user_id: str):
         """
@@ -536,7 +544,15 @@ class Rapid:
         data = json.loads(response.content.decode("utf-8"))
         if response.status_code == 202:
             return data
-
-        raise DatasetNotFoundException(
-            f"Could not find dataset, {layer}/{domain}/{dataset} to delete", data
-        )
+        elif response.status_code == 400:
+                raise DatasetNotFoundException(
+                    f"Could not find dataset, {layer}/{domain}/{dataset} to delete", data
+                )
+        elif response.status_code == 401:
+            raise Exception(# User doesnt have 'DATA_ADMIN' permissions
+                    data["details"]
+                )
+        else:
+            raise Exception(data["details"])
+        # There is an issue with function it returns 202 when dataset doesn't exists, but layer is correct
+        
