@@ -186,20 +186,21 @@ ui-release:
 
 ui-zip-and-release: ui-zip-contents ui-release ## Zip and release prod static ui site
 
-
-##
+RELEASE_TYPE_UC=$(shell echo ${type} | tr  '[:lower:]' '[:upper:]')
 release:
-	@python release.py --operation check
+	@python release.py --operation check --type ${type}
 	@git checkout ${commit}
 	@git tag -a "${version}" -m "Release tag for version ${version}"
 	@git checkout -
 	@git push origin ${version}
-	@python release.py --operation create-changelog
-	@gh release create ${version} -F latest_release_changelog.md
-	@rm -rf latest_release_changelog.md
-
+	@python release.py --operation create-changelog --type ${type}
+	@gh release create ${version} -F latest_release_changelog_${type}.md -t "$(RELEASE_TYPE_UC): ${version}"
+	@rm -rf latest_release_changelog_${type}.md
 
 # Migration --------------------
 ##
 migrate-v7:			## Run the migration
 	@cd api/; ./batect migrate-v7 -- --layer ${layer} --all-layers ${all-layers}
+
+serve-docs:
+	mkdocs serve

@@ -13,13 +13,13 @@ variable "app-replica-count-max" {
 variable "application_version" {
   type        = string
   description = "The version number for the application image (e.g.: v1.0.4, v1.0.x-latest, etc.)"
-  default     = "v7.0.8"
+  default     = "v7.0.9"
 }
 
 variable "ui_version" {
   type        = string
   description = "The version number for the static ui (e.g.: v1.0.0, etc.)"
-  default     = "v7.0.8"
+  default     = "v7.0.9"
 }
 
 variable "catalog_disabled" {
@@ -164,4 +164,23 @@ variable "layers" {
   type        = list(string)
   description = "A list of the layers that the rAPId instance will contain"
   default     = ["default"]
+}
+
+variable "custom_user_name_regex" {
+  type        = string
+  description = "A regex expression for conditional user validation."
+  default     = null
+  nullable    = true
+}
+
+variable "task_memory" {
+  type        = number
+  description = "rAPId ecs task memory"
+  default     = 512
+}
+
+variable "task_cpu" {
+  type        = number
+  description = "rAPId ecs task cpu"
+  default     = 256
 }
