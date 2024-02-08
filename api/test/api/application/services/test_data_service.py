@@ -613,7 +613,7 @@ class TestDatasetInfoRetrieval:
         )
         assert last_updated_time == "2022-03-01 11:03:49+00:00"
         self.s3_adapter.get_last_updated_time.assert_called_once_with(
-            self.valid_schema.metadata.s3_file_location()
+            self.valid_schema.metadata.dataset_location()
         )
 
     def test_get_last_updated_time_empty(self):
@@ -624,7 +624,7 @@ class TestDatasetInfoRetrieval:
         )
         assert last_updated_time == "Never updated"
         self.s3_adapter.get_last_updated_time.assert_called_once_with(
-            self.valid_schema.metadata.s3_file_location()
+            self.valid_schema.metadata.dataset_location()
         )
 
     def test_get_schema_information(self):

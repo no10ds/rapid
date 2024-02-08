@@ -61,10 +61,10 @@ class TestSchemaUpload(BaseClientTest):
         assert response.status_code == 400
         assert response.json() == {
             "details": [
-                "layer -> Field required",
-                "domain -> Field required",
-                "dataset -> Field required",
-                "sensitivity -> Field required",
+                "metadata: layer -> Field required",
+                "metadata: domain -> Field required",
+                "metadata: dataset -> Field required",
+                "metadata: sensitivity -> Field required",
             ]
         }
 
@@ -232,10 +232,10 @@ class TestSchemaUpdate(BaseClientTest):
         assert response.status_code == 400
         assert response.json() == {
             "details": [
-                "layer -> Field required",
-                "domain -> Field required",
-                "dataset -> Field required",
-                "sensitivity -> Field required",
+                "metadata: layer -> Field required",
+                "metadata: domain -> Field required",
+                "metadata: dataset -> Field required",
+                "metadata: sensitivity -> Field required",
             ]
         }
 
