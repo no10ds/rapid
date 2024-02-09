@@ -481,8 +481,8 @@ class Rapid:
             raise ClientDoesNotHaveUserAdminPermissionsException(
                     data["details"]
                 )
-        else:
-            raise Exception(data["details"])
+        
+        raise Exception("Failed to create user")
     
     def delete_user(self, user_name: str, user_id: str):
         """
@@ -514,8 +514,8 @@ class Rapid:
             raise ClientDoesNotHaveUserAdminPermissionsException(
                     data["details"]
                 )
-        else:
-            raise Exception(data["details"])
+        
+        raise Exception("Failed to delete user")
     
     def list_subjects(self):
         """
@@ -536,8 +536,8 @@ class Rapid:
             raise ClientDoesNotHaveUserAdminPermissionsException(
                     data["details"]
                 )
-        else:
-            raise Exception(data["details"])
+        
+        raise Exception("Failed to list subjects")
     
     def list_layers(self):
         """
@@ -554,8 +554,8 @@ class Rapid:
         data = json.loads(response.content.decode("utf-8"))
         if response.status_code == 200:
             return data
-        else:
-            raise Exception(data["details"])
+        
+        raise Exception("Failed to list layers")
     
     def list_protected_domains(self):
         """
@@ -576,8 +576,8 @@ class Rapid:
             raise ClientDoesNotHaveUserAdminPermissionsException(
                     data["details"]
                 )
-        else:
-            raise Exception(data["details"])
+        
+        raise Exception("Failed to list protected domains")
     
     def delete_dataset(self, layer: str, domain: str, dataset: str):
         """
@@ -608,5 +608,5 @@ class Rapid:
             raise ClientDoesNotHaveDataAdminPermissionsException(
                     data["details"]
                 )
-        else:
-            raise Exception(data["details"])
+        
+        raise Exception("Failed to delete dataset")
