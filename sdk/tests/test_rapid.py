@@ -18,7 +18,7 @@ from rapid.exceptions import (
     InvalidPermissionsException,
     SubjectNotFoundException,
     SubjectAlreadyExistsException,
-    DatasetNotFoundException
+    DatasetNotFoundException,
     InvalidDomainNameException,
     DomainConflictException,
     ClientDoesNotHaveUserAdminPermissionsException,
