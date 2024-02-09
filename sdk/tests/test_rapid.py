@@ -520,7 +520,7 @@ class TestRapid:
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
     def test_delete_user_failure_ClientDoesNotHaveUserAdminPermissions(self, requests_mock: Mocker, rapid: Rapid):
-        mocked_response = {"data": "dummy"}
+        mocked_response = {"details": "User xxx-yyy-zzz does not have permissions that grant access to the endpoint scopes [<Action.USER_ADMIN: 'USER_ADMIN'>]"}
         requests_mock.delete(
             f"{RAPID_URL}/user", json=mocked_response, status_code=401
         )
@@ -537,7 +537,7 @@ class TestRapid:
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
     def test_list_subjects_failure_ClientDoesNotHaveUserAdminPermissions(self, requests_mock: Mocker, rapid: Rapid):
-        expected = {"response": "dummy"}
+        expected = {"details": "User xxx-yyy-zzz does not have permissions that grant access to the endpoint scopes [<Action.USER_ADMIN: 'USER_ADMIN'>]"}
         requests_mock.get(f"{RAPID_URL}/subjects", json=expected, status_code=401)
         with pytest.raises(ClientDoesNotHaveUserAdminPermissionsException):
             rapid.list_subjects()
@@ -552,7 +552,7 @@ class TestRapid:
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
     def test_list_protected_domains(self, requests_mock: Mocker, rapid: Rapid):
-        expected = {"response": "dummy"}
+        expected = {"details": "User xxx-yyy-zzz does not have permissions that grant access to the endpoint scopes [<Action.USER_ADMIN: 'USER_ADMIN'>]"}
         requests_mock.get(f"{RAPID_URL}/protected_domains", json=expected)
 
         res = rapid.list_protected_domains()
@@ -598,7 +598,7 @@ class TestRapid:
         layer = "raw"
         domain = "test_domain"
         dataset = "test_dataset"
-        mocked_response = {"response": "dummy"}
+        mocked_response = {'details': "User xxx-yyy-zzz does not have permissions that grant access to the endpoint scopes [<Action.DATA_ADMIN: 'DATA_ADMIN'>]"}
         requests_mock.delete(
             f"{RAPID_URL}/datasets/{layer}/{domain}/{dataset}", 
             json=mocked_response, 
