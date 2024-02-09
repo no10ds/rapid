@@ -27,6 +27,8 @@ from rapid.exceptions import (
     InvalidPermissionsException,
     SubjectAlreadyExistsException,
     SubjectNotFoundException,
+    InvalidDomainNameException,
+    DomainConflictException,
     ClientDoesNotHaveUserAdminPermissionsException,
     ClientDoesNotHaveDataAdminPermissionsException
 )
@@ -415,6 +417,32 @@ class Rapid:
         raise InvalidPermissionsException(
             "One or more of the provided permissions is invalid or duplicated"
         )
+
+    def create_protected_domain(self, name: str):
+        """
+        Creates a new protected domain.
+
+        Args:
+            name (str): The name of the protected domain to create.
+
+        Raises:
+            rapid.exceptions.InvalidDomainNameException: If the domain name is invalid.
+            rapid.exceptions.DomainConflictException: If the domain already exists.
+
+        """
+        url = f"{self.auth.url}/protected_domains/{name}"
+        response = requests.post(
+            url, headers=self.generate_headers(), timeout=TIMEOUT_PERIOD
+        )
+        data = json.loads(response.content.decode("utf-8"))
+        if response.status_code == 201:
+            return
+        elif response.status_code == 400:
+            raise InvalidDomainNameException(data["details"])
+        elif response.status_code == 409:
+            raise DomainConflictException(data["details"])
+
+        raise Exception("Failed to create protected domain")
 
     def create_user(self, user_name: str, user_email: str, user_permissions: list[str]):
         """

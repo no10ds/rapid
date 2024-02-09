@@ -85,6 +85,14 @@ class SubjectNotFoundException(Exception):
 class SubjectDeletionFailedException(Exception):
     pass
 
+
+class InvalidDomainNameException(Exception):
+    pass
+
+
+class DomainConflictException(Exception):
+    pass
+
 class ClientDoesNotHaveUserAdminPermissionsException(Exception):
     pass
 

@@ -18,7 +18,9 @@ from rapid.exceptions import (
     InvalidPermissionsException,
     SubjectNotFoundException,
     SubjectAlreadyExistsException,
-    DatasetNotFoundException,
+    DatasetNotFoundException
+    InvalidDomainNameException,
+    DomainConflictException,
     ClientDoesNotHaveUserAdminPermissionsException,
     ClientDoesNotHaveDataAdminPermissionsException
 )
@@ -395,7 +397,9 @@ class TestRapid:
             rapid.delete_client("xxx-yyy-zzz")
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
-    def update_subject_permissions_success(self, requests_mock: Mocker, rapid: Rapid):
+    def test_update_subject_permissions_success(
+        self, requests_mock: Mocker, rapid: Rapid
+    ):
         mocked_response = {"data": "dummy"}
         requests_mock.put(
             f"{RAPID_URL}/subject/permissions", json=mocked_response, status_code=200
@@ -404,7 +408,9 @@ class TestRapid:
         assert res == mocked_response
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
-    def update_subject_permissions_failure(self, requests_mock: Mocker, rapid: Rapid):
+    def test_update_subject_permissions_failure(
+        self, requests_mock: Mocker, rapid: Rapid
+    ):
         mocked_response = {"data": "dummy"}
         requests_mock.put(
             f"{RAPID_URL}/subject/permissions", json=mocked_response, status_code=400
@@ -412,6 +418,52 @@ class TestRapid:
         with pytest.raises(InvalidPermissionsException):
             rapid.update_subject_permissions("xxx-yyy-zzz", ["READ_ALL"])
 
+    @pytest.mark.usefixtures("requests_mock", "rapid")
+    def test_create_protected_domain_invalid_name_failure(
+        self, requests_mock: Mocker, rapid: Rapid
+    ):
+        mocked_response = {
+            "details": "The value set for domain [dummy] can only contain alphanumeric and underscore `_` characters and must start with an alphabetic character"
+        }
+        requests_mock.post(
+            f"{RAPID_URL}/protected_domains/dummy",
+            json=mocked_response,
+            status_code=400,
+        )
+        with pytest.raises(InvalidDomainNameException) as exc_info:
+            rapid.create_protected_domain("dummy")
+
+        assert (
+            str(exc_info.value)
+            == "The value set for domain [dummy] can only contain alphanumeric and underscore `_` characters and must start with an alphabetic character"
+        )
+
+    @pytest.mark.usefixtures("requests_mock", "rapid")
+    def test_create_protected_domain_conflict_failure(
+        self, requests_mock: Mocker, rapid: Rapid
+    ):
+        mocked_response = {"details": "The protected domain, [dummy] already exists"}
+        requests_mock.post(
+            f"{RAPID_URL}/protected_domains/dummy",
+            json=mocked_response,
+            status_code=409,
+        )
+        with pytest.raises(DomainConflictException) as exc_info:
+            rapid.create_protected_domain("dummy")
+
+        assert str(exc_info.value) == "The protected domain, [dummy] already exists"
+
+    @pytest.mark.usefixtures("requests_mock", "rapid")
+    def test_create_protected_domain_success(self, requests_mock: Mocker, rapid: Rapid):
+        mocked_response = {"data": "dummy"}
+        requests_mock.post(
+            f"{RAPID_URL}/protected_domains/dummy",
+            json=mocked_response,
+            status_code=201,
+        )
+        res = rapid.create_protected_domain("dummy")
+        assert res is None
+        
     @pytest.mark.usefixtures("requests_mock", "rapid")
     def test_create_user_success(self, requests_mock: Mocker, rapid: Rapid):
         mocked_response = {
