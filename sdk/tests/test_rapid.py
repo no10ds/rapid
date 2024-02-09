@@ -560,7 +560,7 @@ class TestRapid:
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
     def test_list_protected_domains_failure_ClientDoesNotHaveUserAdminPermissions(self, requests_mock: Mocker, rapid: Rapid):
-        expected = {"response": "dummy"}
+        expected = {"details": "User xxx-yyy-zzz does not have permissions that grant access to the endpoint scopes [<Action.USER_ADMIN: 'USER_ADMIN'>]"}
         requests_mock.get(f"{RAPID_URL}/protected_domains", json=expected, status_code=401)
         with pytest.raises(ClientDoesNotHaveUserAdminPermissionsException):
             rapid.list_protected_domains()
