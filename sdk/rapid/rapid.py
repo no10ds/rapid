@@ -27,6 +27,8 @@ from rapid.exceptions import (
     InvalidPermissionsException,
     SubjectAlreadyExistsException,
     SubjectNotFoundException,
+    ClientDoesNotHaveUserAdminPermissionsException,
+    ClientDoesNotHaveDataAdminPermissionsException
 )
 
 
@@ -448,7 +450,7 @@ class Rapid:
                     data["details"]
                 )
         elif response.status_code == 401:
-            raise Exception(# User doesnt have 'USER_ADMIN' permissions
+            raise ClientDoesNotHaveUserAdminPermissionsException(
                     data["details"]
                 )
         else:
@@ -476,10 +478,16 @@ class Rapid:
         data = json.loads(response.content.decode("utf-8"))
         if response.status_code == 200:
             return data
-
-        raise SubjectNotFoundException(
-            f"Failed to delete user with id: {user_id}, ensure it exists."
-        )
+        elif response.status_code == 400:
+            raise SubjectNotFoundException(
+                f"Failed to delete user with id: {user_id}, ensure it exists."
+            )
+        elif response.status_code == 401:
+            raise ClientDoesNotHaveUserAdminPermissionsException(
+                    data["details"]
+                )
+        else:
+            raise Exception(data["details"])
     
     def list_subjects(self):
         """
@@ -493,7 +501,15 @@ class Rapid:
             headers=self.generate_headers(),
             timeout=TIMEOUT_PERIOD,
         )
-        return json.loads(response.content.decode("utf-8"))
+        data = json.loads(response.content.decode("utf-8"))
+        if response.status_code == 200:
+            return data
+        elif response.status_code == 401:
+            raise ClientDoesNotHaveUserAdminPermissionsException(
+                    data["details"]
+                )
+        else:
+            raise Exception(data["details"])
     
     def list_layers(self):
         """
@@ -507,7 +523,11 @@ class Rapid:
             headers=self.generate_headers(),
             timeout=TIMEOUT_PERIOD,
         )
-        return json.loads(response.content.decode("utf-8"))
+        data = json.loads(response.content.decode("utf-8"))
+        if response.status_code == 200:
+            return data
+        else:
+            raise Exception(data["details"])
     
     def list_protected_domains(self):
         """
@@ -521,7 +541,15 @@ class Rapid:
             headers=self.generate_headers(),
             timeout=TIMEOUT_PERIOD,
         )
-        return json.loads(response.content.decode("utf-8"))
+        data = json.loads(response.content.decode("utf-8"))
+        if response.status_code == 200:
+            return data
+        elif response.status_code == 401:
+            raise ClientDoesNotHaveUserAdminPermissionsException(
+                    data["details"]
+                )
+        else:
+            raise Exception(data["details"])
     
     def delete_dataset(self, layer: str, domain: str, dataset: str):
         """
@@ -549,10 +577,8 @@ class Rapid:
                     f"Could not find dataset, {layer}/{domain}/{dataset} to delete", data
                 )
         elif response.status_code == 401:
-            raise Exception(# User doesnt have 'DATA_ADMIN' permissions
+            raise ClientDoesNotHaveDataAdminPermissionsException(
                     data["details"]
                 )
         else:
             raise Exception(data["details"])
-        # There is an issue with function it returns 202 when dataset doesn't exists, but layer is correct
-        

@@ -84,3 +84,9 @@ class SubjectNotFoundException(Exception):
 
 class SubjectDeletionFailedException(Exception):
     pass
+
+class ClientDoesNotHaveUserAdminPermissionsException(Exception):
+    pass
+
+class ClientDoesNotHaveDataAdminPermissionsException(Exception):
+    pass

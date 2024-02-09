@@ -18,7 +18,9 @@ from rapid.exceptions import (
     InvalidPermissionsException,
     SubjectNotFoundException,
     SubjectAlreadyExistsException,
-    DatasetNotFoundException
+    DatasetNotFoundException,
+    ClientDoesNotHaveUserAdminPermissionsException,
+    ClientDoesNotHaveDataAdminPermissionsException
 )
 from .conftest import RAPID_URL, RAPID_TOKEN
 
@@ -437,6 +439,13 @@ class TestRapid:
             rapid.create_user("user", "user@user.com", ["READ_ALL"])
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
+    def test_create_user_failure_ClientDoesNotHaveUserAdminPermissions(self, requests_mock: Mocker, rapid: Rapid):
+        mocked_response = {"details": "data"}
+        requests_mock.post(f"{RAPID_URL}/user", json=mocked_response, status_code=401)
+        with pytest.raises(ClientDoesNotHaveUserAdminPermissionsException):
+            rapid.create_user("user", "user@user.com", ["READ_ALL"])
+
+    @pytest.mark.usefixtures("requests_mock", "rapid")
     def test_delete_user_success(self, requests_mock: Mocker, rapid: Rapid):
         mocked_response = {
             "username": "user",
@@ -449,7 +458,7 @@ class TestRapid:
         assert res == mocked_response
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
-    def test_delete_user_failure(self, requests_mock: Mocker, rapid: Rapid):
+    def test_delete_user_failure_SubjectNotFound(self, requests_mock: Mocker, rapid: Rapid):
         mocked_response = {"data": "dummy"}
         requests_mock.delete(
             f"{RAPID_URL}/user", json=mocked_response, status_code=400
@@ -458,12 +467,28 @@ class TestRapid:
             rapid.delete_user("user", "xxx-yyy-zzz")
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
-    def test_list_subjects(self, requests_mock: Mocker, rapid: Rapid):
+    def test_delete_user_failure_ClientDoesNotHaveUserAdminPermissions(self, requests_mock: Mocker, rapid: Rapid):
+        mocked_response = {"data": "dummy"}
+        requests_mock.delete(
+            f"{RAPID_URL}/user", json=mocked_response, status_code=401
+        )
+        with pytest.raises(ClientDoesNotHaveUserAdminPermissionsException):
+            rapid.delete_user("user", "xxx-yyy-zzz")
+
+    @pytest.mark.usefixtures("requests_mock", "rapid")
+    def test_list_subjects_success(self, requests_mock: Mocker, rapid: Rapid):
         expected = {"response": "dummy"}
         requests_mock.get(f"{RAPID_URL}/subjects", json=expected)
 
         res = rapid.list_subjects()
         assert res == expected
+
+    @pytest.mark.usefixtures("requests_mock", "rapid")
+    def test_list_subjects_failure_ClientDoesNotHaveUserAdminPermissions(self, requests_mock: Mocker, rapid: Rapid):
+        expected = {"response": "dummy"}
+        requests_mock.get(f"{RAPID_URL}/subjects", json=expected, status_code=401)
+        with pytest.raises(ClientDoesNotHaveUserAdminPermissionsException):
+            rapid.list_subjects()
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
     def test_list_layers(self, requests_mock: Mocker, rapid: Rapid):
@@ -482,6 +507,13 @@ class TestRapid:
         assert res == expected
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
+    def test_list_protected_domains_failure_ClientDoesNotHaveUserAdminPermissions(self, requests_mock: Mocker, rapid: Rapid):
+        expected = {"response": "dummy"}
+        requests_mock.get(f"{RAPID_URL}/protected_domains", json=expected, status_code=401)
+        with pytest.raises(ClientDoesNotHaveUserAdminPermissionsException):
+            rapid.list_protected_domains()
+
+    @pytest.mark.usefixtures("requests_mock", "rapid")
     def test_delete_dataset_success(self, requests_mock: Mocker, rapid: Rapid):
         layer = "raw"
         domain = "test_domain"
@@ -496,7 +528,7 @@ class TestRapid:
         assert res == mocked_response
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
-    def test_delete_dataset_failure(self, requests_mock: Mocker, rapid: Rapid):
+    def test_delete_dataset_failure_DatasetNotFound(self, requests_mock: Mocker, rapid: Rapid):
         layer = "raw"
         domain = "test_domain"
         dataset = "test_dataset"
@@ -507,4 +539,18 @@ class TestRapid:
             status_code=400
         )
         with pytest.raises(DatasetNotFoundException):
+            rapid.delete_dataset(layer, domain, dataset)
+
+    @pytest.mark.usefixtures("requests_mock", "rapid")
+    def test_delete_dataset_failure_ClientDoesNotHaveDataAdminPermissions(self, requests_mock: Mocker, rapid: Rapid):
+        layer = "raw"
+        domain = "test_domain"
+        dataset = "test_dataset"
+        mocked_response = {"response": "dummy"}
+        requests_mock.delete(
+            f"{RAPID_URL}/datasets/{layer}/{domain}/{dataset}", 
+            json=mocked_response, 
+            status_code=401
+        )
+        with pytest.raises(ClientDoesNotHaveDataAdminPermissionsException):
             rapid.delete_dataset(layer, domain, dataset)
