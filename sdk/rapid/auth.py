@@ -59,7 +59,7 @@ class RapidAuth:
             self.url + "/oauth2/token",
             auth=self.credentials_secret(),
             headers=self.headers,
-            json=self.payload,
+            data=self.payload,
             timeout=TIMEOUT_PERIOD,
         )
         return response
