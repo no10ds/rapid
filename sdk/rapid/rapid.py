@@ -3,7 +3,7 @@ import time
 import requests
 
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
 import pandas as pd
 
@@ -336,7 +336,7 @@ class Rapid:
             return data
         raise SchemaUpdateFailedException("Could not update schema", data)
 
-    def create_client(self, client_name: str, client_permissions: list[str]):
+    def create_client(self, client_name: str, client_permissions: List[str]):
         """
         Creates a new client on the API with the specified permissions.
 
@@ -390,7 +390,7 @@ class Rapid:
             f"Failed to delete client with id: {client_id}, ensure it exists."
         )
 
-    def update_subject_permissions(self, subject_id: str, permissions: list[str]):
+    def update_subject_permissions(self, subject_id: str, permissions: List[str]):
         """
         Updates the permissions of a subject on the API.
 
