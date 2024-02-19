@@ -8,6 +8,11 @@ output "ecs_task_execution_role_arn" {
   description = "The ECS task execution role ARN"
 }
 
+output "ecs_task_execution_role_name" {
+  value       = aws_iam_role.ecsTaskExecutionRole.name
+  description = "The ECS task execution role name"
+}
+
 output "load_balancer_dns" {
   value       = aws_alb.application_load_balancer.dns_name
   description = "The DNS name of the load balancer"
@@ -49,4 +54,9 @@ output "service_table_arn" {
 
 output "application_version" {
   value = var.application_version
+}
+
+output "aws_dynamodb_table_service_table_name" {
+  value = aws_dynamodb_table.service_table.name
+
 }
