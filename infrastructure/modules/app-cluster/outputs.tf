@@ -57,6 +57,6 @@ output "application_version" {
 }
 
 output "aws_dynamodb_table_service_table_name" {
-  value = aws_dynamodb_table.service_table.name
-
+  value       = aws_dynamodb_table.service_table.name
+  description = "Name of the DynammoDB table that contains schema data"
 }
