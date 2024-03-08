@@ -98,6 +98,8 @@ def extract_athena_types(df: DataFrame) -> dict:
     types = {}
     for column in df.columns:
         dtype = str(infer_dtype(df[column], skipna=True))
+        if dtype == 'empty':
+            continue
         try:
             types[column] = PANDAS_TO_ATHENA_CONVERTER[dtype].value
         except KeyError:
