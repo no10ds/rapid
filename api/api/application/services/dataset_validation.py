@@ -30,6 +30,7 @@ def transform_and_validate(schema: Schema, data: pd.DataFrame) -> pd.DataFrame:
         .pipe(clean_column_headers)
         .pipe(dataset_has_correct_columns, schema)
         .pipe(convert_date_columns, schema)
+        .pipe(check_checklist_values, schema)
         .pipe(dataset_has_acceptable_null_values, schema)
         .pipe(dataset_has_correct_data_types, schema)
         .pipe(dataset_has_no_illegal_characters_in_partition_columns, schema)
@@ -97,6 +98,22 @@ def convert_date_columns(
 
     return data_frame, error_list
 
+def check_checklist_values(
+    data_frame: pd.DataFrame, schema: Schema
+) -> Tuple[pd.DataFrame, list[str]]:
+    error_list = []
+    for column in schema.columns:
+        if column.checklist is not None:
+            series = data_frame[column.name]
+            series = series.dropna()
+            
+            not_allowed_values = series.loc[~series.isin(column.checklist)].unique()
+            if len(not_allowed_values) > 0:
+                error_list.append(
+                    f"Column [{column.name}] values [{not_allowed_values}] does not match specified checklist values [{column.checklist}]"
+                )
+
+    return data_frame, error_list
 
 def dataset_has_correct_data_types(
     data_frame: pd.DataFrame, schema: Schema

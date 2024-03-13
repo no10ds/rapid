@@ -7,6 +7,7 @@ import pytest
 from api.application.services.dataset_validation import (
     build_validated_dataframe,
     convert_date_columns,
+    check_checklist_values,
     remove_empty_rows,
     clean_column_headers,
     dataset_has_correct_columns,
@@ -423,6 +424,37 @@ class TestDatasetValidation:
             match=re.escape("Dataset has no rows, it cannot be processed"),
         ):
             dataset_has_rows(df)
+
+    def test_return_error_message_when_checklist_do_not_match(self):
+        df = pd.DataFrame(
+            {"col1": ["a", "b"], "col2": [1, None]}
+        )
+        schema = Schema(
+            metadata=self.schema_metadata,
+            columns=[
+                Column(
+                    name="col1",
+                    partition_index=None,
+                    data_type="string",
+                    allow_null=True,
+                    checklist=["a","c"]
+                ),
+                Column(
+                    name="col2",
+                    partition_index=None,
+                    data_type="int",
+                    allow_null=False,
+                    checklist=[2,3]
+                ),
+            ],
+        )
+
+        
+        data_frame, error_list = check_checklist_values(df, schema)
+        assert error_list == [
+            "Column [col1] values [['b']] does not match specified checklist values [['a', 'c']]",
+            "Column [col2] values [[1.]] does not match specified checklist values [[2, 3]]",
+        ]
 
     def test_return_error_message_when_not_accepted_null_values(self):
         df = pd.DataFrame(
