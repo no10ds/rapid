@@ -17,7 +17,7 @@ class Column(BaseModel):
     data_type: str
     allow_null: bool
     format: Optional[str] = None
-    checklist: Optional[list] = None
+    dropdown: Optional[list] = None
 
     def is_of_data_type(self, d_type: StrEnum) -> bool:
         return self.data_type in list(d_type)
