@@ -86,7 +86,7 @@ def dataset_has_acceptable_duplicated_values(
 ) -> Tuple[pd.DataFrame, list[str]]:
     error_list = []
     for column in schema.columns:
-        if not column.allow_duplicates and data_frame[column.name].duplicated().values.any():
+        if not column.allow_duplicates and data_frame[column.name].dropna().duplicated().values.any():
             error_list.append(f"Column [{column.name}] does not allow duplicated values")
 
     return data_frame, error_list

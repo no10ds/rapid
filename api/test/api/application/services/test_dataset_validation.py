@@ -495,7 +495,7 @@ class TestDatasetValidation:
 
     def test_return_error_message_when_not_accepted_duplicated_values(self):
         df = pd.DataFrame(
-            {"col1": ["a", "b", "a"], "col2": ["d", "e", "d"], "col3": [1, 5, 1]}
+            {"col1": ["a", "b", "a"], "col2": ["d", None, None], "col3": [1, 5, 1]}
         )
         schema = Schema(
             metadata=self.schema_metadata,
@@ -512,7 +512,7 @@ class TestDatasetValidation:
                     partition_index=None,
                     data_type="string",
                     allow_null=False,
-                    allow_duplicates=True
+                    allow_duplicates=False
                 ),
                 Column(
                     name="col3",
