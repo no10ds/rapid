@@ -2,14 +2,14 @@ The rAPId API serves to make data storage and retrieval as easy and consistent a
 
 The API functionality includes:
 
-- [Uploading a schema (i.e. creating a new dataset definition)](/api/routes/schema/)
+- [Uploading a schema (i.e. creating a new dataset definition)](./routes/schema.md)
   - Also creating a new version of an existing schema
-- [Uploading data to any version of a dataset](/api/routes/dataset/#upload)
-- [Listing available data](/api/routes/dataset/#list)
-- [Querying data from any version of a dataset](/api/routes/dataset/#query)
-- [Deleting data](/api/routes/dataset/#delete-data-file)
-- Creating [users](/api/routes/user/#create) and [clients](/api/routes/client/#create)
-- [Managing user and client permissions](/api/routes/subject/#modify-subject-permissions)
+- [Uploading data to any version of a dataset](./routes/dataset.md/#upload)
+- [Listing available data](./routes/dataset.md/#list)
+- [Querying data from any version of a dataset](./routes/dataset.md/#query)
+- [Deleting data](./routes/dataset.md/#delete-data-file)
+- Creating [users](./routes/user.md/#create) and [clients](./routes/client.md/#create)
+- [Managing user and client permissions](./routes/subject.md/#modify-subject-permissions)
 
 ## Application Usage Overview
 
