@@ -17,6 +17,7 @@ class Column(BaseModel):
     data_type: str
     allow_null: bool
     format: Optional[str] = None
+    allow_duplicates: Optional[bool] = True
     dropdown: Optional[list] = None
 
     def is_of_data_type(self, d_type: StrEnum) -> bool:

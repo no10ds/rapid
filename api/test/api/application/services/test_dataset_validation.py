@@ -12,6 +12,7 @@ from api.application.services.dataset_validation import (
     clean_column_headers,
     dataset_has_correct_columns,
     dataset_has_acceptable_null_values,
+    dataset_has_acceptable_duplicated_values,
     dataset_has_correct_data_types,
     dataset_has_no_illegal_characters_in_partition_columns,
     dataset_has_rows,
@@ -491,6 +492,41 @@ class TestDatasetValidation:
                 "Column [col2] does not allow null values",
                 "Column [col3] does not allow null values",
             ]
+
+    def test_return_error_message_when_not_accepted_duplicated_values(self):
+        df = pd.DataFrame(
+            {"col1": ["a", "b", "a"], "col2": ["d", "e", "d"], "col3": [1, 5, 1]}
+        )
+        schema = Schema(
+            metadata=self.schema_metadata,
+            columns=[
+                Column(
+                    name="col1",
+                    partition_index=None,
+                    data_type="string",
+                    allow_null=True,
+                    allow_duplicates=False
+                ),
+                Column(
+                    name="col2",
+                    partition_index=None,
+                    data_type="string",
+                    allow_null=False,
+                    allow_duplicates=True
+                ),
+                Column(
+                    name="col3",
+                    partition_index=None,
+                    data_type="int",
+                    allow_null=False,
+                ),
+            ],
+        )
+
+        data_frame, error_list = dataset_has_acceptable_duplicated_values(df, schema)
+        assert error_list == [
+            "Column [col1] does not allow duplicated values"
+        ]
 
     def test_return_error_message_when_not_correct_datatypes(self):
         df = pd.DataFrame(
