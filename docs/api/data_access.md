@@ -23,5 +23,5 @@ not the reverse.
 Protected datasets as isolated from the hierarchy and are domain specific. This means that you have to be granted access
 to specific protected domains to gain access.
 
-These domains must first be [created](/api/routes/protected_domain/#create) and then assigned to
-a [client](/api/routes/client/#create) or [user](/api/routes/user/#create) for usage.
+These domains must first be [created](./routes/protected_domain.md/#create) and then assigned to
+a [client](./routes/client.md/#create) or [user](./routes/user.md/#create) for usage.
