@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import os
 
 TEST_SDK_VERSION = os.getenv("TEST_SDK_VERSION")
-version = "0.1.7"
+version = "0.1.8"
 setup(
     name="rapid-sdk",
     version=version if TEST_SDK_VERSION is None else f"{version}.{TEST_SDK_VERSION}",
