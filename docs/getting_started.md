@@ -2,8 +2,8 @@
 
 We provide two options for deploying rAPId within an AWS environment:
 
-1. If you have existing infrastructure (e.g a VPC) that you would like to deploy rAPId within, then you can use the [rAPId module](/infrastructure/deployment/existing/), passing in specific variables relating to your AWS account.
-2. If you do not have any existing infrastructure, you can instead deploy the [entire rAPId stack](/infrastructure/deployment/full_stack/) creating all the relevant infrastructure.
+1. If you have existing infrastructure (e.g a VPC) that you would like to deploy rAPId within, then you can use the [rAPId module](./infrastructure/deployment.md/#rapid-module), passing in specific variables relating to your AWS account.
+2. If you do not have any existing infrastructure, you can instead deploy the [entire rAPId stack](./infrastructure/deployment.md/#full_stack) creating all the relevant infrastructure.
 
 # Usage
 
@@ -15,4 +15,4 @@ Navigate to your AWS account and under secrets manager find the `<rAPId-prefix>_
 
 # Developing
 
-Alternatively you can run rAPId locally for development. For more details, please see the [contributing section](/contributing/).
+Alternatively you can run rAPId locally for development. For more details, please see the [contributing section](./contributing.md).

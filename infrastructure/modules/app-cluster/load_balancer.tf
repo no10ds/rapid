@@ -68,43 +68,61 @@ resource "aws_security_group" "load_balancer_security_group_http" {
   # checkov:skip=CKV_AWS_260: Limits by prefix list ID's
   vpc_id      = var.vpc_id
   description = "ALB Security Group"
-  ingress {
-    from_port       = 80
-    to_port         = 80
-    protocol        = "tcp"
-    prefix_list_ids = [data.aws_ec2_managed_prefix_list.cloudwatch.id]
-    description     = "Allow HTTP ingress"
-  }
-  egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-    description      = "Allow all egress"
-  }
-  tags = var.tags
+  tags        = var.tags
 
   lifecycle {
     create_before_destroy = true
   }
 }
+
+resource "aws_security_group_rule" "load_balancer_security_group_rule_ingress_http" {
+  type              = "ingress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  prefix_list_ids   = [data.aws_ec2_managed_prefix_list.cloudwatch.id]
+  security_group_id = aws_security_group.load_balancer_security_group_http.id
+}
+
+resource "aws_security_group_rule" "load_balancer_security_group_rule_egress_http" {
+  type              = "egress"
+  from_port         = 0
+  to_port           = 65535
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  ipv6_cidr_blocks  = ["::/0"]
+  security_group_id = aws_security_group.load_balancer_security_group_http.id
+}
+
+
 resource "aws_security_group" "load_balancer_security_group_https" {
   # checkov:skip=CKV_AWS_260: Limits by prefix list ID's
   vpc_id      = var.vpc_id
   description = "ALB Security Group"
-  ingress {
-    from_port       = 443
-    to_port         = 443
-    protocol        = "tcp"
-    prefix_list_ids = [data.aws_ec2_managed_prefix_list.cloudwatch.id]
-    description     = "Allow HTTPS ingress"
-  }
-  tags = var.tags
+  tags        = var.tags
 
   lifecycle {
     create_before_destroy = true
   }
+}
+
+resource "aws_security_group_rule" "load_balancer_security_group_rule_ingress_https" {
+  type              = "ingress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  prefix_list_ids   = [data.aws_ec2_managed_prefix_list.cloudwatch.id]
+  security_group_id = aws_security_group.load_balancer_security_group_https.id
+}
+
+resource "aws_security_group_rule" "load_balancer_security_group_rule_egress_https" {
+  type              = "egress"
+  from_port         = 0
+  to_port           = 65535
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  ipv6_cidr_blocks  = ["::/0"]
+  security_group_id = aws_security_group.load_balancer_security_group_https.id
 }
 
 resource "aws_lb_target_group" "target_group" {

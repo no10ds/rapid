@@ -35,7 +35,7 @@ Provide the required inputs as described:
 
 - `aws_account` - AWS account where the application will be hosted
 - `aws_region` - AWS region where the application will be hosted
-- `domain_name` - Application hostname ([can be a domain or a subdomain](/infrastructure/domains_subdomains/))
+- `domain_name` - Application hostname ([can be a domain or a subdomain](./domains_subdomains.md))
 - `ip_whitelist` - A list of IP addresses that are allowed to access the service.
 - `public_subnet_ids_list` - List of public subnets for the load balancer
 - `private_subnet_ids_list` - List of private subnets for the ECS service
@@ -48,7 +48,7 @@ There are also these optional inputs:
 - `application_version` - The service's image version
 - `ui_version` - The static UI version
 - `hosted_zone_id` - If provided, will add an alias for the application load balancer to use the provided domain using that HZ. Otherwise, it will create a HZ and the alias
-- `certificate_validation_arn` - If provided, will link the certificate to the load-balancer https-listener. Otherwise, will create a new certificate and link it. ([managing certificates](/infrastructure/certificates/))
+- `certificate_validation_arn` - If provided, will link the certificate to the load-balancer https-listener. Otherwise, will create a new certificate and link it. ([managing certificates](./certificates.md))
 - `app-replica-count-desired` - if provided, will set the number of desired running instances for a service. Otherwise,
   it will default the count to 1
 - `app-replica-count-max` - if provided, will set the number of maximum running instances for a service. Otherwise, it
@@ -197,14 +197,14 @@ Required:
 - `application_version` - service's docker
   image version
 - `ui_version` - Static UI version
-- `domain_name` - application hostname ([can be a domain or a subdomain](/infrastructure/domains_subdomains/))
+- `domain_name` - application hostname ([can be a domain or a subdomain](./domains_subdomains.md))
 - `aws_account` - aws account id where the application will be hosted
 - `aws_region` - aws region where the application will be hosted
 - `iam_users` - IAM users to be created automatically, with roles to be attached to them
 - `manual_users` - IAM users that has been already created manually, with roles to be attached. (Can be left empty)
 - `set_iam_user_groups` - User groups that need to be present on each user. (i.e. if the value is set to admin, then all
   the users will require the admin role)
-- `support_emails_for_cloudwatch_alerts` - list of engineer emails that should receive alert notifications [more info](/infrastructure/alerting_monitoring/)
+- `support_emails_for_cloudwatch_alerts` - list of engineer emails that should receive alert notifications [more info](./alerting_monitoring.md)
 - `ip_whitelist` - ip range to add to application whitelist. The expected value is a list of strings.
 
 Optional:
@@ -213,7 +213,7 @@ Optional:
 - `hosted_zone_id` - if provided, will add an alias for the application load balancer to use the provided domain using
   that HZ. Otherwise, it will create a HZ and the alias
 - `certificate_validation_arn` - if provided, will link the certificate to the load-balancer https-listener. Otherwise,
-  will create a new certificate and link it. [managing certificates](/infrastructure/certificates/)
+  will create a new certificate and link it. [managing certificates](./certificates.md)
 - `tags` - if provided, it will tag the resources with the defined value. Otherwise, it will default to "Resource = '
   data-f1-rapid'"
 

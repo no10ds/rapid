@@ -35,7 +35,7 @@ A schema is defined with the following structure:
 The sensitivity level of a dataset can be described by one of three values: `PUBLIC`, `PRIVATE` and `PROTECTED`.
 These determine the access level that different clients will have to the data depending on their permissions.
 
-Notes if you wish to use the sensitivity level `PROTECTED` then you must first create a Protected Domain for your Dataset. See the [data access docs](data_access.md)
+Notes if you wish to use the sensitivity level `PROTECTED` then you must first create a Protected Domain for your Dataset. See the [data access docs](./data_access.md)
 
 ### Description
 
