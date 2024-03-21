@@ -1,10 +1,16 @@
 # API Changelog
 
-# Changelog
+## v7.10.0 - _2024-03-21_
+
+### Fixes
+
+- Issues with the documentation where links were not re-directing successfully.
+
+### Features
+
+- Extra infrastructure output blocks
 
 ## v7.0.9 - _2024-02-06_
-
-See [v7.0.9] changes
 
 ### Features
 
@@ -112,15 +118,3 @@ See [v7.0.9] changes
 ### Migration
 
 - See the [migration doc](migration.md) for details on how to migrate to v7 from v6.
-
-[Unreleased changes]: https://github.com/no10ds/rapid/compare/v7.0.9...HEAD
-[v7.0.9]: https://github.com/no10ds/rapid/compare/v7.0.8...v7.0.9
-[v7.0.8 / v0.1.6 (sdk)]: https://github.com/no10ds/rapid/v7.0.7...v7.0.8
-[v7.0.7 / v0.1.5 (sdk)]: https://github.com/no10ds/rapid/v7.0.6...v7.0.7
-[v7.0.6 / v0.1.4 (sdk)]: https://github.com/no10ds/rapid/v7.0.5...v7.0.6
-[v7.0.5 / v0.1.3 (sdk)]: https://github.com/no10ds/rapid/v7.0.4...v7.0.5
-[v7.0.4 / v0.1.2 (sdk)]: https://github.com/no10ds/rapid/v7.0.3...v7.0.4
-[v7.0.3 / v0.1.2 (sdk)]: https://github.com/no10ds/rapid/v7.0.2...v7.0.3
-[v7.0.2 / v0.1.2 (sdk)]: https://github.com/no10ds/rapid/v7.0.1...v7.0.2
-[v7.0.1 / v0.1.2 (sdk)]: https://github.com/no10ds/rapid/v7.0.0...v7.0.1
-[v7.0.0 / v0.1.1 (sdk)]: https://github.com/no10ds/rapid/v7.0.0

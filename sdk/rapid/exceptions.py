@@ -92,3 +92,9 @@ class InvalidDomainNameException(Exception):
 
 class DomainConflictException(Exception):
     pass
+
+class ClientDoesNotHaveUserAdminPermissionsException(Exception):
+    pass
+
+class ClientDoesNotHaveDataAdminPermissionsException(Exception):
+    pass
