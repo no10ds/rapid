@@ -97,6 +97,8 @@ def is_date_type(type: str) -> bool:
 def extract_athena_types(df: DataFrame) -> dict:
     types = {}
     for column in df.columns:
+        if df[column].dropna().size == 0:
+            continue
         dtype = str(infer_dtype(df[column], skipna=True))
         try:
             types[column] = PANDAS_TO_ATHENA_CONVERTER[dtype].value
