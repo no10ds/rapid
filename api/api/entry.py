@@ -20,7 +20,11 @@ from api.common.config.auth import IDENTITY_PROVIDER_BASE_URL, Action
 from api.common.config.docs import custom_openapi_docs_generator, COMMIT_SHA, VERSION
 from api.common.config.constants import BASE_API_PATH
 from api.common.logger import AppLogger, init_logger
-from api.common.custom_exceptions import UserError, AWSServiceError
+from api.common.custom_exceptions import (
+    UserError,
+    AWSServiceError,
+    CredentialsUnavailableError,
+)
 from api.common.utilities import strtobool
 from api.controller.auth import auth_router
 from api.controller.client import client_router
@@ -75,7 +79,10 @@ async def startup_event():
 @app.middleware("http")
 async def request_middleware(request: Request, call_next):
     query_params = request.url.include_query_params()
-    subject_id = get_subject_id(request)
+    try:
+        subject_id = get_subject_id(request)
+    except CredentialsUnavailableError:
+        subject_id = "Not an authenticated user"
     AppLogger.info(
         f"    Request started: {request.method} {query_params} by subject: {subject_id}"
     )

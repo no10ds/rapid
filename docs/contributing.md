@@ -58,14 +58,25 @@ You can run the UI locally for development either against an already running rAP
 1. Install `npm`, we recommend using [nvm](https://github.com/nvm-sh/nvm)
 2. Install the all the required packages `make ui-setup`
 
-To connect the UI with your rAPId instance you will need to set the following environment variables:
+To connect the UI with your rAPId instance you will need to setup two environment variable files, both within `./ui`:
+
+### 1. .env.local
+
+The UI uses a proxy system that allows API requests to be made to the rAPId server without them getting blocked CORS issues. You can set the `NEXT_PUBLIC_API_URL` to the api suffix of the rAPId instance `/api` and set `NEXT_PUBLIC_API_URL_PROXY` to be the full domain name, such as `https://myrapid.co.uk`.
 
 ```
 NEXT_PUBLIC_API_URL=
 NEXT_PUBLIC_API_URL_PROXY=
 ```
 
-The UI uses a proxy system that allows API requests to be made to the rAPId server without them getting blocked CORS issues. You can set the `NEXT_PUBLIC_API_URL` to the api suffix of the rAPId instance `/api` and set `NEXT_PUBLIC_API_URL_PROXY` to be the full domain name, such as `https://myrapid.co.uk`.
+### 2. .env.development
+
+This file allows you to set the `client_id` and `client_secret` that your locally running UI can use to authenticate to the API instance that it is running against. They are in this separate file so that they do not get packaged at build time and with the app and stay secret.
+
+```
+UI_CLIENT_ID=
+UI_CLIENT_SECRET=
+```
 
 Running `make ui-run-dev` will then launch the UI in development mode with hot reloading.
 
@@ -174,11 +185,11 @@ Performing a release involves tagging the repository with a new version number s
 
 1. Decide on the new version number for the API and the UI and/or the SDK following the [semantic versioning approach](https://semver.org/).
 2. Update and commit the Changelog (you can follow
-   the [template](https://github.com/no10ds/rapid/blob/main/changelog_release_template/md)). You'll need to separate SDK and API changes into their respective changelogs, under docs/changelog. 
+   the [template](https://github.com/no10ds/rapid/blob/main/changelog_release_template/md)). You'll need to separate SDK and API changes into their respective changelogs, under docs/changelog.
    1. Bundle API, UI and terraform changes as part of the API changelog.
    2. Insert SDK changes into the SDK changelog.
 3. Run `make release commit=<commit_hash> type=<sdk|api> version=vX.X.X`
 
-> Ensure the version number follows the format `vX.X.X` with full-stops in the same places for both API and SDK changes. 
+> Ensure the version number follows the format `vX.X.X` with full-stops in the same places for both API and SDK changes.
 
 Now the release pipeline will run automatically, build all images and packages off that version of the code and tag it within GitHub.
