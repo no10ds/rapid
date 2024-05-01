@@ -5,7 +5,7 @@ from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
 from fastapi.security import OAuth2
 from fastapi.security import SecurityScopes
 from fastapi.security.utils import get_authorization_scheme_param
-from jwt.exceptions import InvalidTokenError
+from jwt.exceptions import InvalidTokenError, DecodeError
 from starlette.requests import Request
 from starlette.status import HTTP_401_UNAUTHORIZED
 
@@ -23,7 +23,7 @@ from api.common.config.auth import (
 from api.common.config.layers import Layer
 from api.common.custom_exceptions import (
     AuthorisationError,
-    UserCredentialsUnavailableError,
+    CredentialsUnavailableError,
     NotAuthorisedToViewPageError,
     AuthenticationError,
 )
@@ -157,7 +157,10 @@ def get_token(request: Request) -> Optional[str]:
 
 def get_subject_id(request: Request):
     token = get_token(request)
-    parsed_token = parse_token(token)
+    try:
+        parsed_token = parse_token(token)
+    except DecodeError:
+        raise CredentialsUnavailableError("Could not fetch user credentials")
     return parsed_token.subject if token else None
 
 
@@ -169,7 +172,7 @@ def check_credentials_availability(
     if not have_credentials(client_token, user_token):
         if browser_request:
             AppLogger.info("Cannot retrieve user credentials if no user token provided")
-            raise UserCredentialsUnavailableError()
+            raise CredentialsUnavailableError()
         else:
             AppLogger.info(
                 "Cannot retrieve client credentials if no client token provided"

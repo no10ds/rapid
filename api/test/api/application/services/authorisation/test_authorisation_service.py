@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 from fastapi import HTTPException
 from fastapi.security import SecurityScopes
-from jwt.exceptions import InvalidTokenError
+from jwt.exceptions import InvalidTokenError, DecodeError
 import pytest
 
 from api.application.services.authorisation.authorisation_service import (
@@ -25,7 +25,7 @@ from api.application.services.permissions_service import PermissionsService
 from api.common.config.auth import Action, RAPID_ACCESS_TOKEN
 from api.common.custom_exceptions import (
     AuthorisationError,
-    UserCredentialsUnavailableError,
+    CredentialsUnavailableError,
     NotAuthorisedToViewPageError,
     AuthenticationError,
 )
@@ -45,8 +45,8 @@ class TestCheckCredentialsAvailability:
             check_credentials_availability(
                 browser_request=True, user_token="user-token", client_token=None
             )
-        except UserCredentialsUnavailableError:
-            pytest.fail("Unexpected UserCredentialsUnavailableError raised")
+        except CredentialsUnavailableError:
+            pytest.fail("Unexpected CredentialsUnavailableError raised")
         except HTTPException:
             pytest.fail("Unexpected HTTPException raised")
 
@@ -55,15 +55,15 @@ class TestCheckCredentialsAvailability:
             check_credentials_availability(
                 browser_request=True, user_token=None, client_token="client-token"
             )
-        except UserCredentialsUnavailableError:
-            pytest.fail("Unexpected UserCredentialsUnavailableError raised")
+        except CredentialsUnavailableError:
+            pytest.fail("Unexpected CredentialsUnavailableError raised")
         except HTTPException:
             pytest.fail("Unexpected HTTPException raised")
 
     def test_raises_user_credentials_error_when_is_browser_request_with_no_credentials(
         self,
     ):
-        with pytest.raises(UserCredentialsUnavailableError):
+        with pytest.raises(CredentialsUnavailableError):
             check_credentials_availability(
                 browser_request=True, user_token=None, client_token=None
             )
@@ -195,15 +195,13 @@ class TestGetToken:
         assert res == expected
 
 
+@pytest.mark.focus
 class TestGetSubject:
     @patch("api.application.services.authorisation.authorisation_service.get_token")
     @patch("api.application.services.authorisation.authorisation_service.parse_token")
     def test_get_subject_id(
         self, mock_parse_token: MagicMock, mock_get_token: MagicMock
     ):
-        @dataclass
-        class MockToken:
-            subject: str
 
         request = MagicMock()
         expected_user = "abc-123"
@@ -217,6 +215,24 @@ class TestGetSubject:
         mock_get_token.assert_called_once_with(request)
         mock_parse_token.assert_called_once_with(expected_token)
         assert res == expected_user
+
+    @patch("api.application.services.authorisation.authorisation_service.get_token")
+    @patch("api.application.services.authorisation.authorisation_service.parse_token")
+    def test_get_subject_id_fails(
+        self, mock_parse_token: MagicMock, mock_get_token: MagicMock
+    ):
+
+        request = MagicMock()
+        expected_token = "token"
+
+        mock_get_token.return_value = expected_token
+        mock_parse_token.side_effect = DecodeError()
+
+        with pytest.raises(CredentialsUnavailableError):
+            get_subject_id(request)
+
+        mock_get_token.assert_called_once_with(request)
+        mock_parse_token.assert_called_once_with(expected_token)
 
 
 class TestCheckPermissions:

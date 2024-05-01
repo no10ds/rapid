@@ -70,7 +70,7 @@ class InvalidFileUploadError(UserError):
 # Specifically handled in global handler ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-class UserCredentialsUnavailableError(Exception):
+class CredentialsUnavailableError(Exception):
     pass
 
 
