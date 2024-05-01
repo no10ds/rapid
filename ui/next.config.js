@@ -20,6 +20,10 @@ const nextConfig = {
           {
             source: process.env.NEXT_PUBLIC_API_URL + '/:path*',
             destination: apiProx + '/:path*'
+          },
+          {
+            source: '/api/dev/:path*',
+            destination: '/api/dev/:path*'
           }
         ]
       : []

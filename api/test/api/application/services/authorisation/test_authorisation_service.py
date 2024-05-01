@@ -13,12 +13,16 @@ from api.application.services.authorisation.authorisation_service import (
     secure_endpoint,
     have_credentials,
     validate_token,
+    get_user_token,
+    get_client_token,
+    get_token,
+    get_subject_id,
 )
 from api.application.services.authorisation.dataset_access_evaluator import (
     DatasetAccessEvaluator,
 )
 from api.application.services.permissions_service import PermissionsService
-from api.common.config.auth import Action
+from api.common.config.auth import Action, RAPID_ACCESS_TOKEN
 from api.common.custom_exceptions import (
     AuthorisationError,
     UserCredentialsUnavailableError,
@@ -149,6 +153,70 @@ class TestValidateToken:
             user_token=user_token,
         )
         mock_parse_token.assert_called_once_with("client-token")
+
+
+class TestGetToken:
+    def test_get_user_token(self):
+        request = MagicMock()
+        expected = "1234567890"
+        request.cookies.get.return_value = expected
+
+        res = get_user_token(request)
+        request.cookies.get.assert_called_once_with(RAPID_ACCESS_TOKEN, None)
+        assert res == expected
+
+    def test_get_client_token(self):
+        request = MagicMock()
+        expected = "1234567890"
+        token = f"Bearer {expected}"
+        request.headers.get.return_value = token
+
+        res = get_client_token(request)
+        assert res == expected
+
+    @pytest.mark.parametrize(
+        "client_token, user_token, response",
+        [
+            ("1234", "5678", "1234"),
+            (None, '"5678', "5678"),
+            ("1234", None, "1234"),
+        ],
+    )
+    def get_token(self, client_token: str, user_token: str, expected: str):
+        request = MagicMock()
+
+        if client_token:
+            request.headers.get.return_value = f"Bearer {client_token}"
+
+        if user_token:
+            request.cookies.get.return_value = user_token
+
+        res = get_token(request)
+        assert res == expected
+
+
+class TestGetSubject:
+    @patch("api.application.services.authorisation.authorisation_service.get_token")
+    @patch("api.application.services.authorisation.authorisation_service.parse_token")
+    def test_get_subject_id(
+        self, mock_parse_token: MagicMock, mock_get_token: MagicMock
+    ):
+        @dataclass
+        class MockToken:
+            subject: str
+
+        request = MagicMock()
+        expected_user = "abc-123"
+        expected_token = "token"
+
+        mock_get_token.return_value = expected_token
+        mock_parse_token.return_value = MockToken(subject=expected_user)
+
+        res = get_subject_id(request)
+
+        mock_get_token.assert_called_once_with(request)
+        mock_parse_token.assert_called_once_with(expected_token)
+        assert res == expected_user
 
 
 class TestCheckPermissions:

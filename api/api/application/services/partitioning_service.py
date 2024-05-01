@@ -16,6 +16,9 @@ class Partition(BaseModel):
 
 
 def generate_path(group_partitions: List[str], group_info: Tuple[Hashable, ...]) -> str:
+    print("generateing path")
+    print(group_partitions)
+    print(group_info)
     formatted_group_partitions = [
         f"{partition}={value}" for partition, value in zip(group_partitions, group_info)
     ]
@@ -29,6 +32,8 @@ def drop_columns(df: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
 def generate_partitioned_data(schema: Schema, df: pd.DataFrame) -> List[Partition]:
     partitions = schema.get_partitions()
 
+    print(partitions)
+
     if len(partitions) == 0:
         return non_partitioned_dataframe(df)
     return partitioned_dataframe(df, partitions)
@@ -41,6 +46,12 @@ def partitioned_dataframe(df: pd.DataFrame, partitions: List[str]) -> List[Parti
         cleaned_dataframe = drop_columns(df=group_data, columns=partitions).reset_index(
             drop=True
         )
+
+        # Pandas returns group_spec as an integer if there is just one partition, but a tuple otherwise
+        # These two lines are to fix standardise the output across both scenarios.
+        if isinstance(group_spec, int):
+            group_spec = (group_spec,)
+
         partitioned_data.append(
             Partition(
                 keys=group_spec,
