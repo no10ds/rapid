@@ -1020,7 +1020,7 @@ class TestQuery(BaseClientTest):
 
         assert response.status_code == 400
         assert response.json() == {
-            "details": [f"{input_key} -> Extra inputs are not permitted"]
+            "details": [f"{input_key} -> extra fields not permitted"]
         }
 
 
@@ -1186,7 +1186,7 @@ class TestLargeDatasetQuery(BaseClientTest):
 
         assert response.status_code == 400
         assert response.json() == {
-            "details": [f"{input_key} -> Extra inputs are not permitted"]
+            "details": [f"{input_key} -> extra fields not permitted"]
         }
 
 

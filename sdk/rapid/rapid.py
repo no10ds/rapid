@@ -30,7 +30,7 @@ from rapid.exceptions import (
     InvalidDomainNameException,
     DomainConflictException,
     ClientDoesNotHaveUserAdminPermissionsException,
-    ClientDoesNotHaveDataAdminPermissionsException
+    ClientDoesNotHaveDataAdminPermissionsException,
 )
 
 
@@ -461,7 +461,11 @@ class Rapid:
             url,
             headers=self.generate_headers(),
             data=json.dumps(
-                {"username": user_name, "email": user_email, "permissions": user_permissions}
+                {
+                    "username": user_name,
+                    "email": user_email,
+                    "permissions": user_permissions,
+                }
             ),
             timeout=TIMEOUT_PERIOD,
         )
@@ -469,21 +473,20 @@ class Rapid:
         if response.status_code == 201:
             return data
         elif response.status_code == 400:
-            if data["details"] == 'One or more of the provided permissions is invalid or duplicated':
+            if (
+                data["details"]
+                == "One or more of the provided permissions is invalid or duplicated"
+            ):
                 raise InvalidPermissionsException(
                     "One or more of the provided permissions is invalid or duplicated"
                 )
             else:
-                raise SubjectAlreadyExistsException(
-                    data["details"]
-                )
+                raise SubjectAlreadyExistsException(data["details"])
         elif response.status_code == 401:
-            raise ClientDoesNotHaveUserAdminPermissionsException(
-                    data["details"]
-                )
-        
+            raise ClientDoesNotHaveUserAdminPermissionsException(data["details"])
+
         raise Exception("Failed to create user")
-    
+
     def delete_user(self, user_name: str, user_id: str):
         """
         Deletes a client from the API based on their id
@@ -498,9 +501,7 @@ class Rapid:
         response = requests.delete(
             url,
             headers=self.generate_headers(),
-            data=json.dumps(
-                {"username": user_name, "user_id": user_id}
-            ),
+            data=json.dumps({"username": user_name, "user_id": user_id}),
             timeout=TIMEOUT_PERIOD,
         )
         data = json.loads(response.content.decode("utf-8"))
@@ -511,12 +512,10 @@ class Rapid:
                 f"Failed to delete user with id: {user_id}, ensure it exists."
             )
         elif response.status_code == 401:
-            raise ClientDoesNotHaveUserAdminPermissionsException(
-                    data["details"]
-                )
-        
+            raise ClientDoesNotHaveUserAdminPermissionsException(data["details"])
+
         raise Exception("Failed to delete user")
-    
+
     def list_subjects(self):
         """
         List all current subjects within rAPId instance.
@@ -533,12 +532,10 @@ class Rapid:
         if response.status_code == 200:
             return data
         elif response.status_code == 401:
-            raise ClientDoesNotHaveUserAdminPermissionsException(
-                    data["details"]
-                )
-        
+            raise ClientDoesNotHaveUserAdminPermissionsException(data["details"])
+
         raise Exception("Failed to list subjects")
-    
+
     def list_layers(self):
         """
         List all current layers within rAPId instance.
@@ -554,9 +551,9 @@ class Rapid:
         data = json.loads(response.content.decode("utf-8"))
         if response.status_code == 200:
             return data
-        
+
         raise Exception("Failed to list layers")
-    
+
     def list_protected_domains(self):
         """
         List all current protected domains within rAPId instance.
@@ -573,12 +570,10 @@ class Rapid:
         if response.status_code == 200:
             return data
         elif response.status_code == 401:
-            raise ClientDoesNotHaveUserAdminPermissionsException(
-                    data["details"]
-                )
-        
+            raise ClientDoesNotHaveUserAdminPermissionsException(data["details"])
+
         raise Exception("Failed to list protected domains")
-    
+
     def delete_dataset(self, layer: str, domain: str, dataset: str):
         """
         Deletes a dataset from the API based on their id
@@ -601,12 +596,10 @@ class Rapid:
         if response.status_code == 202:
             return data
         elif response.status_code == 400:
-                raise DatasetNotFoundException(
-                    f"Could not find dataset, {layer}/{domain}/{dataset} to delete", data
-                )
+            raise DatasetNotFoundException(
+                f"Could not find dataset, {layer}/{domain}/{dataset} to delete", data
+            )
         elif response.status_code == 401:
-            raise ClientDoesNotHaveDataAdminPermissionsException(
-                    data["details"]
-                )
-        
+            raise ClientDoesNotHaveDataAdminPermissionsException(data["details"])
+
         raise Exception("Failed to delete dataset")
