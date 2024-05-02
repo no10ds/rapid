@@ -59,7 +59,7 @@ jobs:
           cache: 'pip'
 
       - name: Setup API environment
-        run: make api/create-venv
+        run: make api/setup
 
       - name: API Static Analysis
         run: make api/lint
@@ -116,7 +116,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: 19
+          node-version: 20
 
       - name: Install UI Packages
         run: make ui/setup
