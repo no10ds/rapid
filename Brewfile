@@ -1,0 +1,8 @@
+brew "pyenv"
+brew "terraform"
+brew "checkov"
+brew "pre-commit"
+brew "nvm"
+brew "mkdocs"
+brew "gh"
+brew "jq"

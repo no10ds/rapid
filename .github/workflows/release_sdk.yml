@@ -37,21 +37,7 @@ jobs:
 
       - name: Setup Python Environment
         run: |
-          make sdk-setup
-          source sdk/.venv/bin/activate
+          make sdk/setup
 
       - name: SDK Release
-        run: make sdk-release
-
-  cleanup:
-    needs:
-      - setup
-      - sdk-release
-    runs-on: self-hosted
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Clean Docker Context
-        if: always()
-        run: make clean-pipeline-docker-context
+        run: make sdk/release

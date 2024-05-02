@@ -49,32 +49,32 @@ jobs:
           echo AWS_DEFAULT_REGION=${{ secrets.AWS_REGION }} >> .env
 
       - name: Build API Image
-        run: make api-create-image
+        run: make api/create-image
 
       - name: API Static Analysis
-        run: make api-lint
+        run: make api/lint
 
       - name: API Tests
-        run: make api-test
+        run: make api/test
 
       - name: API Tag and Upload
-        run: make api-tag-and-upload
+        run: make api/tag-and-upload
 
       - name: API Check Image Scan for Vulnerabilities
-        run: make api-scan-for-vulns-and-tag
+        run: make api/scan-for-vulns-and-tag
 
       - name: API Tag PROD Candidate
-        run: make api-tag-prod-candidate
+        run: make api/tag-prod-candidate
 
       - name: API Deploy Image to Prod
-        run: make api-app-live-in-prod
+        run: make api/app-live-in-prod
 
       - name: API Allow for Application to Start
         run: sleep 120
 
       - name: API Wait for Running Application
         id: await-running-app
-        run: make api-check-app-is-running
+        run: make api/check-app-is-running
 
       - name: API E2E Tests
         id: e2e-tests
@@ -85,11 +85,11 @@ jobs:
         run: |
           # Export AWS credentials to env for e2e tests
           eval "$(aws configure export-credentials --format env)"
-          make api-test-e2e
+          make api/test-e2e
 
       - name: API Tag Image as Failure
         if: always() && steps.await-running-app.conclusion == 'failure' || steps.e2e-tests.conclusion == 'failure'
-        run: make api-tag-prod-failure
+        run: make api/tag-prod-failure
 
   cleanup:
     needs:
@@ -103,4 +103,4 @@ jobs:
 
       - name: Clean Docker Context
         if: always()
-        run: make clean-pipeline-docker-context
+        run: make api/clean-docker
