@@ -6,9 +6,10 @@ PYTHON_VERSION=3.10.6
 NODE_VERSION=lts/iron
 
 # Git references
-GITHUB_SHA=$(git rev-parse HEAD)
-GITHUB_REF_NAME=$(git rev-parse --abbrev-ref HEAD)
-GITHUB_SHORT_SHA=$(git rev-parse --short HEAD)
+GITHUB_SHA=$$(git rev-parse HEAD)
+GITHUB_REF_NAME=$$(git rev-parse --abbrev-ref HEAD)
+GITHUB_SHORT_SHA=$$(git rev-parse --short HEAD)
+
 
 # API Build variables
 API_ACCOUNT_ECR_URI=$(AWS_ACCOUNT).dkr.ecr.$(AWS_REGION).amazonaws.com
