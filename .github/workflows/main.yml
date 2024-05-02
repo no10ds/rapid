@@ -51,6 +51,15 @@ jobs:
       - name: Build API Image
         run: make api/create-image
 
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Setup API environment
+        run: make api/create-venv
+
       - name: API Static Analysis
         run: make api/lint
 

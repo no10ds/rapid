@@ -107,7 +107,7 @@ class TestColumn:
                 "format": None,
             },
             "loc": ("name",),
-            "msg": "field required",
+            "msg": "Field required",
             "type": "missing",
         }
 
@@ -136,7 +136,7 @@ class TestColumn:
                 "format": None,
             },
             "loc": ("data_type",),
-            "msg": "field required",
+            "msg": "Field required",
             "type": "missing",
         }
 
