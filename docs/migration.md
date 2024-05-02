@@ -13,10 +13,6 @@ To execute it, you'll need to decide:
 
 ### Prerequisites
 
-#### Local requirements
-
-You will need the ability to run `Batect`, the requirements for which are listed [here](https://batect.dev/docs/getting-started/requirements/).
-
 ### Steps:
 
 #### Make the infrastructure changes
