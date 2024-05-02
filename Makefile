@@ -91,8 +91,13 @@ api/run:			## Run the api application with hot reload
 
 # API Setup and Config --------------------
 ##
-api/create-venv:		## Create the api local venv for deployment
-	@cd api/; ./local-venv-setup.sh
+api/venv:		## Create the api local venv for deployment
+	@cd api/; python3 -m venv .venv
+
+api/reqs:
+	@cd api/; . .venv/bin/activate; pip install -r requirements-dev.txt
+
+api/setup:	api/venv api/reqs
 
 api/create-image:		## Manually (re)create the api environment image
 	@cd api/; docker build --build-arg commit_sha=$(GITHUB_SHA) --build-arg version=$(GITHUB_REF_NAME) -t rapid-api/service-image .
