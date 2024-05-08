@@ -2,63 +2,58 @@
   "metadata": {
     "layer": "default",
     "domain": "test_e2e",
-    "dataset": "query",
+    "dataset": "{{ name }}",
     "sensitivity": "PUBLIC",
     "description": "A test dataset",
-    "tags": {
-      "test_e2e": "query",
+    "key_value_tags": {
+      "test_e2e": "update",
       "test": "e2e"
     },
+    "key_only_tags": [],
     "owners": [
       {
-        "name": "query",
-        "email": "query@test.com"
+        "name": "update",
+        "email": "update@email.com"
       }
     ],
-    "update_behaviour": "OVERWRITE"
+    "update_behaviour": "APPEND"
   },
   "columns": [
     {
       "name": "year",
-      "partition_index": null,
       "data_type": "int",
       "allow_null": true,
-      "format": null
+      "partition_index": null
     },
     {
       "name": "month",
-      "partition_index": null,
       "data_type": "int",
       "allow_null": true,
-      "format": null
+      "partition_index": null
     },
     {
       "name": "destination",
-      "partition_index": null,
       "data_type": "string",
       "allow_null": true,
-      "format": null
+      "partition_index": null
     },
     {
       "name": "arrival",
-      "partition_index": null,
       "data_type": "string",
       "allow_null": true,
-      "format": null
+      "partition_index": null
     },
     {
       "name": "type",
-      "partition_index": null,
       "data_type": "string",
       "allow_null": true,
-      "format": null
+      "partition_index": null
     },
     {
       "name": "status",
-      "partition_index": null,
       "data_type": "string",
       "allow_null": true,
-      "format": null
+      "partition_index": null
     }
   ]
 }
