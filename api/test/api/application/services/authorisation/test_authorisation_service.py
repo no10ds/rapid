@@ -195,7 +195,6 @@ class TestGetToken:
         assert res == expected
 
 
-@pytest.mark.focus
 class TestGetSubject:
     @patch("api.application.services.authorisation.authorisation_service.get_token")
     @patch("api.application.services.authorisation.authorisation_service.parse_token")
