@@ -11,12 +11,12 @@ GITHUB_REF_NAME=$$(git rev-parse --abbrev-ref HEAD)
 GITHUB_SHORT_SHA=$$(git rev-parse --short HEAD)
 
 
-# API Bfrontendld variables
+# API Build variables
 API_ACCOUNT_ECR_URI=$(AWS_ACCOUNT).dkr.ecr.$(AWS_REGION).amazonaws.com
 API_PUBLIC_URI=public.ecr.aws
 API_PUBLIC_IMAGE=no10-rapid/api
 
-# Frontend Bfrontendld variables
+# Frontend Build variables
 Frontend_ZIP_PATH=$(Frontend_IMAGE_NAME)-$(GITHUB_SHORT_SHA)
 Frontend_LATEST_TAG=$(shell gh api /repos/no10ds/rapid/releases/latest | jq -r ".tag_name")
 ifeq ($(Frontend_LATEST_TAG), null)
@@ -65,8 +65,8 @@ node-setup:				## Setup node to run the Frontend
 backend/venv:		## Create the backend local venv for deployment
 	@cd backend/; python3 -m venv .venv
 
-backend/reqs:		## Create the backend reqfrontendrements for deployment
-	@cd backend/; . .venv/bin/activate; pip install -r reqfrontendrements-dev.txt
+backend/reqs:		## Create the backend requirements for deployment
+	@cd backend/; . .venv/bin/activate; pip install -r requirements-dev.txt
 
 backend/setup:	backend/venv backend/reqs 	## Setup the local development environment for the backend
 
@@ -124,7 +124,7 @@ api/run:			## Run the api application with hot reload
 # API Setup and Config --------------------
 
 api/create-image:		## Manually (re)create the api environment image
-	@cd backend/; docker bfrontendld --bfrontendld-arg commit_sha=$(GITHUB_SHA) --bfrontendld-arg version=$(GITHUB_REF_NAME) -t rapid-api/service-image .
+	@cd backend/; docker build --build-arg commit_sha=$(GITHUB_SHA) --build-arg version=$(GITHUB_REF_NAME) -t rapid-api/service-image .
 
 api/lint:			## Run the api lint checks with flake8
 	@cd backend/; . .venv/bin/activate; flake8 api test
@@ -194,7 +194,7 @@ infra/output:			## Print infrastructure output: make infra/output block=<infra/b
 	@cd infrastructure/; ./scripts/infra_make_helper.sh run_tf output "${block}" "${env}"
 
 infra/scan:			## Print infrastructure output: make infra/output block=<infra/block>
-	@cd infrastructure/; checkov -d ./blocks --qfrontendet
+	@cd infrastructure/; checkov -d ./blocks --quiet
 
 ##
 ##----- SDK -----
@@ -209,22 +209,22 @@ sdk/test:			## Run sdk unit tests
 # SDK Release --------------------
 ##
 
-sdk/clean:		## Clean the environment, removing the previous bfrontendld
+sdk/clean:		## Clean the environment, removing the previous build
 	@cd backend/; rm -rf ./dist
 
-sdk/bfrontendld:	sdk/clean		## Re-bfrontendlds the sdk package
+sdk/build:	sdk/clean		## Re-builds the sdk package
 	@cd backend/; .venv/bin/activate; python setup.py sdist
 
-sdk/release-test:	sdk/bfrontendld	## Bfrontendld and release sdk to testpypi
+sdk/release-test:	sdk/build	## Build and release sdk to testpypi
 	@cd backend/; . .venv/bin/activate; twine upload --repository testpypi dist/*
 
-sdk/release:	sdk/bfrontendld		## Bfrontendld and release sdk to pypi
+sdk/release:	sdk/build		## Build and release sdk to pypi
 	@cd backend/; . .venv/bin/activate; twine upload dist/*
 
 ##
 ##----- Frontend -----
 ##
-frontend/setup:			## Setup npm reqfrontendred for the sdk
+frontend/setup:			## Setup npm required for the sdk
 	@cd frontend/; npm i -g next; npm ci
 
 # Frontend Running --------------------
@@ -249,9 +249,9 @@ frontend/test-e2e-headed:
 # Frontend Release --------------------
 ##
 frontend/create-static-out:
-	@cd frontend/; npm run bfrontendld:static
+	@cd frontend/; npm run build:static
 
-frontend/zip-contents:		## Zip contents of the bfrontendlt static html files
+frontend/zip-contents:		## Zip contents of the built static html files
 ifdef tag
 	@cd frontend/; zip -r "${tag}.zip" ./out
 	@cd frontend/; zip -r "${tag}-router-lambda.zip" ./lambda/lambda.js
@@ -260,7 +260,7 @@ else
 	@cd frontend/; zip -r "$(Frontend_ZIP_PATH)-router-lambda.zip" ./lambda/lambda.js
 endif
 
-frontend/release:		## Upload the zipped bfrontendlt static files to a production Github release
+frontend/release:		## Upload the zipped built static files to a production Github release
 	@gh release upload ${tag} "./frontend/${tag}.zip" --clobber
 	@gh release upload ${tag} "./frontend/${tag}-router-lambda.zip" --clobber
 
