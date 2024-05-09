@@ -8,7 +8,7 @@ on:
       - opened
 
 jobs:
-  run-ui-test:
+  run-frontend-test:
     runs-on: self-hosted
 
     steps:
@@ -20,18 +20,18 @@ jobs:
 
       - name: Install packages
         run: |
-          cd ui
+          cd frontend
           npm install
 
       - name: Install playwright browsers
         run: |
-          cd ui
+          cd frontend
           npx playwright install-deps
           npm install @playwright/test -D
           npx playwright install
 
       - name: Run playwright tests
-        run: make ui/test-e2e
+        run: make frontend/test-e2e
         env:
           E2E_DOMAIN_NAME: ${{ secrets.E2E_DOMAIN_NAME }}
           E2E_RESOURCE_PREFIX: ${{ secrets.E2E_RESOURCE_PREFIX }}

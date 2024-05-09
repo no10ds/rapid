@@ -74,7 +74,7 @@ def add_exception_handlers(app: FastAPI) -> None:
 
     def _generate_pydantic_error_message(message: dict) -> List[str]:
         PYDANTIC_JSON_DECODE_ERROR = "json_invalid"
-        PATH_STR_REGEX_ERROR = "value_error.str.regex"
+        PATH_STR_REGEX_ERROR = "string_pattern_mismatch"
         REGEX_ERROR_MAP = {r"^[a-z0-9_\-]+$": "was required to be lowercase only."}
 
         error_messages = []

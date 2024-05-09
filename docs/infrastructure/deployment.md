@@ -46,7 +46,7 @@ Provide the required inputs as described:
 There are also these optional inputs:
 
 - `application_version` - The service's image version
-- `ui_version` - The static UI version
+- `ui_version` - The version of the static frontend site
 - `hosted_zone_id` - If provided, will add an alias for the application load balancer to use the provided domain using that HZ. Otherwise, it will create a HZ and the alias
 - `certificate_validation_arn` - If provided, will link the certificate to the load-balancer https-listener. Otherwise, will create a new certificate and link it. ([managing certificates](./certificates.md))
 - `app-replica-count-desired` - if provided, will set the number of desired running instances for a service. Otherwise,
@@ -196,7 +196,7 @@ Required:
 - `iam_account_alias` - account alias required by AWS, it needs to be a unique name
 - `application_version` - service's docker
   image version
-- `ui_version` - Static UI version
+- `ui_version` - The version of the static frontend site
 - `domain_name` - application hostname ([can be a domain or a subdomain](./domains_subdomains.md))
 - `aws_account` - aws account id where the application will be hosted
 - `aws_region` - aws region where the application will be hosted

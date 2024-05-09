@@ -35,7 +35,7 @@ jobs:
       - name: API Tag and Upload Release Image
         run: make api/tag-and-upload-release-image
 
-  ui-release:
+  frontend-release:
     needs:
       - setup
     runs-on: self-hosted
@@ -48,14 +48,14 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install UI Packages
-        run: make ui/setup
+      - name: Install Frontend Packages
+        run: make frontend/setup
 
-      - name: UI Build Static Files
-        run: make ui/create-static-out
+      - name: Frontend Build Static Files
+        run: make frontend/create-static-out
 
-      - name: UI Zip and Release
+      - name: Frontend Zip and Release
         env:
           TAG: ${{ github.event.release.tag_name }}
           GH_TOKEN: ${{ github.token }}
-        run: make ui/zip-and-release tag=$TAG
+        run: make frontend/zip-and-release tag=$TAG

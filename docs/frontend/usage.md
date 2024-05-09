@@ -1,12 +1,12 @@
 # Usage
 
-The rAPId UI is a NextJS static site that serves as a user friendly wrapper to the API.
+The rAPId Frontend is a NextJS static site that serves as a user friendly wrapper to the API.
 
-The UI provides easy access to the core actions within rAPId such as the ability to create schemas, upload and download data, as well as handling common user and client management.
+The Frontend provides easy access to the core actions within rAPId such as the ability to create schemas, upload and download data, as well as handling common user and client management.
 
-> ## Demo UI coming soon!
+> ## Demo Frontend coming soon!
 >
-> In lieu of a demo UI for you to use, here are some screenshots that demonstrate the functionality available.
+> In lieu of a demo Frontend for you to use, here are some screenshots that demonstrate the functionality available.
 
 ## Creating Users
 
@@ -28,6 +28,6 @@ If a user has `READ` access to a dataset, they download it by selecting it from 
 
 # Permissions
 
-The UI automatically infers the permissions that the logged in user has access to and filters out what actions they can perform.
+The Frontend automatically infers the permissions that the logged in user has access to and filters out what actions they can perform.
 
 For example if a user does not have any user admin privileges then they will not be able to see any of the user and client creation interfaces.

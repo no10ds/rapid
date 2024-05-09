@@ -3,7 +3,7 @@ import type { AccessTokenResponse } from '@/service/types'
 
 const generateToken = async () => {
   const auth = Buffer.from(
-    `${process.env.UI_CLIENT_ID}:${process.env.UI_CLIENT_SECRET}`
+    `${process.env.FRONTEND_CLIENT_ID}:${process.env.FRONTEND_CLIENT_SECRET}`
   ).toString('base64')
   const headers = {
     'Content-Type': 'application/x-www-form-urlencoded',
@@ -11,7 +11,7 @@ const generateToken = async () => {
   }
   const data = {
     grant_type: 'client_credentials',
-    client_id: process.env.UI_CLIENT_ID
+    client_id: process.env.FRONTEND_CLIENT_ID
   }
   const url = `${process.env.NEXT_PUBLIC_API_URL_PROXY}/api/oauth2/token`
   const response = await fetch(url, {

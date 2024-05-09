@@ -28,14 +28,6 @@ nav:
           - api/routes/client.md
           - api/routes/permissions.md
           - api/routes/subject.md
-  - Infrastructure:
-      - infrastructure/deployment.md
-      - infrastructure/alerting_monitoring.md
-      - infrastructure/certificates.md
-      - infrastructure/domains_subdomains.md
-      - infrastructure/overview.md
-  - UI:
-      - ui/usage.md
   - SDK:
       - sdk/usage.md
       - sdk/useful_patterns.md
@@ -47,6 +39,14 @@ nav:
               - sdk/api/items/schema.md
           - Patterns:
               - sdk/api/patterns/data.md
+  - Infrastructure:
+      - infrastructure/deployment.md
+      - infrastructure/alerting_monitoring.md
+      - infrastructure/certificates.md
+      - infrastructure/domains_subdomains.md
+      - infrastructure/overview.md
+  - Frontend:
+      - frontend/usage.md
   - Migration: migration.md
   - Contributing: contributing.md
   - Changelog:
@@ -60,7 +60,7 @@ plugins:
           options:
             show_source: false
             show_basis: true
-          paths: [sdk]
+          paths: [backend]
 
 markdown_extensions:
   - pymdownx.highlight

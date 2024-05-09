@@ -1,4 +1,6 @@
 flake8
+requests_mock
+mock
 pytest
 pytest-cov
 pytest-order
