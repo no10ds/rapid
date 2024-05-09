@@ -11,18 +11,18 @@ GITHUB_REF_NAME=$$(git rev-parse --abbrev-ref HEAD)
 GITHUB_SHORT_SHA=$$(git rev-parse --short HEAD)
 
 
-# API Build variables
+# API Bfrontendld variables
 API_ACCOUNT_ECR_URI=$(AWS_ACCOUNT).dkr.ecr.$(AWS_REGION).amazonaws.com
 API_PUBLIC_URI=public.ecr.aws
 API_PUBLIC_IMAGE=no10-rapid/api
 
-# UI Build variables
-UI_ZIP_PATH=$(UI_IMAGE_NAME)-$(GITHUB_SHORT_SHA)
-UI_LATEST_TAG=$(shell gh api /repos/no10ds/rapid/releases/latest | jq -r ".tag_name")
-ifeq ($(UI_LATEST_TAG), null)
-	TAG_NAME="$(UI_IMAGE_NAME)-$(GITHUB_SHORT_SHA)"
+# Frontend Bfrontendld variables
+Frontend_ZIP_PATH=$(Frontend_IMAGE_NAME)-$(GITHUB_SHORT_SHA)
+Frontend_LATEST_TAG=$(shell gh api /repos/no10ds/rapid/releases/latest | jq -r ".tag_name")
+ifeq ($(Frontend_LATEST_TAG), null)
+	TAG_NAME="$(Frontend_IMAGE_NAME)-$(GITHUB_SHORT_SHA)"
 else
-	TAG_NAME="$(UI_LATEST_TAG)-dev-$(GITHUB_SHORT_SHA)"
+	TAG_NAME="$(Frontend_LATEST_TAG)-dev-$(GITHUB_SHORT_SHA)"
 endif
 
 .PHONY: help
@@ -53,9 +53,40 @@ python-setup:			## Setup python to run the sdk and api
 	pyenv install --skip-existing $(PYTHON_VERSION)
 	pyenv local $(PYTHON_VERSION)
 
-node-setup:				## Setup node to run the UI
+node-setup:				## Setup node to run the Frontend
 	. ${HOME}/.nvm/nvm.sh && nvm install $(NODE_VERSION)
 	. ${HOME}/.nvm/nvm.sh && nvm use $(NODE_VERSION)
+
+##
+##----- Backend ----- ## This encompasses both the api and sdk
+##
+
+# Backend Setup and Config --------------------
+backend/venv:		## Create the backend local venv for deployment
+	@cd backend/; python3 -m venv .venv
+
+backend/reqs:		## Create the backend reqfrontendrements for deployment
+	@cd backend/; . .venv/bin/activate; pip install -r reqfrontendrements-dev.txt
+
+backend/setup:	backend/venv backend/reqs 	## Setup the local development environment for the backend
+
+backend/lint:			## Run the backend lint checks with flake8
+	@cd backend/; . .venv/bin/activate; flake8 api test rapid
+
+backend/format:			## Run the backend code format with black
+	@cd backend/; . .venv/bin/activate; black api test rapid
+
+
+# Backend Testing -------------------
+
+backend-test:			## Run backend python unit tests
+	@cd backend/; . .venv/bin/activate; pytest test/api test/rapid -vv -s
+
+backend/test-coverage:		## Run backend python unit tests with coverage report
+	@cd backend/; . .venv/bin/activate; pytest --durations=5 --cov=backend --cov-report term-missing test/api test/rapid
+
+backend/test-focus:			## Run backend python tests marked with `@pytest.mark.focus`
+	@cd backend/; . .venv/bin/activate; pytest test/api test/rapid -vv -s -m focus
 
 ##
 ##----- API -----
@@ -63,27 +94,27 @@ node-setup:				## Setup node to run the UI
 
 # API Testing --------------------
 api/test:			## Run api python unit tests
-	@cd api/; . .venv/bin/activate; pytest test/api -vv -s
+	@cd backend/; . .venv/bin/activate; pytest test/api -vv -s
 
 api/test-coverage:		## Run api python unit tests with coverage report
-	@cd api/; . .venv/bin/activate; pytest --durations=5 --cov=api --cov-report term-missing test/api
+	@cd backend/; . .venv/bin/activate; pytest --durations=5 --cov=api --cov-report term-missing test/api
 
 api/test-focus:			## Run api python tests marked with `@pytest.mark.focus`
-	@cd api/; . .venv/bin/activate; pytest test/api -vv -s -m focus
+	@cd backend/; . .venv/bin/activate; pytest test/api -vv -s -m focus
 
 api/test-e2e:			## Run api python e2e tests
-	@cd api/; . .venv/bin/activate; pytest test/e2e -v
+	@cd backend/; . .venv/bin/activate; pytest test/e2e -v
 
 api/test-e2e-focus:		## Run api python e2e tests marked with `@pytest.mark.focus`
-	@cd api/; . .venv/bin/activate; pytest test/e2e -v -s -m focus
+	@cd backend/; . .venv/bin/activate; pytest test/e2e -v -s -m focus
 
 # API Security --------------------
 ##
 api/scan-for-vulns-and-tag:	## Scan api ecr for latest image and tag as vulnerable
-	@cd api/; ./image-utils.sh "pipeline_post_scanning_processing"
+	@cd backend/; ./image-utils.sh "pipeline_post_scanning_processing"
 
 api/scheduled-prod-scan:	## Handle api scheduled scan result for production image
-	@cd api/; ./image-utils.sh "scheduled_scan_result_check" "PROD"
+	@cd backend/; ./image-utils.sh "scheduled_scan_result_check" "PROD"
 
 # API Running --------------------
 ##
@@ -91,29 +122,21 @@ api/run:			## Run the api application with hot reload
 	@cd api && . .venv/bin/activate && uvicorn api.entry:app --host 0.0.0.0 --port 8000 --reload
 
 # API Setup and Config --------------------
-##
-api/venv:		## Create the api local venv for deployment
-	@cd api/; python3 -m venv .venv
-
-api/reqs:
-	@cd api/; . .venv/bin/activate; pip install -r requirements-dev.txt
-
-api/setup:	api/venv api/reqs
 
 api/create-image:		## Manually (re)create the api environment image
-	@cd api/; docker build --build-arg commit_sha=$(GITHUB_SHA) --build-arg version=$(GITHUB_REF_NAME) -t rapid-api/service-image .
+	@cd backend/; docker bfrontendld --bfrontendld-arg commit_sha=$(GITHUB_SHA) --bfrontendld-arg version=$(GITHUB_REF_NAME) -t rapid-api/service-image .
 
 api/lint:			## Run the api lint checks with flake8
-	@cd api/; . .venv/bin/activate; flake8 api test
+	@cd backend/; . .venv/bin/activate; flake8 api test
 
 api/format:			## Run the api code format with black
-	@cd api/; . .venv/bin/activate; black api test
+	@cd backend/; . .venv/bin/activate; black api test
 
 # API Release --------------------
 ##
 
 api/tag-image:		## Tag the image with the latest commit hash
-	@cd api/; docker tag rapid-api-service-image:latest $(API_ACCOUNT_ECR_URI)/$(API_IMAGE_NAME):$(GITHUB_SHORT_SHA)
+	@cd backend/; docker tag rapid-api-service-image:latest $(API_ACCOUNT_ECR_URI)/$(API_IMAGE_NAME):$(GITHUB_SHORT_SHA)
 
 api/upload-image:	## Upload the tagged image to the image registry
 	@aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(API_ACCOUNT_ECR_URI) && docker push $(API_ACCOUNT_ECR_URI)/$(API_IMAGE_NAME):$(GITHUB_SHORT_SHA)
@@ -121,7 +144,7 @@ api/upload-image:	## Upload the tagged image to the image registry
 api/tag-and-upload:	api/tag-image api/upload-image	## Tag and upload the latest api image
 
 api/tag-release-image:			## Tag the image with the tag name
-	@cd api/; tag rapid-api-service-image:latest $(API_PUBLIC_URI)/$(API_PUBLIC_IMAGE):${GITHUB_REF_NAME}
+	@cd backend/; tag rapid-api-service-image:latest $(API_PUBLIC_URI)/$(API_PUBLIC_IMAGE):${GITHUB_REF_NAME}
 
 api/upload-release-image:	## Upload the tagged release image to the image registry
 	@aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin $(API_PUBLIC_URI) && docker push $(API_PUBLIC_URI)/$(API_PUBLIC_IMAGE):${GITHUB_REF_NAME}
@@ -129,10 +152,10 @@ api/upload-release-image:	## Upload the tagged release image to the image regist
 api/tag-and-upload-release-image: api/tag-release-image api/upload-release-image## Tag and upload the api release image
 
 api/tag-prod-candidate:		## Tag the uploaded api image as a candidate for PROD deployment
-	@cd api/; ./image-utils.sh "tag_prod_image"
+	@cd backend/; ./image-utils.sh "tag_prod_image"
 
 api/tag-prod-failure: 		## Tag the PROD image with a fail flag
-	@cd api/; ./image-utils.sh "tag_prod_failure"
+	@cd backend/; ./image-utils.sh "tag_prod_failure"
 
 api/app-live-in-prod:		## Deploy the latest version of the api
 	@aws ecs update-service --region $(AWS_REGION) --force-new-deployment --service $(ECS_SERVICE) --cluster $(ECS_CLUSTER)
@@ -171,86 +194,77 @@ infra/output:			## Print infrastructure output: make infra/output block=<infra/b
 	@cd infrastructure/; ./scripts/infra_make_helper.sh run_tf output "${block}" "${env}"
 
 infra/scan:			## Print infrastructure output: make infra/output block=<infra/block>
-	@cd infrastructure/; checkov -d ./blocks --quiet
+	@cd infrastructure/; checkov -d ./blocks --qfrontendet
 
 ##
 ##----- SDK -----
 ##
 
-sdk/venv:		## Create the Python virtual environment for the sdk
-	@cd sdk/; python3 -m venv .venv
-
-
-sdk/reqs:		## Install the necessary Python requirements
-	@cd sdk/; . .venv/bin/activate; pip install -r requirements.txt
-
-sdk/setup:	sdk/venv sdk/reqs			## Setup Python required for the sdk
-
-
 # SDK Testing --------------------
 ##
 sdk/test:			## Run sdk unit tests
-	@cd sdk/; . .venv/bin/activate; pytest -vv -s
+	@cd backend/; . .venv/bin/activate; pytest test/rapid -vv -s
+
 
 # SDK Release --------------------
 ##
 
-sdk/clean:		## Clean the environment, removing the previous build
-	@cd sdk/; rm -rf ./dist
+sdk/clean:		## Clean the environment, removing the previous bfrontendld
+	@cd backend/; rm -rf ./dist
 
-sdk/build:	sdk/clean		## Re-builds the sdk package
-	@cd sdk/; .venv/bin/activate; python setup.py sdist
+sdk/bfrontendld:	sdk/clean		## Re-bfrontendlds the sdk package
+	@cd backend/; .venv/bin/activate; python setup.py sdist
 
-sdk/release-test:	sdk/build	## Build and release sdk to testpypi
-	@cd sdk/; . .venv/bin/activate; twine upload --repository testpypi dist/*
+sdk/release-test:	sdk/bfrontendld	## Bfrontendld and release sdk to testpypi
+	@cd backend/; . .venv/bin/activate; twine upload --repository testpypi dist/*
 
-sdk/release:	sdk/build		## Build and release sdk to pypi
-	@cd sdk/; . .venv/bin/activate; twine upload dist/*
+sdk/release:	sdk/bfrontendld		## Bfrontendld and release sdk to pypi
+	@cd backend/; . .venv/bin/activate; twine upload dist/*
 
 ##
-##----- UI -----
+##----- Frontend -----
 ##
-ui/setup:			## Setup npm required for the sdk
-	@cd ui/; npm i -g next; npm ci
+frontend/setup:			## Setup npm reqfrontendred for the sdk
+	@cd frontend/; npm i -g next; npm ci
 
-# UI Running --------------------
+# Frontend Running --------------------
 ##
-ui/run:				## Run the ui application
-	@cd ui/; npm run
+frontend/run:				## Run the frontend application
+	@cd frontend/; npm run
 
-ui/run-dev:			## Run the ui application with hot reload
-	@cd ui/; npm run dev
+frontend/run-dev:			## Run the frontend application with hot reload
+	@cd frontend/; npm run dev
 
-# UI Testing --------------------
+# Frontend Testing --------------------
 ##
-ui/test:			## Test ui site
-	@cd ui/; npm run test:all
+frontend/test:			## Test frontend site
+	@cd frontend/; npm run test:all
 
-ui/test-e2e:
-	@cd ui/; npx playwright test ui/playwright
+frontend/test-e2e:
+	@cd frontend/; npx playwright test frontend/playwright
 
-ui/test-e2e-headed:
-	@cd ui/; npx playwright test ui/playwright --ui
+frontend/test-e2e-headed:
+	@cd frontend/; npx playwright test frontend/playwright --frontend
 
-# UI Release --------------------
+# Frontend Release --------------------
 ##
-ui/create-static-out:
-	@cd ui/; npm run build:static
+frontend/create-static-out:
+	@cd frontend/; npm run bfrontendld:static
 
-ui/zip-contents:		## Zip contents of the built static html files
+frontend/zip-contents:		## Zip contents of the bfrontendlt static html files
 ifdef tag
-	@cd ui/; zip -r "${tag}.zip" ./out
-	@cd ui/; zip -r "${tag}-router-lambda.zip" ./lambda/lambda.js
+	@cd frontend/; zip -r "${tag}.zip" ./out
+	@cd frontend/; zip -r "${tag}-router-lambda.zip" ./lambda/lambda.js
 else
-	@cd ui/; zip -r "$(UI_ZIP_PATH).zip" ./out
-	@cd ui/; zip -r "$(UI_ZIP_PATH)-router-lambda.zip" ./lambda/lambda.js
+	@cd frontend/; zip -r "$(Frontend_ZIP_PATH).zip" ./out
+	@cd frontend/; zip -r "$(Frontend_ZIP_PATH)-router-lambda.zip" ./lambda/lambda.js
 endif
 
-ui/release:		## Upload the zipped built static files to a production Github release
-	@gh release upload ${tag} "./ui/${tag}.zip" --clobber
-	@gh release upload ${tag} "./ui/${tag}-router-lambda.zip" --clobber
+frontend/release:		## Upload the zipped bfrontendlt static files to a production Github release
+	@gh release upload ${tag} "./frontend/${tag}.zip" --clobber
+	@gh release upload ${tag} "./frontend/${tag}-router-lambda.zip" --clobber
 
-ui/zip-and-release: ui/zip-contents ui/release ## Zip and release prod static ui site
+frontend/zip-and-release: frontend/zip-contents frontend/release ## Zip and release prod static frontend site
 
 RELEASE_TYPE_UC=$(shell echo ${type} | tr  '[:lower:]' '[:upper:]')
 release:
@@ -266,7 +280,7 @@ release:
 # Migration --------------------
 ##
 migrate-v7:			## Run the migration
-	@cd api/; . .venv/bin/activate; python migrations/scripts/v7_layer_migration.py --layer ${layer} --all-layers ${all-layers}
+	@cd backend/; . .venv/bin/activate; python migrations/scripts/v7_layer_migration.py --layer ${layer} --all-layers ${all-layers}
 
 serve-docs:
 	mkdocs serve

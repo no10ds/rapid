@@ -59,7 +59,7 @@ jobs:
           cache: 'pip'
 
       - name: Setup API environment
-        run: make api/setup
+        run: make backend/setup
 
       - name: API Static Analysis
         run: make api/lint
@@ -93,7 +93,7 @@ jobs:
 
       - name: Setup Python Environment
         run: |
-          make sdk/setup
+          make backend/setup
 
       - name: SDK Test
         run: make sdk/test
@@ -104,7 +104,7 @@ jobs:
       - name: SDK Test Deploy
         run: make sdk/release-test
 
-  ui-dev:
+  frontend-dev:
     needs:
       - setup
       - security-check
@@ -118,11 +118,11 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install UI Packages
-        run: make ui/setup
+      - name: Install Frontend Packages
+        run: make frontend/setup
 
-      - name: UI Test
-        run: make ui/test
+      - name: Frontend Test
+        run: make frontend/test
 
   cleanup:
     needs:
@@ -130,7 +130,7 @@ jobs:
       - security-check
       - api-dev
       - sdk-dev
-      - ui-dev
+      - frontend-dev
     runs-on: self-hosted
     steps:
       - name: Checkout
