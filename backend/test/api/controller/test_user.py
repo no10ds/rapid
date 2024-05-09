@@ -82,7 +82,7 @@ class TestUserCreation(BaseClientTest):
 
         assert response.status_code == 400
         assert response.json() == {
-            "details": ["username -> field required", "email -> field required"]
+            "details": ["username -> Field required", "email -> Field required"]
         }
 
     @patch.object(SubjectService, "create_user")

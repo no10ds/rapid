@@ -25,7 +25,7 @@ else
 	TAG_NAME="$(Frontend_LATEST_TAG)-dev-$(GITHUB_SHORT_SHA)"
 endif
 
-.PHONY: help
+.PHONY: help backend/test
 
 setup: brew precommit
 
@@ -79,7 +79,7 @@ backend/format:			## Run the backend code format with black
 
 # Backend Testing -------------------
 
-backend-test:			## Run backend python unit tests
+backend/test:			## Run backend python unit tests
 	@cd backend/; . .venv/bin/activate; pytest test/api test/rapid -vv -s
 
 backend/test-coverage:		## Run backend python unit tests with coverage report
