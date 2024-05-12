@@ -8,7 +8,7 @@ from botocore.exceptions import ClientError
 from api.adapter.athena_adapter import AthenaAdapter
 from api.common.custom_exceptions import UserError, AWSServiceError, QueryExecutionError
 from api.domain.dataset_metadata import DatasetMetadata
-from api.domain.sql_query import SQLQuery, SQLQueryOrderBy
+from rapid.items.query import Query, QueryOrderBy
 
 
 class TestQuery:
@@ -28,7 +28,7 @@ class TestQuery:
         self.mock_athena_read_sql_query.return_value = query_result_df
 
         result = self.athena_adapter.query(
-            DatasetMetadata("layer", "my", "table", 1), SQLQuery()
+            DatasetMetadata("layer", "my", "table", 1), Query()
         )
 
         self.mock_athena_read_sql_query.assert_called_once_with(
@@ -42,9 +42,7 @@ class TestQuery:
         assert result.equals(query_result_df)
 
     def test_no_query_provided(self):
-        self.athena_adapter.query(
-            DatasetMetadata("layer", "my", "table", 1), SQLQuery()
-        )
+        self.athena_adapter.query(DatasetMetadata("layer", "my", "table", 1), Query())
 
         self.mock_athena_read_sql_query.assert_called_once_with(
             sql="SELECT * FROM layer_my_table_1",
@@ -62,10 +60,10 @@ class TestQuery:
                 "table",
                 1,
             ),
-            SQLQuery(
+            Query(
                 select_columns=["column1", "column2"],
                 group_by_columns=["column2"],
-                order_by_columns=[SQLQueryOrderBy(column="column1")],
+                order_by_columns=[QueryOrderBy(column="column1")],
                 limit=2,
             ),
         )
@@ -83,7 +81,7 @@ class TestQuery:
 
         with pytest.raises(UserError, match="Query failed to execute: Some error"):
             self.athena_adapter.query(
-                DatasetMetadata("layer", "my", "table", 1), SQLQuery()
+                DatasetMetadata("layer", "my", "table", 1), Query()
             )
 
     def test_query_fails_because_of_invalid_format(self):
@@ -99,7 +97,7 @@ class TestQuery:
             UserError, match="Failed to execute query: The error message"
         ):
             self.athena_adapter.query(
-                DatasetMetadata("layer", "my", "table", 10), SQLQuery()
+                DatasetMetadata("layer", "my", "table", 10), Query()
             )
 
     def test_query_fails_because_table_does_not_exist(self):
@@ -111,7 +109,7 @@ class TestQuery:
 
         with pytest.raises(UserError, match=expected_message):
             self.athena_adapter.query(
-                DatasetMetadata("layer", "my", "table", 1), SQLQuery()
+                DatasetMetadata("layer", "my", "table", 1), Query()
             )
 
     def test_returns_async_query_result_dataframe(self):
@@ -122,7 +120,7 @@ class TestQuery:
         self.mock_athena_read_sql_query.return_value = query_result_df
 
         result = self.athena_adapter.query(
-            DatasetMetadata("layer", "my", "table", 1), SQLQuery()
+            DatasetMetadata("layer", "my", "table", 1), Query()
         )
 
         self.mock_athena_read_sql_query.assert_called_once_with(
@@ -153,7 +151,7 @@ class TestLargeQuery:
         }
 
         result = self.athena_adapter.query_async(
-            DatasetMetadata("layer", "my", "table", 1), SQLQuery()
+            DatasetMetadata("layer", "my", "table", 1), Query()
         )
 
         self.mock_athena_client.start_query_execution.assert_called_once_with(
@@ -172,10 +170,10 @@ class TestLargeQuery:
 
         self.athena_adapter.query_async(
             DatasetMetadata("layer", "my", "table", 1),
-            SQLQuery(
+            Query(
                 select_columns=["column1", "column2"],
                 group_by_columns=["column2"],
-                order_by_columns=[SQLQueryOrderBy(column="column1")],
+                order_by_columns=[QueryOrderBy(column="column1")],
                 limit=2,
             ),
         )
@@ -194,7 +192,7 @@ class TestLargeQuery:
 
         with pytest.raises(UserError, match="Query failed to execute: Some error"):
             self.athena_adapter.query_async(
-                DatasetMetadata("layer", "my", "table", 1), SQLQuery()
+                DatasetMetadata("layer", "my", "table", 1), Query()
             )
 
     def test_query_fails_because_of_invalid_format(self):
@@ -210,7 +208,7 @@ class TestLargeQuery:
             UserError, match="Failed to execute query: The error message"
         ):
             self.athena_adapter.query_async(
-                DatasetMetadata("layer", "my", "table", 10), SQLQuery()
+                DatasetMetadata("layer", "my", "table", 10), Query()
             )
 
     def test_query_fails_because_table_does_not_exist(self):
@@ -222,7 +220,7 @@ class TestLargeQuery:
 
         with pytest.raises(UserError, match=expected_message):
             self.athena_adapter.query_async(
-                DatasetMetadata("layer", "my", "table", 1), SQLQuery()
+                DatasetMetadata("layer", "my", "table", 1), Query()
             )
 
 
