@@ -89,9 +89,11 @@ class DatasetAccessEvaluator:
                 in SensitivityPermissionConverter[permission.sensitivity].value,
                 schema_metadata.get_layer()
                 in LayerPermissionConverter[permission.layer].value,
-                schema_metadata.get_domain() == permission.get_domain()
-                if permission.is_protected_permission()
-                else True,
+                (
+                    schema_metadata.get_domain() == permission.get_domain()
+                    if permission.is_protected_permission()
+                    else True
+                ),
             ]
         )
 

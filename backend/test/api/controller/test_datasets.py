@@ -23,7 +23,7 @@ from api.domain.dataset_metadata import DatasetMetadata
 from api.domain.schema import Schema, Column
 from api.domain.schema_metadata import Owner, SchemaMetadata
 from api.domain.search_metadata import SearchMetadata, MatchField
-from api.domain.sql_query import SQLQuery
+from rapid.items.query import Query
 from test.api.common.controller_test_utils import BaseClientTest
 
 
@@ -829,7 +829,7 @@ class TestQuery(BaseClientTest):
         )
         assert res.status_code == 200
         mock_query_method.assert_called_once_with(
-            DatasetMetadata("raw", "mydomain", "mydataset", 1), SQLQuery()
+            DatasetMetadata("raw", "mydomain", "mydataset", 1), Query()
         )
 
     @patch.object(DataService, "query_data")
@@ -844,7 +844,7 @@ class TestQuery(BaseClientTest):
 
         mock_query_method.assert_called_once_with(
             DatasetMetadata("raw", "mydomain", "mydataset", 1),
-            SQLQuery(select_columns=["column1"], limit="10"),
+            Query(select_columns=["column1"], limit="10"),
         )
 
     @patch("api.controller.datasets.construct_dataset_metadata")
@@ -860,7 +860,7 @@ class TestQuery(BaseClientTest):
         self.client.post(query_url, headers={"Authorization": "Bearer test-token"})
 
         mock_query_method.assert_called_once_with(
-            DatasetMetadata("raw", "mydomain", "mydataset", 32), SQLQuery()
+            DatasetMetadata("raw", "mydomain", "mydataset", 32), Query()
         )
 
     @patch.object(DataService, "query_data")
@@ -882,7 +882,7 @@ class TestQuery(BaseClientTest):
 
         mock_query_method.assert_called_once_with(
             DatasetMetadata("raw", "mydomain", "mydataset", 1),
-            SQLQuery(
+            Query(
                 select_columns=["column1"],
                 filter="",
                 aggregation_conditions="",
@@ -1053,7 +1053,7 @@ class TestLargeDatasetQuery(BaseClientTest):
         mock_large_query_method.assert_called_once_with(
             subject_id,
             DatasetMetadata("raw", "mydomain", "mydataset", 1),
-            SQLQuery(),
+            Query(),
         )
 
     @patch.object(DataService, "query_large_data")
@@ -1077,7 +1077,7 @@ class TestLargeDatasetQuery(BaseClientTest):
         mock_large_query_method.assert_called_once_with(
             subject_id,
             DatasetMetadata("raw", "mydomain", "mydataset", 10),
-            SQLQuery(select_columns=["column1"], limit="10"),
+            Query(select_columns=["column1"], limit="10"),
         )
 
     @patch("api.controller.datasets.construct_dataset_metadata")
@@ -1100,7 +1100,7 @@ class TestLargeDatasetQuery(BaseClientTest):
         self.client.post(query_url, headers={"Authorization": "Bearer test-token"})
 
         mock_large_query_method.assert_called_once_with(
-            subject_id, DatasetMetadata("raw", "mydomain", "mydataset", 3), SQLQuery()
+            subject_id, DatasetMetadata("raw", "mydomain", "mydataset", 3), Query()
         )
 
     @patch.object(DataService, "query_large_data")
@@ -1134,7 +1134,7 @@ class TestLargeDatasetQuery(BaseClientTest):
                 "mydataset",
                 13,
             ),
-            SQLQuery(
+            Query(
                 select_columns=["column1"],
                 filter="",
                 aggregation_conditions="",

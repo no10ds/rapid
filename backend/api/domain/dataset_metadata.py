@@ -1,3 +1,4 @@
+# TODO: Remove external dependencies so that this class can be moved to the sdk package
 import json
 from typing import List, Optional, TYPE_CHECKING
 

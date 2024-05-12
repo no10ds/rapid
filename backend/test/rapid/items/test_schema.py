@@ -1,7 +1,13 @@
 import pytest
 from pydantic import ValidationError
 
-from rapid.items.schema import Schema, SchemaMetadata, Column, Owner, SensitivityLevel
+from rapid.items.schema import Schema, Column
+from rapid.items.schema_metadata import (
+    SchemaMetadata,
+    SensitivityLevel,
+    Owner,
+    UpdateBehaviour,
+)
 
 
 DUMMY_COLUMNS = [
@@ -260,11 +266,14 @@ class TestSchema:
                 "layer": "raw",
                 "domain": "test",
                 "dataset": "rapid_sdk",
-                "sensitivity": "PUBLIC",
+                "sensitivity": SensitivityLevel.PUBLIC,
+                "description": "",
+                "update_behaviour": UpdateBehaviour.APPEND,
                 "owners": [{"name": "Test", "email": "test@email.com"}],
                 "version": None,
                 "key_value_tags": {},
                 "key_only_tags": [],
+                "is_latest_version": True,
             },
             "columns": [
                 {
