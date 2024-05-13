@@ -176,3 +176,7 @@ export type PermissionUiResponse = {
     | string
     | { [key: string]: { [key: string]: string | { [key: string]: string } } }
 }
+
+export type AccessTokenResponse = {
+  token: string
+}
