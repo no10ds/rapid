@@ -75,7 +75,7 @@ api/test-e2e:			## Run api python e2e tests
 	@cd api/; . .venv/bin/activate; pytest test/e2e -v
 
 api/test-e2e-focus:		## Run api python e2e tests marked with `@pytest.mark.focus`
-	@cd api/; . .venv/bin/activate; pytest test/e2e -v -m focus
+	@cd api/; . .venv/bin/activate; pytest test/e2e -v -s -m focus
 
 # API Security --------------------
 ##

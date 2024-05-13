@@ -1,6 +1,7 @@
 flake8
 pytest
 pytest-cov
+pytest-order
 python-dotenv
 
 -r ./requirements.txt

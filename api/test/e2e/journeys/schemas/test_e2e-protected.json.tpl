@@ -1,20 +1,19 @@
 {
   "metadata": {
     "layer": "default",
-    "domain": "test_e2e",
-    "dataset": "upload",
-    "sensitivity": "PUBLIC",
+    "domain": "test_e2e_protected",
+    "dataset": "{{name}}",
+    "sensitivity": "PROTECTED",
     "description": "A test dataset",
-    "tags": {
-      "test_e2e": "upload",
-      "test": "e2e"
-    },
+    "key_value_tags": {},
+    "key_only_tags": [],
     "owners": [
       {
-        "name": "upload",
-        "email": "upload@test.com"
+        "name": "test_e2e_protected",
+        "email": "test_e2e_protected@email.com"
       }
     ],
+    "tags": {},
     "update_behaviour": "OVERWRITE"
   },
   "columns": [

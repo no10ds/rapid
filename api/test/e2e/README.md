@@ -1,21 +1,15 @@
 # E2E Tests
 
-## Initial Setup
+## Setup
 
-The E2E tests require some first time setup. The tests will hit the real endpoints and some validation checks are
-performed that require the relevant resources to be available in AWS (files in S3, Crawlers, Glue Tables, etc.).
+Before running the E2E tests, you need to set the following environment variables so that the tests can run against your instance of rAPId.
 
-### Data setup
-
-Run [this](./setup_e2e_tests.py) script, passing in values for the environment variables listed below.
-
-```bash
-CLIENT_ID
-CLIENT_SECRET
-BASE_URL
+```
+E2E_RESOURCE_PREFIX = #The resource prefix of your rAPId instance
+DOMAIN_NAME = #The domain name that your rAPId instance is hosted at
 ```
 
-> Note: After running this it will take a few minutes for the uploaded data to become available and for the tests to pass.
+You will also need to be authenticated to the relevant AWS account.
 
 ## Running the tests
 
@@ -26,9 +20,3 @@ To run them locally against the live instance, use:
 ```bash
 make test-e2e
 ```
-
-## Gotchas
-
-If some tests return an HTTP status of 429, this is due to crawlers still running (or in their stopping phase). This
-generally happens when the E2E tests are run multiple times in quick succession. Wait for the crawlers to finish and
-re-run the tests.
