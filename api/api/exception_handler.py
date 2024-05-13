@@ -8,7 +8,7 @@ from fastapi.templating import Jinja2Templates
 from starlette.responses import RedirectResponse
 
 from api.application.services.authorisation.authorisation_service import (
-    UserCredentialsUnavailableError,
+    CredentialsUnavailableError,
     is_browser_request,
 )
 from api.common.custom_exceptions import (
@@ -22,7 +22,7 @@ templates = Jinja2Templates(directory=(os.path.abspath("templates")))
 
 def add_exception_handlers(app: FastAPI) -> None:
     # Custom handlers
-    @app.exception_handler(UserCredentialsUnavailableError)
+    @app.exception_handler(CredentialsUnavailableError)
     async def user_credentials_missing_handler(request, exc):
         return RedirectResponse(url="/login")
 
@@ -74,7 +74,7 @@ def add_exception_handlers(app: FastAPI) -> None:
 
     def _generate_pydantic_error_message(message: dict) -> List[str]:
         PYDANTIC_JSON_DECODE_ERROR = "json_invalid"
-        PATH_STR_REGEX_ERROR = "string_pattern_mismatch"
+        PATH_STR_REGEX_ERROR = "value_error.str.regex"
         REGEX_ERROR_MAP = {r"^[a-z0-9_\-]+$": "was required to be lowercase only."}
 
         error_messages = []

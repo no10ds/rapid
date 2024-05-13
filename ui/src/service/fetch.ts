@@ -15,12 +15,18 @@ import {
   GetLoginResponse,
   MethodsResponse,
   PermissionUiResponse,
-  SubjectPermission
+  SubjectPermission,
+  AccessTokenResponse
 } from './types'
 import { api } from '@/utils/data'
 
 export const getAuthStatus = async (): Promise<AuthResponse> => {
   const res = await api(`/api/auth`, { method: 'GET' })
+  return res.json()
+}
+
+export const getDevToken = async (): Promise<AccessTokenResponse> => {
+  const res = await fetch(`/api/dev/token`, { method: 'GET', cache: 'force-cache' })
   return res.json()
 }
 

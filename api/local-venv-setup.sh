@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eu -o pipefail
 
-required_py_version="Python 3.10.2"
+required_py_version="Python 3.10.6"
 
 function check-py-version() {
   py_version=$( python3 --version )
@@ -12,8 +12,8 @@ function check-py-version() {
 }
 
 function create-venv() {
-  python3 -m venv venv
-  source venv/bin/activate
+  python3 -m venv .venv
+  source .venv/bin/activate
   pip install -r requirements.txt
   deactivate
   echo "Virtual environment set up successfully"

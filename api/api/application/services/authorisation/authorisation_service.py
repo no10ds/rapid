@@ -5,7 +5,7 @@ from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
 from fastapi.security import OAuth2
 from fastapi.security import SecurityScopes
 from fastapi.security.utils import get_authorization_scheme_param
-from jwt.exceptions import InvalidTokenError
+from jwt.exceptions import InvalidTokenError, DecodeError
 from starlette.requests import Request
 from starlette.status import HTTP_401_UNAUTHORIZED
 
@@ -23,7 +23,7 @@ from api.common.config.auth import (
 from api.common.config.layers import Layer
 from api.common.custom_exceptions import (
     AuthorisationError,
-    UserCredentialsUnavailableError,
+    CredentialsUnavailableError,
     NotAuthorisedToViewPageError,
     AuthenticationError,
 )
@@ -137,14 +137,6 @@ def process_dataset_metadata(layer, domain, dataset) -> DatasetMetadata:
         raise AuthenticationError("You are not authorised to perform this action")
 
 
-def get_subject_id(request: Request):
-    client_token = get_client_token(request)
-    user_token = get_user_token(request)
-    token = client_token if client_token else user_token
-    token = parse_token(token)
-    return token.subject
-
-
 def get_client_token(request: Request) -> Optional[str]:
     authorization: str = request.headers.get("Authorization")
     scheme, jwt_token = get_authorization_scheme_param(authorization)
@@ -157,6 +149,21 @@ def get_user_token(request: Request) -> Optional[str]:
     return request.cookies.get(RAPID_ACCESS_TOKEN, None)
 
 
+def get_token(request: Request) -> Optional[str]:
+    client_token = get_client_token(request)
+    user_token = get_user_token(request)
+    return client_token if client_token else user_token
+
+
+def get_subject_id(request: Request):
+    token = get_token(request)
+    try:
+        parsed_token = parse_token(token)
+    except DecodeError:
+        raise CredentialsUnavailableError("Could not fetch user credentials")
+    return parsed_token.subject if token else None
+
+
 def check_credentials_availability(
     browser_request: bool,
     client_token: Optional[str],
@@ -165,7 +172,7 @@ def check_credentials_availability(
     if not have_credentials(client_token, user_token):
         if browser_request:
             AppLogger.info("Cannot retrieve user credentials if no user token provided")
-            raise UserCredentialsUnavailableError()
+            raise CredentialsUnavailableError()
         else:
             AppLogger.info(
                 "Cannot retrieve client credentials if no client token provided"
