@@ -30,10 +30,10 @@ jobs:
           echo AWS_REGION=${{ secrets.AWS_REGION }} >> .env
 
       - name: Build API Image
-        run: make api-create-image
+        run: make api/create-image
 
       - name: API Tag and Upload Release Image
-        run: make api-tag-and-upload-release-image
+        run: make api/tag-and-upload-release-image
 
   ui-release:
     needs:
@@ -46,25 +46,24 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: 19
+          node-version: 20
 
       - name: Install UI Packages
-        run: make ui-setup
+        run: make ui/setup
 
       - name: UI Build Static Files
-        run: make ui-create-static-out
+        run: make ui/create-static-out
 
       - name: UI Zip and Release
         env:
           TAG: ${{ github.event.release.tag_name }}
           GH_TOKEN: ${{ github.token }}
-        run: make ui-zip-and-release tag=$TAG
+        run: make ui/zip-and-release tag=$TAG
 
   cleanup:
     needs:
       - setup
       - api-release
-      - ui-release
     runs-on: self-hosted
     steps:
       - name: Checkout
@@ -72,4 +71,4 @@ jobs:
 
       - name: Clean Docker Context
         if: always()
-        run: make clean-pipeline-docker-context
+        run: make api/clean-docker
