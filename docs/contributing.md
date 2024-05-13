@@ -1,21 +1,17 @@
 ## Prerequisites
 
-### Install all the required tools:
+### Install the dependencies
 
-- jq (use Homebrew)
 - Git
-- [pre-commit](https://pre-commit.com)
 - [Make](https://formulae.brew.sh/formula/make)
-- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 - [Homebrew](https://brew.sh/)
 - Docker
-- [Java version 8+](https://mkyong.com/java/how-to-install-java-on-mac-osx/) (for Batect, future releases will remove this dependency)
-- Python (v3.10) - Only for local development without Docker (ideally manage
-  via [pyenv](https://github.com/pyenv/pyenv))
 
-### Install the pre-commit hooks.
+Use brew to install the rest of the dependencies and setup the pre-commit hooks by running:
 
-In the project root run `make precommit`. This will install all the relevant pre-commit hooks across the entire codebase.
+```
+make setup
+```
 
 ## Running the API
 
@@ -33,21 +29,17 @@ ALLOWED_EMAIL_DOMAINS=
 
 You can then run the following commands from within the root project directory:
 
-`make api-run` runs Batect to bring up a locally running version of the API within a Docker container.
+- `make python-setup` - Installs and selects the correct version of Python with pyenv.
 
-`make api-run-dev` runs Batect to bring up a locally running version of the API within a Docker container using a "hot-reload" mode so you can keep this running during development.
+- `make api/setup` - Creates the virtual environment for the API and pip installs the Python dependencies.
+
+- `make api/run` - Runs the API in development mode
 
 ## Passing an AWS Role
 
 As the application connects to AWS services you will need to provide the application with AWS credentials.
 
-To do this, you will need to add the following environment variables to the `.env` file of rAPId.
-
-```
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_SESSION_TOKEN=
-```
+The AWS credentials need to be present as environment variables, wherever you are running the application from.
 
 For security, we recommend that these are only the temporary credentials of an assumed role.
 
@@ -55,8 +47,8 @@ For security, we recommend that these are only the temporary credentials of an a
 
 You can run the UI locally for development either against an already running rAPId instance that has been deployed or a locally running instance of rAPId.
 
-1. Install `npm`, we recommend using [nvm](https://github.com/nvm-sh/nvm)
-2. Install the all the required packages `make ui-setup`
+1. Install the correct version of node with nvm by running `make node-setup`
+2. Install the all the required packages `make ui/setup`
 
 To connect the UI with your rAPId instance you will need to setup two environment variable files, both within `./ui`:
 
@@ -78,7 +70,7 @@ UI_CLIENT_ID=
 UI_CLIENT_SECRET=
 ```
 
-Running `make ui-run-dev` will then launch the UI in development mode with hot reloading.
+Running `make ui/run-dev` will then launch the UI in development mode with hot reloading.
 
 ## Testing
 
@@ -101,19 +93,19 @@ LAYERS=raw,layer
 
 Then run the following command from within the root project directory:
 
-`make api-test`
+`make api/test`
 
 ### UI
 
 To test the UI run the following command from within the root project directory:
 
-`make ui-test`
+`make ui/test`
 
 ### SDK
 
 To test the SDK run the following command from within the root project directory:
 
-`make sdk-test`
+`make sdk/test`
 
 ## Security
 
@@ -125,7 +117,7 @@ To scan for security vulnerabilities run `make security-check`
 
 #### Infrastructure flaws
 
-To launch a static scan on the infrastructure, you can run `make infra-scan`.
+To launch a static scan on the infrastructure, you can run `make infra/scan`.
 
 [checkov](https://www.checkov.io/) is used to check for flaws in the AWS architecture.
 
@@ -172,8 +164,7 @@ Performing a release involves tagging the repository with a new version number s
 
 ### Prerequisites
 
-- Download the GitHub CLI with `brew install gh`
-- Then run `gh auth login` and follow the steps
+- Run `gh auth login` and follow the steps
 
 ### Steps
 
