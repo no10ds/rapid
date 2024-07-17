@@ -83,6 +83,12 @@ variable "geo_restriction_locations" {
   default     = ["GB"]
 }
 
+variable "sql_injection_protection" {
+  description = "Wheather to add SQL injection protection to WAF."
+  type        = bool
+  default     = true
+}
+
 variable "password_policy" {
   type = object({
     minimum_length                   = number
