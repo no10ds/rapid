@@ -84,7 +84,7 @@ variable "geo_restriction_locations" {
 }
 
 variable "sql_injection_protection" {
-  description = "Wheather to add SQL injection protection to WAF."
+  description = "Whether to add SQL injection protection rule to WAF. Setting the variable to false may result in reduced application protection."
   type        = bool
   default     = true
 }
