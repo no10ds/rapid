@@ -28,6 +28,9 @@ class SchemaMetadata(BaseModel):
     version: Optional[int] = None
     key_value_tags: Optional[Dict[str, str]] = {}
     key_only_tags: Optional[List[str]] = []
+    description: Optional[str] = ""
+    update_behaviour: Optional[str] = "APPEND"
+    is_latest_version: Optional[bool] = True
 
     class Config:
         use_enum_values = True
