@@ -1,5 +1,11 @@
 # SDK Changelog
 
+## v0.1.9 - _2024-09-12_
+
+### Features
+
+- Expanded rAPId sdk metadata to include: update_behaviour, is_latest_version and description.
+
 ## v0.1.8 - _2024-03-21_
 
 ### Features
