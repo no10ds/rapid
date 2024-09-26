@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eu -o pipefail
 
-LATEST_TAG=$(git rev-parse --short "$GITHUB_SHA")
+LATEST_TAG=$(git rev-parse --short HEAD)
 IGNORE_LIST_FILE=vulnerability-ignore-list.txt
 
 RETRIES=0
