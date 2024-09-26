@@ -1,5 +1,13 @@
 # API Changelog
 
+## v7.11.0 - _2024-09-26_
+
+### Fixes
+
+- Removed dependency on batect
+- Removed the need to copy the access token when running the UI locally
+- Refactored the e2e tests
+
 ## v7.10.0 - _2024-03-21_
 
 ### Fixes
