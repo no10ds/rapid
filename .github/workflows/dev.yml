@@ -50,16 +50,25 @@ jobs:
           echo AWS_DEFAULT_REGION=${{ secrets.AWS_REGION }} >> .env
 
       - name: Build API Image
-        run: make api-create-image
+        run: make api/create-image
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Setup API environment
+        run: make api/setup
 
       - name: API Static Analysis
-        run: make api-lint
+        run: make api/lint
 
       - name: API Tests
-        run: make api-test
+        run: make api/test
 
       - name: API Tag and Upload
-        run: make api-tag-and-upload
+        run: make api/tag-and-upload
 
   sdk-dev:
     needs:
@@ -84,18 +93,17 @@ jobs:
 
       - name: Setup Python Environment
         run: |
-          make sdk-setup
-          source sdk/.venv/bin/activate
+          make sdk/setup
 
       - name: SDK Test
-        run: make sdk-test
+        run: make sdk/test
 
       - name: Set env variable
         run: echo "TEST_SDK_VERSION=$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
 
       - name: SDK Test Deploy
-        run: make sdk-release-test
-        
+        run: make sdk/release-test
+
   ui-dev:
     needs:
       - setup
@@ -108,13 +116,13 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: 19
+          node-version: 20
 
       - name: Install UI Packages
-        run: make ui-setup
+        run: make ui/setup
 
       - name: UI Test
-        run: make ui-test
+        run: make ui/test
 
   cleanup:
     needs:
@@ -130,4 +138,4 @@ jobs:
 
       - name: Clean Docker Context
         if: always()
-        run: make clean-pipeline-docker-context
+        run: make api/clean-docker

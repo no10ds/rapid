@@ -1,4 +1,4 @@
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 
 import pytest
 from api.application.services.authorisation.dataset_access_evaluator import (
@@ -14,15 +14,9 @@ from test.api.common.controller_test_utils import BaseClientTest
 
 
 @pytest.fixture(scope="session", autouse=True)
-def get_client_token_mock():
-    with patch("api.entry.get_client_token", return_value=None) as client_token_mock:
+def get_subject_id_mock():
+    with patch("api.entry.get_subject_id", return_value=None) as client_token_mock:
         yield client_token_mock
-
-
-@pytest.fixture(scope="session", autouse=True)
-def get_user_token_mock():
-    with patch("api.entry.get_user_token", return_value=None) as user_token_mock:
-        yield user_token_mock
 
 
 class TestStatus(BaseClientTest):
@@ -51,15 +45,13 @@ class TestStatus(BaseClientTest):
 
 
 class TestDatasetsUI(BaseClientTest):
-    @patch("api.entry.parse_token")
+    @patch("api.entry.get_subject_id")
     @patch.object(DatasetAccessEvaluator, "get_authorised_datasets")
     def test_gets_datasets_for_ui_write(
-        self, mock_get_authorised_datasets, mock_parse_token
+        self, mock_get_authorised_datasets, mock_get_subject_id
     ):
         subject_id = "123abc"
-        mock_token = Mock()
-        mock_token.subject = subject_id
-        mock_parse_token.return_value = mock_token
+        mock_get_subject_id.return_value = subject_id
 
         mock_get_authorised_datasets.return_value = [
             DatasetMetadata("layer", "domain1", "datset1", 1),
@@ -74,15 +66,13 @@ class TestDatasetsUI(BaseClientTest):
         mock_get_authorised_datasets.assert_called_once_with(subject_id, Action.WRITE)
         assert response.status_code == 200
 
-    @patch("api.entry.parse_token")
+    @patch("api.entry.get_subject_id")
     @patch.object(DatasetAccessEvaluator, "get_authorised_datasets")
     def test_gets_datasets_for_ui_read(
-        self, mock_get_authorised_datasets, mock_parse_token
+        self, mock_get_authorised_datasets, mock_get_subject_id
     ):
         subject_id = "123abc"
-        mock_token = Mock()
-        mock_token.subject = subject_id
-        mock_parse_token.return_value = mock_token
+        mock_get_subject_id.return_value = subject_id
 
         mock_get_authorised_datasets.return_value = [
             DatasetMetadata("layer", "domain1", "datset1", 1),
@@ -137,14 +127,12 @@ class TestMethodsUI(BaseClientTest):
         assert allowed_actions["can_create_schema"] is can_create_schema
         assert allowed_actions["can_search_catalog"] is can_search_catalog
 
-    @patch("api.entry.parse_token")
+    @patch("api.entry.get_subject_id")
     @patch("api.entry.permissions_service")
     def test_calls_methods_with_expected_arguments(
-        self, mock_permissions_service, mock_parse_token
+        self, mock_permissions_service, mock_get_subject_id
     ):
-        mock_token = Mock()
-        mock_token.subject = "123abc"
-        mock_parse_token.return_value = mock_token
+        mock_get_subject_id.return_value = "123abc"
 
         mock_permissions_service.get_subject_permission_keys.return_value = [
             "READ_ALL",
@@ -167,14 +155,12 @@ class TestMethodsUI(BaseClientTest):
             "can_search_catalog": True,
         }
 
-    @patch("api.entry.parse_token")
+    @patch("api.entry.get_subject_id")
     @patch("api.entry.permissions_service")
     def test_calls_methods_with_expected_arguments_when_user_error(
-        self, mock_permissions_service, mock_parse_token
+        self, mock_permissions_service, mock_get_subject_id
     ):
-        mock_token = Mock()
-        mock_token.subject = "123abc"
-        mock_parse_token.return_value = mock_token
+        mock_get_subject_id.return_value = "123abc"
 
         mock_permissions_service.get_subject_permission_keys.side_effect = UserError(
             "a message"
@@ -189,14 +175,12 @@ class TestMethodsUI(BaseClientTest):
             "error_message": "You have not been granted relevant permissions. Please speak to your system administrator.",
         }
 
-    @patch("api.entry.parse_token")
+    @patch("api.entry.get_subject_id")
     @patch("api.entry.permissions_service")
     def test_calls_methods_with_expected_arguments_when_aws_error(
-        self, mock_permissions_service, mock_parse_token
+        self, mock_permissions_service, mock_get_subject_id
     ):
-        mock_token = Mock()
-        mock_token.subject = "123abc"
-        mock_parse_token.return_value = mock_token
+        mock_get_subject_id.return_value = "123abc"
 
         mock_permissions_service.get_subject_permission_keys.side_effect = (
             AWSServiceError("a custom message")
@@ -211,15 +195,14 @@ class TestMethodsUI(BaseClientTest):
             "error_message": "a custom message",
         }
 
-    @patch("api.entry.parse_token")
+    @patch("api.entry.get_subject_id")
     @patch("api.entry.permissions_service")
     @patch("api.entry._determine_user_ui_actions")
     def test_calls_methods_with_expected_arguments_when_no_permissions(
-        self, mock_ui_actions, mock_permissions_service, mock_parse_token
+        self, mock_ui_actions, mock_permissions_service, mock_get_subject_id
     ):
-        mock_token = Mock()
-        mock_token.subject = "123abc"
-        mock_parse_token.return_value = mock_token
+
+        mock_get_subject_id.return_value = "123abc"
 
         mock_ui_actions.return_value = {}
 

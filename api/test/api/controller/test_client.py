@@ -71,7 +71,7 @@ class TestClientCreation(BaseClientTest):
         )
 
         assert response.status_code == 400
-        assert response.json() == {"details": ["client_name -> Field required"]}
+        assert response.json() == {"details": ["client_name -> field required"]}
 
     @patch.object(SubjectService, "create_client")
     def test_bad_request_when_invalid_permissions(self, mock_create_client):
