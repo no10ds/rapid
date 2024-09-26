@@ -2,18 +2,17 @@
   "metadata": {
     "layer": "default",
     "domain": "test_e2e",
-    "dataset": "update",
+    "dataset": "{{name}}",
     "sensitivity": "PUBLIC",
     "description": "A test dataset",
     "tags": {
-      "test_e2e": "upload",
-      "test": "e2e",
-      "new_tag": "should not be created"
+      "test_e2e": "unauthorised",
+      "test": "e2e"
     },
     "owners": [
       {
-        "name": "upload",
-        "email": "upload1@test.com"
+        "name": "unauthorised",
+        "email": "unauthorised@test.com"
       }
     ],
     "update_behaviour": "OVERWRITE"
@@ -23,43 +22,43 @@
       "name": "year",
       "partition_index": null,
       "data_type": "int",
-      "allow_null": true
+      "allow_null": true,
+      "format": null
     },
     {
       "name": "month",
       "partition_index": null,
-      "data_type": "double",
-      "allow_null": true
+      "data_type": "int",
+      "allow_null": true,
+      "format": null
     },
     {
       "name": "destination",
       "partition_index": null,
       "data_type": "string",
-      "allow_null": true
+      "allow_null": true,
+      "format": null
     },
     {
       "name": "arrival",
       "partition_index": null,
       "data_type": "string",
-      "allow_null": true
+      "allow_null": true,
+      "format": null
     },
     {
       "name": "type",
       "partition_index": null,
       "data_type": "string",
-      "allow_null": true
+      "allow_null": true,
+      "format": null
     },
     {
       "name": "status",
       "partition_index": null,
       "data_type": "string",
-      "allow_null": true
-    },
-    {
-      "name": "newcolumn",
-      "partition_index": null,
-      "data_type": "int",
-      "allow_null": true
+      "allow_null": true,
+      "format": null
     }
   ]
 }

@@ -1,19 +1,20 @@
 {
   "metadata": {
     "layer": "default",
-    "domain": "test_e2e_protected",
-    "dataset": "do_not_delete",
-    "sensitivity": "PROTECTED",
+    "domain": "test_e2e",
+    "dataset": "{{ name }}",
+    "sensitivity": "PUBLIC",
     "description": "A test dataset",
-    "key_value_tags": {},
-    "key_only_tags": [],
+    "tags": {
+      "test_e2e": "query",
+      "test": "e2e"
+    },
     "owners": [
       {
-        "name": "test_e2e_protected",
-        "email": "test_e2e_protected@email.com"
+        "name": "query",
+        "email": "query@test.com"
       }
     ],
-    "tags": {},
     "update_behaviour": "OVERWRITE"
   },
   "columns": [
