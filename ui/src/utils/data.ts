@@ -1,5 +1,6 @@
 import { createUrl } from './url'
 import { defaultError } from '@/lang'
+import { getDevToken } from '@/service'
 
 export type ParamsType = Record<string, string | string[] | number>
 
@@ -12,9 +13,18 @@ export const api = async (
   const baseUrl = API_URL ? `${API_URL}${path}` : path
   const url = createUrl(`${baseUrl}`, params)
   let detailMessage
+
+  let headers = {}
+
+  if (process.env.NODE_ENV === 'development') {
+    const response = await getDevToken()
+    headers['Authorization'] = `Bearer ${response.token}`
+  }
+
   const res: Response = await fetch(url, {
     credentials: 'include',
-    ...init
+    ...init,
+    headers: headers
   })
   if (res.ok) return res
   try {

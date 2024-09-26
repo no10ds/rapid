@@ -41,6 +41,12 @@ def partitioned_dataframe(df: pd.DataFrame, partitions: List[str]) -> List[Parti
         cleaned_dataframe = drop_columns(df=group_data, columns=partitions).reset_index(
             drop=True
         )
+
+        # Pandas returns group_spec as an integer if there is just one partition, but a tuple otherwise
+        # These two lines are to fix standardise the output across both scenarios.
+        if isinstance(group_spec, int):
+            group_spec = (group_spec,)
+
         partitioned_data.append(
             Partition(
                 keys=group_spec,

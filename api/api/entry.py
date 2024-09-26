@@ -9,13 +9,9 @@ from fastapi.staticfiles import StaticFiles
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_401_UNAUTHORIZED
 
 from api.application.services.authorisation.authorisation_service import (
-    get_client_token,
-    get_user_token,
     secure_endpoint,
-    RAPID_ACCESS_TOKEN,
-    user_logged_in,
+    get_subject_id,
 )
-from api.application.services.authorisation.token_utils import parse_token
 from api.application.services.permissions_service import PermissionsService
 from api.application.services.authorisation.dataset_access_evaluator import (
     DatasetAccessEvaluator,
@@ -24,7 +20,11 @@ from api.common.config.auth import IDENTITY_PROVIDER_BASE_URL, Action
 from api.common.config.docs import custom_openapi_docs_generator, COMMIT_SHA, VERSION
 from api.common.config.constants import BASE_API_PATH
 from api.common.logger import AppLogger, init_logger
-from api.common.custom_exceptions import UserError, AWSServiceError
+from api.common.custom_exceptions import (
+    UserError,
+    AWSServiceError,
+    CredentialsUnavailableError,
+)
 from api.common.utilities import strtobool
 from api.controller.auth import auth_router
 from api.controller.client import client_router
@@ -79,7 +79,10 @@ async def startup_event():
 @app.middleware("http")
 async def request_middleware(request: Request, call_next):
     query_params = request.url.include_query_params()
-    subject_id = _get_subject_id(request)
+    try:
+        subject_id = get_subject_id(request)
+    except CredentialsUnavailableError:
+        subject_id = "Not an authenticated user"
     AppLogger.info(
         f"    Request started: {request.method} {query_params} by subject: {subject_id}"
     )
@@ -134,7 +137,7 @@ def info():
     include_in_schema=False,
 )
 async def get_auth(request: Request):
-    if user_logged_in(request):
+    if get_subject_id(request) is not None:
         return {"detail": "success"}
     else:
         raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail=str("fail"))
@@ -152,7 +155,7 @@ async def methods(request: Request):
     default_error_message = "You have not been granted relevant permissions. Please speak to your system administrator."
 
     try:
-        subject_id = parse_token(request.cookies.get(RAPID_ACCESS_TOKEN)).subject
+        subject_id = get_subject_id(request)
         subject_permissions = permissions_service.get_subject_permission_keys(
             subject_id
         )
@@ -184,8 +187,7 @@ async def get_permissions_ui():
     include_in_schema=False,
 )
 async def get_datasets_ui(action: Action, request: Request):
-    subject_id = parse_token(request.cookies.get(RAPID_ACCESS_TOKEN)).subject
-
+    subject_id = get_subject_id(request)
     datasets = upload_service.get_authorised_datasets(subject_id, action)
     return [dataset.to_dict() for dataset in datasets]
 
@@ -193,13 +195,6 @@ async def get_datasets_ui(action: Action, request: Request):
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
     return FileResponse("static/favicon.ico")
-
-
-def _get_subject_id(request: Request):
-    client_token = get_client_token(request)
-    user_token = get_user_token(request)
-    token = client_token if client_token else user_token
-    return parse_token(token).subject if token else "Not an authenticated user"
 
 
 def _determine_user_ui_actions(subject_permissions: List[str]) -> Dict[str, bool]:
@@ -217,10 +212,15 @@ def _determine_user_ui_actions(subject_permissions: List[str]) -> Dict[str, bool
                 for permission in subject_permissions
             )
         ),
-        "can_search_catalog": False
-        if CATALOG_DISABLED
-        else any(
-            (permission.startswith(Action.READ) for permission in subject_permissions)
+        "can_search_catalog": (
+            False
+            if CATALOG_DISABLED
+            else any(
+                (
+                    permission.startswith(Action.READ)
+                    for permission in subject_permissions
+                )
+            )
         ),
     }
 
