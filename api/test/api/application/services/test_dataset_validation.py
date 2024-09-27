@@ -1,6 +1,7 @@
 import re
 from typing import List
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -468,6 +469,8 @@ class TestDatasetValidation:
                 "col3": [1, 5, True],
                 "col4": [1.5, 2.5, "A"],
                 "col5": ["2021-01-01", "2021-05-01", 1000],
+                "col6": [None, None, None],
+                "col7": [np.nan, np.nan, np.nan]
             }
         )
         schema = Schema(
@@ -503,17 +506,27 @@ class TestDatasetValidation:
                     data_type="date",
                     allow_null=False,
                 ),
+                Column(
+                    name="col6",
+                    partition_index=None,
+                    data_type="string",
+                    allow_null=True,
+                ),
+                Column(
+                    name="col7",
+                    partition_index=None,
+                    data_type="string",
+                    allow_null=True,
+                ),
             ],
         )
 
-        try:
-            dataset_has_correct_data_types(df, schema)
-        except DatasetValidationError as error:
-            assert error.message == [
-                "Column [col2] has an incorrect data type. Expected boolean, received string",
-                "Column [col3] has an incorrect data type. Expected int, received string",
-                "Column [col4] has an incorrect data type. Expected double, received string",
-            ]
+        data_frame, error_list = dataset_has_correct_data_types(df, schema)
+        assert error_list == [
+            "Column [col2] has an incorrect data type. Expected boolean, received string",
+            "Column [col3] has an incorrect data type. Expected int, received string",
+            "Column [col4] has an incorrect data type. Expected bigint, received string",
+        ]
 
     def test_return_error_message_when_dataset_has_illegal_chars_in_partition_columns(
         self,
