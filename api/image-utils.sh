@@ -19,7 +19,7 @@ function _scan_in_progress {
 
   STATUS=$(aws ecr describe-image-scan-findings \
   --region "$AWS_REGION" \
-  --repository-name "$IMAGE_NAME" \
+  --repository-name "$API_IMAGE_NAME" \
   --image-id imageTag="$LATEST_TAG" \
   | jq '.imageScanStatus.status' \
   | jq -r .)
@@ -47,7 +47,7 @@ function _get_high_or_critical_vulnerabilities {
   VULNS=()
   while IFS='' read -r line; do VULNS+=("$line"); done < <(aws ecr describe-image-scan-findings \
   --region "$AWS_REGION" \
-  --repository-name "$IMAGE_NAME" \
+  --repository-name "$API_IMAGE_NAME" \
   --image-id imageTag="$1" \
   | jq '.imageScanFindings.findings[] | select(.severity == "HIGH" or .severity == "CRITICAL") | (.name + "_" + .uri)' \
   | jq -r .)
@@ -72,7 +72,7 @@ function get_image_sha_if_exists {
   set +e
   IMAGE_METADATA="$( aws ecr describe-images \
   --region "$AWS_REGION" \
-  --repository-name=$IMAGE_NAME \
+  --repository-name="$API_IMAGE_NAME" \
   --image-ids=imageTag="$1" 2> /dev/null )"
   set -e
   if [[ $? == 0 ]]; then
@@ -117,13 +117,13 @@ function tag_image {
 
   MANIFEST=$(aws ecr batch-get-image \
   --region "$AWS_REGION" \
-  --repository-name "$IMAGE_NAME" \
+  --repository-name "$API_IMAGE_NAME" \
   --image-ids imageTag="$2" \
   --query 'images[].imageManifest' --output text)
 
   aws ecr put-image \
   --region "$AWS_REGION" \
-  --repository-name "$IMAGE_NAME" \
+  --repository-name "$API_IMAGE_NAME" \
   --image-tag "$1" \
   --image-manifest "$MANIFEST" > /dev/null
 }
@@ -133,7 +133,7 @@ function _untag_and_delete {
 
   aws ecr batch-delete-image \
   --region "$AWS_REGION" \
-  --repository-name "$IMAGE_NAME" \
+  --repository-name "$API_IMAGE_NAME" \
   --image-ids imageTag="$1" > /dev/null
 }
 
