@@ -2,7 +2,7 @@
 export
 
 # Versions
-PYTHON_VERSION=3.10.6
+PYTHON_VERSION=3.12.6
 NODE_VERSION=lts/iron
 
 # Git references
@@ -83,7 +83,7 @@ api/scan-for-vulns-and-tag:	## Scan api ecr for latest image and tag as vulnerab
 	@cd api/; ./image-utils.sh "pipeline_post_scanning_processing"
 
 api/scheduled-prod-scan:	## Handle api scheduled scan result for production image
-	@cd api/; ./image-utils.sh "scheduled_scan_result_check" "PROD"
+	@cd api/; ./image-utils.sh "scheduled_scan_result_check" "b329333"
 
 # API Running --------------------
 ##
@@ -113,7 +113,7 @@ api/format:			## Run the api code format with black
 ##
 
 api/tag-image:		## Tag the image with the latest commit hash
-	@cd api/; docker tag rapid-api-service-image:latest $(API_ACCOUNT_ECR_URI)/$(API_IMAGE_NAME):$(GITHUB_SHORT_SHA)
+	@cd api/; docker tag rapid-api/service-image:latest $(API_ACCOUNT_ECR_URI)/$(API_IMAGE_NAME):$(GITHUB_SHORT_SHA)
 
 api/upload-image:	## Upload the tagged image to the image registry
 	@aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(API_ACCOUNT_ECR_URI) && docker push $(API_ACCOUNT_ECR_URI)/$(API_IMAGE_NAME):$(GITHUB_SHORT_SHA)
@@ -121,7 +121,7 @@ api/upload-image:	## Upload the tagged image to the image registry
 api/tag-and-upload:	api/tag-image api/upload-image	## Tag and upload the latest api image
 
 api/tag-release-image:			## Tag the image with the tag name
-	@cd api/; tag rapid-api-service-image:latest $(API_PUBLIC_URI)/$(API_PUBLIC_IMAGE):${GITHUB_REF_NAME}
+	@cd api/; tag rapid-api/service-image:latest $(API_PUBLIC_URI)/$(API_PUBLIC_IMAGE):${GITHUB_REF_NAME}
 
 api/upload-release-image:	## Upload the tagged release image to the image registry
 	@aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin $(API_PUBLIC_URI) && docker push $(API_PUBLIC_URI)/$(API_PUBLIC_IMAGE):${GITHUB_REF_NAME}
