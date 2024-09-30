@@ -10,6 +10,7 @@ psutil
 pyarrow
 pyjwt
 pydantic[email]
+python-dotenv
 python-multipart
 uvicorn
 requests
