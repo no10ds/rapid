@@ -10,7 +10,6 @@ GITHUB_SHA=$$(git rev-parse HEAD)
 GITHUB_REF_NAME=$$(git rev-parse --abbrev-ref HEAD)
 GITHUB_SHORT_SHA=$$(git rev-parse --short HEAD)
 
-
 # API Build variables
 API_ACCOUNT_ECR_URI=$(AWS_ACCOUNT).dkr.ecr.$(AWS_REGION).amazonaws.com
 API_PUBLIC_URI=public.ecr.aws
