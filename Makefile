@@ -83,7 +83,7 @@ api/scan-for-vulns-and-tag:	## Scan api ecr for latest image and tag as vulnerab
 	@cd api/; ./image-utils.sh "pipeline_post_scanning_processing"
 
 api/scheduled-prod-scan:	## Handle api scheduled scan result for production image
-	@cd api/; ./image-utils.sh "scheduled_scan_result_check" "b329333"
+	@cd api/; ./image-utils.sh "scheduled_scan_result_check" "PROD"
 
 # API Running --------------------
 ##
