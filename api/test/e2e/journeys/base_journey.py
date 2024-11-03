@@ -28,7 +28,8 @@ class BaseJourneyTest(ABC):
     raw_data_directory = f"raw_data/{layer}/{e2e_test_domain}"
     schema_directory = f"{FILE_PATH}/schemas"
 
-    filename = "test_journey_file.csv"
+    csv_filename = "test_journey_file.csv"
+    parquet_filename = "test_journey_file.parquet"
 
     def upload_dataset_url(self, layer: str, domain: str, dataset: str) -> str:
         return f"{self.datasets_endpoint}/{layer}/{domain}/{dataset}"
@@ -68,6 +69,32 @@ class BaseJourneyTest(ABC):
 
     def status_url(self) -> str:
         return f"{self.base_url}/status"
+
+    def user_url(self) -> str:
+        return f"{self.base_url}/user"
+
+    def client_url(self) -> str:
+        return f"{self.base_url}/client"
+
+    def jobs_url(self) -> str:
+        return f"{self.base_url}/jobs"
+
+    def list_datasets_url(self) -> str:
+        return f"{self.base_url}/datasets"
+
+    def layers_url(self) -> str:
+        return f"{self.base_url}/layers"
+
+    def query_large_dataset_url(
+        self, layer: str, domain: str, dataset: str, version: int = 0
+    ) -> str:
+        return f"{self.datasets_endpoint}/{layer}/{domain}/{dataset}/query/large?version={version}"
+
+    def protected_domain_url(self, domain: str = "test_domain") -> str:
+        return f"{self.base_url}/protected_domains/{domain}"
+
+    def schema_url(self) -> str:
+        return f"{self.base_url}/schema"
 
 
 class BaseAuthenticatedJourneyTest(BaseJourneyTest):
@@ -131,5 +158,13 @@ class BaseAuthenticatedJourneyTest(BaseJourneyTest):
         response = requests.delete(
             cls.upload_dataset_url(cls, cls.layer, cls.e2e_test_domain, name),
             headers=cls.generate_auth_headers(cls, "E2E_TEST_CLIENT_DATA_ADMIN"),
+        )
+        assert response.status_code == HTTPStatus.ACCEPTED
+
+    @classmethod
+    def delete_user(cls, name: str) -> str:
+        response = requests.delete(
+            cls.username(cls),
+            headers=cls.generate_auth_headers(cls, "E2E_TEST_CLIENT_USER_ADMIN"),
         )
         assert response.status_code == HTTPStatus.ACCEPTED

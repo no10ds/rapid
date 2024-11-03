@@ -36,7 +36,9 @@ class TestProtectedDomainJourneys(BaseAuthenticatedJourneyTest):
         cls.dataset = cls.create_schema("protected")
 
         # Upload file
-        files = {"file": (cls.filename, open("./test/e2e/" + cls.filename, "rb"))}
+        files = {
+            "file": (cls.csv_filename, open("./test/e2e/" + cls.csv_filename, "rb"))
+        }
         upload_url = cls.upload_dataset_url(
             cls, cls.layer, "test_e2e_protected", cls.dataset
         )
@@ -149,6 +151,8 @@ class TestProtectedDomainJourneys(BaseAuthenticatedJourneyTest):
         response = requests.post(url, headers=self.generate_auth_headers())
         assert response.status_code == HTTPStatus.UNAUTHORIZED
 
+    # @pytest.mark.focus
+    # @pytest.mark.order(2)
     def test_allows_access_to_protected_domain_when_granted_permission(self):
         self.assume_permissions(["READ_DEFAULT_PROTECTED_TEST_E2E_PROTECTED"])
 
@@ -176,3 +180,24 @@ class TestProtectedDomainJourneys(BaseAuthenticatedJourneyTest):
         }
 
         self.reset_permissions()
+
+    # @pytest.mark.focus
+    # @pytest.mark.order(3)
+    # def test_delete_protected_domain(self):
+    #     self.reset_permissions()
+    #     # Create protected domain
+    #     create_url = self.create_protected_domain_url("test_e2e")
+    #     response = requests.post(create_url, headers=self.generate_auth_headers())
+    #     assert response.status_code == HTTPStatus.CREATED
+
+    #     # Lists created protected domain
+    #     list_url = self.list_protected_domain_url()
+    #     response = requests.get(list_url, headers=self.generate_auth_headers())
+    #     assert "test_e2e" in response.json()
+
+    #     # Not authorised to access existing protected domain
+    #     url = self.query_dataset_url(
+    #         layer=self.layer, domain="test_e2e_protected", dataset=self.dataset
+    #     )
+    #     response = requests.post(url, headers=self.generate_auth_headers())
+    #     assert response.status_code == HTTPStatus.UNAUTHORIZED
