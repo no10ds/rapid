@@ -23,8 +23,10 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
         cls.delete_dataset(cls.dataset)
 
     @pytest.mark.order(1)
-    def test_uploads_when_authorised(self):
-        files = {"file": (self.filename, open("./test/e2e/" + self.filename, "rb"))}
+    def test_uploads_csv_when_authorised(self):
+        files = {
+            "file": (self.csv_filename, open("./test/e2e/" + self.csv_filename, "rb"))
+        }
         upload_url = self.upload_dataset_url(
             self.layer, self.e2e_test_domain, self.dataset
         )
@@ -33,6 +35,23 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
         )
 
         assert response.status_code == HTTPStatus.ACCEPTED
+
+    # @pytest.mark.order(1)
+    # def test_uploads_parquet_when_authorised(self):
+    #     files = {
+    #         "file": (
+    #             self.parquet_filename,
+    #             open("./test/e2e/" + self.parquet_filename, "rb"),
+    #         )
+    #     }
+    #     upload_url = self.upload_dataset_url(
+    #         self.layer, self.e2e_test_domain, self.dataset
+    #     )
+    #     response = requests.post(
+    #         upload_url, headers=self.generate_auth_headers(), files=files
+    #     )
+
+    #     assert response.status_code == HTTPStatus.ACCEPTED
 
     @pytest.mark.order(2)
     def test_list_when_authorised(self):
@@ -68,6 +87,7 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
         response = requests.post(url, headers=self.generate_auth_headers())
         assert response.status_code == HTTPStatus.NOT_FOUND
 
+    @pytest.mark.order(2)
     def test_queries_existing_dataset_as_csv_when_authorised(self):
         url = self.query_dataset_url(
             layer=self.layer, domain=self.e2e_test_domain, dataset="query", version=1

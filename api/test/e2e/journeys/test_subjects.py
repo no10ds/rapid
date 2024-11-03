@@ -1,16 +1,21 @@
 from http import HTTPStatus
-
 import requests
 
 from test.e2e.journeys.base_journey import (
     BaseAuthenticatedJourneyTest,
     RESOURCE_PREFIX,
 )
+import json
+import pytest
 
 
 class TestSubjectJourneys(BaseAuthenticatedJourneyTest):
     def client_name(self) -> str:
         return "E2E_TEST_CLIENT_USER_ADMIN"
+
+    # @classmethod
+    # def teardown_class(cls):
+    #     cls.delete_user(cls.user)
 
     def test_lists_all_permissions_contains_all_default_permissions(self):
         response = requests.get(
@@ -92,5 +97,99 @@ class TestSubjectJourneys(BaseAuthenticatedJourneyTest):
             ]
         )
 
-    # TODO: Test the create/delete client flow
-    # TODO: Test the create/delete user flow
+    def test_create_delete_user_flow(self):
+        response = requests.post(
+            self.user_url(),
+            headers=self.generate_auth_headers(),
+            data=json.dumps(
+                {
+                    "username": "johnDoe",
+                    "email": "johndoe@no10.gov.uk",
+                    "permissions": ["READ_ALL", "WRITE_DEFAULT_PUBLIC"],
+                }
+            ),
+        )
+
+        assert response.status_code == HTTPStatus.CREATED
+        subject_id = response.json()["user_id"]
+
+        # Check the user exists
+        response = requests.get(
+            self.subjects_url(),
+            headers=self.generate_auth_headers(),
+        )
+
+        user_list = [subject["subject_id"] for subject in response.json()]
+        assert subject_id in user_list
+
+        # Delete the user
+        response = requests.delete(
+            self.user_url(),
+            headers=self.generate_auth_headers(),
+            data=json.dumps({"username": "johnDoe", "user_id": subject_id}),
+        )
+
+        assert response.status_code == HTTPStatus.OK
+
+    def test_create_delete_client_flow(self):
+        response = requests.post(
+            self.client_url(),
+            headers=self.generate_auth_headers(),
+            data=json.dumps(
+                {
+                    "client_name": "john_doe_client",
+                    "permissions": ["READ_ALL", "WRITE_DEFAULT_PUBLIC"],
+                }
+            ),
+        )
+
+        assert response.status_code == HTTPStatus.CREATED
+        print(response.json())
+        client_id = response.json()["client_id"]
+
+        # Check the user exists
+        response = requests.get(
+            self.subjects_url(),
+            headers=self.generate_auth_headers(),
+        )
+
+        user_list = [subject["subject_id"] for subject in response.json()]
+        assert client_id in user_list
+
+        # Delete the user
+        response = requests.delete(
+            f"{self.client_url()}/{client_id}",
+            headers=self.generate_auth_headers(),
+        )
+
+        assert response.status_code == HTTPStatus.OK
+
+    def test_invalid_user_email_creation(self):
+        response = requests.post(
+            self.user_url(),
+            headers=self.generate_auth_headers(),
+            data=json.dumps(
+                {
+                    "username": "johnDoe",
+                    "email": "johndoe@invalidemail.org",
+                    "permissions": ["READ_ALL", "WRITE_DEFAULT_PUBLIC"],
+                }
+            ),
+        )
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    def test_invalid_user_permissions(self):
+        response = requests.post(
+            self.user_url(),
+            headers=self.generate_auth_headers(),
+            data=json.dumps(
+                {
+                    "username": "johnDoe",
+                    "email": "johndoe@no10.gov.uk",
+                    "permissions": ["READ_ALL1", "WRITE_DEFAULT_PUBLIC"],
+                }
+            ),
+        )
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
