@@ -23,7 +23,6 @@ class SchemaVersion(StrEnum):
     V2 = "v2"
 
 
-@pytest.mark.focus
 class TestSchemaJourney(BaseAuthenticatedJourneyTest):
     dataset = None
 
