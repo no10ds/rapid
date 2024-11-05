@@ -2,10 +2,16 @@ from http import HTTPStatus
 
 import requests
 import pytest
-
+import csv
+import json
+import os
+from io import StringIO
 from test.e2e.journeys.base_journey import (
     BaseAuthenticatedJourneyTest,
 )
+from test.e2e.utils import get_secret
+
+RESOURCE_PREFIX = os.environ["RESOURCE_PREFIX"]
 
 
 class TestDataJourneys(BaseAuthenticatedJourneyTest):
@@ -22,6 +28,7 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
     def teardown_class(cls):
         cls.delete_dataset(cls.dataset)
 
+    @pytest.mark.focus
     @pytest.mark.order(1)
     def test_uploads_csv_when_authorised(self):
         files = {
@@ -36,22 +43,22 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
 
         assert response.status_code == HTTPStatus.ACCEPTED
 
-    # @pytest.mark.order(1)
-    # def test_uploads_parquet_when_authorised(self):
-    #     files = {
-    #         "file": (
-    #             self.parquet_filename,
-    #             open("./test/e2e/" + self.parquet_filename, "rb"),
-    #         )
-    #     }
-    #     upload_url = self.upload_dataset_url(
-    #         self.layer, self.e2e_test_domain, self.dataset
-    #     )
-    #     response = requests.post(
-    #         upload_url, headers=self.generate_auth_headers(), files=files
-    #     )
+    @pytest.mark.order(1)
+    def test_uploads_parquet_when_authorised(self):
+        files = {
+            "file": (
+                self.parquet_filename,
+                open("./test/e2e/" + self.parquet_filename, "rb"),
+            )
+        }
+        upload_url = self.upload_dataset_url(
+            self.layer, self.e2e_test_domain, self.dataset
+        )
+        response = requests.post(
+            upload_url, headers=self.generate_auth_headers(), files=files
+        )
 
-    #     assert response.status_code == HTTPStatus.ACCEPTED
+        assert response.status_code == HTTPStatus.ACCEPTED
 
     @pytest.mark.order(2)
     def test_list_when_authorised(self):
@@ -87,22 +94,74 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
         response = requests.post(url, headers=self.generate_auth_headers())
         assert response.status_code == HTTPStatus.NOT_FOUND
 
-    # TODO: Do we need to test this for Parquet?
     @pytest.mark.order(2)
     def test_queries_existing_dataset_as_csv_when_authorised(self):
         url = self.query_dataset_url(
-            layer=self.layer, domain=self.e2e_test_domain, dataset="query", version=1
+            layer=self.layer,
+            domain=self.e2e_test_domain,
+            dataset=self.dataset,
+            version=1,
         )
-
         headers = {
             "Accept": "text/csv",
             **self.generate_auth_headers(),
         }
         response = requests.post(url, headers=headers)
-        assert response.status_code == HTTPStatus.NO_CONTENT
+        assert response.status_code == HTTPStatus.OK
+        csv_content = response.text
+        csv_reader = csv.DictReader(StringIO(csv_content))
+        csv_data = [row for row in csv_reader]
 
-    def test_returns_data_as_expected_for_existing_dataset(self):
-        pass
+        assert csv_data == [
+            {
+                "year": "2017",
+                "month": "7",
+                "destination": "Leeds",
+                "arrival": "London",
+                "type": "regular",
+                "status": "completed",
+            },
+            {
+                "year": "2017",
+                "month": "7",
+                "destination": "Darlington",
+                "arrival": "Durham",
+                "type": "regular",
+                "status": "completed",
+            },
+        ]
+
+    @pytest.mark.order(2)
+    def test_queries_existing_dataset_as_json_when_authorised(self):
+        url = self.query_dataset_url(
+            layer=self.layer,
+            domain=self.e2e_test_domain,
+            dataset=self.dataset,
+            version=1,
+        )
+        headers = {
+            **self.generate_auth_headers(),
+        }
+        response = requests.post(url, headers=headers)
+        assert response.status_code == HTTPStatus.OK
+        assert response.json() == {
+            "0": {
+                "year": "2017",
+                "month": "7",
+                "destination": "Leeds",
+                "arrival": "London",
+                "type": "regular",
+                "status": "completed",
+            },
+            "1": {
+                "year": "2017",
+                "month": "7",
+                "destination": "Darlington",
+                "arrival": "Durham",
+                "type": "regular",
+                "status": "completed",
+            },
+        }
 
     @pytest.mark.order(2)
     def test_fails_to_query_and_sql_injection_attempted(self):
@@ -113,16 +172,28 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
         response = requests.post(url, headers=(self.generate_auth_headers()), json=body)
         assert response.status_code == HTTPStatus.FORBIDDEN
 
-    def test_get_dataset_info():
+    @pytest.mark.order(2)
+    def test_get_dataset_info(self):
         """
         This test should ensure that the dataset info can be retrieved with the right permissions
         """
-        pass
+        # Get dataset info
+        info_url = self.info_dataset_url(
+            layer=self.layer,
+            domain=self.e2e_test_domain,
+            dataset=self.dataset,
+        )
+
+        response = requests.get(
+            info_url,
+            headers=self.generate_auth_headers("E2E_TEST_CLIENT_BASE_PERMISSIONS"),
+        )
+
+        assert response.status_code == HTTPStatus.OK
 
     @pytest.mark.order(3)
     # TODO: Can we test to ensure that the data is deleted only with the right permissions? We should split this test up.
     def test_lists_raw_datasets_and_deletes_existing_data(self):
-
         # Get available raw dataset names
         list_raw_files_url = self.list_dataset_raw_files_url(
             layer=self.layer, domain=self.e2e_test_domain, dataset=self.dataset
@@ -149,11 +220,23 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
 
         assert response2.status_code == HTTPStatus.OK
 
+    @pytest.mark.order(2)
+    @pytest.mark.focus
     def test_large_data_endpoint(self):
-        """
-        This test should ensure that the large data endpoint works. It should also get a job id and check the status of the job.
-        """
-        pass
+        large_dataset_url = f"{self.query_dataset_url_large(
+            layer=self.layer,
+            domain=self.e2e_test_domain,
+            dataset=self.dataset,
+            version=1
+        )}"
+
+        response = requests.post(large_dataset_url, headers=self.generate_auth_headers())
+        assert response.status_code == HTTPStatus.ACCEPTED
+        job_id = response.json()['details']["job_id"]
+        job_id_url = f"{self.jobs_url()}/{job_id}"
+
+        response = requests.get(job_id_url, headers=self.generate_auth_headers())
+        assert response.status_code == HTTPStatus.OK
 
     def test_upload_data_to_schema(self):
         """

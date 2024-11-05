@@ -28,6 +28,38 @@ resource "aws_secretsmanager_secret_version" "e2e_test_client_user_admin_secrets
   })
 }
 
+# E2E_TEST_CLIENT_BASIC_PERMISSIONS:
+resource "aws_cognito_user_pool_client" "e2e_test_client_base_permissions" {
+  name = "${var.resource-name-prefix}_e2e_test_client_base_permissions"
+
+  user_pool_id        = aws_cognito_user_pool.rapid_user_pool.id
+  generate_secret     = true
+  explicit_auth_flows = var.rapid_client_explicit_auth_flows
+  allowed_oauth_scopes = [
+    "${aws_cognito_resource_server.rapid_resource_server.identifier}/CLIENT_APP",
+  ]
+  allowed_oauth_flows                  = ["client_credentials"]
+  allowed_oauth_flows_user_pool_client = true
+}
+
+resource "aws_secretsmanager_secret" "e2e_test_client_base_permissions" {
+  # checkov:skip=CKV_AWS_149:AWS Managed Key is sufficient
+  # checkov:skip=CKV2_AWS_57:Disable automatic rotation enabled
+  name                    = "${var.resource-name-prefix}_E2E_TEST_CLIENT_BASE_PERMISSIONS"
+  recovery_window_in_days = 0
+}
+
+resource "aws_secretsmanager_secret_version" "ee2e_test_client_base_permissions_secrets_version" {
+  secret_id = aws_secretsmanager_secret.e2e_test_client_base_permissions.id
+  secret_string = jsonencode({
+    CLIENT_NAME   = aws_cognito_user_pool_client.e2e_test_client_base_permissions.name
+    CLIENT_ID     = aws_cognito_user_pool_client.e2e_test_client_base_permissions.id
+    CLIENT_SECRET = aws_cognito_user_pool_client.e2e_test_client_base_permissions.client_secret
+  })
+}
+
+
+
 # E2E_TEST_CLIENT_DATA_ADMIN
 resource "aws_cognito_user_pool_client" "e2e_test_client_data_admin" {
   name = "${var.resource-name-prefix}_e2e_test_client_data_admin"
