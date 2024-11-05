@@ -17,3 +17,7 @@ class TestGeneralBehaviour(BaseJourneyTest):
         api_url = self.status_url()
         response = requests.get(api_url)
         assert response.status_code == HTTPStatus.OK
+
+    def test_always_list_layers(self):
+        response = requests.get(self.layers_url())
+        assert response.status_code == HTTPStatus.OK

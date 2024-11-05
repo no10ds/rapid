@@ -31,6 +31,9 @@ class BaseJourneyTest(ABC):
     csv_filename = "test_journey_file.csv"
     parquet_filename = "test_journey_file.parquet"
 
+    def dynamo_db_schema_table(self) -> str:
+        return RESOURCE_PREFIX + "_schema_table"
+
     def upload_dataset_url(self, layer: str, domain: str, dataset: str) -> str:
         return f"{self.datasets_endpoint}/{layer}/{domain}/{dataset}"
 
@@ -95,6 +98,11 @@ class BaseJourneyTest(ABC):
 
     def schema_url(self) -> str:
         return f"{self.base_url}/schema"
+
+    def schema_generate_url(
+        self, layer: str, sensitivity: str, domain: str, dataset: str
+    ) -> str:
+        return f"{self.schema_url()}/{layer}/{sensitivity}/{domain}/{dataset}/generate"
 
 
 class BaseAuthenticatedJourneyTest(BaseJourneyTest):

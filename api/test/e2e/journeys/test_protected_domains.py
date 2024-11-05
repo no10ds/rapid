@@ -53,6 +53,7 @@ class TestProtectedDomainJourneys(BaseAuthenticatedJourneyTest):
         assert response.status_code == HTTPStatus.ACCEPTED
 
     @classmethod
+    # TODO: Can we simplify this? It's a bit of a mess
     def teardown_class(cls):
         """Deletes the protected domain permissions"""
         domain = "test_e2e"
@@ -151,7 +152,6 @@ class TestProtectedDomainJourneys(BaseAuthenticatedJourneyTest):
         response = requests.post(url, headers=self.generate_auth_headers())
         assert response.status_code == HTTPStatus.UNAUTHORIZED
 
-    # @pytest.mark.focus
     # @pytest.mark.order(2)
     def test_allows_access_to_protected_domain_when_granted_permission(self):
         self.assume_permissions(["READ_DEFAULT_PROTECTED_TEST_E2E_PROTECTED"])
@@ -181,7 +181,9 @@ class TestProtectedDomainJourneys(BaseAuthenticatedJourneyTest):
 
         self.reset_permissions()
 
-    # @pytest.mark.focus
+    def test_delete_protected_domain(self):
+        pass
+
     # @pytest.mark.order(3)
     # def test_delete_protected_domain(self):
     #     self.reset_permissions()

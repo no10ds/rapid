@@ -87,6 +87,7 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
         response = requests.post(url, headers=self.generate_auth_headers())
         assert response.status_code == HTTPStatus.NOT_FOUND
 
+    # TODO: Do we need to test this for Parquet?
     @pytest.mark.order(2)
     def test_queries_existing_dataset_as_csv_when_authorised(self):
         url = self.query_dataset_url(
@@ -100,6 +101,9 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
         response = requests.post(url, headers=headers)
         assert response.status_code == HTTPStatus.NO_CONTENT
 
+    def test_returns_data_as_expected_for_existing_dataset(self):
+        pass
+
     @pytest.mark.order(2)
     def test_fails_to_query_and_sql_injection_attempted(self):
         url = self.query_dataset_url(
@@ -109,7 +113,14 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
         response = requests.post(url, headers=(self.generate_auth_headers()), json=body)
         assert response.status_code == HTTPStatus.FORBIDDEN
 
+    def test_get_dataset_info():
+        """
+        This test should ensure that the dataset info can be retrieved with the right permissions
+        """
+        pass
+
     @pytest.mark.order(3)
+    # TODO: Can we test to ensure that the data is deleted only with the right permissions? We should split this test up.
     def test_lists_raw_datasets_and_deletes_existing_data(self):
 
         # Get available raw dataset names
@@ -138,5 +149,20 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
 
         assert response2.status_code == HTTPStatus.OK
 
+    def test_large_data_endpoint(self):
+        """
+        This test should ensure that the large data endpoint works. It should also get a job id and check the status of the job.
+        """
+        pass
 
-# TODO: Test the upload of a parquet file
+    def test_upload_data_to_schema(self):
+        """
+        This test should ensure that data can be uploaded to a schema.
+        """
+        pass
+
+    def test_upload_invalid_data_to_schema(self):
+        """
+        This test should ensure that invalid data cannot be uploaded to a schema.
+        """
+        pass
