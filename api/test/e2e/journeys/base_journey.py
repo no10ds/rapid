@@ -42,6 +42,11 @@ class BaseJourneyTest(ABC):
     ) -> str:
         return f"{self.datasets_endpoint}/{layer}/{domain}/{dataset}/query?version={version}"
 
+    def query_dataset_url_large(
+        self, layer: str, domain: str, dataset: str, version: int = 0
+    ) -> str:
+        return f"{self.datasets_endpoint}/{layer}/{domain}/{dataset}/query/large?version={version}"
+
     def info_dataset_url(
         self, layer: str, domain: str, dataset: str, version: int = 0
     ) -> str:
@@ -173,6 +178,22 @@ class BaseAuthenticatedJourneyTest(BaseJourneyTest):
     def delete_user(cls, name: str) -> str:
         response = requests.delete(
             cls.username(cls),
+            headers=cls.generate_auth_headers(cls, "E2E_TEST_CLIENT_USER_ADMIN"),
+        )
+        assert response.status_code == HTTPStatus.ACCEPTED
+
+    @classmethod
+    def delete_client(cls, name: str) -> str:
+        response = requests.delete(
+            f"{cls.client_url()}/{cls.client_id(cls)}",
+            headers=cls.generate_auth_headers(cls, "E2E_TEST_CLIENT_USER_ADMIN"),
+        )
+        assert response.status_code == HTTPStatus.ACCEPTED
+
+    @classmethod
+    def delete_domain(cls, name: str) -> str:
+        response = requests.delete(
+            cls.protected_domain_url(cls, name),
             headers=cls.generate_auth_headers(cls, "E2E_TEST_CLIENT_USER_ADMIN"),
         )
         assert response.status_code == HTTPStatus.ACCEPTED

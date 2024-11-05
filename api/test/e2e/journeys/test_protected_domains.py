@@ -17,7 +17,6 @@ from test.e2e.journeys.base_journey import (
 from test.e2e.utils import get_secret
 
 
-@pytest.mark.focus
 class TestProtectedDomainJourneys(BaseAuthenticatedJourneyTest):
     dataset = None
     cognito_client_id = None
@@ -73,7 +72,6 @@ class TestProtectedDomainJourneys(BaseAuthenticatedJourneyTest):
         response = requests.put(
             modification_url, headers=self.generate_auth_headers(), json=payload
         )
-        print(response.json())
         assert response.status_code == HTTPStatus.OK
 
     def reset_permissions(self):
