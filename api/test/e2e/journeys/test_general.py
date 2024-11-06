@@ -9,7 +9,6 @@ from test.e2e.journeys.base_journey import (
 import pytest
 
 
-@pytest.mark.focus
 class TestGeneralBehaviour(BaseJourneyTest):
     def test_http_request_is_redirected_to_https(self):
         response = requests.get(self.status_url())
