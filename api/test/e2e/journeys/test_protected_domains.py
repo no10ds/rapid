@@ -17,6 +17,7 @@ from test.e2e.journeys.base_journey import (
 from test.e2e.utils import get_secret
 
 
+@pytest.mark.focus
 class TestProtectedDomainJourneys(BaseAuthenticatedJourneyTest):
     dataset = None
     cognito_client_id = None
@@ -77,7 +78,7 @@ class TestProtectedDomainJourneys(BaseAuthenticatedJourneyTest):
     def reset_permissions(self):
         self.assume_permissions([])
 
-    @pytest.mark.order(1)
+    @pytest.mark.order(4)
     def test_create_protected_domain(self):
         self.reset_permissions()
         # Create protected domain
@@ -97,7 +98,7 @@ class TestProtectedDomainJourneys(BaseAuthenticatedJourneyTest):
         response = requests.post(url, headers=self.generate_auth_headers())
         assert response.status_code == HTTPStatus.UNAUTHORIZED
 
-    @pytest.mark.order(2)
+    @pytest.mark.order(5)
     def test_allows_access_to_protected_domain_when_granted_permission(self):
         self.assume_permissions(["READ_DEFAULT_PROTECTED_TEST_E2E_PROTECTED"])
 
@@ -126,7 +127,7 @@ class TestProtectedDomainJourneys(BaseAuthenticatedJourneyTest):
 
         self.reset_permissions()
 
-    @pytest.mark.order(3)
+    @pytest.mark.order(6)
     def test_delete_protected_domain(self):
         # Delete protected domain
         delete_url = self.protected_domain_url("test_e2e")

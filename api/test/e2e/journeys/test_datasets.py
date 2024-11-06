@@ -13,7 +13,6 @@ from test.e2e.utils import get_secret
 
 RESOURCE_PREFIX = os.environ["RESOURCE_PREFIX"]
 
-
 class TestDataJourneys(BaseAuthenticatedJourneyTest):
     dataset = None
 
@@ -28,7 +27,6 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
     def teardown_class(cls):
         cls.delete_dataset(cls.dataset)
 
-    @pytest.mark.focus
     @pytest.mark.order(1)
     def test_uploads_csv_when_authorised(self):
         files = {
@@ -191,9 +189,8 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
 
         assert response.status_code == HTTPStatus.OK
 
-    @pytest.mark.order(3)
-    # TODO: Can we test to ensure that the data is deleted only with the right permissions? We should split this test up.
-    def test_lists_raw_datasets_and_deletes_existing_data(self):
+    @pytest.mark.order(2)
+    def test_lists_raw_datasets(self):
         # Get available raw dataset names
         list_raw_files_url = self.list_dataset_raw_files_url(
             layer=self.layer, domain=self.e2e_test_domain, dataset=self.dataset
@@ -203,25 +200,46 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
         )
         assert available_datasets_response.status_code == HTTPStatus.OK
         filenames = available_datasets_response.json()
-        assert len(filenames) == 1
-
-        # Delete dataset
-        file_name = filenames[0]
-        delete_raw_data_url = self.delete_data_url(
-            layer=self.layer,
-            domain=self.e2e_test_domain,
-            dataset=self.dataset,
-            raw_filename=file_name,
-        )
-
-        response2 = requests.delete(
-            delete_raw_data_url, headers=self.generate_auth_headers()
-        )
-
-        assert response2.status_code == HTTPStatus.OK
+        assert len(filenames) == 2 # 2 files uploaded csv and parquet
 
     @pytest.mark.order(2)
-    @pytest.mark.focus
+    def test_upload_to_invalid_location(self):
+        """
+        This test should ensure that invalid data cannot be uploaded to a schema.
+        """
+        files = {
+            "file": (self.csv_filename, open("./test/e2e/" + self.csv_filename, "rb"))
+        }
+
+        invalid_params = {
+            "layer": "invalid-layer",
+            "domain": "invalid-domain",
+            "dataset": "invalid-dataset"
+        }
+
+        invalid_response_codes = []
+        for k,v in invalid_params.items():
+            if k == "layer":
+                upload_url = self.upload_dataset_url(
+                    v, self.e2e_test_domain, self.dataset
+                )
+                assert self.return_status_code_for_invalid_url(upload_url) == HTTPStatus.BAD_REQUEST
+            elif k == "domain":
+                upload_url = self.upload_dataset_url(
+                    self.layer, v, self.dataset
+                )
+                assert self.return_status_code_for_invalid_url(upload_url) == HTTPStatus.NOT_FOUND
+            elif k == "dataset":
+                upload_url = self.upload_dataset_url(
+                    self.layer, self.e2e_test_domain, v
+                )
+                assert self.return_status_code_for_invalid_url(upload_url) == HTTPStatus.NOT_FOUND
+
+    def return_status_code_for_invalid_url(self, url: str):
+        response = requests.post(url, headers=self.generate_auth_headers())
+        return response.status_code
+
+    @pytest.mark.order(2)
     def test_large_data_endpoint(self):
         large_dataset_url = f"{self.query_dataset_url_large(
             layer=self.layer,
@@ -238,14 +256,26 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
         response = requests.get(job_id_url, headers=self.generate_auth_headers())
         assert response.status_code == HTTPStatus.OK
 
-    def test_upload_data_to_schema(self):
-        """
-        This test should ensure that data can be uploaded to a schema.
-        """
-        pass
+    def test_always_list_layers(self):
+        response = requests.get(
+            self.layers_url(),
+            headers=self.generate_auth_headers(),
+        )
+        print(response.content)
+        assert response.status_code == HTTPStatus.OK
 
-    def test_upload_invalid_data_to_schema(self):
-        """
-        This test should ensure that invalid data cannot be uploaded to a schema.
-        """
-        pass
+    @pytest.mark.order(3)
+    def delete_existing_dataset(self):
+        # Delete dataset
+        delete_raw_data_url = self.delete_data_url(
+            layer=self.layer,
+            domain=self.e2e_test_domain,
+            dataset=self.dataset,
+            raw_filename=self.csv_filename,
+        )
+
+        response = requests.delete(
+            delete_raw_data_url, headers=self.generate_auth_headers()
+        )
+
+        assert response.status_code == HTTPStatus.OK
