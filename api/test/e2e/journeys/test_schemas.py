@@ -1,26 +1,20 @@
-import json
 from http import HTTPStatus
-import os
 import requests
 from requests import Response
-import pandas as pd
 from io import StringIO
 import boto3
+import pandas as pd
 from botocore.exceptions import ClientError
 from boto3.dynamodb.conditions import Key, Attr, Or
-from test.e2e.journeys.base_journey import (
-    BaseAuthenticatedJourneyTest,
-)
 from jinja2 import Template
 from strenum import StrEnum
 import pytest
-
-from api.common.config.aws import AWS_REGION
-
-
-class SchemaVersion(StrEnum):
-    V1 = "v1"
-    V2 = "v2"
+from test.e2e.journeys.base_journey import BaseAuthenticatedJourneyTest, SchemaVersion
+from api.common.config.aws import (
+    AWS_REGION,
+    DYNAMO_PERMISSIONS_TABLE_NAME,
+    SCHEMA_TABLE_NAME,
+)
 
 
 class TestSchemaJourney(BaseAuthenticatedJourneyTest):
@@ -36,15 +30,6 @@ class TestSchemaJourney(BaseAuthenticatedJourneyTest):
     @classmethod
     def teardown_class(cls):
         cls.delete_dataset(cls.dataset)
-        cls.delete_dataset("invalid_dataset")
-
-    def read_schema_version(self, version: SchemaVersion) -> dict:
-        with open(
-            os.path.join(self.schema_directory, f"test_e2e-schema_{version}.json.tpl")
-        ) as file:
-            template = Template(file.read())
-            contents = template.render(name=self.dataset)
-            return json.loads(contents)
 
     def upload_schema(self, schema: dict) -> Response:
         return requests.post(
@@ -62,7 +47,7 @@ class TestSchemaJourney(BaseAuthenticatedJourneyTest):
 
     def get_dataset_from_dynamodb(self, layer: str, domain: str, dataset: str) -> dict:
         dynamodb = boto3.resource("dynamodb", region_name=AWS_REGION)
-        table = dynamodb.Table(self.dynamo_db_schema_table())
+        table = dynamodb.Table(SCHEMA_TABLE_NAME)
         try:
             response = table.query(
                 KeyConditionExpression=Key("PK").eq(f"{layer}/{domain}/{dataset}"),
@@ -87,7 +72,6 @@ class TestSchemaJourney(BaseAuthenticatedJourneyTest):
 
         # Verify schema in dynamodb is correct -> No way to query schema via API endpoint
         dataset_schema_v1 = self.get_dataset_from_dynamodb(layer, domain, dataset)
-
         rapid_schema_column_names_v1 = self.extract_column_names(dataset_schema_v1)
         assert dataset_schema_v1[0]["domain"] == schema_v1["metadata"]["domain"]
         assert dataset_schema_v1[0]["layer"] == schema_v1["metadata"]["layer"]
@@ -105,9 +89,6 @@ class TestSchemaJourney(BaseAuthenticatedJourneyTest):
         assert sorted(column_names) == sorted(rapid_schema_column_names_v2)
 
     def test_invalid_schema_upload(self):
-        """
-        This test should attempt to upload an invalid schema and assert that the response is rejected
-        """
         invalid_metadata = {
             "layer": "default123",
             "sensitivity": "INVALID",
@@ -137,7 +118,6 @@ class TestSchemaJourney(BaseAuthenticatedJourneyTest):
             response = self.upload_schema(schema_v1)
             assert response.status_code == HTTPStatus.BAD_REQUEST
 
-        # Modify schema to be invalid
         schema_v1 = self.read_schema_version(SchemaVersion.V1)
         schema_v1.pop("columns", None)
         response1 = self.upload_schema(schema_v1)
@@ -163,18 +143,7 @@ class TestSchemaJourney(BaseAuthenticatedJourneyTest):
 
         assert response.status_code == HTTPStatus.OK
 
-    def make_file_invalid(self, buffer_obj):
-        df = pd.read_csv(buffer_obj)
-        df.columns = [""] + list(df.columns[1:])
-        output_buffer = StringIO()
-        df.to_csv(output_buffer)
-        output_buffer.seek(0)
-        return output_buffer
-
     def test_generate_schema_with_invalid_data(self):
-        """
-        This test should generate a schema with invalid data and assert that the response is rejected - deleting column name here
-        """
         files = {
             "file": (
                 self.csv_filename,
@@ -184,7 +153,6 @@ class TestSchemaJourney(BaseAuthenticatedJourneyTest):
         generate_url = self.schema_generate_url(
             self.layer, "PUBLIC", self.e2e_test_domain, "test"
         )
-        # Modify the file to be invalid
         response = requests.post(
             generate_url, headers=self.generate_auth_headers(), files=files
         )

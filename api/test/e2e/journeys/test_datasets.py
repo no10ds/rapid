@@ -27,6 +27,10 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
     def teardown_class(cls):
         cls.delete_dataset(cls.dataset)
 
+    def return_status_code_for_invalid_url(self, url: str) -> int:
+        response = requests.post(url, headers=self.generate_auth_headers())
+        return response.status_code
+
     @pytest.mark.order(1)
     def test_uploads_csv_when_authorised(self):
         files = {
@@ -172,9 +176,6 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
 
     @pytest.mark.order(2)
     def test_get_dataset_info(self):
-        """
-        This test should ensure that the dataset info can be retrieved with the right permissions
-        """
         # Get dataset info
         info_url = self.info_dataset_url(
             layer=self.layer,
@@ -204,9 +205,6 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
 
     @pytest.mark.order(2)
     def test_upload_to_invalid_location(self):
-        """
-        This test should ensure that invalid data cannot be uploaded to a schema.
-        """
         files = {
             "file": (self.csv_filename, open("./test/e2e/" + self.csv_filename, "rb"))
         }
@@ -235,10 +233,6 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
                 )
                 assert self.return_status_code_for_invalid_url(upload_url) == HTTPStatus.NOT_FOUND
 
-    def return_status_code_for_invalid_url(self, url: str):
-        response = requests.post(url, headers=self.generate_auth_headers())
-        return response.status_code
-
     @pytest.mark.order(2)
     def test_large_data_endpoint(self):
         large_dataset_url = f"{self.query_dataset_url_large(
@@ -256,6 +250,7 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
         response = requests.get(job_id_url, headers=self.generate_auth_headers())
         assert response.status_code == HTTPStatus.OK
 
+    #TODO: Why does this need authentication?
     def test_always_list_layers(self):
         response = requests.get(
             self.layers_url(),
@@ -267,7 +262,7 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
     @pytest.mark.order(3)
     def delete_existing_dataset(self):
         # Delete dataset
-        delete_raw_data_url = self.delete_data_url(
+        delete_raw_data_url = self.delete_dataset_url(
             layer=self.layer,
             domain=self.e2e_test_domain,
             dataset=self.dataset,

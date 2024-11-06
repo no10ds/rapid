@@ -1,12 +1,16 @@
 from abc import ABC, abstractmethod
 import os
+import uuid
 from api.common.config.aws import PERMISSIONS_TABLE_SUFFIX
 from test.e2e.utils import get_secret, AuthenticationFailedError
 from http import HTTPStatus
 import requests
 from requests.auth import HTTPBasicAuth
 import json
+import pandas as pd
+from io import StringIO
 from uuid import uuid4
+from strenum import StrEnum
 from jinja2 import Template
 
 from api.common.config.constants import CONTENT_ENCODING
@@ -17,10 +21,16 @@ DYNAMO_PERMISSIONS_TABLE_NAME = RESOURCE_PREFIX + PERMISSIONS_TABLE_SUFFIX
 FILE_PATH = os.path.dirname(os.path.abspath(__file__))
 
 
+class SchemaVersion(StrEnum):
+    V1 = "v1"
+    V2 = "v2"
+
+
 class BaseJourneyTest(ABC):
     base_url = f"https://{DOMAIN_NAME}/api"
     datasets_endpoint = f"{base_url}/datasets"
     schema_endpoint = f"{base_url}/schema"
+    subjects_url = f"{base_url}/subjects"
 
     e2e_test_domain = "test_e2e"
     layer = "default"
@@ -29,11 +39,7 @@ class BaseJourneyTest(ABC):
     schema_directory = f"{FILE_PATH}/schemas"
 
     csv_filename = "test_journey_file.csv"
-    csv_invalid_filename = "test_journey_file_invalid.csv"
     parquet_filename = "test_journey_file.parquet"
-
-    def dynamo_db_schema_table(self) -> str:
-        return RESOURCE_PREFIX + "_schema_table"
 
     def upload_dataset_url(self, layer: str, domain: str, dataset: str) -> str:
         return f"{self.datasets_endpoint}/{layer}/{domain}/{dataset}"
@@ -56,19 +62,19 @@ class BaseJourneyTest(ABC):
     def list_dataset_raw_files_url(self, layer: str, domain: str, dataset: str) -> str:
         return f"{self.datasets_endpoint}/{layer}/{domain}/{dataset}/1/files"
 
-    def protected_domain_url(self, domain: str) -> str:
-        return f"{self.base_url}/protected_domains/{domain}"
+    def delete_dataset_url(
+        self, layer: str, domain: str, dataset: str, raw_filename: str
+    ) -> str:
+        return f"{self.datasets_endpoint}/{layer}/{domain}/{dataset}/1/{raw_filename}"
 
     def list_protected_domain_url(self) -> str:
         return f"{self.base_url}/protected_domains"
 
+    def protected_domain_url(self, domain: str = "test_domain") -> str:
+        return f"{self.base_url}/protected_domains/{domain}"
+
     def modify_subjects_permissions_url(self) -> str:
         return f"{self.base_url}/subjects/permissions"
-
-    def delete_data_url(
-        self, layer: str, domain: str, dataset: str, raw_filename: str
-    ) -> str:
-        return f"{self.datasets_endpoint}/{layer}/{domain}/{dataset}/1/{raw_filename}"
 
     def permissions_url(self) -> str:
         return f"{self.base_url}/permissions"
@@ -94,14 +100,6 @@ class BaseJourneyTest(ABC):
     def layers_url(self) -> str:
         return f"{self.base_url}/layers"
 
-    def query_large_dataset_url(
-        self, layer: str, domain: str, dataset: str, version: int = 0
-    ) -> str:
-        return f"{self.datasets_endpoint}/{layer}/{domain}/{dataset}/query/large?version={version}"
-
-    def protected_domain_url(self, domain: str = "test_domain") -> str:
-        return f"{self.base_url}/protected_domains/{domain}"
-
     def schema_url(self) -> str:
         return f"{self.base_url}/schema"
 
@@ -121,6 +119,7 @@ class BaseAuthenticatedJourneyTest(BaseJourneyTest):
         if not client_name:
             client_name = self.client_name()
 
+        # TODO: Can this be cached to reduce the amount of calls?
         token_url = f"https://{DOMAIN_NAME}/api/oauth2/token"
         data_admin_credentials = get_secret(
             secret_name=f"{RESOURCE_PREFIX}_{client_name}"  # pragma: allowlist secret
@@ -142,6 +141,14 @@ class BaseAuthenticatedJourneyTest(BaseJourneyTest):
 
         token = json.loads(response.content.decode(CONTENT_ENCODING))["access_token"]
         return {"Authorization": f"Bearer {token}"}
+
+    def read_schema_version(self, version: SchemaVersion) -> dict:
+        with open(
+            os.path.join(self.schema_directory, f"test_e2e-schema_{version}.json.tpl")
+        ) as file:
+            template = Template(file.read())
+            contents = template.render(name=self.dataset)
+            return json.loads(contents)
 
     @classmethod
     def generate_schema_name(cls, name: str) -> str:
@@ -175,17 +182,18 @@ class BaseAuthenticatedJourneyTest(BaseJourneyTest):
         assert response.status_code == HTTPStatus.ACCEPTED
 
     @classmethod
-    def delete_user(cls, name: str) -> str:
+    def delete_user(cls, username: str, user_id) -> str:
         response = requests.delete(
-            cls.username(cls, name),
+            f"{cls.user_url(cls)}",
             headers=cls.generate_auth_headers(cls, "E2E_TEST_CLIENT_USER_ADMIN"),
+            data=json.dumps({"username": username, "user_id": user_id}),
         )
         assert response.status_code == HTTPStatus.ACCEPTED
 
     @classmethod
-    def delete_client(cls, name: str) -> str:
+    def delete_client(cls, client_id: str) -> str:
         response = requests.delete(
-            f"{cls.client_url()}/{cls.client_id(cls)}",
+            f"{cls.client_url(cls)}/{client_id}",
             headers=cls.generate_auth_headers(cls, "E2E_TEST_CLIENT_USER_ADMIN"),
         )
         assert response.status_code == HTTPStatus.ACCEPTED
@@ -197,3 +205,31 @@ class BaseAuthenticatedJourneyTest(BaseJourneyTest):
             headers=cls.generate_auth_headers(cls, "E2E_TEST_CLIENT_DATA_ADMIN"),
         )
         assert response.status_code == HTTPStatus.ACCEPTED
+
+    def generate_username_payload(self) -> dict:
+        unique_id = uuid.uuid4()
+        # Append the UUID to the username and email
+        username = f"johnDoe_{unique_id}"
+        email = f"johndoe_{unique_id}@no10.gov.uk"
+
+        payload = {
+            "username": username,
+            "email": email,
+            "permissions": ["READ_ALL", "WRITE_DEFAULT_PUBLIC"],
+        }
+        return payload
+
+    def generate_client_payload(self) -> dict:
+        unique_id = uuid.uuid4()
+        return {
+            "client_name": f"john_doe_client_{unique_id}",
+            "permissions": ["READ_ALL", "WRITE_DEFAULT_PUBLIC"],
+        }
+
+    def make_file_invalid(self, buffer_obj: StringIO) -> StringIO:
+        df = pd.read_csv(buffer_obj)
+        df.columns = [""] + list(df.columns[1:])
+        output_buffer = StringIO()
+        df.to_csv(output_buffer)
+        output_buffer.seek(0)
+        return output_buffer
