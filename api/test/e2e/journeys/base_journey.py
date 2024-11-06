@@ -29,6 +29,7 @@ class BaseJourneyTest(ABC):
     schema_directory = f"{FILE_PATH}/schemas"
 
     csv_filename = "test_journey_file.csv"
+    csv_invalid_filename = "test_journey_file_invalid.csv"
     parquet_filename = "test_journey_file.parquet"
 
     def dynamo_db_schema_table(self) -> str:
@@ -120,7 +121,6 @@ class BaseAuthenticatedJourneyTest(BaseJourneyTest):
         if not client_name:
             client_name = self.client_name()
 
-        # TODO: Can this be cached to reduce the amount of calls?
         token_url = f"https://{DOMAIN_NAME}/api/oauth2/token"
         data_admin_credentials = get_secret(
             secret_name=f"{RESOURCE_PREFIX}_{client_name}"  # pragma: allowlist secret
@@ -177,7 +177,7 @@ class BaseAuthenticatedJourneyTest(BaseJourneyTest):
     @classmethod
     def delete_user(cls, name: str) -> str:
         response = requests.delete(
-            cls.username(cls),
+            cls.username(cls, name),
             headers=cls.generate_auth_headers(cls, "E2E_TEST_CLIENT_USER_ADMIN"),
         )
         assert response.status_code == HTTPStatus.ACCEPTED
@@ -194,6 +194,6 @@ class BaseAuthenticatedJourneyTest(BaseJourneyTest):
     def delete_domain(cls, name: str) -> str:
         response = requests.delete(
             cls.protected_domain_url(cls, name),
-            headers=cls.generate_auth_headers(cls, "E2E_TEST_CLIENT_USER_ADMIN"),
+            headers=cls.generate_auth_headers(cls, "E2E_TEST_CLIENT_DATA_ADMIN"),
         )
         assert response.status_code == HTTPStatus.ACCEPTED
