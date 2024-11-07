@@ -83,7 +83,7 @@ class TestSchemaMetadata:
         assert schema_metadata.owners == [Owner(name="Test", email="test@email.com")]
         assert schema_metadata.description == "test"
         assert schema_metadata.update_behaviour == "OVERWRITE"
-        assert schema_metadata.is_latest_version == True
+        assert schema_metadata.is_latest_version
 
 
 class TestColumn:
@@ -276,14 +276,12 @@ class TestSchema:
                 "domain": "test",
                 "dataset": "rapid_sdk",
                 "sensitivity": SensitivityLevel.PUBLIC,
-                "description": "",
                 "update_behaviour": UpdateBehaviour.APPEND,
                 "owners": [{"name": "Test", "email": "test@email.com"}],
                 "version": None,
                 "key_value_tags": {},
                 "key_only_tags": [],
                 "description": "test",
-                "update_behaviour": "OVERWRITE",
                 "is_latest_version": True,
             },
             "columns": [
