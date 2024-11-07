@@ -8,7 +8,7 @@ Below is a simple example for uploading a Pandas DataFrame to the API.
 import pandas as pd
 from rapid import Rapid
 from rapid.patterns import dataset
-from rapid.items.schema import SchemaMetadata, SensitivityLevel, Owner
+from rapid.items.schema_metadata import SchemaMetadata, SensitivityLevel, Owner
 from rapid.exceptions import DataFrameUploadValidationException
 
 rapid = Rapid()
@@ -40,7 +40,7 @@ Now going forward say for instance we now expect that for column c we can expect
 import pandas as pd
 from rapid import Rapid
 from rapid.patterns import dataset
-from rapid.items.schema import SchemaMetadata, SensitivityLevel, Owner, Column
+from rapid.items.schema_metadata import SchemaMetadata, SensitivityLevel, Owner, Column
 from rapid.exceptions import ColumnNotDifferentException
 
 rapid = Rapid()
