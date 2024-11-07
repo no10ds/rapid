@@ -3,7 +3,8 @@ import pytest
 from pandas import DataFrame
 from requests_mock import Mocker
 
-from rapid.items.schema import Owner, SchemaMetadata, Schema, SensitivityLevel, Column
+from rapid.items.schema import Schema, Column
+from rapid.items.schema_metadata import Owner, SchemaMetadata, SensitivityLevel
 from rapid.patterns.dataset import (
     upload_and_create_dataset,
     update_schema_to_dataframe,

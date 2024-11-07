@@ -1,36 +1,8 @@
-from enum import Enum
-from typing import Dict, List, Optional, Union
+# Note: This class is replicated in the api code, they should be de-duplicated once the external dependencies are removed from the API
+from typing import List, Optional, Union
 from pydantic.main import BaseModel
 
-
-class SensitivityLevel(Enum):
-    PUBLIC = "PUBLIC"
-    PRIVATE = "PRIVATE"
-    PROTECTED = "PROTECTED"
-
-
-class UpdateBehaviour(Enum):
-    APPEND = "APPEND"
-    OVERWRITE = "OVERWRITE"
-
-
-class Owner(BaseModel):
-    name: str
-    email: str
-
-
-class SchemaMetadata(BaseModel):
-    layer: str
-    domain: str
-    dataset: str
-    sensitivity: SensitivityLevel
-    owners: List[Owner]
-    version: Optional[int] = None
-    key_value_tags: Optional[Dict[str, str]] = {}
-    key_only_tags: Optional[List[str]] = []
-
-    class Config:
-        use_enum_values = True
+from rapid.items.schema_metadata import SchemaMetadata
 
 
 class Column(BaseModel):

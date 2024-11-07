@@ -3,7 +3,8 @@ from rapid.exceptions import (
     DataFrameUploadValidationException,
     DatasetNotFoundException,
 )
-from rapid.items.schema import Schema, SchemaMetadata
+from rapid.items.schema import Schema
+from rapid.items.schema_metadata import SchemaMetadata
 from rapid import Rapid
 
 

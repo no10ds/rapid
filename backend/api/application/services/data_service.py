@@ -40,7 +40,7 @@ from api.domain.enriched_schema import (
 from api.domain.Jobs.QueryJob import QueryJob, QueryStep
 from api.domain.Jobs.UploadJob import UploadJob, UploadStep
 from api.domain.schema import Schema
-from api.domain.sql_query import SQLQuery
+from rapid.items.query import Query
 
 
 class DataService:
@@ -215,7 +215,7 @@ class DataService:
             )
             self.athena_adapter.wait_for_query_to_complete(query_id)
 
-    def is_query_too_large(self, dataset: DatasetMetadata, query: SQLQuery):
+    def is_query_too_large(self, dataset: DatasetMetadata, query: Query):
         if query.limit:
             if int(query.limit) <= DATASET_ROWS_QUERY_LIMIT:
                 return False
@@ -226,7 +226,7 @@ class DataService:
     def query_data(
         self,
         dataset: DatasetMetadata,
-        query: SQLQuery,
+        query: Query,
     ) -> pd.DataFrame:
         if not self.is_query_too_large(dataset, query):
             return self.athena_adapter.query(dataset, query)
@@ -237,7 +237,7 @@ class DataService:
         self,
         subject_id: str,
         dataset: DatasetMetadata,
-        query: SQLQuery,
+        query: Query,
     ) -> str:
         query_job = self.job_service.create_query_job(subject_id, dataset)
         query_execution_id = self.athena_adapter.query_async(dataset, query)
@@ -266,7 +266,7 @@ class DataService:
             self.job_service.fail(query_job, build_error_message_list(error))
             raise error
 
-    def _build_query(self, schema: Schema) -> SQLQuery:
+    def _build_query(self, schema: Schema) -> Query:
         date_columns = schema.get_columns_by_type(DateType)
         date_range_queries = [
             *[
@@ -282,7 +282,7 @@ class DataService:
             "count(*) as data_size",
             *date_range_queries,
         ]
-        return SQLQuery(select_columns=columns_to_query)
+        return Query(select_columns=columns_to_query)
 
     def _enrich_metadata(
         self, schema: Schema, statistics_dataframe: pd.DataFrame, last_updated: str
