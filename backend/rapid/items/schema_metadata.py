@@ -39,7 +39,7 @@ class SchemaMetadata(BaseModel):
     key_value_tags: Optional[Dict[str, str]] = dict()
     key_only_tags: Optional[List[str]] = list()
     owners: Optional[List[Owner]] = None
-    update_behaviour: str = UpdateBehaviour.APPEND
+    update_behaviour: str = UpdateBehaviour.OVERWRITE
     is_latest_version: bool = True
 
     def get_sensitivity(self) -> str:

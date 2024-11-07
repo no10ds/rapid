@@ -276,7 +276,7 @@ class TestSchema:
                 "domain": "test",
                 "dataset": "rapid_sdk",
                 "sensitivity": SensitivityLevel.PUBLIC,
-                "update_behaviour": UpdateBehaviour.APPEND,
+                "update_behaviour": UpdateBehaviour.OVERWRITE,
                 "owners": [{"name": "Test", "email": "test@email.com"}],
                 "version": None,
                 "key_value_tags": {},
