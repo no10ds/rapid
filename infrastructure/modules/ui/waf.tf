@@ -49,18 +49,21 @@ resource "aws_wafv2_web_acl" "rapid_acl" {
           }
         }
 
-        statement {
-          not_statement {
-            statement {
-              sqli_match_statement {
-                field_to_match {
-                  body {
-                    oversize_handling = "CONTINUE"
+        dynamic "statement" {
+          for_each = var.sql_injection_protection ? [1] : []
+          content {
+            not_statement {
+              statement {
+                sqli_match_statement {
+                  field_to_match {
+                    body {
+                      oversize_handling = "CONTINUE"
+                    }
                   }
-                }
-                text_transformation {
-                  priority = 0
-                  type     = "NONE"
+                  text_transformation {
+                    priority = 0
+                    type     = "NONE"
+                  }
                 }
               }
             }
