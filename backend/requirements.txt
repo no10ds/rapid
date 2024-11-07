@@ -11,6 +11,7 @@ pyarrow
 pyjwt
 pydantic>=2.0.0
 pydantic[email]
+python-dotenv
 python-multipart
 uvicorn
 requests

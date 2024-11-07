@@ -44,6 +44,9 @@ DUMMY_METADATA = SchemaMetadata(
     dataset="rapid_sdk",
     sensitivity=SensitivityLevel.PUBLIC,
     owners=[Owner(name="Test", email="test@email.com")],
+    description="test",
+    update_behaviour="OVERWRITE",
+    is_latest_version=True,
 )
 
 
@@ -68,6 +71,9 @@ class TestSchemaMetadata:
             "dataset": "rapid_sdk",
             "sensitivity": SensitivityLevel.PUBLIC,
             "owners": [{"name": "Test", "email": "test@email.com"}],
+            "description": "test",
+            "update_behaviour": "OVERWRITE",
+            "is_latest_version": True,
         }
 
         schema_metadata = SchemaMetadata(**_schema_metadata)
@@ -75,6 +81,9 @@ class TestSchemaMetadata:
         assert schema_metadata.dataset == "rapid_sdk"
         assert schema_metadata.sensitivity == "PUBLIC"
         assert schema_metadata.owners == [Owner(name="Test", email="test@email.com")]
+        assert schema_metadata.description == "test"
+        assert schema_metadata.update_behaviour == "OVERWRITE"
+        assert schema_metadata.is_latest_version == True
 
 
 class TestColumn:
@@ -273,6 +282,8 @@ class TestSchema:
                 "version": None,
                 "key_value_tags": {},
                 "key_only_tags": [],
+                "description": "test",
+                "update_behaviour": "OVERWRITE",
                 "is_latest_version": True,
             },
             "columns": [
