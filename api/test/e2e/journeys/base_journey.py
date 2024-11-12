@@ -10,7 +10,7 @@ import json
 import pandas as pd
 from io import StringIO
 from uuid import uuid4
-from strenum import StrEnum
+from enum import Enum
 from jinja2 import Template
 
 from api.common.config.constants import CONTENT_ENCODING
@@ -21,9 +21,14 @@ DYNAMO_PERMISSIONS_TABLE_NAME = RESOURCE_PREFIX + PERMISSIONS_TABLE_SUFFIX
 FILE_PATH = os.path.dirname(os.path.abspath(__file__))
 
 
-class SchemaVersion(StrEnum):
+class SchemaVersion(Enum):
     V1 = "v1"
     V2 = "v2"
+    V3 = "v3"
+
+    def __str__(self):
+        # Override the string representation to return the value directly
+        return self.value
 
 
 class BaseJourneyTest(ABC):
@@ -119,7 +124,6 @@ class BaseAuthenticatedJourneyTest(BaseJourneyTest):
         if not client_name:
             client_name = self.client_name()
 
-        # TODO: Can this be cached to reduce the amount of calls?
         token_url = f"https://{DOMAIN_NAME}/api/oauth2/token"
         data_admin_credentials = get_secret(
             secret_name=f"{RESOURCE_PREFIX}_{client_name}"  # pragma: allowlist secret
@@ -177,31 +181,6 @@ class BaseAuthenticatedJourneyTest(BaseJourneyTest):
     def delete_dataset(cls, name: str) -> str:
         response = requests.delete(
             cls.upload_dataset_url(cls, cls.layer, cls.e2e_test_domain, name),
-            headers=cls.generate_auth_headers(cls, "E2E_TEST_CLIENT_DATA_ADMIN"),
-        )
-        assert response.status_code == HTTPStatus.ACCEPTED
-
-    @classmethod
-    def delete_user(cls, username: str, user_id) -> str:
-        response = requests.delete(
-            f"{cls.user_url(cls)}",
-            headers=cls.generate_auth_headers(cls, "E2E_TEST_CLIENT_USER_ADMIN"),
-            data=json.dumps({"username": username, "user_id": user_id}),
-        )
-        assert response.status_code == HTTPStatus.ACCEPTED
-
-    @classmethod
-    def delete_client(cls, client_id: str) -> str:
-        response = requests.delete(
-            f"{cls.client_url(cls)}/{client_id}",
-            headers=cls.generate_auth_headers(cls, "E2E_TEST_CLIENT_USER_ADMIN"),
-        )
-        assert response.status_code == HTTPStatus.ACCEPTED
-
-    @classmethod
-    def delete_domain(cls, name: str) -> str:
-        response = requests.delete(
-            cls.protected_domain_url(cls, name),
             headers=cls.generate_auth_headers(cls, "E2E_TEST_CLIENT_DATA_ADMIN"),
         )
         assert response.status_code == HTTPStatus.ACCEPTED

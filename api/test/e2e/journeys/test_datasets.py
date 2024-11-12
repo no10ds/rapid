@@ -13,6 +13,7 @@ from test.e2e.utils import get_secret
 
 RESOURCE_PREFIX = os.environ["RESOURCE_PREFIX"]
 
+
 class TestDataJourneys(BaseAuthenticatedJourneyTest):
     dataset = None
 
@@ -201,62 +202,63 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
         )
         assert available_datasets_response.status_code == HTTPStatus.OK
         filenames = available_datasets_response.json()
-        assert len(filenames) == 2 # 2 files uploaded csv and parquet
+        assert len(filenames) == 2  # 2 files uploaded csv and parquet
 
     @pytest.mark.order(2)
-    def test_upload_to_invalid_location(self):
+    @pytest.mark.parametrize(
+        "layer, domain, dataset, expected_status",
+        [
+            (
+                "invalid-layer",
+                "test_e2e",
+                "test_dataset",
+                HTTPStatus.BAD_REQUEST,
+            ),
+            (
+                "default-layer",
+                "invalid-domain",
+                "test_dataset",
+                HTTPStatus.BAD_REQUEST,
+            ),
+            (
+                "default-layer",
+                "test_e2e",
+                "invalid-dataset",
+                HTTPStatus.BAD_REQUEST,
+            ),
+        ],
+    )
+    def test_upload_to_invalid_location(self, layer, domain, dataset, expected_status):
         files = {
             "file": (self.csv_filename, open("./test/e2e/" + self.csv_filename, "rb"))
         }
-
-        invalid_params = {
-            "layer": "invalid-layer",
-            "domain": "invalid-domain",
-            "dataset": "invalid-dataset"
-        }
-
-        invalid_response_codes = []
-        for k,v in invalid_params.items():
-            if k == "layer":
-                upload_url = self.upload_dataset_url(
-                    v, self.e2e_test_domain, self.dataset
-                )
-                assert self.return_status_code_for_invalid_url(upload_url) == HTTPStatus.BAD_REQUEST
-            elif k == "domain":
-                upload_url = self.upload_dataset_url(
-                    self.layer, v, self.dataset
-                )
-                assert self.return_status_code_for_invalid_url(upload_url) == HTTPStatus.NOT_FOUND
-            elif k == "dataset":
-                upload_url = self.upload_dataset_url(
-                    self.layer, self.e2e_test_domain, v
-                )
-                assert self.return_status_code_for_invalid_url(upload_url) == HTTPStatus.NOT_FOUND
+        upload_url = self.upload_dataset_url(layer, domain, dataset)
+        assert self.return_status_code_for_invalid_url(upload_url) == expected_status
 
     @pytest.mark.order(2)
     def test_large_data_endpoint(self):
-        large_dataset_url = f"{self.query_dataset_url_large(
+        large_dataset_url = self.query_dataset_url_large(
             layer=self.layer,
             domain=self.e2e_test_domain,
             dataset=self.dataset,
-            version=1
-        )}"
+            version=1,
+        )
 
-        response = requests.post(large_dataset_url, headers=self.generate_auth_headers())
+        response = requests.post(
+            large_dataset_url, headers=self.generate_auth_headers()
+        )
         assert response.status_code == HTTPStatus.ACCEPTED
-        job_id = response.json()['details']["job_id"]
+        job_id = response.json()["details"]["job_id"]
         job_id_url = f"{self.jobs_url()}/{job_id}"
 
         response = requests.get(job_id_url, headers=self.generate_auth_headers())
         assert response.status_code == HTTPStatus.OK
 
-    #TODO: Why does this need authentication?
     def test_always_list_layers(self):
         response = requests.get(
             self.layers_url(),
             headers=self.generate_auth_headers(),
         )
-        print(response.content)
         assert response.status_code == HTTPStatus.OK
 
     @pytest.mark.order(3)
