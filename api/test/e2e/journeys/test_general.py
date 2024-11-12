@@ -6,7 +6,6 @@ from test.e2e.journeys.base_journey import (
     BaseJourneyTest,
     DOMAIN_NAME,
 )
-import pytest
 
 
 class TestGeneralBehaviour(BaseJourneyTest):

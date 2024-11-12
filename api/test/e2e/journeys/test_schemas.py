@@ -1,22 +1,10 @@
 from http import HTTPStatus
 import requests
 from requests import Response
-from io import StringIO
-import boto3
-import pandas as pd
-from botocore.exceptions import ClientError
-from boto3.dynamodb.conditions import Key, Attr, Or
-from jinja2 import Template
 import pytest
 from test.e2e.journeys.base_journey import BaseAuthenticatedJourneyTest, SchemaVersion
-from api.common.config.aws import (
-    AWS_REGION,
-    DYNAMO_PERMISSIONS_TABLE_NAME,
-    SCHEMA_TABLE_NAME,
-)
 
 
-@pytest.mark.focus
 class TestSchemaJourney(BaseAuthenticatedJourneyTest):
     dataset = None
 
