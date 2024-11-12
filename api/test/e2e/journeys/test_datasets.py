@@ -3,13 +3,11 @@ from http import HTTPStatus
 import requests
 import pytest
 import csv
-import json
 import os
 from io import StringIO
 from test.e2e.journeys.base_journey import (
     BaseAuthenticatedJourneyTest,
 )
-from test.e2e.utils import get_secret
 
 RESOURCE_PREFIX = os.environ["RESOURCE_PREFIX"]
 
@@ -229,9 +227,6 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
         ],
     )
     def test_upload_to_invalid_location(self, layer, domain, dataset, expected_status):
-        files = {
-            "file": (self.csv_filename, open("./test/e2e/" + self.csv_filename, "rb"))
-        }
         upload_url = self.upload_dataset_url(layer, domain, dataset)
         assert self.return_status_code_for_invalid_url(upload_url) == expected_status
 

@@ -35,7 +35,6 @@ class BaseJourneyTest(ABC):
     base_url = f"https://{DOMAIN_NAME}/api"
     datasets_endpoint = f"{base_url}/datasets"
     schema_endpoint = f"{base_url}/schema"
-    subjects_url = f"{base_url}/subjects"
 
     e2e_test_domain = "test_e2e"
     layer = "default"

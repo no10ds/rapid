@@ -1,9 +1,7 @@
 from http import HTTPStatus
 import requests
 from test.e2e.journeys.base_journey import BaseAuthenticatedJourneyTest, SchemaVersion
-from jinja2 import Template
 import os
-import pytest
 
 RESOURCE_PREFIX = os.environ["E2E_RESOURCE_PREFIX"]
 

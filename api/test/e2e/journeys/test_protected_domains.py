@@ -1,13 +1,9 @@
-from functools import reduce
 from http import HTTPStatus
 from typing import List
 
 import requests
 import pytest
 import uuid
-from boto3.dynamodb.conditions import Key, Attr, Or
-from botocore.exceptions import ClientError
-from api.common.config.aws import AWS_REGION
 
 from test.e2e.journeys.base_journey import (
     BaseAuthenticatedJourneyTest,
