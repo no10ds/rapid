@@ -41,7 +41,6 @@ class TestProtectedDomainJourneys(BaseAuthenticatedJourneyTest):
         # Create schema
         cls.dataset = cls.create_schema("protected")
 
-        # TODO: Discuss if this should actually be in the journey itself?
         # Upload file
         files = {
             "file": (cls.csv_filename, open("./test/e2e/" + cls.csv_filename, "rb"))
@@ -84,17 +83,14 @@ class TestProtectedDomainJourneys(BaseAuthenticatedJourneyTest):
     def reset_permissions(self):
         self.assume_permissions([])
 
-    # We have these orders because the datasets and domain tests interfere.
-    @pytest.mark.order(4)
+    @pytest.mark.order(1)
     def test_create_protected_domain(self):
         self.reset_permissions()
         # Create protected domain
         # Generate a random string (UUID without hyphens)
-        print("DOMAIN NAME:", self.test_domain_name)
         create_url = self.protected_domain_url(self.test_domain_name)
 
         response = requests.post(create_url, headers=self.generate_auth_headers())
-        print("RESPONSE CONTENT", response.content)
         assert response.status_code == HTTPStatus.CREATED
 
         # Lists created protected domain
@@ -109,7 +105,7 @@ class TestProtectedDomainJourneys(BaseAuthenticatedJourneyTest):
         response = requests.post(url, headers=self.generate_auth_headers())
         assert response.status_code == HTTPStatus.UNAUTHORIZED
 
-    @pytest.mark.order(5)
+    @pytest.mark.order(2)
     def test_allows_access_to_protected_domain_when_granted_permission(self):
         self.assume_permissions(["READ_DEFAULT_PROTECTED_TEST_E2E_PROTECTED"])
 
@@ -138,12 +134,11 @@ class TestProtectedDomainJourneys(BaseAuthenticatedJourneyTest):
 
         self.reset_permissions()
 
-    @pytest.mark.order(6)
+    @pytest.mark.order(3)
     def test_delete_protected_domain(self):
         # Delete protected domain
         delete_url = self.protected_domain_url(self.test_domain_name)
         response = requests.delete(delete_url, headers=self.generate_auth_headers())
-        print(response.content)
         assert response.status_code == HTTPStatus.ACCEPTED
         # Lists protected domain and checks it's gone
         list_url = self.list_protected_domain_url()
