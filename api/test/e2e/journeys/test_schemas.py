@@ -44,7 +44,6 @@ class TestSchemaJourney(BaseAuthenticatedJourneyTest):
             column.pop("format", None)
             column.pop("statistics", None)
 
-        # Return the cleaned dataset
         return schema
 
     def get_schema_from_info_endpoint(
@@ -60,7 +59,6 @@ class TestSchemaJourney(BaseAuthenticatedJourneyTest):
         return self.clean_schema(response.json())
 
     def test_uploads_new_schema_version(self):
-        # Upload initial schema
         schema_v1 = self.read_schema_version(SchemaVersion.V1)
         layer = schema_v1["metadata"]["layer"]
         domain = schema_v1["metadata"]["domain"]

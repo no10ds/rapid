@@ -23,21 +23,16 @@ class TestProtectedDomainJourneys(BaseAuthenticatedJourneyTest):
     @classmethod
     def create_domain_name(cls) -> str:
         random_str = str(uuid.uuid4()).replace("-", "_")
-        # Concatenate "test_e2e" with the random string
         return "test_e2e_" + random_str
 
     @classmethod
     def setup_class(cls):
-        # Fetch cognito client id
         data_admin_credentials = get_secret(
             secret_name=f"{RESOURCE_PREFIX}_E2E_TEST_CLIENT_DATA_ADMIN"  # pragma: allowlist secret
         )
         cls.cognito_client_id = data_admin_credentials["CLIENT_ID"]
-
-        # Create schema
         cls.dataset = cls.create_schema("protected")
 
-        # Upload file
         files = {
             "file": (cls.csv_filename, open("./test/e2e/" + cls.csv_filename, "rb"))
         }
@@ -82,19 +77,15 @@ class TestProtectedDomainJourneys(BaseAuthenticatedJourneyTest):
     @pytest.mark.order(1)
     def test_create_protected_domain(self):
         self.reset_permissions()
-        # Create protected domain
-        # Generate a random string (UUID without hyphens)
         create_url = self.protected_domain_url(self.test_domain_name)
 
         response = requests.post(create_url, headers=self.generate_auth_headers())
         assert response.status_code == HTTPStatus.CREATED
 
-        # Lists created protected domain
         list_url = self.list_protected_domain_url()
         response = requests.get(list_url, headers=self.generate_auth_headers())
         assert self.test_domain_name in response.json()
 
-        # Not authorised to access existing protected domain
         url = self.query_dataset_url(
             layer=self.layer, domain="test_e2e_protected", dataset=self.dataset
         )
@@ -132,11 +123,10 @@ class TestProtectedDomainJourneys(BaseAuthenticatedJourneyTest):
 
     @pytest.mark.order(3)
     def test_delete_protected_domain(self):
-        # Delete protected domain
         delete_url = self.protected_domain_url(self.test_domain_name)
         response = requests.delete(delete_url, headers=self.generate_auth_headers())
         assert response.status_code == HTTPStatus.ACCEPTED
-        # Lists protected domain and checks it's gone
+        
         list_url = self.list_protected_domain_url()
         response = requests.get(list_url, headers=self.generate_auth_headers())
         assert self.test_domain_name not in response.json()

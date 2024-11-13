@@ -6,9 +6,14 @@ from test.e2e.journeys.base_journey import (
     RESOURCE_PREFIX,
 )
 import json
+import pytest
 
 
+@pytest.mark.focus
 class TestSubjectJourneys(BaseAuthenticatedJourneyTest):
+    subject_id = None
+
+    client_id = None
 
     def client_name(self) -> str:
         return "E2E_TEST_CLIENT_USER_ADMIN"
@@ -93,54 +98,68 @@ class TestSubjectJourneys(BaseAuthenticatedJourneyTest):
             ]
         )
 
-    def test_create_delete_user_flow(self):
+    @pytest.mark.order(1)
+    def test_create_user(self):
         username_payload = self.generate_username_payload()
         response = requests.post(
             self.user_url(), headers=self.generate_auth_headers(), json=username_payload
         )
 
         assert response.status_code == HTTPStatus.CREATED
-        subject_id = response.json()["user_id"]
+        self.__class__.subject_id = response.json()["user_id"]
+        self.__class__.subject_name = response.json()["username"]
 
+    @pytest.mark.order(2)
+    def test_list_user(self):
         response = requests.get(
             self.subjects_url(),
             headers=self.generate_auth_headers(),
         )
 
         user_list = [subject["subject_id"] for subject in response.json()]
-        assert subject_id in user_list
+        self.subject_id in user_list
 
+    @pytest.mark.order(3)
+    def test_delete_user(self):
+        username_payload = self.generate_username_payload(self.subject_name)
         response = requests.delete(
             self.user_url(),
             headers=self.generate_auth_headers(),
             data=json.dumps(
-                {"username": username_payload["username"], "user_id": subject_id}
+                {
+                    "username": username_payload["username"],
+                    "user_id": self.subject_id,
+                }
             ),
         )
 
         assert response.status_code == HTTPStatus.OK
 
-    def test_create_delete_client_flow(self):
+    @pytest.mark.order(1)
+    def test_create_client(self):
         client_payload = self.generate_client_payload()
         response = requests.post(
             self.client_url(),
             headers=self.generate_auth_headers(),
             json=client_payload,
         )
-
         assert response.status_code == HTTPStatus.CREATED
-        client_id = response.json()["client_id"]
+        self.__class__.client_id = response.json()["client_id"]
 
+    @pytest.mark.order(2)
+    def test_list_client(self):
         response = requests.get(
             self.subjects_url(),
             headers=self.generate_auth_headers(),
         )
 
         user_list = [subject["subject_id"] for subject in response.json()]
-        assert client_id in user_list
+        assert self.client_id in user_list
 
+    @pytest.mark.order(3)
+    def test_delete_client(self):
         response = requests.delete(
-            f"{self.client_url()}/{client_id}",
+            f"{self.client_url()}/{self.client_id}",
             headers=self.generate_auth_headers(),
         )
 

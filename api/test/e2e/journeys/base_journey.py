@@ -12,7 +12,7 @@ from io import StringIO
 from uuid import uuid4
 from enum import Enum
 from jinja2 import Template
-
+from strenum import StrEnum
 from api.common.config.constants import CONTENT_ENCODING
 
 DOMAIN_NAME = os.environ["E2E_DOMAIN_NAME"]
@@ -21,14 +21,10 @@ DYNAMO_PERMISSIONS_TABLE_NAME = RESOURCE_PREFIX + PERMISSIONS_TABLE_SUFFIX
 FILE_PATH = os.path.dirname(os.path.abspath(__file__))
 
 
-class SchemaVersion(Enum):
+class SchemaVersion(StrEnum):
     V1 = "v1"
     V2 = "v2"
     V3 = "v3"
-
-    def __str__(self):
-        # Override the string representation to return the value directly
-        return self.value
 
 
 class BaseJourneyTest(ABC):
@@ -184,11 +180,14 @@ class BaseAuthenticatedJourneyTest(BaseJourneyTest):
         )
         assert response.status_code == HTTPStatus.ACCEPTED
 
-    def generate_username_payload(self) -> dict:
+    def generate_username_payload(self, username: str = None) -> dict:
         unique_id = uuid.uuid4()
-        # Append the UUID to the username and email
-        username = f"johnDoe_{unique_id}"
-        email = f"johndoe_{unique_id}@no10.gov.uk"
+        if not username:
+            username = f"johnDoe_{unique_id}"
+            email = f"johndoe_{unique_id}@no10.gov.uk"
+        else:
+            username = username
+            email = f"{username}@no10.gov.uk"
 
         payload = {
             "username": username,
