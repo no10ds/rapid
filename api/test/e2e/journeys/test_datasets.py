@@ -183,7 +183,7 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
 
         response = requests.get(
             info_url,
-            headers=self.generate_auth_headers("E2E_TEST_CLIENT_BASE_PERMISSIONS"),
+            headers=self.generate_auth_headers("E2E_TEST_CLIENT_READ_ALL_PUBLIC"),
         )
 
         assert response.status_code == HTTPStatus.OK
