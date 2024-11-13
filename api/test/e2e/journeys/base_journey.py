@@ -10,7 +10,6 @@ import json
 import pandas as pd
 from io import StringIO
 from uuid import uuid4
-from enum import Enum
 from jinja2 import Template
 from strenum import StrEnum
 from api.common.config.constants import CONTENT_ENCODING
@@ -210,3 +209,27 @@ class BaseAuthenticatedJourneyTest(BaseJourneyTest):
         df.to_csv(output_buffer)
         output_buffer.seek(0)
         return output_buffer
+
+    def compare_schema(self, local_schema, queried_schema, override_keys=None):
+        """
+        We're explicitly checking for local_schema values in queried_schema.
+        There will be dome queried_schema values that are not in local_schema,
+        """
+        if override_keys is None:
+            override_keys = []
+
+        for key, value in local_schema.items():
+            if key in override_keys:
+                continue
+            if isinstance(value, list):
+                for i in range(len(value)):
+                    self.compare_schema(value[i], queried_schema[key][i], override_keys)
+            elif isinstance(value, dict):
+                self.compare_schema(value, queried_schema[key], override_keys)
+            else:
+                assert (
+                    key in queried_schema
+                ), f"Key '{key}' not found in second dictionary."
+                assert (
+                    value == queried_schema[key]
+                ), f"Value for key '{key}' does not match. Expected: {value}, Actual: {queried_schema[key]}"
