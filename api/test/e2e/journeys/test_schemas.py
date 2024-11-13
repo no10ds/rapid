@@ -33,19 +33,6 @@ class TestSchemaJourney(BaseAuthenticatedJourneyTest):
             json=schema,
         )
 
-    def clean_schema(self, schema):
-        schema["metadata"].pop("version", None)
-        schema["metadata"].pop("is_latest_version", None)
-        schema["metadata"].pop("number_of_rows", None)
-        schema["metadata"].pop("number_of_columns", None)
-        schema["metadata"].pop("last_updated", None)
-
-        for column in schema["columns"]:
-            column.pop("format", None)
-            column.pop("statistics", None)
-
-        return schema
-
     def get_schema_from_info_endpoint(
         self, layer: str, domain: str, dataset: str
     ) -> dict:
@@ -56,8 +43,9 @@ class TestSchemaJourney(BaseAuthenticatedJourneyTest):
                 client_name="E2E_TEST_CLIENT_READ_ALL_WRITE_ALL"
             ),
         )
-        return self.clean_schema(response.json())
+        return response.json()
 
+    @pytest.mark.focus
     def test_uploads_new_schema_version(self):
         schema_v1 = self.read_schema_version(SchemaVersion.V1)
         layer = schema_v1["metadata"]["layer"]
@@ -67,19 +55,16 @@ class TestSchemaJourney(BaseAuthenticatedJourneyTest):
         response1 = self.upload_schema(schema_v1)
         assert response1.status_code == HTTPStatus.CREATED
         uploaded_schema = self.get_schema_from_info_endpoint(layer, domain, dataset)
-        assert uploaded_schema == schema_v1
+        self.compare_schema(schema_v1, uploaded_schema, override_keys=["version"])
 
         schema_v2 = self.read_schema_version(SchemaVersion.V2)
         response2 = self.update_schema(schema_v2)
         assert response2.status_code == HTTPStatus.OK
 
         updated_schema = self.get_schema_from_info_endpoint(layer, domain, dataset)
-        # For test simplicity, assert the newcolumn column is present:
-
-        check_for_new_column = (
-            list(filter(lambda x: x["name"] == "newcolumn", updated_schema["columns"])),
+        self.compare_schema(
+            schema_v2, updated_schema, override_keys=["version", "tags"]
         )
-        assert len(check_for_new_column) == 1
 
     @pytest.mark.parametrize(
         "metadata_key, metadata_value",

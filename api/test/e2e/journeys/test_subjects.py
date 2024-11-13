@@ -9,7 +9,6 @@ import json
 import pytest
 
 
-@pytest.mark.focus
 class TestSubjectJourneys(BaseAuthenticatedJourneyTest):
     subject_id = None
 

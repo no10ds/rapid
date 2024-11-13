@@ -126,7 +126,7 @@ class TestProtectedDomainJourneys(BaseAuthenticatedJourneyTest):
         delete_url = self.protected_domain_url(self.test_domain_name)
         response = requests.delete(delete_url, headers=self.generate_auth_headers())
         assert response.status_code == HTTPStatus.ACCEPTED
-        
+
         list_url = self.list_protected_domain_url()
         response = requests.get(list_url, headers=self.generate_auth_headers())
         assert self.test_domain_name not in response.json()
