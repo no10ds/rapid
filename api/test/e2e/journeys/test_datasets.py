@@ -74,7 +74,7 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
             "dataset": self.dataset,
         }
         assert response.status_code == HTTPStatus.OK
-        # Asserts that the expected dataset fields are within the listed response
+
         assert any([expected.items() <= dataset.items() for dataset in response.json()])
 
     @pytest.mark.order(2)
@@ -175,7 +175,6 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
 
     @pytest.mark.order(2)
     def test_get_dataset_info(self):
-        # Get dataset info
         info_url = self.info_dataset_url(
             layer=self.layer,
             domain=self.e2e_test_domain,
@@ -258,7 +257,6 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
 
     @pytest.mark.order(3)
     def delete_existing_dataset(self):
-        # Delete dataset
         delete_raw_data_url = self.delete_dataset_url(
             layer=self.layer,
             domain=self.e2e_test_domain,
