@@ -23,7 +23,6 @@ FILE_PATH = os.path.dirname(os.path.abspath(__file__))
 class SchemaVersion(StrEnum):
     V1 = "v1"
     V2 = "v2"
-    V3 = "v3"
 
 
 class BaseJourneyTest(ABC):
