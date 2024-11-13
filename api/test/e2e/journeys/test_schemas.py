@@ -45,7 +45,6 @@ class TestSchemaJourney(BaseAuthenticatedJourneyTest):
         )
         return response.json()
 
-    @pytest.mark.focus
     def test_uploads_new_schema_version(self):
         schema_v1 = self.read_schema_version(SchemaVersion.V1)
         layer = schema_v1["metadata"]["layer"]

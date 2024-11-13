@@ -17,7 +17,7 @@ class TestUnauthorisedJourney(BaseAuthenticatedJourneyTest):
     @classmethod
     def setup_class(cls):
         cls.dataset = cls.create_schema("unauthorised")
-        cls.test_subject_id = cls.get_subject_id("e2e_test_client_base_permissions")
+        cls.test_subject_id = cls.get_subject_id("e2e_test_client_read_all_public")
         cls.test_job_id = cls.fetch_job_id()
 
     @classmethod
@@ -172,7 +172,10 @@ class TestUnauthorisedJourney(BaseAuthenticatedJourneyTest):
         response = requests.put(
             f"{self.subjects_url()}/permissions",
             headers=self.generate_auth_headers(),
-            json={"subject_id": self.test_subject_id, "permissions": ["READ_ALL"]},
+            json={
+                "subject_id": self.test_subject_id,
+                "permissions": ["WRITE_ALL_PUBLIC"],
+            },
         )
         assert response.status_code == HTTPStatus.UNAUTHORIZED
 

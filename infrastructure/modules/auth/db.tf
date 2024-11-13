@@ -154,10 +154,10 @@ resource "aws_dynamodb_table_item" "test_client_base_permissions" {
   item = <<ITEM
   {
     "PK": {"S": "SUBJECT"},
-    "SK": {"S": "${aws_cognito_user_pool_client.e2e_test_client_base_permissions.id}"},
-    "Id": {"S": "${aws_cognito_user_pool_client.e2e_test_client_base_permissions.id}"},
+    "SK": {"S": "${aws_cognito_user_pool_client.e2e_test_client_read_all_public.id}"},
+    "Id": {"S": "${aws_cognito_user_pool_client.e2e_test_client_read_all_public.id}"},
     "Type": {"S": "CLIENT"},
-    "Permissions": {"SS": ["READ_ALL_PUBLIC", "WRITE_ALL_PUBLIC"]}
+    "Permissions": {"SS": ["READ_ALL_PUBLIC"]}
   }
   ITEM
 }
