@@ -11,7 +11,7 @@ import pandas as pd
 from io import StringIO
 from uuid import uuid4
 from jinja2 import Template
-from enum import StrEnum
+from strenum import StrEnum
 
 DOMAIN_NAME = os.environ["E2E_DOMAIN_NAME"]
 
