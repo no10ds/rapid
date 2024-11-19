@@ -146,7 +146,7 @@ resource "aws_dynamodb_table_item" "test_client_user_admin_permissions" {
   ITEM
 }
 
-resource "aws_dynamodb_table_item" "test_client_base_permissions" {
+resource "aws_dynamodb_table_item" "test_client_read_all_public_permissions" {
   table_name = aws_dynamodb_table.permissions_table.name
   hash_key   = aws_dynamodb_table.permissions_table.hash_key
   range_key  = aws_dynamodb_table.permissions_table.range_key
