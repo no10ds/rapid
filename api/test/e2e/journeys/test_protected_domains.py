@@ -1,17 +1,12 @@
-from functools import reduce
 from http import HTTPStatus
 from typing import List
 
-import boto3
-from boto3.dynamodb.conditions import Key, Attr, Or
-from botocore.exceptions import ClientError
 import requests
-
-from api.common.config.aws import AWS_REGION
+import pytest
+import uuid
 
 from test.e2e.journeys.base_journey import (
     BaseAuthenticatedJourneyTest,
-    DYNAMO_PERMISSIONS_TABLE_NAME,
     RESOURCE_PREFIX,
 )
 from test.e2e.utils import get_secret
@@ -19,24 +14,28 @@ from test.e2e.utils import get_secret
 
 class TestProtectedDomainJourneys(BaseAuthenticatedJourneyTest):
     dataset = None
+    test_domain_name = None
     cognito_client_id = None
 
     def client_name(self) -> str:
         return "E2E_TEST_CLIENT_DATA_ADMIN"
 
     @classmethod
+    def create_domain_name(cls) -> str:
+        random_str = str(uuid.uuid4()).replace("-", "_")
+        return "test_e2e_" + random_str
+
+    @classmethod
     def setup_class(cls):
-        # Fetch cognito client id
         data_admin_credentials = get_secret(
             secret_name=f"{RESOURCE_PREFIX}_E2E_TEST_CLIENT_DATA_ADMIN"  # pragma: allowlist secret
         )
         cls.cognito_client_id = data_admin_credentials["CLIENT_ID"]
-
-        # Create schema
         cls.dataset = cls.create_schema("protected")
 
-        # Upload file
-        files = {"file": (cls.filename, open("./test/e2e/" + cls.filename, "rb"))}
+        files = {
+            "file": (cls.csv_filename, open("./test/e2e/" + cls.csv_filename, "rb"))
+        }
         upload_url = cls.upload_dataset_url(
             cls, cls.layer, "test_e2e_protected", cls.dataset
         )
@@ -48,66 +47,12 @@ class TestProtectedDomainJourneys(BaseAuthenticatedJourneyTest):
             files=files,
         )
 
+        cls.test_domain_name = cls.create_domain_name()
+
         assert response.status_code == HTTPStatus.ACCEPTED
 
     @classmethod
     def teardown_class(cls):
-        """Deletes the protected domain permissions"""
-        domain = "test_e2e"
-
-        # Setup table
-        db_table = boto3.resource("dynamodb", region_name=AWS_REGION).Table(
-            DYNAMO_PERMISSIONS_TABLE_NAME
-        )
-
-        # Get permissions
-        response = db_table.query(
-            KeyConditionExpression=Key("PK").eq("PERMISSION"),
-            FilterExpression=Attr("Domain").eq(domain.upper()),
-        )
-        protected_permissions = [item["SK"] for item in response["Items"]]
-
-        if not protected_permissions:
-            pass
-        else:
-            # Check subjects with permission
-            subjects_with_protected_permissions = db_table.query(
-                KeyConditionExpression=Key("PK").eq("SUBJECT"),
-                FilterExpression=reduce(
-                    Or,
-                    (
-                        [
-                            Attr("Permissions").contains(value)
-                            for value in protected_permissions
-                        ]
-                    ),
-                ),
-            )["Items"]
-        # Delete permissions for users with protected domain and protected domain
-        try:
-            with db_table.batch_writer() as batch:
-                # Remove protected domain permissions from subjects
-                for subject in subjects_with_protected_permissions:
-                    subject["Permissions"].difference_update(protected_permissions)
-
-                    if len(subject["Permissions"]) == 0:
-                        subject["Permissions"] = {}
-
-                    batch.put_item(Item=subject)
-
-                # Remove protected domain permissions from database
-                for permission in protected_permissions:
-                    batch.delete_item(
-                        Key={
-                            "PK": "PERMISSION",
-                            "SK": permission,
-                        }
-                    )
-        except ClientError as error:
-            print(f"Unable to delete {protected_permissions} from db")
-            print(error)
-
-        # Delete the dataset
         response = requests.delete(
             cls.upload_dataset_url(cls, cls.layer, "test_e2e_protected", cls.dataset),
             headers=cls.generate_auth_headers(cls, "E2E_TEST_CLIENT_DATA_ADMIN"),
@@ -124,31 +69,30 @@ class TestProtectedDomainJourneys(BaseAuthenticatedJourneyTest):
         response = requests.put(
             modification_url, headers=self.generate_auth_headers(), json=payload
         )
-        print(response.json())
         assert response.status_code == HTTPStatus.OK
 
     def reset_permissions(self):
         self.assume_permissions([])
 
+    @pytest.mark.order(1)
     def test_create_protected_domain(self):
         self.reset_permissions()
-        # Create protected domain
-        create_url = self.create_protected_domain_url("test_e2e")
+        create_url = self.protected_domain_url(self.test_domain_name)
+
         response = requests.post(create_url, headers=self.generate_auth_headers())
         assert response.status_code == HTTPStatus.CREATED
 
-        # Lists created protected domain
         list_url = self.list_protected_domain_url()
         response = requests.get(list_url, headers=self.generate_auth_headers())
-        assert "test_e2e" in response.json()
+        assert self.test_domain_name in response.json()
 
-        # Not authorised to access existing protected domain
         url = self.query_dataset_url(
             layer=self.layer, domain="test_e2e_protected", dataset=self.dataset
         )
         response = requests.post(url, headers=self.generate_auth_headers())
         assert response.status_code == HTTPStatus.UNAUTHORIZED
 
+    @pytest.mark.order(2)
     def test_allows_access_to_protected_domain_when_granted_permission(self):
         self.assume_permissions(["READ_DEFAULT_PROTECTED_TEST_E2E_PROTECTED"])
 
@@ -176,3 +120,13 @@ class TestProtectedDomainJourneys(BaseAuthenticatedJourneyTest):
         }
 
         self.reset_permissions()
+
+    @pytest.mark.order(3)
+    def test_delete_protected_domain(self):
+        delete_url = self.protected_domain_url(self.test_domain_name)
+        response = requests.delete(delete_url, headers=self.generate_auth_headers())
+        assert response.status_code == HTTPStatus.ACCEPTED
+
+        list_url = self.list_protected_domain_url()
+        response = requests.get(list_url, headers=self.generate_auth_headers())
+        assert self.test_domain_name not in response.json()
