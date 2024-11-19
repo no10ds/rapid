@@ -9,7 +9,7 @@ from test.e2e.journeys.base_journey import (
     BaseAuthenticatedJourneyTest,
 )
 
-RESOURCE_PREFIX = os.environ["RESOURCE_PREFIX"]
+from api.common.config.aws import RESOURCE_PREFIX
 
 
 class TestDataJourneys(BaseAuthenticatedJourneyTest):

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import os
 import uuid
-from api.common.config.aws import PERMISSIONS_TABLE_SUFFIX
+from api.common.config.aws import PERMISSIONS_TABLE_SUFFIX, RESOURCE_PREFIX
 from test.e2e.utils import get_secret, AuthenticationFailedError
 from http import HTTPStatus
 import requests
@@ -11,11 +11,10 @@ import pandas as pd
 from io import StringIO
 from uuid import uuid4
 from jinja2 import Template
-from strenum import StrEnum
-from api.common.config.constants import CONTENT_ENCODING
+from enum import StrEnum
 
 DOMAIN_NAME = os.environ["E2E_DOMAIN_NAME"]
-RESOURCE_PREFIX = os.environ["E2E_RESOURCE_PREFIX"]
+
 DYNAMO_PERMISSIONS_TABLE_NAME = RESOURCE_PREFIX + PERMISSIONS_TABLE_SUFFIX
 FILE_PATH = os.path.dirname(os.path.abspath(__file__))
 
