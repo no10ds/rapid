@@ -37,6 +37,7 @@ def schema_has_valid_column_definitions(schema: Schema):
     has_allow_null_false_on_partitioned_columns(schema)
     has_only_accepted_data_types(schema)
     has_valid_date_column_definition(schema)
+    has_valid_allow_duplicates_columns(schema)
 
 
 def has_columns(schema: Schema):
@@ -204,7 +205,14 @@ def has_valid_update_behaviour(schema: Schema):
             f"You must specify a valid update behaviour. Accepted values: {UpdateBehaviour._member_names_}"
         )
 
-
+def has_valid_allow_duplicates_columns(schema: Schema):
+    if not schema.has_overwrite_behaviour():
+        for column in schema.columns:
+            if not column.allow_duplicates:
+                raise SchemaValidationError(
+                    f"Schema with APPEND update behaviour cannot forbid duplicated values in columns"
+                )
+    
 def __has_unique_value(
     set_to_compare: List[Union[str, int]], actual_value: List[Any], field_name: str
 ):
