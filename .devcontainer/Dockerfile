@@ -1,1 +1,1 @@
-FROM nikolaik/python-nodejs:latest
+FROM nikolaik/python-nodejs:python3.12-nodejs23
