@@ -1,0 +1,4 @@
+ipykernel
+#'ipykernel<=6.8.0,>=6.4.0' pre-commit - ARN
+#ipykernel - AMD
+pre-commit
