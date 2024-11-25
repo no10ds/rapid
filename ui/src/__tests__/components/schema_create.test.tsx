@@ -27,6 +27,7 @@ const mockSchemaData: GenerateSchemaResponse = {
       partition_index: null,
       data_type: 'int',
       allow_null: true,
+      allow_duplicates: true,
       format: null
     }
   ]

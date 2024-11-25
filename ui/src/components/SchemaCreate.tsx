@@ -251,7 +251,7 @@ function CreateSchema({
         </Typography>
 
         <SimpleTable
-          sx={{ mb: 4 }}
+          sx={{ mb: 5 }}
           list={newSchemaData.columns.map((item) => {
             return [
               { children: item.name },
@@ -307,6 +307,24 @@ function CreateSchema({
               },
               {
                 children: (
+                  <FormControl fullWidth size="small">
+                    <Select
+                      label="Allows Duplicates"
+                      data={['true', 'false']}
+                      value={item.allow_duplicates}
+                      onChange={(e) =>
+                        setNewSchemaDataColumn(
+                          item.name,
+                          'allow_duplicates',
+                          e.target.value === 'true'
+                        )
+                      }
+                    />
+                  </FormControl>
+                )
+              },
+              {
+                children: (
                   <TextField
                     size="small"
                     variant="outlined"
@@ -329,6 +347,7 @@ function CreateSchema({
             { children: 'Data Type' },
             { children: doesTypesContainData ? 'Data Format' : '' },
             { children: 'Allows Null' },
+            { children: 'Allows Duplicates' },
             { children: 'Partition Index (Optional)' }
           ]}
         />

@@ -42,6 +42,7 @@ class Column(BaseModel):
     partition_index: Optional[int] = None
     allow_null: bool = True
     format: Optional[str] = None
+    allow_duplicates: Optional[bool] = True
 
 
 class Schema(BaseModel):
