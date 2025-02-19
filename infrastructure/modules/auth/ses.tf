@@ -1,3 +1,6 @@
+locals {
+  allowed_email_domains = concat(["simulator.amazonses.com"], split(",", var.allowed_email_domains))
+}
 resource "aws_ses_domain_identity" "ses_domain" {
   count  = var.cognito_ses_authentication ? 1 : 0
   domain = var.domain_name
@@ -206,7 +209,37 @@ data "aws_iam_policy_document" "ses_policy_document" {
 
     condition {
       test     = "ForAllValues:StringNotLike"
-      values   = [for key in split(",", var.allowed_email_domains) : "*@${key}"]
+      values   = [for key in local.allowed_email_domains : "*@${key}"]
+      variable = "ses:Recipients"
+    }
+  }
+
+  statement {
+    effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["email.cognito-idp.amazonaws.com"]
+    }
+    actions   = ["SES:SendEmail", "SES:SendRawEmail"]
+    resources = [aws_ses_domain_identity.ses_domain[0].arn]
+    condition {
+      test     = "StringEquals"
+      values   = [var.aws_account]
+      variable = "aws:SourceAccount"
+    }
+    condition {
+      test     = "ArnLike"
+      values   = aws_cognito_user_pool.rapid_user_pool.arn
+      variable = "ses:Recipients"
+    }
+    condition {
+      test     = "StringEqualsIgnoreCase"
+      values   = "no-reply@${var.domain_name}"
+      variable = "ses:FromAddress"
+    }
+    condition {
+      test     = "StringLike"
+      values   = [for key in local.allowed_email_domains : "*@${key}"]
       variable = "ses:Recipients"
     }
   }
