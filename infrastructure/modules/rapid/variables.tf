@@ -118,11 +118,13 @@ variable "cognito_ses_authentication" {
 variable "ses_email_notifications" {
   type        = list(string)
   description = "List of emails that will receive SES notifications when sent email receive bounce or complaint response from server"
+  default     = null
 }
 
 variable "ses_allowed_from_emails" {
   type        = list(string)
   description = "List of the domain emails that are allowed to be used by AWS account in SES"
+  default     = null
 }
 
 variable "public_subnet_ids_list" {
