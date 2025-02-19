@@ -223,7 +223,17 @@ data "aws_iam_policy_document" "ses_policy_document" {
       variable = "ses:Recipients"
     }
   }
+}
 
+resource "aws_ses_identity_policy" "ses_policy_cognito" {
+  count    = var.cognito_ses_authentication ? 1 : 0
+  name     = "${var.resource-name-prefix}_ses_policy_cognito"
+  identity = aws_ses_domain_identity.ses_domain[0].arn
+  policy   = data.aws_iam_policy_document.ses_policy_document_cognito[0].json
+}
+
+data "aws_iam_policy_document" "ses_policy_document_cognito" {
+  count = var.cognito_ses_authentication ? 1 : 0
   statement {
     effect = "Allow"
     principals {
