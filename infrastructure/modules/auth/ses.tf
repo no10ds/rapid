@@ -197,8 +197,8 @@ data "aws_iam_policy_document" "ses_policy_document" {
       variable = "ses:FromAddress"
     }
     condition {
-      test     = "StringNotLike"
-      values   = ["arn:aws:cognito-idp:${var.aws_region}:${var.aws_account}:userpool/*"]
+      test     = "StringNotEqualsIgnoreCase"
+      values   = ["arn:aws:iam::${var.aws_account}:role/aws-service-role/email.cognito-idp.amazonaws.com/AWSServiceRoleForAmazonCognitoIdpEmailService"]
       variable = "aws:SourceArn"
     }
   }
@@ -218,8 +218,8 @@ data "aws_iam_policy_document" "ses_policy_document" {
       variable = "ses:Recipients"
     }
     condition {
-      test     = "StringNotLike"
-      values   = ["arn:aws:cognito-idp:${var.aws_region}:${var.aws_account}:userpool/*"]
+      test     = "StringNotEqualsIgnoreCase"
+      values   = ["arn:aws:iam::${var.aws_account}:role/aws-service-role/email.cognito-idp.amazonaws.com/AWSServiceRoleForAmazonCognitoIdpEmailService"]
       variable = "aws:SourceArn"
     }
   }
