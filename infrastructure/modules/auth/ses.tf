@@ -194,7 +194,7 @@ data "aws_iam_policy_document" "ses_policy_document" {
 
     condition {
       test     = "ForAllValues:StringNotEqualsIgnoreCase"
-      values   = var.ses_allowed_from_emails
+      values   = local.ses_allowed_from_emails
       variable = "ses:FromAddress"
     }
   }
