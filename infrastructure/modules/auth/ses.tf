@@ -228,11 +228,6 @@ data "aws_iam_policy_document" "ses_policy_document" {
       variable = "aws:SourceAccount"
     }
     condition {
-      test     = "ArnLike"
-      values   = [aws_cognito_user_pool.rapid_user_pool.arn]
-      variable = "ses:Recipients"
-    }
-    condition {
       test     = "StringEqualsIgnoreCase"
       values   = ["no-reply@${var.domain_name}"]
       variable = "ses:FromAddress"
