@@ -196,6 +196,11 @@ data "aws_iam_policy_document" "ses_policy_document" {
       values   = var.ses_allowed_from_emails
       variable = "ses:FromAddress"
     }
+    condition {
+      test     = "StringNotLike"
+      values   = ["arn:aws:cognito-idp:${var.aws_region}:${var.aws_account}:userpool/*"]
+      variable = "ses:Recipients"
+    }
   }
   statement {
     effect    = "Deny"
@@ -210,6 +215,11 @@ data "aws_iam_policy_document" "ses_policy_document" {
     condition {
       test     = "ForAllValues:StringNotLike"
       values   = [for key in local.allowed_email_domains : "*@${key}"]
+      variable = "ses:Recipients"
+    }
+    condition {
+      test     = "StringNotLike"
+      values   = ["arn:aws:cognito-idp:${var.aws_region}:${var.aws_account}:userpool/*"]
       variable = "ses:Recipients"
     }
   }
