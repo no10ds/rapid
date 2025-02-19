@@ -229,7 +229,7 @@ data "aws_iam_policy_document" "ses_policy_document" {
     }
     condition {
       test     = "ArnLike"
-      values   = aws_cognito_user_pool.rapid_user_pool.arn
+      values   = [aws_cognito_user_pool.rapid_user_pool.arn]
       variable = "ses:Recipients"
     }
     condition {
