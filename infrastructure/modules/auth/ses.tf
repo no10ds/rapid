@@ -1,5 +1,6 @@
 locals {
-  allowed_email_domains = concat(["simulator.amazonses.com"], split(",", var.allowed_email_domains))
+  allowed_email_domains   = concat(["simulator.amazonses.com"], split(",", var.allowed_email_domains))
+  ses_allowed_from_emails = concat(["no-reply@${var.domain_name}"], var.ses_allowed_from_emails)
 }
 resource "aws_ses_domain_identity" "ses_domain" {
   count  = var.cognito_ses_authentication ? 1 : 0
@@ -196,11 +197,6 @@ data "aws_iam_policy_document" "ses_policy_document" {
       values   = var.ses_allowed_from_emails
       variable = "ses:FromAddress"
     }
-    condition {
-      test     = "StringNotEqualsIgnoreCase"
-      values   = ["arn:aws:iam::${var.aws_account}:role/aws-service-role/email.cognito-idp.amazonaws.com/AWSServiceRoleForAmazonCognitoIdpEmailService"]
-      variable = "aws:SourceArn"
-    }
   }
   statement {
     effect    = "Deny"
@@ -216,11 +212,6 @@ data "aws_iam_policy_document" "ses_policy_document" {
       test     = "ForAllValues:StringNotLike"
       values   = [for key in local.allowed_email_domains : "*@${key}"]
       variable = "ses:Recipients"
-    }
-    condition {
-      test     = "StringNotEqualsIgnoreCase"
-      values   = ["arn:aws:iam::${var.aws_account}:role/aws-service-role/email.cognito-idp.amazonaws.com/AWSServiceRoleForAmazonCognitoIdpEmailService"]
-      variable = "aws:SourceArn"
     }
   }
 }
