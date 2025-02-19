@@ -112,6 +112,7 @@ variable "password_policy" {
 variable "cognito_ses_authentication" {
   type        = bool
   description = "Whether to use SES instead of SNS for authentication. If you choose SNS make sure you moved it from sandbox to production environment."
+  default     = false
 }
 
 variable "ses_email_notifications" {
