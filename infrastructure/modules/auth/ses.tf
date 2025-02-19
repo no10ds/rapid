@@ -199,7 +199,7 @@ data "aws_iam_policy_document" "ses_policy_document" {
     condition {
       test     = "StringNotLike"
       values   = ["arn:aws:cognito-idp:${var.aws_region}:${var.aws_account}:userpool/*"]
-      variable = "ses:Recipients"
+      variable = "aws:SourceArn"
     }
   }
   statement {
@@ -220,7 +220,7 @@ data "aws_iam_policy_document" "ses_policy_document" {
     condition {
       test     = "StringNotLike"
       values   = ["arn:aws:cognito-idp:${var.aws_region}:${var.aws_account}:userpool/*"]
-      variable = "ses:Recipients"
+      variable = "aws:SourceArn"
     }
   }
 }
