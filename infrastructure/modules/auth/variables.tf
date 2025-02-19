@@ -132,9 +132,9 @@ variable "aws_region" {
 variable "ses_email_notifications" {
   type        = list(string)
   description = "List of emails that will receive SES notifications when sent email receive bounce or complaint response from server"
-  default = null
+  default     = null
   validation {
-    condition = var.cognito_ses_authentication == false || try(length(var.ses_email_notifications), 0) > 0
+    condition     = var.cognito_ses_authentication == false || try(length(var.ses_email_notifications), 0) > 0
     error_message = "When you enable SES with cognito you need to add at least one email for SES notifications"
   }
 }
