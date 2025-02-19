@@ -234,7 +234,7 @@ data "aws_iam_policy_document" "ses_policy_document" {
     }
     condition {
       test     = "StringEqualsIgnoreCase"
-      values   = "no-reply@${var.domain_name}"
+      values   = ["no-reply@${var.domain_name}"]
       variable = "ses:FromAddress"
     }
     condition {
