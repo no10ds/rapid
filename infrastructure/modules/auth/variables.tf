@@ -107,3 +107,39 @@ variable "layers" {
   description = "A list of the layers that the rAPId instance will contain"
   default     = ["default"]
 }
+
+variable "cognito_ses_authentication" {
+  type        = bool
+  description = "Whether to use SES instead of SNS for authentication. If you choose SNS make sure you moved it from sandbox to production environment."
+}
+
+variable "hosted_zone_id" {
+  type        = string
+  description = "Hosted Zone ID with the domain Name Servers, pass quotes to create a new one from scratch"
+  default     = ""
+}
+
+variable "aws_account" {
+  type        = string
+  description = "AWS Account number to host the rAPId service"
+}
+
+variable "aws_region" {
+  type        = string
+  description = "The region of the AWS Account for the rAPId service"
+}
+
+variable "ses_email_notifications" {
+  type        = list(string)
+  description = "List of emails that will receive SES notifications when sent email receive bounce or complaint response from server"
+}
+
+variable "ses_allowed_from_emails" {
+  type        = list(string)
+  description = "List of the domain emails that are allowed to be used by AWS account in SES"
+}
+
+variable "allowed_email_domains" {
+  type        = string
+  description = "List of allowed emails domains that can be associated with users"
+}
