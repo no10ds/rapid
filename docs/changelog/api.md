@@ -1,5 +1,11 @@
 # API Changelog
 
+## v7.11.1 - _2025-03-11_
+
+### Fixes
+
+- Fix release issues
+
 ## v7.11.0 - _2024-09-26_
 
 ### Fixes
