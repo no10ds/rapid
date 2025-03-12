@@ -68,9 +68,10 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
         response = requests.post(url, headers=self.generate_auth_headers())
         assert response.status_code == HTTPStatus.NOT_FOUND
 
+    @pytest.mark.order(2)
     def test_queries_existing_dataset_as_csv_when_authorised(self):
         url = self.query_dataset_url(
-            layer=self.layer, domain=self.e2e_test_domain, dataset="query", version=1
+            layer=self.layer, domain=self.e2e_test_domain, dataset=self.dataset, version=1
         )
 
         headers = {
@@ -78,7 +79,7 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
             **self.generate_auth_headers(),
         }
         response = requests.post(url, headers=headers)
-        assert response.status_code == HTTPStatus.NO_CONTENT
+        assert response.status_code == HTTPStatus.OK
 
     @pytest.mark.order(2)
     def test_fails_to_query_and_sql_injection_attempted(self):

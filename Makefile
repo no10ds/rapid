@@ -24,13 +24,12 @@ else
 	TAG_NAME="$(UI_LATEST_TAG)-dev-$(GITHUB_SHORT_SHA)"
 endif
 
-.PHONY: help
-
 setup: brew precommit
 
 brew:				## Brew install all the dependencies
 	brew bundle
 
+.PHONY: help
 help: 				## List targets and description
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
 
@@ -61,6 +60,7 @@ node-setup:				## Setup node to run the UI
 ##
 
 # API Testing --------------------
+.PHONY: api/test
 api/test:			## Run api python unit tests
 	@cd api/; . .venv/bin/activate; pytest test/api -vv -s
 
