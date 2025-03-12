@@ -174,14 +174,20 @@ resource "aws_s3_bucket" "access_logs" {
   force_destroy = true
   tags          = var.tags
 
-  versioning {
-    enabled = true
-  }
+}
 
-  logging {
-    target_bucket = var.log_bucket_name
-    target_prefix = "log/${var.resource-name-prefix}-cloudtrail-access-logs"
+resource "aws_s3_bucket_versioning" "access_logs" {
+  bucket = aws_s3_bucket.access_logs.id
+  versioning_configuration {
+    status = "Enabled"
   }
+}
+
+resource "aws_s3_bucket_logging" "access_logs" {
+  bucket = aws_s3_bucket.access_logs.id
+
+  target_bucket = var.log_bucket_name
+  target_prefix = "log/${var.resource-name-prefix}-cloudtrail-access-logs"
 }
 
 resource "aws_s3_bucket_public_access_block" "access_logs" {
