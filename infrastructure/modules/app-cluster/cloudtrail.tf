@@ -177,14 +177,16 @@ resource "aws_s3_bucket" "access_logs" {
 }
 
 resource "aws_s3_bucket_versioning" "access_logs" {
-  bucket = aws_s3_bucket.access_logs.id
+  count  = var.enable_cloudtrail ? 1 : 0
+  bucket = aws_s3_bucket.access_logs[0].id
   versioning_configuration {
     status = "Enabled"
   }
 }
 
 resource "aws_s3_bucket_logging" "access_logs" {
-  bucket = aws_s3_bucket.access_logs.id
+  count  = var.enable_cloudtrail ? 1 : 0
+  bucket = aws_s3_bucket.access_logs[0].id
 
   target_bucket = var.log_bucket_name
   target_prefix = "log/${var.resource-name-prefix}-cloudtrail-access-logs"
