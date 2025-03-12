@@ -79,7 +79,7 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
             **self.generate_auth_headers(),
         }
         response = requests.post(url, headers=headers)
-        assert response.status_code == HTTPStatus.NO_CONTENT
+        assert response.status_code == HTTPStatus.OK
 
     @pytest.mark.order(2)
     def test_fails_to_query_and_sql_injection_attempted(self):
