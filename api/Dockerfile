@@ -1,3 +1,6 @@
+#checkov:skip=CKV_DOCKER_9: Allow for use of apt
+#checkov:skip=CKV_DOCKER_2: No need for healthcheck in container
+#checkov:skip=CKV_DOCKER_3: No need for user in container
 FROM debian:12-slim AS build
 RUN apt-get update && \
     apt-get install --no-install-suggests --no-install-recommends --yes python3-venv gcc libpython3-dev git && \
