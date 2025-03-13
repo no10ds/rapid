@@ -8,7 +8,7 @@ NODE_VERSION=lts/iron
 # Git references
 GITHUB_SHA=$$(git rev-parse HEAD)
 GITHUB_SHORT_SHA=$$(git rev-parse --short HEAD)
-RELEASE_TAG=$(git describe --exact-match --tags HEAD)
+RELEASE_TAG=$$(git describe --exact-match --tags HEAD)
 
 # API Build variables
 API_ACCOUNT_ECR_URI=$(AWS_ACCOUNT).dkr.ecr.$(AWS_REGION).amazonaws.com
@@ -110,11 +110,17 @@ api/format:			## Run the api code format with black
 # API Release --------------------
 ##
 
+pull: api/docker-login
+	@docker pull $(API_ACCOUNT_ECR_URI)/$(API_IMAGE_NAME):$(GITHUB_SHORT_SHA)
+
 api/tag-image:		## Tag the image with the latest commit hash
 	@cd api/; docker tag rapid-api/service-image:latest $(API_ACCOUNT_ECR_URI)/$(API_IMAGE_NAME):$(GITHUB_SHORT_SHA)
 
-api/upload-image:	## Upload the tagged image to the image registry
-	@aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(API_ACCOUNT_ECR_URI) && docker push $(API_ACCOUNT_ECR_URI)/$(API_IMAGE_NAME):$(GITHUB_SHORT_SHA)
+api/docker-login:
+	aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(API_ACCOUNT_ECR_URI)
+
+api/upload-image: api/docker-login	## Upload the tagged image to the image registry
+	@docker push $(API_ACCOUNT_ECR_URI)/$(API_IMAGE_NAME):$(GITHUB_SHORT_SHA)
 
 api/tag-and-upload:	api/tag-image api/upload-image	## Tag and upload the latest api image
 
