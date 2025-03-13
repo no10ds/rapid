@@ -120,7 +120,7 @@ api/upload-image:	## Upload the tagged image to the image registry
 api/tag-and-upload:	api/tag-image api/upload-image	## Tag and upload the latest api image
 
 api/tag-release-image:			## Tag the image with the tag name
-	@cd api/; tag rapid-api/service-image:latest $(API_PUBLIC_URI)/$(API_PUBLIC_IMAGE):${GITHUB_REF_NAME}
+	@cd api/; docker tag rapid-api/service-image:latest $(API_PUBLIC_URI)/$(API_PUBLIC_IMAGE):${GITHUB_REF_NAME}
 
 api/upload-release-image:	## Upload the tagged release image to the image registry
 	@aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin $(API_PUBLIC_URI) && docker push $(API_PUBLIC_URI)/$(API_PUBLIC_IMAGE):${GITHUB_REF_NAME}
