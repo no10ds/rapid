@@ -10,11 +10,6 @@ resource "aws_s3_bucket" "rapid_athena_query_results_bucket" {
 
 }
 
-resource "aws_s3_bucket_acl" "rapid_athena_query_results_bucket" {
-  bucket = aws_s3_bucket.rapid_athena_query_results_bucket.id
-  acl    = "private"
-}
-
 resource "aws_s3_bucket_server_side_encryption_configuration" "rapid_athena_query_results_bucket" {
   bucket = aws_s3_bucket.rapid_athena_query_results_bucket.id
 
