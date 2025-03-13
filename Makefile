@@ -7,8 +7,8 @@ NODE_VERSION=lts/iron
 
 # Git references
 GITHUB_SHA=$$(git rev-parse HEAD)
-GITHUB_REF_NAME=$$(git rev-parse --abbrev-ref HEAD)
 GITHUB_SHORT_SHA=$$(git rev-parse --short HEAD)
+RELEASE_TAG=$(git tag --points-at HEAD | head -1)
 
 # API Build variables
 API_ACCOUNT_ECR_URI=$(AWS_ACCOUNT).dkr.ecr.$(AWS_REGION).amazonaws.com
@@ -17,11 +17,10 @@ API_PUBLIC_IMAGE=no10-rapid/api
 
 # UI Build variables
 UI_ZIP_PATH=$(UI_IMAGE_NAME)-$(GITHUB_SHORT_SHA)
-UI_LATEST_TAG=$(shell gh api /repos/no10ds/rapid/releases/latest | jq -r ".tag_name")
-ifeq ($(UI_LATEST_TAG), null)
+ifeq ($(RELEASE_TAG), null)
 	TAG_NAME="$(UI_IMAGE_NAME)-$(GITHUB_SHORT_SHA)"
 else
-	TAG_NAME="$(UI_LATEST_TAG)-dev-$(GITHUB_SHORT_SHA)"
+	TAG_NAME="$(RELEASE_TAG)-dev-$(GITHUB_SHORT_SHA)"
 endif
 
 setup: brew precommit
@@ -100,7 +99,7 @@ api/reqs:
 api/setup:	api/venv api/reqs
 
 api/create-image:		## Manually (re)create the api environment image
-	@cd api/; docker build --build-arg commit_sha=$(GITHUB_SHA) --build-arg version=$(GITHUB_REF_NAME) -t rapid-api/service-image .
+	@cd api/; docker build --build-arg commit_sha=$(GITHUB_SHA) --build-arg version=$(GITHUB_SHORT_SHA) -t rapid-api/service-image .
 
 api/lint:			## Run the api lint checks with flake8
 	@cd api/; . .venv/bin/activate; flake8 api test
@@ -120,10 +119,10 @@ api/upload-image:	## Upload the tagged image to the image registry
 api/tag-and-upload:	api/tag-image api/upload-image	## Tag and upload the latest api image
 
 api/tag-release-image:			## Tag the image with the tag name
-	@cd api/; docker tag rapid-api/service-image:latest $(API_PUBLIC_URI)/$(API_PUBLIC_IMAGE):${GITHUB_REF_NAME}
+	@cd api/; docker tag rapid-api/service-image:latest $(API_PUBLIC_URI)/$(API_PUBLIC_IMAGE):${RELEASE_TAG}
 
 api/upload-release-image:	## Upload the tagged release image to the image registry
-	@aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin $(API_PUBLIC_URI) && docker push $(API_PUBLIC_URI)/$(API_PUBLIC_IMAGE):${GITHUB_REF_NAME}
+	@aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin $(API_PUBLIC_URI) && docker push $(API_PUBLIC_URI)/$(API_PUBLIC_IMAGE):${RELEASE_TAG}
 
 api/tag-and-upload-release-image: api/tag-release-image api/upload-release-image## Tag and upload the api release image
 
