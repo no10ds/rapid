@@ -1,5 +1,11 @@
 # API Changelog
 
+## v7.11.2 - _2025-03-11_
+
+### Fixes
+
+- FastAPI update requires content-type header for API calls
+
 ## v7.11.1 - _2025-03-11_
 
 ### Fixes

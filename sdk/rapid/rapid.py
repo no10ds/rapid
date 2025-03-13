@@ -46,7 +46,10 @@ class Rapid:
         self.auth = auth if auth else RapidAuth()
 
     def generate_headers(self) -> Dict:
-        return {"Authorization": "Bearer " + self.auth.fetch_token()}
+        return {
+            "Authorization": "Bearer " + self.auth.fetch_token(),
+            "Content-Type": "application/json",
+        }
 
     def list_datasets(self):
         """
