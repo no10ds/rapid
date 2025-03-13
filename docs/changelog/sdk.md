@@ -1,5 +1,11 @@
 # SDK Changelog
 
+## v0.1.10 - _2024-03-13_
+
+### Features
+
+- FastAPI update requires content-type header for API calls
+
 ## v0.1.9 - _2024-09-12_
 
 ### Features
