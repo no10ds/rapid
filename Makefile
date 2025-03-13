@@ -8,7 +8,7 @@ NODE_VERSION=lts/iron
 # Git references
 GITHUB_SHA=$$(git rev-parse HEAD)
 GITHUB_SHORT_SHA=$$(git rev-parse --short HEAD)
-RELEASE_TAG=$(git tag --points-at HEAD | head -1)
+RELEASE_TAG=$(git describe --exact-match --tags HEAD)
 
 # API Build variables
 API_ACCOUNT_ECR_URI=$(AWS_ACCOUNT).dkr.ecr.$(AWS_REGION).amazonaws.com
