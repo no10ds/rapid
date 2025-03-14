@@ -107,7 +107,9 @@ describe('Page: Upload page', () => {
             body: formData,
             credentials: 'include',
             method: 'POST',
-            headers: {}
+            headers: {
+              "Content-Type": "application/json"
+            }
           }
         )
       })
