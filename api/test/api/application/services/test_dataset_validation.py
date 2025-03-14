@@ -7,10 +7,12 @@ import pytest
 from api.application.services.dataset_validation import (
     build_validated_dataframe,
     convert_date_columns,
+    check_dropdown_values,
     remove_empty_rows,
     clean_column_headers,
     dataset_has_correct_columns,
     dataset_has_acceptable_null_values,
+    dataset_has_acceptable_duplicated_values,
     dataset_has_correct_data_types,
     dataset_has_no_illegal_characters_in_partition_columns,
     dataset_has_rows,
@@ -424,6 +426,37 @@ class TestDatasetValidation:
         ):
             dataset_has_rows(df)
 
+    def test_return_error_message_when_dropdown_do_not_match(self):
+        df = pd.DataFrame(
+            {"col1": ["a", "b"], "col2": [1, None]}
+        )
+        schema = Schema(
+            metadata=self.schema_metadata,
+            columns=[
+                Column(
+                    name="col1",
+                    partition_index=None,
+                    data_type="string",
+                    allow_null=True,
+                    dropdown=["a","c"]
+                ),
+                Column(
+                    name="col2",
+                    partition_index=None,
+                    data_type="int",
+                    allow_null=False,
+                    dropdown=[2,3]
+                ),
+            ],
+        )
+
+        
+        data_frame, error_list = check_dropdown_values(df, schema)
+        assert error_list == [
+            "Column [col1] values [['b']] does not match specified dropdown values [['a', 'c']]",
+            "Column [col2] values [[1.]] does not match specified dropdown values [[2, 3]]",
+        ]
+
     def test_return_error_message_when_not_accepted_null_values(self):
         df = pd.DataFrame(
             {"col1": ["a", "b", None], "col2": ["d", "e", None], "col3": [1, 5, None]}
@@ -459,6 +492,41 @@ class TestDatasetValidation:
                 "Column [col2] does not allow null values",
                 "Column [col3] does not allow null values",
             ]
+
+    def test_return_error_message_when_not_accepted_duplicated_values(self):
+        df = pd.DataFrame(
+            {"col1": ["a", "b", "a"], "col2": ["d", None, None], "col3": [1, 5, 1]}
+        )
+        schema = Schema(
+            metadata=self.schema_metadata,
+            columns=[
+                Column(
+                    name="col1",
+                    partition_index=None,
+                    data_type="string",
+                    allow_null=True,
+                    allow_duplicates=False
+                ),
+                Column(
+                    name="col2",
+                    partition_index=None,
+                    data_type="string",
+                    allow_null=False,
+                    allow_duplicates=False
+                ),
+                Column(
+                    name="col3",
+                    partition_index=None,
+                    data_type="int",
+                    allow_null=False,
+                ),
+            ],
+        )
+
+        data_frame, error_list = dataset_has_acceptable_duplicated_values(df, schema)
+        assert error_list == [
+            "Column [col1] does not allow duplicated values"
+        ]
 
     def test_return_error_message_when_not_correct_datatypes(self):
         df = pd.DataFrame(
