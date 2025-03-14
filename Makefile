@@ -217,12 +217,7 @@ sdk/release:	sdk/build		## Build and release sdk to pypi
 ui/setup:			## Setup npm required for the sdk
 	@cd ui/; npm i -g next; npm ci
 
-# UI Running --------------------
-##
-ui/run:				## Run the ui application
-	@cd ui/; npm run
-
-ui/run-dev:			## Run the ui application with hot reload
+ui/run:			## Run the ui application with hot reload
 	@cd ui/; npm run dev
 
 # UI Testing --------------------

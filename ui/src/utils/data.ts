@@ -24,7 +24,7 @@ export const api = async (
   const res: Response = await fetch(url, {
     credentials: 'include',
     ...init,
-    headers: headers
+    headers: {...headers, "Content-Type": "application/json"}
   })
   if (res.ok) return res
   try {

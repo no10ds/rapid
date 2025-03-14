@@ -17,7 +17,7 @@ test('test', async ({ page }) => {
   await page.getByTestId('select-type').selectOption('DATA_ADMIN')
   await page
     .getByRole('row')
-    .filter({ hasText: 'ActionDATA_ADMIN' })
+    .filter({ hasText: 'DATA_ADMIN' })
     .getByRole('button')
     .click()
   await page.getByTestId('submit').click()
