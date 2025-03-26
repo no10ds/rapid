@@ -119,7 +119,6 @@ export const createClient = async ({
 }) => {
   const res = await api(`/api/${path}`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
   })
   return res.json()
@@ -130,7 +129,6 @@ export const updateSubjectPermissions = async (
 ): Promise<UpdateSubjectPermissionsResponse> => {
   const res = await api(`/api/subjects/permissions`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
   })
   return res.json()
@@ -175,8 +173,7 @@ export const queryDataset = async ({
   const res = await api(`/api/datasets/${path}`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
-      Accept: acceptHeader
+      Accept: acceptHeader,
     },
     body: JSON.stringify(data)
   })
@@ -202,7 +199,6 @@ export const createSchema = async (
 ): Promise<CreateSchemaResponse> => {
   const res = await api(`/api/schema`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
   })
   return res.json()
@@ -211,7 +207,6 @@ export const createSchema = async (
 export const deleteClient = async ({ clientId }: { clientId: string }) => {
   const res = await api(`/api/client/${clientId}`, {
     method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' }
   })
   return res.json()
 }
@@ -225,7 +220,6 @@ export const deleteUser = async ({
 }) => {
   const res = await api('/api/user', {
     method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ user_id: userId, username })
   })
   return res.json()

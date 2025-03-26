@@ -14,17 +14,22 @@ export const api = async (
   const url = createUrl(`${baseUrl}`, params)
   let detailMessage
 
-  let headers = {}
+  let headers = init.headers || {}
 
   if (process.env.NODE_ENV === 'development') {
     const response = await getDevToken()
     headers['Authorization'] = `Bearer ${response.token}`
   }
 
+  // Don't set Content-Type for FormData (file uploads)
+  if (!(init.body instanceof FormData)) {
+    headers = {...headers, "Content-Type": "application/json"}
+  }
+
   const res: Response = await fetch(url, {
     credentials: 'include',
     ...init,
-    headers: {...headers, "Content-Type": "application/json"}
+    headers
   })
   if (res.ok) return res
   try {
