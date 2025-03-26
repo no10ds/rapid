@@ -1,5 +1,11 @@
 # API Changelog
 
+## v7.11.3 - _2025-03-26_
+
+### Fixes
+
+- Remove `Content-Type: 'application/json'` header from file upload calls to the API.
+
 ## v7.11.2 - _2025-03-11_
 
 ### Fixes
