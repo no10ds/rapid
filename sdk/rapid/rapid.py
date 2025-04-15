@@ -3,7 +3,7 @@ import time
 import requests
 
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Callable, Dict, Optional
 
 import pandas as pd
 
@@ -55,12 +55,12 @@ class Rapid:
         self,
         endpoint: str,
         method: str,
-        data=None,
-        files=None,
-        headers={},
-        timeout=TIMEOUT_PERIOD,
-        success_code=200,
-        error_handlers={}
+        data: str | None = None,
+        files: Dict[str, tuple[str, bytes]] | None = None,
+        headers: Dict[str, str] = {},
+        timeout: int = TIMEOUT_PERIOD,
+        success_code: int = 200,
+        error_handlers: Dict[str | int, Callable[[Dict], Exception]] = {}
     ):
         """
         A helper method to perform API requests. This method is not intended to be used directly.
@@ -87,7 +87,7 @@ class Rapid:
             method,
             url,
             headers=headers,
-            params=
+            files=files,
             data=json.dumps(data),
             timeout=timeout,
         )
@@ -99,9 +99,7 @@ class Rapid:
         elif "default" in error_handlers:
             raise error_handlers["default"](data)
         else:
-            raise Exception(
-                f"Unexpected error occurred: {response.status_code}", data
-            )
+            raise Exception(f"Unexpected error occurred: {response.status_code}", data)
 
     def list_datasets(self):
         """
@@ -339,9 +337,10 @@ class Rapid:
             endpoint=f"schema",
             data=json.dumps(schema.dict()),
             method="POST",
+            success_code=201,
             error_handlers={
-                404: lambda d: SchemaGenerationFailedException("Could not find schema", d),
-                "default": lambda d: SchemaGenerationFailedException("Failed to gather the schema", d)
+                409: lambda d: SchemaAlreadyExistsException("The schema already exists"),
+                "default": lambda d: SchemaCreateFailedException("Could not create schema", d)
             }
         )
 
