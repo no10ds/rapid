@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.5",
-    "@playwright/test": "^1.38.1",
+    "@playwright/test": "^1.51.0",
     "@storybook/addon-a11y": "^6.5.14",
     "@storybook/addon-actions": "^6.5.14",
     "@storybook/addon-essentials": "^7.4.0",
