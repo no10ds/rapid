@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import os
 import uuid
 from api.common.config.aws import PERMISSIONS_TABLE_SUFFIX, RESOURCE_PREFIX
+from api.common.config.constants import CONTENT_ENCODING
 from test.e2e.utils import get_secret, AuthenticationFailedError
 from http import HTTPStatus
 import requests
