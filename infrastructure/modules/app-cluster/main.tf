@@ -293,52 +293,50 @@ resource "aws_ecs_task_definition" "aws-ecs-task" {
   #checkov:skip=CKV_AWS_249
   family = "${var.resource-name-prefix}-task"
 
-  container_definitions = <<DEFINITION
-  [
+  container_definitions = jsonencode([
     {
-      "name": "${var.resource-name-prefix}-container",
-      "volumesFrom": [],
-      "mountPoints": [],
-      "image": "${var.rapid_ecr_url}:${var.application_version}",
-      "entryPoint": [],
-      "essential": true,
-      "environment": ${jsonencode([
-  for key, value in local.environment_variables :
-  {
-    "name" : "${upper(key)}",
-    "value" : "${value}"
-  }
-])},
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-          "awslogs-group": "${aws_cloudwatch_log_group.log-group.id}",
-          "awslogs-region": "${var.aws_region}",
-          "awslogs-stream-prefix": "${var.resource-name-prefix}-app-logs"
-        }
-      },
-      "portMappings": [
+      name           = "${var.resource-name-prefix}-container"
+      volumesFrom    = []
+      mountPoints    = []
+      image          = "${var.rapid_ecr_url}:${var.application_version}"
+      entryPoint     = []
+      essential      = true
+      systemControls = []
+      environment = [
+        for key, value in local.environment_variables :
         {
-          "containerPort": ${var.container_port},
-          "hostPort": ${var.host_port},
-          "protocol": "${var.protocol}"
+          "name" : upper(key),
+          "value" : value
+      }]
+      logConfiguration = {
+        logDriver = "awslogs",
+        options = {
+          awslogs-group         = "${aws_cloudwatch_log_group.log-group.id}",
+          awslogs-region        = "${var.aws_region}",
+          awslogs-stream-prefix = "${var.resource-name-prefix}-app-logs"
         }
-      ],
-      "cpu": ${var.task_cpu},
-      "memory": ${var.task_memory},
-      "networkMode": "awsvpc"
+      }
+      portMappings = [
+        {
+          containerPort = var.container_port
+          hostPort      = var.host_port
+          protocol      = var.protocol
+        }
+      ]
+      cpu         = var.task_cpu
+      memory      = var.task_memory
+      networkMode = "awsvpc"
     }
-  ]
-  DEFINITION
+  ])
 
-requires_compatibilities = ["FARGATE"]
-network_mode             = "awsvpc"
-memory                   = var.task_memory
-cpu                      = var.task_cpu
-execution_role_arn       = aws_iam_role.ecsTaskExecutionRole.arn
-task_role_arn            = aws_iam_role.ecsTaskExecutionRole.arn
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  memory                   = var.task_memory
+  cpu                      = var.task_cpu
+  execution_role_arn       = aws_iam_role.ecsTaskExecutionRole.arn
+  task_role_arn            = aws_iam_role.ecsTaskExecutionRole.arn
 
-tags = var.tags
+  tags = var.tags
 }
 
 data "aws_ecs_task_definition" "main" {
