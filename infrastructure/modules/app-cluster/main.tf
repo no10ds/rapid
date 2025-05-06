@@ -8,10 +8,9 @@ locals {
     "ALLOWED_EMAIL_DOMAINS" : var.allowed_email_domains,
     "COGNITO_USER_POOL_ID" : var.cognito_user_pool_id,
     "RESOURCE_PREFIX" : var.resource-name-prefix,
-    "COGNITO_USER_LOGIN_APP_CREDENTIALS_SECRETS_NAME" : var.cognito_user_login_app_credentials_secrets_name
+    "COGNITO_USER_LOGIN_APP_CREDENTIALS_SECRETS_NAME" : var.cognito_user_login_app_credentials_secrets_name,
+    "CUSTOM_USER_NAME_REGEX" : var.custom_user_name_regex == null ? "" : var.custom_user_name_regex
     },
-       "CUSTOM_USER_NAME_REGEX" : var.custom_user_name_regex == null ? "" :  var.custom_user_name_regex
-
     var.project_information
   )
 }
