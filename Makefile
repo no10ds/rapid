@@ -71,7 +71,7 @@ api/test-focus:			## Run api python tests marked with `@pytest.mark.focus`
 	@cd api/; . .venv/bin/activate; pytest test/api -vv -s -m focus
 
 api/test-e2e:			## Run api python e2e tests
-	@cd api/; . .venv/bin/activate; pytest test/e2e -v  --order-scope=module 
+	@cd api/; . .venv/bin/activate; pytest test/e2e -v  --order-scope=module
 
 api/test-e2e-focus:		## Run api python e2e tests marked with `@pytest.mark.focus`
 	@cd api/; . .venv/bin/activate; pytest test/e2e -v -s -m focus

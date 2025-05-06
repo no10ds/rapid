@@ -141,10 +141,13 @@ class Rapid:
             timeout=TIMEOUT_PERIOD,
         )
         if response.status_code == 200:
-            return pd.read_json(StringIO(response.content.decode("utf-8")), orient="index")
+            return pd.read_json(
+                StringIO(response.content.decode("utf-8")), orient="index"
+            )
 
         raise DatasetNotFoundException(
-            f"Could not find dataset, {layer}/{domain}/{dataset} to download", response.json()
+            f"Could not find dataset, {layer}/{domain}/{dataset} to download",
+            response.json(),
         )
 
     def upload_dataframe(
