@@ -99,6 +99,7 @@ resource "aws_sns_topic" "ses_notifications" {
 }
 
 resource "aws_sns_topic_policy" "default" {
+  count  = var.cognito_ses_authentication ? 1 : 0
   arn    = aws_sns_topic.ses_notifications[0].arn
   policy = data.aws_iam_policy_document.sns_topic_policy[0].json
 }
