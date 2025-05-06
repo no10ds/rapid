@@ -162,6 +162,7 @@ class TestColumn:
             "data_type": "object",
             "allow_null": True,
             "format": None,
+            "allow_duplicates": True,
         }
 
         column = Column(
@@ -171,7 +172,7 @@ class TestColumn:
             format=None,
             partition_index=None,
         )
-        assert column.dict() == _column
+        assert column.model_dump() == _column
 
 
 class TestSchema:
@@ -285,6 +286,7 @@ class TestSchema:
                     "partition_index": None,
                     "allow_null": True,
                     "format": None,
+                    "allow_duplicates": True
                 },
                 {
                     "name": "column_b",
@@ -292,6 +294,7 @@ class TestSchema:
                     "partition_index": None,
                     "allow_null": True,
                     "format": None,
+                    "allow_duplicates": True
                 },
             ],
         }
