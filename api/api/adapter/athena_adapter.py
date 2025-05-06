@@ -8,7 +8,7 @@ from awswrangler.exceptions import QueryFailed
 from botocore.exceptions import ClientError
 from pandas import DataFrame
 
-from api.common.config.aws import ATHENA_DATABASE, ATHENA_WORKGROUP, OUTPUT_QUERY_BUCKET
+from api.common.config.aws import ATHENA_DATABASE, ATHENA_WORKGROUP, OUTPUT_QUERY_BUCKET, AWS_REGION
 from api.common.custom_exceptions import AWSServiceError, QueryExecutionError, UserError
 from api.common.logger import AppLogger
 from api.domain.dataset_metadata import DatasetMetadata
@@ -24,7 +24,7 @@ class AthenaAdapter:
         athena_read_sql_query: Callable[
             [str, str], DataFrame
         ] = wr.athena.read_sql_query,
-        athena_client=boto3.client("athena"),
+        athena_client=boto3.client("athena", region_name=AWS_REGION),
     ):
         self.__database = database
         self.__workgroup = workgroup
