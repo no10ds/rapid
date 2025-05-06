@@ -1,5 +1,17 @@
 # SDK Changelog
 
+## v0.1.11 - _2025-03-26_
+
+### Fixes
+
+- Remove `Content-Type: 'application/json'` header from file upload calls to the API.
+
+## v0.1.10 - _2024-03-13_
+
+### Features
+
+- FastAPI update requires content-type header for API calls
+
 ## v0.1.9 - _2024-09-12_
 
 ### Features

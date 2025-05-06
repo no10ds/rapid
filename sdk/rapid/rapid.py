@@ -46,8 +46,11 @@ class Rapid:
         """
         self.auth = auth if auth else RapidAuth()
 
-    def generate_headers(self) -> Dict:
-        return {"Authorization": "Bearer " + self.auth.fetch_token()}
+    def generate_headers(self, is_file: bool = False) -> Dict:
+        return {
+            "Authorization": f"Bearer {self.auth.fetch_token()}",
+            **({} if is_file else {"Content-Type": "application/json"})
+        }
 
     def list_datasets(self):
         """
@@ -180,7 +183,7 @@ class Rapid:
         url = f"{self.auth.url}/datasets/{layer}/{domain}/{dataset}"
         response = requests.post(
             url,
-            headers=self.generate_headers(),
+            headers=self.generate_headers(is_file=True),
             files=self.convert_dataframe_for_file_upload(df),
             timeout=TIMEOUT_PERIOD,
         )
@@ -282,7 +285,7 @@ class Rapid:
 
         response = requests.post(
             url,
-            headers=self.generate_headers(),
+            headers=self.generate_headers(is_file=True),
             files=self.convert_dataframe_for_file_upload(df),
             timeout=TIMEOUT_PERIOD,
         )
