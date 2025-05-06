@@ -111,19 +111,19 @@ variable "password_policy" {
 
 variable "cognito_ses_authentication" {
   type        = bool
-  description = "Whether to use SES instead of SNS for authentication. If you choose SNS make sure you moved it from sandbox to production environment."
+  description = "Configure Cognito user pool to send emails with SES instead of SNS. If you choose SNS make sure you moved it from sandbox to production environment."
   default     = false
 }
 
 variable "ses_email_notifications" {
   type        = list(string)
-  description = "List of emails that will receive SES notifications when sent email receive bounce or complaint response from server"
+  description = "List of email addresses that will receive SES notifications when an email results in a bounce or complaint response from the server"
   default     = null
 }
 
 variable "ses_allowed_from_emails" {
   type        = list(string)
-  description = "List of the domain emails that are allowed to be used by AWS account in SES"
+  description = "List of email domains that SES can use to issue emails in AWS account"
   default     = null
 }
 
