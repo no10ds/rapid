@@ -173,7 +173,7 @@ export const queryDataset = async ({
   const res = await api(`/api/datasets/${path}`, {
     method: 'POST',
     headers: {
-      Accept: acceptHeader,
+      Accept: acceptHeader
     },
     body: JSON.stringify(data)
   })
@@ -206,7 +206,7 @@ export const createSchema = async (
 
 export const deleteClient = async ({ clientId }: { clientId: string }) => {
   const res = await api(`/api/client/${clientId}`, {
-    method: 'DELETE',
+    method: 'DELETE'
   })
   return res.json()
 }
