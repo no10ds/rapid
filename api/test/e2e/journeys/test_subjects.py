@@ -1,14 +1,19 @@
 from http import HTTPStatus
-
 import requests
 
 from test.e2e.journeys.base_journey import (
     BaseAuthenticatedJourneyTest,
     RESOURCE_PREFIX,
 )
+import json
+import pytest
 
 
 class TestSubjectJourneys(BaseAuthenticatedJourneyTest):
+    subject_id = None
+
+    client_id = None
+
     def client_name(self) -> str:
         return "E2E_TEST_CLIENT_USER_ADMIN"
 
@@ -92,5 +97,109 @@ class TestSubjectJourneys(BaseAuthenticatedJourneyTest):
             ]
         )
 
-    # TODO: Test the create/delete client flow
-    # TODO: Test the create/delete user flow
+    @pytest.mark.order(1)
+    def test_create_user(self):
+        username_payload = self.generate_username_payload()
+        response = requests.post(
+            self.user_url(), headers=self.generate_auth_headers(), json=username_payload
+        )
+
+        assert response.status_code == HTTPStatus.CREATED
+        self.__class__.subject_id = response.json()["user_id"]
+        self.__class__.subject_name = response.json()["username"]
+
+    @pytest.mark.order(2)
+    def test_list_user(self):
+        response = requests.get(
+            self.subjects_url(),
+            headers=self.generate_auth_headers(),
+        )
+
+        user_list = [subject["subject_id"] for subject in response.json()]
+        self.subject_id in user_list
+
+    @pytest.mark.order(3)
+    def test_delete_user(self):
+        username_payload = self.generate_username_payload(self.subject_name)
+        response = requests.delete(
+            self.user_url(),
+            headers=self.generate_auth_headers(),
+            data=json.dumps(
+                {
+                    "username": username_payload["username"],
+                    "user_id": self.subject_id,
+                }
+            ),
+        )
+
+        assert response.status_code == HTTPStatus.OK
+
+    @pytest.mark.order(1)
+    def test_create_client(self):
+        client_payload = self.generate_client_payload()
+        response = requests.post(
+            self.client_url(),
+            headers=self.generate_auth_headers(),
+            json=client_payload,
+        )
+        assert response.status_code == HTTPStatus.CREATED
+        self.__class__.client_id = response.json()["client_id"]
+
+    @pytest.mark.order(2)
+    def test_list_client(self):
+        response = requests.get(
+            self.subjects_url(),
+            headers=self.generate_auth_headers(),
+        )
+
+        user_list = [subject["subject_id"] for subject in response.json()]
+        assert self.client_id in user_list
+
+    @pytest.mark.order(3)
+    def test_delete_client(self):
+        response = requests.delete(
+            f"{self.client_url()}/{self.client_id}",
+            headers=self.generate_auth_headers(),
+        )
+
+        assert response.status_code == HTTPStatus.OK
+
+    def test_invalid_user_email_creation(self):
+        username_payload = self.generate_username_payload()
+        username_payload["email"] = "invalid!email@fakedomain.com"
+        response = requests.post(
+            self.user_url(), headers=self.generate_auth_headers(), json=username_payload
+        )
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    def test_invalid_user_permissions(self):
+        username_payload = self.generate_username_payload()
+        username_payload["permissions"] = ["READ_ALL1", "WRITE_DEFAULT_PUBLIC"]
+        response = requests.post(
+            self.user_url(),
+            headers=self.generate_auth_headers(),
+            json=username_payload,
+        )
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    def test_invalid_client_name_creation(self):
+        client_payload = self.generate_client_payload()
+        client_payload["client_name"] = "[]!@#$%^&*()_test_client"
+        response = requests.post(
+            self.user_url(), headers=self.generate_auth_headers(), json=client_payload
+        )
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    def test_invalid_client_permissions_creation(self):
+        client_payload = self.generate_client_payload()
+        client_payload["permissions"] = ["READ_ALL1", "WRITE_DEFAULT_PUBLIC"]
+        response = requests.post(
+            self.user_url(),
+            headers=self.generate_auth_headers(),
+            json=client_payload,
+        )
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST

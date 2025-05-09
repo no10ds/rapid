@@ -13,7 +13,9 @@ class TestUnauthenticatedJourneys(BaseJourneyTest):
         assert response.status_code == HTTPStatus.FORBIDDEN
 
     def test_upload_is_forbidden_when_no_token_provided(self):
-        files = {"file": (self.filename, open("./test/e2e/" + self.filename, "rb"))}
+        files = {
+            "file": (self.csv_filename, open("./test/e2e/" + self.csv_filename, "rb"))
+        }
         url = self.upload_dataset_url(self.layer, self.e2e_test_domain, "anything")
         response = requests.post(url, files=files)
         assert response.status_code == HTTPStatus.FORBIDDEN

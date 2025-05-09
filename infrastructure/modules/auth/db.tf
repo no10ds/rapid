@@ -146,6 +146,22 @@ resource "aws_dynamodb_table_item" "test_client_user_admin_permissions" {
   ITEM
 }
 
+resource "aws_dynamodb_table_item" "test_client_read_all_public_permissions" {
+  table_name = aws_dynamodb_table.permissions_table.name
+  hash_key   = aws_dynamodb_table.permissions_table.hash_key
+  range_key  = aws_dynamodb_table.permissions_table.range_key
+
+  item = <<ITEM
+  {
+    "PK": {"S": "SUBJECT"},
+    "SK": {"S": "${aws_cognito_user_pool_client.e2e_test_client_read_all_public.id}"},
+    "Id": {"S": "${aws_cognito_user_pool_client.e2e_test_client_read_all_public.id}"},
+    "Type": {"S": "CLIENT"},
+    "Permissions": {"SS": ["READ_ALL_PUBLIC"]}
+  }
+  ITEM
+}
+
 resource "aws_dynamodb_table_item" "ui_test_user_permissions" {
   table_name = aws_dynamodb_table.permissions_table.name
   hash_key   = aws_dynamodb_table.permissions_table.hash_key

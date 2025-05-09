@@ -1,20 +1,28 @@
 from abc import ABC, abstractmethod
 import os
-from api.common.config.aws import PERMISSIONS_TABLE_SUFFIX
+import uuid
+from api.common.config.aws import PERMISSIONS_TABLE_SUFFIX, RESOURCE_PREFIX
+from api.common.config.constants import CONTENT_ENCODING
 from test.e2e.utils import get_secret, AuthenticationFailedError
 from http import HTTPStatus
 import requests
 from requests.auth import HTTPBasicAuth
 import json
+import pandas as pd
+from io import StringIO
 from uuid import uuid4
 from jinja2 import Template
-
-from api.common.config.constants import CONTENT_ENCODING
+from strenum import StrEnum
 
 DOMAIN_NAME = os.environ["E2E_DOMAIN_NAME"]
-RESOURCE_PREFIX = os.environ["E2E_RESOURCE_PREFIX"]
+
 DYNAMO_PERMISSIONS_TABLE_NAME = RESOURCE_PREFIX + PERMISSIONS_TABLE_SUFFIX
 FILE_PATH = os.path.dirname(os.path.abspath(__file__))
+
+
+class SchemaVersion(StrEnum):
+    V1 = "v1"
+    V2 = "v2"
 
 
 class BaseJourneyTest(ABC):
@@ -28,7 +36,8 @@ class BaseJourneyTest(ABC):
     raw_data_directory = f"raw_data/{layer}/{e2e_test_domain}"
     schema_directory = f"{FILE_PATH}/schemas"
 
-    filename = "test_journey_file.csv"
+    csv_filename = "test_journey_file.csv"
+    parquet_filename = "test_journey_file.parquet"
 
     def upload_dataset_url(self, layer: str, domain: str, dataset: str) -> str:
         return f"{self.datasets_endpoint}/{layer}/{domain}/{dataset}"
@@ -38,6 +47,11 @@ class BaseJourneyTest(ABC):
     ) -> str:
         return f"{self.datasets_endpoint}/{layer}/{domain}/{dataset}/query?version={version}"
 
+    def query_dataset_url_large(
+        self, layer: str, domain: str, dataset: str, version: int = 0
+    ) -> str:
+        return f"{self.datasets_endpoint}/{layer}/{domain}/{dataset}/query/large?version={version}"
+
     def info_dataset_url(
         self, layer: str, domain: str, dataset: str, version: int = 0
     ) -> str:
@@ -46,19 +60,19 @@ class BaseJourneyTest(ABC):
     def list_dataset_raw_files_url(self, layer: str, domain: str, dataset: str) -> str:
         return f"{self.datasets_endpoint}/{layer}/{domain}/{dataset}/1/files"
 
-    def create_protected_domain_url(self, domain: str) -> str:
-        return f"{self.base_url}/protected_domains/{domain}"
+    def delete_dataset_url(
+        self, layer: str, domain: str, dataset: str, raw_filename: str
+    ) -> str:
+        return f"{self.datasets_endpoint}/{layer}/{domain}/{dataset}/1/{raw_filename}"
 
     def list_protected_domain_url(self) -> str:
         return f"{self.base_url}/protected_domains"
 
+    def protected_domain_url(self, domain: str = "test_domain") -> str:
+        return f"{self.base_url}/protected_domains/{domain}"
+
     def modify_subjects_permissions_url(self) -> str:
         return f"{self.base_url}/subjects/permissions"
-
-    def delete_data_url(
-        self, layer: str, domain: str, dataset: str, raw_filename: str
-    ) -> str:
-        return f"{self.datasets_endpoint}/{layer}/{domain}/{dataset}/1/{raw_filename}"
 
     def permissions_url(self) -> str:
         return f"{self.base_url}/permissions"
@@ -68,6 +82,29 @@ class BaseJourneyTest(ABC):
 
     def status_url(self) -> str:
         return f"{self.base_url}/status"
+
+    def user_url(self) -> str:
+        return f"{self.base_url}/user"
+
+    def client_url(self) -> str:
+        return f"{self.base_url}/client"
+
+    def jobs_url(self) -> str:
+        return f"{self.base_url}/jobs"
+
+    def list_datasets_url(self) -> str:
+        return f"{self.base_url}/datasets"
+
+    def layers_url(self) -> str:
+        return f"{self.base_url}/layers"
+
+    def schema_url(self) -> str:
+        return f"{self.base_url}/schema"
+
+    def schema_generate_url(
+        self, layer: str, sensitivity: str, domain: str, dataset: str
+    ) -> str:
+        return f"{self.schema_url()}/{layer}/{sensitivity}/{domain}/{dataset}/generate"
 
 
 class BaseAuthenticatedJourneyTest(BaseJourneyTest):
@@ -80,7 +117,6 @@ class BaseAuthenticatedJourneyTest(BaseJourneyTest):
         if not client_name:
             client_name = self.client_name()
 
-        # TODO: Can this be cached to reduce the amount of calls?
         token_url = f"https://{DOMAIN_NAME}/api/oauth2/token"
         data_admin_credentials = get_secret(
             secret_name=f"{RESOURCE_PREFIX}_{client_name}"  # pragma: allowlist secret
@@ -102,6 +138,14 @@ class BaseAuthenticatedJourneyTest(BaseJourneyTest):
 
         token = json.loads(response.content.decode(CONTENT_ENCODING))["access_token"]
         return {"Authorization": f"Bearer {token}"}
+
+    def read_schema_version(self, version: SchemaVersion) -> dict:
+        with open(
+            os.path.join(self.schema_directory, f"test_e2e-schema_{version}.json.tpl")
+        ) as file:
+            template = Template(file.read())
+            contents = template.render(name=self.dataset)
+            return json.loads(contents)
 
     @classmethod
     def generate_schema_name(cls, name: str) -> str:
@@ -133,3 +177,58 @@ class BaseAuthenticatedJourneyTest(BaseJourneyTest):
             headers=cls.generate_auth_headers(cls, "E2E_TEST_CLIENT_DATA_ADMIN"),
         )
         assert response.status_code == HTTPStatus.ACCEPTED
+
+    def generate_username_payload(self, username: str = None) -> dict:
+        unique_id = uuid.uuid4()
+        if not username:
+            username = f"johnDoe_{unique_id}"
+            email = f"johndoe_{unique_id}@no10.gov.uk"
+        else:
+            username = username
+            email = f"{username}@no10.gov.uk"
+
+        payload = {
+            "username": username,
+            "email": email,
+            "permissions": ["READ_ALL", "WRITE_DEFAULT_PUBLIC"],
+        }
+        return payload
+
+    def generate_client_payload(self) -> dict:
+        unique_id = uuid.uuid4()
+        return {
+            "client_name": f"john_doe_client_{unique_id}",
+            "permissions": ["READ_ALL", "WRITE_DEFAULT_PUBLIC"],
+        }
+
+    def make_file_invalid(self, buffer_obj: StringIO) -> StringIO:
+        df = pd.read_csv(buffer_obj)
+        df.columns = [""] + list(df.columns[1:])
+        output_buffer = StringIO()
+        df.to_csv(output_buffer)
+        output_buffer.seek(0)
+        return output_buffer
+
+    def compare_schema(self, local_schema, queried_schema, override_keys=None):
+        """
+        We're explicitly checking for local_schema values in queried_schema.
+        There will be dome queried_schema values that are not in local_schema,
+        """
+        if override_keys is None:
+            override_keys = []
+
+        for key, value in local_schema.items():
+            if key in override_keys:
+                continue
+            if isinstance(value, list):
+                for i in range(len(value)):
+                    self.compare_schema(value[i], queried_schema[key][i], override_keys)
+            elif isinstance(value, dict):
+                self.compare_schema(value, queried_schema[key], override_keys)
+            else:
+                assert (
+                    key in queried_schema
+                ), f"Key '{key}' not found in second dictionary."
+                assert (
+                    value == queried_schema[key]
+                ), f"Value for key '{key}' does not match. Expected: {value}, Actual: {queried_schema[key]}"
