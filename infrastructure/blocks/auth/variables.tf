@@ -37,3 +37,14 @@ variable "ses_allowed_from_emails" {
   type        = list(string)
   description = "List of email domains that SES can use to issue emails in AWS account"
 }
+
+variable "hosted_zone_id" {
+  type        = string
+  description = "The hosted zone ID for the domain name"
+}
+
+variable "ses_email_notifications" {
+  type        = list(string)
+  description = "List of email addresses that will receive SES notifications when an email results in a bounce or complaint response from the server"
+
+}
