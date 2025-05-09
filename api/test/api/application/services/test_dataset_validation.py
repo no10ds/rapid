@@ -470,7 +470,7 @@ class TestDatasetValidation:
                 "col4": [1.5, 2.5, "A"],
                 "col5": ["2021-01-01", "2021-05-01", 1000],
                 "col6": [None, None, None],
-                "col7": [np.nan, np.nan, np.nan]
+                "col7": [np.nan, np.nan, np.nan],
             }
         )
         schema = Schema(
