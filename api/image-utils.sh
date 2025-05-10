@@ -54,17 +54,22 @@ function _get_high_or_critical_vulnerabilities {
 }
 
 function _get_unknown_vulnerabilities_count {
-  for VULN in "${VULNS[@]}"
-  do
-    CVE=$(echo $VULN | awk -F'_' '{print $1}')
-    if ( grep -qc "$CVE" "$IGNORE_LIST_FILE" )
-    then
-      continue
-    else
-      echo "$VULN" | tr "_" " "
-      UNKNOWN_VULNERABILITIES=$((UNKNOWN_VULNERABILITIES+1))
-    fi
-  done
+  if [ ${#VULNS[@]} -eq 0 ]; then
+    echo "No vulnerabilities found"
+    exit 0
+  else
+    for VULN in "${VULNS[@]}"
+    do
+      CVE=$(echo $VULN | awk -F'_' '{print $1}')
+      if ( grep -qc "$CVE" "$IGNORE_LIST_FILE" )
+      then
+        continue
+      else
+        echo "$VULN" | tr "_" " "
+        UNKNOWN_VULNERABILITIES=$((UNKNOWN_VULNERABILITIES+1))
+      fi
+    done
+  fi
 }
 
 function get_image_sha_if_exists {

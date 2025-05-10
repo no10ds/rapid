@@ -110,7 +110,7 @@ def status(request: Request):
 @app.get(f"{BASE_API_PATH}/apis", tags=["Info"])
 def info():
     """The endpoint used for a service information check"""
-    if PROJECT_NAME is None:
+    if not PROJECT_NAME:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Path not found")
 
     return {
@@ -230,9 +230,9 @@ def _set_security_headers(response) -> None:
         "default-src 'self' "
         f"{IDENTITY_PROVIDER_BASE_URL}; "
         "script-src 'self' 'unsafe-inline' "
-        "cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui-bundle.js; "
+        "cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js; "
         "style-src 'self' "
-        "cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui.css; "
+        "cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css; "
         "img-src 'self' data: "
         "fastapi.tiangolo.com/img/favicon.png;"
     )
