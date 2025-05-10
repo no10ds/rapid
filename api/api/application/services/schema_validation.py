@@ -209,7 +209,7 @@ def has_valid_update_behaviour(schema: Schema):
 def has_valid_allow_unique_columns(schema: Schema):
     if not schema.has_overwrite_behaviour():
         for column in schema.columns:
-            if not column.unique:
+            if column.unique:
                 raise SchemaValidationError(
                     "Schema with APPEND update behaviour cannot force unique values in columns"
                 )
