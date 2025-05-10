@@ -148,7 +148,7 @@ function DownloadDataset() {
           { children: 'Name' },
           { children: 'Data Type' },
           { children: 'Allows Null' },
-          { children: 'Allows Duplicates' },
+          { children: 'Force Unique' },
           { children: 'Max' },
           { children: 'Min' }
         ]}
@@ -157,7 +157,7 @@ function DownloadDataset() {
             { children: column.name },
             { children: column.data_type },
             { children: column.allow_null ? 'True' : 'False' },
-            { children: column.allow_duplicates ? 'True' : 'False' },
+            { children: column.unique === false ? 'False' : column.unique },
             { children: column.statistics ? column.statistics.max : '-' },
             { children: column.statistics ? column.statistics.min : '-' }
           ]

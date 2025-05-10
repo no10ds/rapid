@@ -93,7 +93,7 @@ export type DatasetInfoResponse = {
     partition_index?: number
     data_type: string
     allow_null: boolean
-    allow_duplicates: boolean
+    unique: string | boolean
     format?: string
     statistics?: { [key: string]: string }
   }[]
@@ -116,7 +116,7 @@ export type GenerateSchemaResponse = {
     partition_index?: number
     data_type: string
     allow_null: boolean
-    allow_duplicates: boolean
+    unique: string | boolean
     format?: string
   }[]
 }

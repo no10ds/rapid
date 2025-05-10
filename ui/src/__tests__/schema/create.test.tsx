@@ -37,7 +37,7 @@ const mockGenerate = {
       partition_index: null,
       data_type: 'object',
       allow_null: true,
-      allow_duplicates: true,
+      unique: false,
       format: null
     }
   ]

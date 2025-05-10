@@ -22,7 +22,7 @@ from rapid.exceptions import (
     InvalidDomainNameException,
     DomainConflictException,
     ClientDoesNotHaveUserAdminPermissionsException,
-    ClientDoesNotHaveDataAdminPermissionsException
+    ClientDoesNotHaveDataAdminPermissionsException,
 )
 from .conftest import RAPID_URL, RAPID_TOKEN
 
@@ -44,7 +44,7 @@ DUMMY_SCHEMA = {
             "partition_index": None,
             "allow_null": True,
             "format": None,
-            "allow_duplicates": True,
+            "unique": "ignore_na",
         },
         {
             "name": "column_b",
@@ -52,7 +52,7 @@ DUMMY_SCHEMA = {
             "partition_index": None,
             "allow_null": True,
             "format": None,
-            "allow_duplicates": False,
+            "unique": "all",
         },
     ],
 }
@@ -465,35 +465,45 @@ class TestRapid:
         )
         res = rapid.create_protected_domain("dummy")
         assert res is None
-        
+
     @pytest.mark.usefixtures("requests_mock", "rapid")
     def test_create_user_success(self, requests_mock: Mocker, rapid: Rapid):
         mocked_response = {
             "username": "user",
             "email": "user",
             "permissions": ["READ_ALL"],
-            "user_id": "xxx-yyy-zzz"
+            "user_id": "xxx-yyy-zzz",
         }
         requests_mock.post(f"{RAPID_URL}/user", json=mocked_response, status_code=201)
         res = rapid.create_user("user", "user@user.com", ["READ_ALL"])
         assert res == mocked_response
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
-    def test_create_user_failure_subjectalreadyexists(self, requests_mock: Mocker, rapid: Rapid):
-        mocked_response = {"details": "The user 'user' or email 'user@user.com' already exist"}
+    def test_create_user_failure_subjectalreadyexists(
+        self, requests_mock: Mocker, rapid: Rapid
+    ):
+        mocked_response = {
+            "details": "The user 'user' or email 'user@user.com' already exist"
+        }
         requests_mock.post(f"{RAPID_URL}/user", json=mocked_response, status_code=400)
         with pytest.raises(SubjectAlreadyExistsException):
             rapid.create_user("user", "user@user.com", ["READ_ALL"])
-    
+
     @pytest.mark.usefixtures("requests_mock", "rapid")
-    def test_create_user_failure_invalidpermissions(self, requests_mock: Mocker, rapid: Rapid):
-        mocked_response = {"details": "One or more of the provided permissions is invalid or duplicated"}
+    def test_create_user_failure_invalidpermissions(
+        self, requests_mock: Mocker, rapid: Rapid
+    ):
+        mocked_response = {
+            "details": "One or more of the provided permissions is invalid or duplicated"
+        }
         requests_mock.post(f"{RAPID_URL}/user", json=mocked_response, status_code=400)
         with pytest.raises(InvalidPermissionsException):
             rapid.create_user("user", "user@user.com", ["READ_ALL"])
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
-    def test_create_user_failure_ClientDoesNotHaveUserAdminPermissions(self, requests_mock: Mocker, rapid: Rapid):
+    def test_create_user_failure_ClientDoesNotHaveUserAdminPermissions(
+        self, requests_mock: Mocker, rapid: Rapid
+    ):
         mocked_response = {"details": "data"}
         requests_mock.post(f"{RAPID_URL}/user", json=mocked_response, status_code=401)
         with pytest.raises(ClientDoesNotHaveUserAdminPermissionsException):
@@ -501,31 +511,28 @@ class TestRapid:
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
     def test_delete_user_success(self, requests_mock: Mocker, rapid: Rapid):
-        mocked_response = {
-            "username": "user",
-            "user_id": "xxx-yyy-zzz"
-        }
-        requests_mock.delete(
-            f"{RAPID_URL}/user", json=mocked_response, status_code=200
-        )
+        mocked_response = {"username": "user", "user_id": "xxx-yyy-zzz"}
+        requests_mock.delete(f"{RAPID_URL}/user", json=mocked_response, status_code=200)
         res = rapid.delete_user("user", "xxx-yyy-zzz")
         assert res == mocked_response
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
-    def test_delete_user_failure_SubjectNotFound(self, requests_mock: Mocker, rapid: Rapid):
+    def test_delete_user_failure_SubjectNotFound(
+        self, requests_mock: Mocker, rapid: Rapid
+    ):
         mocked_response = {"data": "dummy"}
-        requests_mock.delete(
-            f"{RAPID_URL}/user", json=mocked_response, status_code=400
-        )
+        requests_mock.delete(f"{RAPID_URL}/user", json=mocked_response, status_code=400)
         with pytest.raises(SubjectNotFoundException):
             rapid.delete_user("user", "xxx-yyy-zzz")
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
-    def test_delete_user_failure_ClientDoesNotHaveUserAdminPermissions(self, requests_mock: Mocker, rapid: Rapid):
-        mocked_response = {"details": "User xxx-yyy-zzz does not have permissions that grant access to the endpoint scopes [<Action.USER_ADMIN: 'USER_ADMIN'>]"}
-        requests_mock.delete(
-            f"{RAPID_URL}/user", json=mocked_response, status_code=401
-        )
+    def test_delete_user_failure_ClientDoesNotHaveUserAdminPermissions(
+        self, requests_mock: Mocker, rapid: Rapid
+    ):
+        mocked_response = {
+            "details": "User xxx-yyy-zzz does not have permissions that grant access to the endpoint scopes [<Action.USER_ADMIN: 'USER_ADMIN'>]"
+        }
+        requests_mock.delete(f"{RAPID_URL}/user", json=mocked_response, status_code=401)
         with pytest.raises(ClientDoesNotHaveUserAdminPermissionsException):
             rapid.delete_user("user", "xxx-yyy-zzz")
 
@@ -538,8 +545,12 @@ class TestRapid:
         assert res == expected
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
-    def test_list_subjects_failure_ClientDoesNotHaveUserAdminPermissions(self, requests_mock: Mocker, rapid: Rapid):
-        expected = {"details": "User xxx-yyy-zzz does not have permissions that grant access to the endpoint scopes [<Action.USER_ADMIN: 'USER_ADMIN'>]"}
+    def test_list_subjects_failure_ClientDoesNotHaveUserAdminPermissions(
+        self, requests_mock: Mocker, rapid: Rapid
+    ):
+        expected = {
+            "details": "User xxx-yyy-zzz does not have permissions that grant access to the endpoint scopes [<Action.USER_ADMIN: 'USER_ADMIN'>]"
+        }
         requests_mock.get(f"{RAPID_URL}/subjects", json=expected, status_code=401)
         with pytest.raises(ClientDoesNotHaveUserAdminPermissionsException):
             rapid.list_subjects()
@@ -554,16 +565,24 @@ class TestRapid:
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
     def test_list_protected_domains(self, requests_mock: Mocker, rapid: Rapid):
-        expected = {"details": "User xxx-yyy-zzz does not have permissions that grant access to the endpoint scopes [<Action.USER_ADMIN: 'USER_ADMIN'>]"}
+        expected = {
+            "details": "User xxx-yyy-zzz does not have permissions that grant access to the endpoint scopes [<Action.USER_ADMIN: 'USER_ADMIN'>]"
+        }
         requests_mock.get(f"{RAPID_URL}/protected_domains", json=expected)
 
         res = rapid.list_protected_domains()
         assert res == expected
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
-    def test_list_protected_domains_failure_ClientDoesNotHaveUserAdminPermissions(self, requests_mock: Mocker, rapid: Rapid):
-        expected = {"details": "User xxx-yyy-zzz does not have permissions that grant access to the endpoint scopes [<Action.USER_ADMIN: 'USER_ADMIN'>]"}
-        requests_mock.get(f"{RAPID_URL}/protected_domains", json=expected, status_code=401)
+    def test_list_protected_domains_failure_ClientDoesNotHaveUserAdminPermissions(
+        self, requests_mock: Mocker, rapid: Rapid
+    ):
+        expected = {
+            "details": "User xxx-yyy-zzz does not have permissions that grant access to the endpoint scopes [<Action.USER_ADMIN: 'USER_ADMIN'>]"
+        }
+        requests_mock.get(
+            f"{RAPID_URL}/protected_domains", json=expected, status_code=401
+        )
         with pytest.raises(ClientDoesNotHaveUserAdminPermissionsException):
             rapid.list_protected_domains()
 
@@ -572,39 +591,45 @@ class TestRapid:
         layer = "raw"
         domain = "test_domain"
         dataset = "test_dataset"
-        mocked_response = {'details': '{dataset} has been deleted.'}
+        mocked_response = {"details": "{dataset} has been deleted."}
         requests_mock.delete(
             f"{RAPID_URL}/datasets/{layer}/{domain}/{dataset}",
-              json=mocked_response, 
-              status_code=202
+            json=mocked_response,
+            status_code=202,
         )
         res = rapid.delete_dataset(layer, domain, dataset)
         assert res == mocked_response
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
-    def test_delete_dataset_failure_DatasetNotFound(self, requests_mock: Mocker, rapid: Rapid):
+    def test_delete_dataset_failure_DatasetNotFound(
+        self, requests_mock: Mocker, rapid: Rapid
+    ):
         layer = "raw"
         domain = "test_domain"
         dataset = "test_dataset"
         mocked_response = {"response": "dummy"}
         requests_mock.delete(
-            f"{RAPID_URL}/datasets/{layer}/{domain}/{dataset}", 
-            json=mocked_response, 
-            status_code=400
+            f"{RAPID_URL}/datasets/{layer}/{domain}/{dataset}",
+            json=mocked_response,
+            status_code=400,
         )
         with pytest.raises(DatasetNotFoundException):
             rapid.delete_dataset(layer, domain, dataset)
 
     @pytest.mark.usefixtures("requests_mock", "rapid")
-    def test_delete_dataset_failure_ClientDoesNotHaveDataAdminPermissions(self, requests_mock: Mocker, rapid: Rapid):
+    def test_delete_dataset_failure_ClientDoesNotHaveDataAdminPermissions(
+        self, requests_mock: Mocker, rapid: Rapid
+    ):
         layer = "raw"
         domain = "test_domain"
         dataset = "test_dataset"
-        mocked_response = {'details': "User xxx-yyy-zzz does not have permissions that grant access to the endpoint scopes [<Action.DATA_ADMIN: 'DATA_ADMIN'>]"}
+        mocked_response = {
+            "details": "User xxx-yyy-zzz does not have permissions that grant access to the endpoint scopes [<Action.DATA_ADMIN: 'DATA_ADMIN'>]"
+        }
         requests_mock.delete(
-            f"{RAPID_URL}/datasets/{layer}/{domain}/{dataset}", 
-            json=mocked_response, 
-            status_code=401
+            f"{RAPID_URL}/datasets/{layer}/{domain}/{dataset}",
+            json=mocked_response,
+            status_code=401,
         )
         with pytest.raises(ClientDoesNotHaveDataAdminPermissionsException):
             rapid.delete_dataset(layer, domain, dataset)

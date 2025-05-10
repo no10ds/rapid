@@ -309,14 +309,14 @@ function CreateSchema({
                 children: (
                   <FormControl fullWidth size="small">
                     <Select
-                      label="Allows Duplicates"
-                      data={['true', 'false']}
-                      value={item.allow_duplicates}
+                      label="Force Unique"
+                      data={['all', 'ignore_na', 'false']}
+                      value={item.unique}
                       onChange={(e) =>
                         setNewSchemaDataColumn(
                           item.name,
-                          'allow_duplicates',
-                          e.target.value === 'true'
+                          'unique',
+                          e.target.value === 'false' ? false : e.target.value
                         )
                       }
                     />
@@ -347,7 +347,7 @@ function CreateSchema({
             { children: 'Data Type' },
             { children: doesTypesContainData ? 'Data Format' : '' },
             { children: 'Allows Null' },
-            { children: 'Allows Duplicates' },
+            { children: 'Force Unique' },
             { children: 'Partition Index (Optional)' }
           ]}
         />
