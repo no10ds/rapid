@@ -61,7 +61,10 @@ DUMMY_SCHEMA = {
 class TestRapid:
     @pytest.mark.usefixtures("rapid")
     def test_generate_headers(self, rapid: Rapid):
-        expected = {"Authorization": f"Bearer {RAPID_TOKEN}"}
+        expected = {
+            "Authorization": f"Bearer {RAPID_TOKEN}",
+            "Content-Type": "application/json",
+        }
 
         assert expected == rapid.generate_headers()
 
