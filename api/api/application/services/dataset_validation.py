@@ -129,7 +129,6 @@ def dataset_has_correct_data_types(
     for column in schema.columns:
         if column.name not in column_types:
             continue
-
         actual_type = column_types[column.name]
         expected_type = column.data_type
 
