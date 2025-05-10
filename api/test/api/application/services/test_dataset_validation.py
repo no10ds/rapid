@@ -492,13 +492,15 @@ class TestDatasetValidation:
                     name="col3",
                     partition_index=None,
                     data_type="string",
-                    allow_null="ignore_na",
+                    allow_null=False,
+                    unique="ignore_na",
                 ),
                 Column(
                     name="col4",
                     partition_index=None,
                     data_type="string",
-                    allow_null="all",
+                    allow_null=False,
+                    unique="all",
                 ),
             ],
         )
