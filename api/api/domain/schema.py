@@ -1,5 +1,6 @@
 from strenum import StrEnum
 from typing import List, Dict, Optional, Set
+from typing_extensions import Literal
 
 import awswrangler as wr
 from pydantic.main import BaseModel
@@ -17,7 +18,7 @@ class Column(BaseModel):
     data_type: str
     allow_null: bool
     format: Optional[str] = None
-    allow_duplicates: Optional[bool] = True
+    unique: Optional[Literal["all", "ignore_na", False]] = False
 
     def is_of_data_type(self, d_type: StrEnum) -> bool:
         return self.data_type in list(d_type)

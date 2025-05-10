@@ -1052,7 +1052,7 @@ class TestDynamoDBAdapterSchemaTable:
                         "data_type": "int",
                         "allow_null": False,
                         "format": None,
-                        "allow_duplicates": True,
+                        "unique": False,
                     },
                     {
                         "name": "colname2",
@@ -1060,7 +1060,7 @@ class TestDynamoDBAdapterSchemaTable:
                         "data_type": "string",
                         "allow_null": True,
                         "format": None,
-                        "allow_duplicates": True,
+                        "unique": False,
                     },
                 ],
             }

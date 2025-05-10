@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Dict, List, Optional, Union
 from pydantic.main import BaseModel
+from typing_extensions import Literal
 
 
 class SensitivityLevel(Enum):
@@ -42,7 +43,7 @@ class Column(BaseModel):
     partition_index: Optional[int] = None
     allow_null: bool = True
     format: Optional[str] = None
-    allow_duplicates: Optional[bool] = True
+    unique: Optional[Literal["all", "ignore_na", False]] = False
 
 
 class Schema(BaseModel):

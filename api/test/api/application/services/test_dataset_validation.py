@@ -12,7 +12,7 @@ from api.application.services.dataset_validation import (
     clean_column_headers,
     dataset_has_correct_columns,
     dataset_has_acceptable_null_values,
-    dataset_has_acceptable_duplicated_values,
+    dataset_has_acceptable_unique_values,
     dataset_has_correct_data_types,
     dataset_has_no_illegal_characters_in_partition_columns,
     dataset_has_rows,
@@ -462,9 +462,14 @@ class TestDatasetValidation:
                 "Column [col3] does not allow null values",
             ]
 
-    def test_return_error_message_when_not_accepted_duplicated_values(self):
+    def test_return_error_message_when_not_accepted_unique_values(self):
         df = pd.DataFrame(
-            {"col1": ["a", "b", "a"], "col2": ["d", None, None], "col3": [1, 5, 1]}
+            {
+                "col1": [None, "b", None, "a"],
+                "col2": [None, "b", None, "a"],
+                "col3": [None, "b", None, "b"],
+                "col4": [None, "b", None, "b"],
+            }
         )
         schema = Schema(
             metadata=self.schema_metadata,
@@ -474,29 +479,37 @@ class TestDatasetValidation:
                     partition_index=None,
                     data_type="string",
                     allow_null=True,
-                    allow_duplicates=False
+                    unique="ignore_na",
                 ),
                 Column(
                     name="col2",
                     partition_index=None,
                     data_type="string",
                     allow_null=False,
-                    allow_duplicates=False
+                    unique="all",
                 ),
                 Column(
                     name="col3",
                     partition_index=None,
-                    data_type="int",
-                    allow_null=False,
+                    data_type="string",
+                    allow_null="ignore_na",
+                ),
+                Column(
+                    name="col4",
+                    partition_index=None,
+                    data_type="string",
+                    allow_null="all",
                 ),
             ],
         )
 
-        data_frame, error_list = dataset_has_acceptable_duplicated_values(df, schema)
+        data_frame, error_list = dataset_has_acceptable_unique_values(df, schema)
         assert error_list == [
-            "Column [col1] does not allow duplicated values"
+            "Column [col2] must have unique values including empty values",
+            "Column [col3] must have unique values excluding empty values",
+            "Column [col4] must have unique values including empty values",
         ]
-        
+
     def test_return_error_message_when_not_correct_datatypes(self):
         df = pd.DataFrame(
             {
@@ -506,7 +519,7 @@ class TestDatasetValidation:
                 "col4": [1.5, 2.5, "A"],
                 "col5": ["2021-01-01", "2021-05-01", 1000],
                 "col6": [None, None, None],
-                "col7": [np.nan, np.nan, np.nan]
+                "col7": [np.nan, np.nan, np.nan],
             }
         )
         schema = Schema(
