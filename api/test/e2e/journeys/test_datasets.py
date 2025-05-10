@@ -3,13 +3,10 @@ from http import HTTPStatus
 import requests
 import pytest
 import csv
-import os
 from io import StringIO
 from test.e2e.journeys.base_journey import (
     BaseAuthenticatedJourneyTest,
 )
-
-from api.common.config.aws import RESOURCE_PREFIX
 
 
 class TestDataJourneys(BaseAuthenticatedJourneyTest):
