@@ -37,6 +37,7 @@ def schema_has_valid_column_definitions(schema: Schema):
     has_allow_null_false_on_partitioned_columns(schema)
     has_only_accepted_data_types(schema)
     has_valid_date_column_definition(schema)
+    has_valid_allow_unique_columns(schema)
 
 
 def has_columns(schema: Schema):
@@ -203,6 +204,15 @@ def has_valid_update_behaviour(schema: Schema):
         raise SchemaValidationError(
             f"You must specify a valid update behaviour. Accepted values: {UpdateBehaviour._member_names_}"
         )
+
+
+def has_valid_allow_unique_columns(schema: Schema):
+    if not schema.has_overwrite_behaviour():
+        for column in schema.columns:
+            if column.unique:
+                raise SchemaValidationError(
+                    "Schema with APPEND update behaviour cannot force unique values in columns"
+                )
 
 
 def __has_unique_value(

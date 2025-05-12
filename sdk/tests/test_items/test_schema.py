@@ -9,14 +9,14 @@ DUMMY_COLUMNS = [
         name="column_a",
         partition_index=None,
         data_type="object",
-        allow_null=True,
+        unique=False,
         format=None,
     ),
     Column(
         name="column_b",
         partition_index=None,
         data_type="object",
-        allow_null=True,
+        unique=False,
         format=None,
     ),
 ]
@@ -26,7 +26,7 @@ DUMMY_COLUMNS_TWO = [
         name="column_c",
         partition_index=None,
         data_type="Float64",
-        allow_null=True,
+        unique=False,
         format=None,
     )
 ]
@@ -77,7 +77,7 @@ class TestSchemaMetadata:
         assert schema_metadata.owners == [Owner(name="Test", email="test@email.com")]
         assert schema_metadata.description == "test"
         assert schema_metadata.update_behaviour == "OVERWRITE"
-        assert schema_metadata.is_latest_version == True
+        assert schema_metadata.is_latest_version is True
 
 
 class TestColumn:
@@ -162,6 +162,7 @@ class TestColumn:
             "data_type": "object",
             "allow_null": True,
             "format": None,
+            "unique": False,
         }
 
         column = Column(
@@ -171,7 +172,7 @@ class TestColumn:
             format=None,
             partition_index=None,
         )
-        assert column.dict() == _column
+        assert column.model_dump() == _column
 
 
 class TestSchema:
@@ -285,6 +286,7 @@ class TestSchema:
                     "partition_index": None,
                     "allow_null": True,
                     "format": None,
+                    "unique": False,
                 },
                 {
                     "name": "column_b",
@@ -292,6 +294,7 @@ class TestSchema:
                     "partition_index": None,
                     "allow_null": True,
                     "format": None,
+                    "unique": False,
                 },
             ],
         }
