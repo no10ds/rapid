@@ -148,7 +148,7 @@ function DownloadDataset() {
           { children: 'Name' },
           { children: 'Data Type' },
           { children: 'Allows Null' },
-          { children: 'Force Unique' },
+          { children: 'Is Unique' },
           { children: 'Max' },
           { children: 'Min' }
         ]}
