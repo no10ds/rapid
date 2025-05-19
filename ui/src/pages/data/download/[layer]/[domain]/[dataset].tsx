@@ -157,7 +157,7 @@ function DownloadDataset() {
             { children: column.name },
             { children: column.data_type },
             { children: column.allow_null ? 'True' : 'False' },
-            { children: column.unique === false ? 'False' : column.unique },
+            { children: column.unique ? 'True' : 'False' },
             { children: column.statistics ? column.statistics.max : '-' },
             { children: column.statistics ? column.statistics.min : '-' }
           ]

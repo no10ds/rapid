@@ -316,7 +316,7 @@ function CreateSchema({
                         setNewSchemaDataColumn(
                           item.name,
                           'unique',
-                          e.target.value === 'false' ? false : e.target.value
+                          e.target.value === 'true'
                         )
                       }
                     />

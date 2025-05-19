@@ -44,7 +44,7 @@ DUMMY_SCHEMA = {
             "partition_index": None,
             "allow_null": True,
             "format": None,
-            "unique": "ignore_na",
+            "unique": True,
         },
         {
             "name": "column_b",
@@ -52,7 +52,7 @@ DUMMY_SCHEMA = {
             "partition_index": None,
             "allow_null": True,
             "format": None,
-            "unique": "all",
+            "unique": True,
         },
     ],
 }

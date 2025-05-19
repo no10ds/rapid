@@ -465,10 +465,9 @@ class TestDatasetValidation:
     def test_return_error_message_when_not_accepted_unique_values(self):
         df = pd.DataFrame(
             {
-                "col1": [None, "b", None, "a"],
+                "col1": [None, "a", None, "a"],
                 "col2": [None, "b", None, "a"],
-                "col3": [None, "b", None, "b"],
-                "col4": [None, "b", None, "b"],
+                "col3": ["c", "b", None, "b"],
             }
         )
         schema = Schema(
@@ -479,37 +478,29 @@ class TestDatasetValidation:
                     partition_index=None,
                     data_type="string",
                     allow_null=True,
-                    unique="ignore_na",
+                    unique=True,
                 ),
                 Column(
                     name="col2",
                     partition_index=None,
                     data_type="string",
                     allow_null=False,
-                    unique="all",
+                    unique=True,
                 ),
                 Column(
                     name="col3",
                     partition_index=None,
                     data_type="string",
                     allow_null=False,
-                    unique="ignore_na",
-                ),
-                Column(
-                    name="col4",
-                    partition_index=None,
-                    data_type="string",
-                    allow_null=False,
-                    unique="all",
+                    unique=True,
                 ),
             ],
         )
 
         data_frame, error_list = dataset_has_acceptable_unique_values(df, schema)
         assert error_list == [
-            "Column [col2] must have unique values including empty values",
-            "Column [col3] must have unique values excluding empty values",
-            "Column [col4] must have unique values including empty values",
+            "Column [col1] must have unique values",
+            "Column [col3] must have unique values",
         ]
 
     def test_return_error_message_when_not_correct_datatypes(self):

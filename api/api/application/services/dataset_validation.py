@@ -86,17 +86,8 @@ def dataset_has_acceptable_unique_values(
 ) -> Tuple[pd.DataFrame, list[str]]:
     error_list = []
     for column in schema.columns:
-        if column.unique == "all" and data_frame[column.name].duplicated().values.any():
-            error_list.append(
-                f"Column [{column.name}] must have unique values including empty values"
-            )
-        elif (
-            column.unique == "ignore_na"
-            and data_frame[column.name].dropna().duplicated().values.any()
-        ):
-            error_list.append(
-                f"Column [{column.name}] must have unique values excluding empty values"
-            )
+        if column.unique and data_frame[column.name].dropna().duplicated().values.any():
+            error_list.append(f"Column [{column.name}] must have unique values")
 
     return data_frame, error_list
 

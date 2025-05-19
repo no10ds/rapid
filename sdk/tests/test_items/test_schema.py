@@ -9,6 +9,7 @@ DUMMY_COLUMNS = [
         name="column_a",
         partition_index=None,
         data_type="object",
+        allow_null=True,
         unique=False,
         format=None,
     ),
@@ -16,6 +17,7 @@ DUMMY_COLUMNS = [
         name="column_b",
         partition_index=None,
         data_type="object",
+        allow_null=True,
         unique=False,
         format=None,
     ),
@@ -26,6 +28,7 @@ DUMMY_COLUMNS_TWO = [
         name="column_c",
         partition_index=None,
         data_type="Float64",
+        allow_null=True,
         unique=False,
         format=None,
     )
