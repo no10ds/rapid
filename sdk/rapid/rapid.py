@@ -4,6 +4,7 @@ import requests
 
 from datetime import datetime
 from typing import Dict, Optional
+from io import StringIO
 
 import pandas as pd
 
@@ -142,12 +143,11 @@ class Rapid:
             data=json.dumps(query.dict(exclude_none=True)),
             timeout=TIMEOUT_PERIOD,
         )
-        data = json.loads(response.content.decode("utf-8"))
         if response.status_code == 200:
-            return pd.read_json(json.dumps(data), orient="index")
+            return pd.read_json(StringIO(response.content.decode("utf-8")), orient="index")
 
         raise DatasetNotFoundException(
-            f"Could not find dataset, {layer}/{domain}/{dataset} to download", data
+            f"Could not find dataset, {layer}/{domain}/{dataset} to download", response.json()
         )
 
     def upload_dataframe(

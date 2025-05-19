@@ -13,13 +13,13 @@ variable "app-replica-count-max" {
 variable "application_version" {
   type        = string
   description = "The version number for the application image (e.g.: v1.0.4, v1.0.x-latest, etc.)"
-  default     = "v7.11.1"
+  default     = "v7.12.0"
 }
 
 variable "ui_version" {
   type        = string
   description = "The version number for the static ui (e.g.: v1.0.0, etc.)"
-  default     = "v7.11.1"
+  default     = "v7.12.0"
 }
 
 variable "catalog_disabled" {
@@ -81,6 +81,12 @@ variable "geo_restriction_locations" {
   description = "The ISO 3166-1-alpha-2 codes for which you want CloudFront either to distribute your content (whitelist)."
   type        = list(string)
   default     = ["GB"]
+}
+
+variable "sql_injection_protection" {
+  description = "Whether to add SQL injection protection rule to WAF. Setting the variable to false may result in reduced application protection."
+  type        = bool
+  default     = true
 }
 
 variable "password_policy" {

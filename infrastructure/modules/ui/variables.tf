@@ -59,3 +59,9 @@ variable "geo_restriction_locations" {
   type        = list(string)
   default     = ["GB"]
 }
+
+variable "sql_injection_protection" {
+  description = "Whether to add SQL injection protection to WAF. Setting the variable to false may result in reduced application protection."
+  type        = bool
+  default     = true
+}
