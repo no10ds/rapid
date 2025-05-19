@@ -310,7 +310,7 @@ function CreateSchema({
                   <FormControl fullWidth size="small">
                     <Select
                       label="Force Unique"
-                      data={['all', 'ignore_na', 'false']}
+                      data={['true', 'false']}
                       value={item.unique}
                       onChange={(e) =>
                         setNewSchemaDataColumn(
