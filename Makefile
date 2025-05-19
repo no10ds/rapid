@@ -251,6 +251,7 @@ ui/release:		## Upload the zipped built static files to a production Github rele
 
 ui/zip-and-release: ui/zip-contents ui/release ## Zip and release prod static ui site
 
+
 RELEASE_TYPE_UC=$(shell echo ${type} | tr  '[:lower:]' '[:upper:]')
 release:
 	@python release.py --operation check --type ${type}
