@@ -309,9 +309,9 @@ function CreateSchema({
                 children: (
                   <FormControl fullWidth size="small">
                     <Select
-                      label="Force Unique"
+                      label="Is Unique"
                       data={['true', 'false']}
-                      value={item.unique}
+                      value={item.unique ?? 'false'}
                       onChange={(e) =>
                         setNewSchemaDataColumn(
                           item.name,
@@ -347,7 +347,7 @@ function CreateSchema({
             { children: 'Data Type' },
             { children: doesTypesContainData ? 'Data Format' : '' },
             { children: 'Allows Null' },
-            { children: 'Force Unique' },
+            { children: 'Is Unique' },
             { children: 'Partition Index (Optional)' }
           ]}
         />
