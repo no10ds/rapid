@@ -1175,14 +1175,14 @@ class TestSchemaValidation:
                     partition_index=0,
                     data_type="int",
                     allow_null=False,
-                    unique="all",
+                    unique=True,
                 ),
                 Column(
                     name="colname2",
                     partition_index=None,
                     data_type="string",
                     allow_null=False,
-                    unique="ignore_na",
+                    unique=False,
                 ),
             ],
         )
