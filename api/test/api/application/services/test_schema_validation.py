@@ -1158,3 +1158,41 @@ class TestSchemaValidation:
 
         with pytest.raises(SchemaValidationError):
             validate_schema_for_upload(invalid_upload_schema)
+
+    def test_is_invalid_when_dataset_is_append_and_forces_unique(self):
+        invalid_upload_schema = Schema(
+            metadata=SchemaMetadata(
+                layer="raw",
+                domain="some",
+                dataset="dataset",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
+                update_behaviour="APPEND",
+            ),
+            columns=[
+                Column(
+                    name="colname1",
+                    partition_index=0,
+                    data_type="int",
+                    allow_null=False,
+                    unique=True,
+                ),
+                Column(
+                    name="colname2",
+                    partition_index=None,
+                    data_type="string",
+                    allow_null=False,
+                    unique=False,
+                ),
+            ],
+        )
+        try:
+            validate_schema(invalid_upload_schema)
+        except Exception as e:
+            print(e)
+            pass
+
+        self._assert_validate_schema_raises_error(
+            invalid_upload_schema,
+            r"Schema with APPEND update behaviour cannot force unique values in columns",
+        )
