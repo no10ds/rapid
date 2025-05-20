@@ -23,7 +23,7 @@ export const api = async (
 
   // Don't set Content-Type for FormData (file uploads)
   if (!(init.body instanceof FormData)) {
-    headers = {...headers, "Content-Type": "application/json"}
+    headers = { ...headers, 'Content-Type': 'application/json' }
   }
 
   const res: Response = await fetch(url, {

@@ -31,6 +31,7 @@ def transform_and_validate(schema: Schema, data: pd.DataFrame) -> pd.DataFrame:
         .pipe(dataset_has_correct_columns, schema)
         .pipe(convert_date_columns, schema)
         .pipe(dataset_has_acceptable_null_values, schema)
+        .pipe(dataset_has_acceptable_unique_values, schema)
         .pipe(dataset_has_correct_data_types, schema)
         .pipe(dataset_has_no_illegal_characters_in_partition_columns, schema)
     )
@@ -76,6 +77,17 @@ def dataset_has_acceptable_null_values(
     for column in schema.columns:
         if not column.allow_null and data_frame[column.name].isnull().values.any():
             error_list.append(f"Column [{column.name}] does not allow null values")
+
+    return data_frame, error_list
+
+
+def dataset_has_acceptable_unique_values(
+    data_frame: pd.DataFrame, schema: Schema
+) -> Tuple[pd.DataFrame, list[str]]:
+    error_list = []
+    for column in schema.columns:
+        if column.unique and data_frame[column.name].dropna().duplicated().values.any():
+            error_list.append(f"Column [{column.name}] must have unique values")
 
     return data_frame, error_list
 
