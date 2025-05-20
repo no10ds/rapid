@@ -15,14 +15,20 @@ resource "aws_s3_bucket" "rapid_ui" {
   force_destroy = true
   tags          = var.tags
 
-  versioning {
-    enabled = true
-  }
+}
 
-  logging {
-    target_bucket = var.log_bucket_name
-    target_prefix = "log/ui-f1-registry"
+resource "aws_s3_bucket_versioning" "rapid_ui" {
+  bucket = aws_s3_bucket.rapid_ui.id
+  versioning_configuration {
+    status = "Enabled"
   }
+}
+
+resource "aws_s3_bucket_logging" "rapid_ui" {
+  bucket = aws_s3_bucket.rapid_ui.id
+
+  target_bucket = var.log_bucket_name
+  target_prefix = "log/ui-f1-registry"
 }
 
 # Resource to avoid error "AccessControlListNotSupported: The bucket does not allow ACLs"
