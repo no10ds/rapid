@@ -1,8 +1,8 @@
 # SDK Changelog
 
-## v0.1.12 - _2025-05-19
+## v0.1.12 - \_2025-05-19
 
-- Fixing deprecation warning in download_dataframe function from passing JSON string from rAPId as literal. 
+- Fixing deprecation warning in download_dataframe function from passing JSON string from rAPId as literal.
 
 ## v0.1.11 - _2025-03-26_
 

@@ -82,6 +82,7 @@ resource "aws_security_group_rule" "load_balancer_security_group_rule_ingress_ht
   protocol          = "tcp"
   prefix_list_ids   = [data.aws_ec2_managed_prefix_list.cloudwatch.id]
   security_group_id = aws_security_group.load_balancer_security_group_http.id
+  description       = "Load balancer security group rule ingress http"
 }
 
 resource "aws_security_group_rule" "load_balancer_security_group_rule_egress_http" {
@@ -92,6 +93,7 @@ resource "aws_security_group_rule" "load_balancer_security_group_rule_egress_htt
   cidr_blocks       = ["0.0.0.0/0"]
   ipv6_cidr_blocks  = ["::/0"]
   security_group_id = aws_security_group.load_balancer_security_group_http.id
+  description       = "Load balancer security group rule egress http"
 }
 
 
@@ -113,6 +115,7 @@ resource "aws_security_group_rule" "load_balancer_security_group_rule_ingress_ht
   protocol          = "tcp"
   prefix_list_ids   = [data.aws_ec2_managed_prefix_list.cloudwatch.id]
   security_group_id = aws_security_group.load_balancer_security_group_https.id
+  description       = "Load balancer security group rule ingress https"
 }
 
 resource "aws_security_group_rule" "load_balancer_security_group_rule_egress_https" {
@@ -123,6 +126,7 @@ resource "aws_security_group_rule" "load_balancer_security_group_rule_egress_htt
   cidr_blocks       = ["0.0.0.0/0"]
   ipv6_cidr_blocks  = ["::/0"]
   security_group_id = aws_security_group.load_balancer_security_group_https.id
+  description       = "Load balancer security group rule egress https"
 }
 
 resource "aws_lb_target_group" "target_group" {
