@@ -174,14 +174,22 @@ resource "aws_s3_bucket" "access_logs" {
   force_destroy = true
   tags          = var.tags
 
-  versioning {
-    enabled = true
-  }
+}
 
-  logging {
-    target_bucket = var.log_bucket_name
-    target_prefix = "log/${var.resource-name-prefix}-cloudtrail-access-logs"
+resource "aws_s3_bucket_versioning" "access_logs" {
+  count  = var.enable_cloudtrail ? 1 : 0
+  bucket = aws_s3_bucket.access_logs[0].id
+  versioning_configuration {
+    status = "Enabled"
   }
+}
+
+resource "aws_s3_bucket_logging" "access_logs" {
+  count  = var.enable_cloudtrail ? 1 : 0
+  bucket = aws_s3_bucket.access_logs[0].id
+
+  target_bucket = var.log_bucket_name
+  target_prefix = "log/${var.resource-name-prefix}-cloudtrail-access-logs"
 }
 
 resource "aws_s3_bucket_public_access_block" "access_logs" {
@@ -253,6 +261,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "access_logs_lifecycle" {
   rule {
     id     = "expire-old-logs"
     status = "Enabled"
+
+    filter {
+      prefix = ""
+    }
 
     expiration {
       days = 90
