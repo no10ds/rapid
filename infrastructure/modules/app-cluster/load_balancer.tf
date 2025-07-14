@@ -76,6 +76,7 @@ resource "aws_security_group" "load_balancer_security_group_http" {
 }
 
 resource "aws_security_group_rule" "load_balancer_security_group_rule_ingress_http" {
+  # checkov:skip=CKV_AWS_260: Limits by prefix list ID's
   type              = "ingress"
   from_port         = 80
   to_port           = 80
