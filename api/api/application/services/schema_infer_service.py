@@ -71,6 +71,7 @@ class SchemaInferService:
                 allow_null=True,
                 format=DEFAULT_DATE_FORMAT if is_date_type(_type) else None,
                 unique=False,
+                validation_checks=None,
             )
             for name, _type in extract_athena_types(dataframe).items()
         ]

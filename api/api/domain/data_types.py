@@ -4,6 +4,8 @@ from enum import Enum
 from pandas import DataFrame
 from pandas.api.types import infer_dtype
 
+import pandera
+
 from api.common.custom_exceptions import UnsupportedTypeError
 
 
@@ -58,7 +60,7 @@ class PandasDataType(StrEnum):
     STRING = StringType.STRING
 
 
-class AthenaDataType(Enum):
+class AthenaDataType(StrEnum):
     BIGINT = NumericType.BIGINT
     BOOLEAN = BooleanType.BOOLEAN
     CHAR = StringType.CHAR
@@ -90,6 +92,34 @@ PANDAS_TO_ATHENA_CONVERTER = {
 }
 
 
+ATHENA_TO_PANDERA_CONVERTER = {
+    AthenaDataType.STRING: pandera.dtypes.String,
+    AthenaDataType.VARCHAR: pandera.dtypes.String,
+    AthenaDataType.CHAR: pandera.dtypes.String,
+    AthenaDataType.INT: pandera.dtypes.Int,
+    AthenaDataType.BIGINT: pandera.dtypes.Int64,
+    AthenaDataType.SMALLINT: pandera.dtypes.Int16,
+    AthenaDataType.TINYINT: pandera.dtypes.Int8,
+    AthenaDataType.DOUBLE: pandera.dtypes.Float64,
+    AthenaDataType.FLOAT: pandera.dtypes.Float32,
+    AthenaDataType.DECIMAL: pandera.dtypes.Float64, 
+    AthenaDataType.BOOLEAN: pandera.dtypes.Bool,
+    AthenaDataType.DATE: pandera.dtypes.Timestamp,
+    AthenaDataType.TIMESTAMP: pandera.dtypes.Timestamp,
+}
+
+
+
+def convert_athena_to_pandera_type(athena_type: str) -> str:
+    try:
+        pandas_type = ATHENA_TO_PANDERA_CONVERTER[athena_type]
+    except KeyError:
+        raise UnsupportedTypeError(
+            f"Unable to convert data type: {athena_type} to the Pandera Schema. This type is currently unsupported."
+        )
+    return pandas_type
+
+# TODO: Replace with pandera's equivalent
 def is_date_type(type: str) -> bool:
     return type in [AthenaDataType.DATE.value]
 

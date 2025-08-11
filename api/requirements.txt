@@ -6,6 +6,7 @@ gunicorn
 httpx
 jinja2
 pandas
+pandera
 psutil
 pyarrow
 pyjwt

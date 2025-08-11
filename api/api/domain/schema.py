@@ -1,11 +1,13 @@
 from strenum import StrEnum
-from typing import List, Dict, Optional, Set
+from typing import List, Dict, Optional, Set, Any
 
 import awswrangler as wr
 from pydantic.main import BaseModel
 import pyarrow as pa
+import pandera
 
 from api.domain.schema_metadata import Owner, SchemaMetadata, UpdateBehaviour
+from api.domain.data_types import convert_athena_to_pandera_type
 
 METADATA = "metadata"
 COLUMNS = "columns"
@@ -18,6 +20,7 @@ class Column(BaseModel):
     allow_null: bool
     format: Optional[str] = None
     unique: bool = False
+    validation_checks: Optional[List[Dict[str, Any]]] = None
 
     def is_of_data_type(self, d_type: StrEnum) -> bool:
         return self.data_type in list(d_type)
@@ -107,4 +110,71 @@ class Schema(BaseModel):
                 pa.field(column.name, wr._data_types.athena2pyarrow(column.data_type))
                 for column in self.columns
             ]
+        )
+    
+    def _convert_data_type(self, data_type: str) -> str:
+        """Convert Athena data type to Pandera data type for Pandera validation."""
+        return convert_athena_to_pandera_type(data_type)
+    
+    def _convert_validation_checks(self, validation_checks: Optional[List[Dict[str, Any]]]) -> List[pandera.Check]:
+        """Convert validation check configs to Pandera Check objects."""
+        if not validation_checks:
+            return []
+        
+        check_mappings = {
+            "in_range": {
+                "constructor": pandera.Check.in_range,
+                "param_mapping": {
+                    "min_value": "min_val",
+                    "max_value": "max_val"
+                }
+            },
+            "isin": {
+                "constructor": pandera.Check.isin,
+                "param_mapping": {
+                    "values": "values"
+                }
+            }
+        }
+        
+        pandera_checks = []
+        
+        for check in validation_checks:
+            check_type = check["type"]
+            params = check["params"]
+            
+            if check_type not in check_mappings:
+                raise ValueError(f"Unsupported validation check: {check_type}")
+            
+            mapping = check_mappings[check_type]
+            
+            try:
+                pandera_params = {
+                    pandera_param: params.get(config_param)
+                    for pandera_param, config_param in mapping["param_mapping"].items()
+                }
+                
+                pandera_checks.append(mapping["constructor"](**pandera_params))
+                
+            except Exception as e:
+                raise ValueError(f"Invalid parameters for '{check_type}' check: {params}. Error: {str(e)}")
+        
+        return pandera_checks
+    
+    def generate_pandera_schema(self) -> pandera.DataFrameSchema:
+        """Convert our rapid schema to Pandera schema format."""
+        pandera_columns = {}
+
+        for column in self.columns:
+            converted_checks = self._convert_validation_checks(column.validation_checks)
+            
+            pandera_columns[column.name] = pandera.Column(
+                dtype=self._convert_data_type(column.data_type),
+                checks=converted_checks, 
+                nullable=column.allow_null,
+                unique=column.unique,
+            )
+
+        return pandera.DataFrameSchema(
+            columns=pandera_columns,
         )

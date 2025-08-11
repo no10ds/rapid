@@ -2,6 +2,7 @@ from typing import Tuple
 
 import pandas as pd
 from pandas import Timestamp
+import pandera
 
 from api.common.custom_exceptions import (
     DatasetValidationError,
@@ -30,10 +31,9 @@ def transform_and_validate(schema: Schema, data: pd.DataFrame) -> pd.DataFrame:
         .pipe(clean_column_headers)
         .pipe(dataset_has_correct_columns, schema)
         .pipe(convert_date_columns, schema)
-        .pipe(dataset_has_acceptable_null_values, schema)
-        .pipe(dataset_has_acceptable_unique_values, schema)
         .pipe(dataset_has_correct_data_types, schema)
         .pipe(dataset_has_no_illegal_characters_in_partition_columns, schema)
+        .pipe(dataset_is_validated_with_pandera, schema)
     )
 
     if validation_context.has_errors():
@@ -68,28 +68,6 @@ def dataset_has_correct_columns(
         )
 
     return df, error_list
-
-
-def dataset_has_acceptable_null_values(
-    data_frame: pd.DataFrame, schema: Schema
-) -> Tuple[pd.DataFrame, list[str]]:
-    error_list = []
-    for column in schema.columns:
-        if not column.allow_null and data_frame[column.name].isnull().values.any():
-            error_list.append(f"Column [{column.name}] does not allow null values")
-
-    return data_frame, error_list
-
-
-def dataset_has_acceptable_unique_values(
-    data_frame: pd.DataFrame, schema: Schema
-) -> Tuple[pd.DataFrame, list[str]]:
-    error_list = []
-    for column in schema.columns:
-        if column.unique and data_frame[column.name].dropna().duplicated().values.any():
-            error_list.append(f"Column [{column.name}] must have unique values")
-
-    return data_frame, error_list
 
 
 def convert_date_columns(
@@ -192,3 +170,17 @@ def is_valid_custom_dtype(actual_type: str, expected_type: str) -> bool:
     """
     is_custom_dtype = expected_type in list(DateType)
     return is_custom_dtype and actual_type in list(StringType)
+
+
+def dataset_is_validated_with_pandera(
+    data_frame: pd.DataFrame, schema: Schema
+) -> Tuple[pd.DataFrame, list[str]]:
+    error_list = []
+    try:
+        pandera_schema = schema.generate_pandera_schema()
+        validated_df = pandera_schema.validate(data_frame)
+        data_frame = validated_df
+    except pandera.errors.SchemaError as e:
+        error_list.append(str(e))
+    
+    return data_frame, error_list

@@ -29,6 +29,7 @@ A schema is defined with the following structure:
 - `allow_null` - Boolean value, specifies whether the columns can have empty values or not.
 - `partition_index` (Optional) - Integer value, whether the column is a [partition](#partitions) and its index.
 - `format` (Conditional) - String value, regular expression used to specify the format of the dates. Will only be used and required if the data_type is date.
+- `validation_checks` (Optional) - Array value, additional pandera data validation checks.
 
 ### Sensitivity
 
