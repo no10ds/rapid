@@ -13,6 +13,7 @@ from api.common.custom_exceptions import SchemaValidationError
 from api.domain.data_types import AthenaDataType, is_date_type
 from api.domain.schema import Schema
 from api.domain.schema_metadata import UpdateBehaviour, Owner
+from api.application.services.column_validation import validate_column
 
 
 def validate_schema_for_upload(schema: Schema):
@@ -35,9 +36,10 @@ def schema_has_valid_column_definitions(schema: Schema):
     has_unique_partition_indexes(schema)
     has_valid_partition_index_values(schema)
     has_allow_null_false_on_partitioned_columns(schema)
-    has_only_accepted_data_types(schema)
+    # has_only_accepted_data_types(schema)
     has_valid_date_column_definition(schema)
     has_valid_allow_unique_columns(schema)
+    has_valid_columns(schema)
 
 
 def has_columns(schema: Schema):
@@ -157,25 +159,26 @@ def has_valid_partition_index_values(schema: Schema):
 
 def has_allow_null_false_on_partitioned_columns(schema):
     for partitioned_col in schema.get_partition_columns():
-        if partitioned_col.allow_null:
+        if partitioned_col.nullable:
             raise SchemaValidationError("Partition columns cannot allow null values")
 
 
-def has_only_accepted_data_types(schema: Schema):
-    data_types = schema.get_data_types()
-    try:
-        for data_type in data_types:
-            AthenaDataType(data_type)
-    except ValueError:
-        raise SchemaValidationError(
-            "You are specifying one or more unaccepted data types",
-        )
+# TODO Pandera: replace data type validation
+# def has_only_accepted_data_types(schema: Schema):
+#     data_types = schema.get_data_types()
+#     try:
+#         for data_type in data_types:
+#             AthenaDataType(data_type)
+#     except ValueError:
+#         raise SchemaValidationError(
+#             "You are specifying one or more unaccepted data types",
+#         )
 
 
 def has_valid_date_column_definition(schema: Schema):
     for column in schema.columns:
-        if is_date_type(column.data_type) and __has_value_for(column.format):
-            __has_valid_date_format(column.format)
+        if is_date_type(column.dtype) and __has_value_for(column.metadata.get("format")):
+            __has_valid_date_format(column.metadata.get("format"))
 
 
 def has_valid_sensitivity_level(schema: Schema):
@@ -213,6 +216,10 @@ def has_valid_allow_unique_columns(schema: Schema):
                 raise SchemaValidationError(
                     "Schema with APPEND update behaviour cannot force unique values in columns"
                 )
+            
+def has_valid_columns(schema: Schema):
+    for column in schema.columns:
+        validate_column(column)
 
 
 def __has_unique_value(

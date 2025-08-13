@@ -14,7 +14,7 @@ from api.common.custom_exceptions import (
     UserError,
 )
 from api.common.logger import AppLogger
-from api.domain.schema import Schema, Column, COLUMNS
+from api.domain.schema import Schema, COLUMNS
 from api.domain.schema_metadata import SchemaMetadata
 from api.domain.dataset_metadata import DatasetMetadata
 
@@ -48,13 +48,14 @@ class SchemaService:
 
         return self._parse_schema(schema_dict)
 
+    # TODO Pandera: parse schema with pandera?
     def _parse_schema(self, schema: dict, only_metadata: bool = False):
         metadata = SchemaMetadata.parse_obj(schema)
         if only_metadata:
             return metadata
         return Schema(
             metadata=metadata,
-            columns=[Column.parse_obj(col) for col in schema[COLUMNS]],
+            columns=[],
         )
 
     def get_schema_metadatas(
