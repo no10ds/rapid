@@ -2,9 +2,9 @@ from typing import List, Tuple, Hashable, Optional
 
 import pandas as pd
 from pydantic import BaseModel
+import pandera
 
-from api.domain.schema import Schema
-
+from api.domain import schema_utils
 
 class Partition(BaseModel):
     keys: Optional[list] = [""]
@@ -26,8 +26,8 @@ def drop_columns(df: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
     return df.drop(labels=columns, axis=1)
 
 
-def generate_partitioned_data(schema: Schema, df: pd.DataFrame) -> List[Partition]:
-    partitions = schema.get_partitions()
+def generate_partitioned_data(schema: pandera.DataFrameSchema, df: pd.DataFrame) -> List[Partition]:
+    partitions = schema_utils.get_partitions(schema)
 
     if len(partitions) == 0:
         return non_partitioned_dataframe(df)

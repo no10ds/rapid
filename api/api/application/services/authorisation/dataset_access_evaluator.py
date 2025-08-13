@@ -7,7 +7,7 @@ from api.application.services.permissions_service import PermissionsService
 from api.application.services.schema_service import SchemaService
 from api.domain.dataset_filters import DatasetFilters
 from api.domain.dataset_metadata import DatasetMetadata, LAYER, DOMAIN
-from api.domain.schema_metadata import SchemaMetadata, SENSITIVITY
+from api.domain.schema_utils import SchemaMetadata, SENSITIVITY
 from api.domain.permission_item import PermissionItem
 
 

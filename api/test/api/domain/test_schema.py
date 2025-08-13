@@ -4,8 +4,7 @@ import pyarrow as pa
 import pytest
 
 from api.adapter.s3_adapter import S3Adapter
-from api.domain.schema import Schema, Column
-from api.domain.schema_metadata import Owner, SchemaMetadata
+from api.domain import schema_utils
 from api.domain.data_types import BooleanType, NumericType, StringType
 
 
@@ -44,33 +43,33 @@ class TestSchema:
     def test_gets_column_names(self):
         expected_column_names = ["colname1", "colname2", "colname3"]
 
-        actual_column_names = self.schema.get_column_names()
+        actual_column_names = schema_utils.get_column_names(self.schema)
 
         assert actual_column_names == expected_column_names
 
     def test_gets_partitions(self):
         expected_columns = ["colname2", "colname1"]
 
-        actual_columns = self.schema.get_partitions()
+        actual_columns = schema_utils.get_partitions(self.schema)
 
         assert actual_columns == expected_columns
 
     def test_gets_partition_numbers(self):
         expected_partitions_numbers = [0, 1]
 
-        actual_partitions_numbers = self.schema.get_partition_indexes()
+        actual_partitions_numbers = schema_utils.get_partition_indexes(self.schema)
 
         assert actual_partitions_numbers == expected_partitions_numbers
 
     def test_get_data_types(self):
         expected_data_types = {"int", "string", "boolean"}
 
-        actual_data_types = self.schema.get_data_types()
+        actual_data_types = schema_utils.get_data_types(self.schema)
 
         assert actual_data_types == expected_data_types
 
     def test_get_partition_columns(self):
-        res = self.schema.get_partition_columns()
+        res = schema_utils.get_partition_columns(self.schema)
         expected = [
             Column(
                 name="colname2",
@@ -90,7 +89,7 @@ class TestSchema:
         assert res == expected
 
     def test_get_partition_columns_for_glue(self):
-        res = self.schema.get_partition_columns_for_glue()
+        res = schema_utils.get_partition_columns_for_glue(self.schema)
         expected = [
             {
                 "Name": "colname2",
@@ -102,7 +101,7 @@ class TestSchema:
         assert res == expected
 
     def test_get_non_partition_columns_for_glue(self):
-        res = self.schema.get_non_partition_columns_for_glue()
+        res = schema_utils.get_non_partition_columns_for_glue(self.schema)
         expected = [
             {
                 "Name": "colname3",
@@ -120,11 +119,11 @@ class TestSchema:
         ],
     )
     def test_get_column_names_by_type(self, type, expected):
-        res = self.schema.get_column_names_by_type(type)
+        res = schema_utils.get_column_names_by_type(self.schema, type)
         assert res == expected
 
     def test_generates_storage_schema(self):
-        res = self.schema.generate_storage_schema()
+        res = schema_utils.generate_storage_schema(self.schema)
 
         expected = pa.schema(
             [

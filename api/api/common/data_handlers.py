@@ -6,6 +6,7 @@ from pathlib import Path
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
+import pandera
 from fastapi import UploadFile, File
 from pandas.io.parsers import TextFileReader
 
@@ -97,7 +98,7 @@ def get_dataframe_from_chunk_type(
 
 
 def delete_incoming_raw_file(
-    schema: Schema, file_path: Path, raw_file_identifier: str = None
+    schema: pandera.DataFrameSchema, file_path: Path, raw_file_identifier: str = None
 ):
     raw_file_identifier_string = f"Raw file identifier: {raw_file_identifier}"
     try:

@@ -4,6 +4,7 @@ from threading import Thread
 from typing import List, Tuple
 
 import pandas as pd
+import pandera
 
 from api.adapter.athena_adapter import AthenaAdapter
 from api.adapter.glue_adapter import GlueAdapter
@@ -40,6 +41,7 @@ from api.domain.Jobs.QueryJob import QueryJob, QueryStep
 from api.domain.Jobs.UploadJob import UploadJob, UploadStep
 from api.domain.schema import Schema
 from api.domain.sql_query import SQLQuery
+from api.domain import schema_utils
 
 
 class DataService:
@@ -94,7 +96,7 @@ class DataService:
         return f"{raw_file_identifier}.csv", dataset.version, upload_job.job_id
 
     def process_upload(
-        self, job: UploadJob, schema: Schema, file_path: Path, raw_file_identifier: str
+        self, job: UploadJob, schema: pandera.DataFrameSchema, file_path: Path, raw_file_identifier: str
     ) -> None:
         try:
             self.job_service.update_step(job, UploadStep.VALIDATION)
@@ -113,17 +115,17 @@ class DataService:
             self.job_service.succeed(job)
         except Exception as error:
             AppLogger.error(
-                f"Processing upload failed for layer [{schema.get_layer()}], domain [{schema.get_domain()}], dataset [{schema.get_dataset()}], and version [{schema.get_version()}]: {error}"
+                f"Processing upload failed for layer [{schema_utils.get_layer(schema)}], domain [{schema_utils.get_domain(schema)}], dataset [{schema_utils.get_dataset(schema)}], and version [{schema_utils.get_version(schema)}]: {error}"
             )
             delete_incoming_raw_file(schema, file_path, raw_file_identifier)
             self.job_service.fail(job, build_error_message_list(error))
             raise error
 
     def validate_incoming_data(
-        self, schema: Schema, file_path: Path, raw_file_identifier: str
+        self, schema: pandera.DataFrameSchema, file_path: Path, raw_file_identifier: str
     ) -> None:
         AppLogger.info(
-            f"Validating dataset for {schema.get_layer()}/{schema.get_domain()}/{schema.get_dataset()}"
+            f"Validating dataset for {schema_utils.get_layer(schema)}/{schema_utils.get_domain(schema)}/{schema_utils.get_dataset(schema)}"
         )
         dataset_errors = set()
         for chunk in construct_chunked_dataframe(file_path):
@@ -137,32 +139,32 @@ class DataService:
             raise DatasetValidationError(list(dataset_errors))
 
     def process_chunks(
-        self, schema: Schema, file_path: Path, raw_file_identifier: str
+        self, schema: pandera.DataFrameSchema, file_path: Path, raw_file_identifier: str
     ) -> None:
         AppLogger.info(
-            f"Processing chunks for {schema.get_layer()}/{schema.get_domain()}/{schema.get_dataset()}/{schema.get_version()}"
+            f"Processing chunks for {schema_utils.get_layer(schema)}/{schema_utils.get_domain(schema)}/{schema_utils.get_dataset(schema)}/{schema_utils.get_version(schema)}"
         )
         for chunk in construct_chunked_dataframe(file_path):
             dataframe = get_dataframe_from_chunk_type(chunk)
             self.process_chunk(schema, raw_file_identifier, dataframe)
 
-        if schema.has_overwrite_behaviour():
+        if schema_utils.has_overwrite_behaviour(schema):
             self.remove_existing_data(schema, raw_file_identifier)
 
         AppLogger.info(
-            f"Processing chunks for {schema.get_layer()}/{schema.get_domain()}/{schema.get_dataset()}/{schema.get_version()} completed"
+            f"Processing chunks for {schema_utils.get_layer(schema)}/{schema_utils.get_domain(schema)}/{schema_utils.get_dataset(schema)}/{schema_utils.get_version(schema)} completed"
         )
 
     def process_chunk(
-        self, schema: Schema, raw_file_identifier: str, chunk: pd.DataFrame
+        self, schema: pandera.DataFrameSchema, raw_file_identifier: str, chunk: pd.DataFrame
     ) -> None:
         validated_dataframe = build_validated_dataframe(schema, chunk)
         permanent_filename = self.generate_permanent_filename(raw_file_identifier)
         self.upload_data(schema, validated_dataframe, permanent_filename)
 
-    def remove_existing_data(self, schema: Schema, raw_file_identifier: str) -> None:
+    def remove_existing_data(self, schema: pandera.DataFrameSchema, raw_file_identifier: str) -> None:
         AppLogger.info(
-            f"Overwriting existing data for layer [{schema.get_layer()}], domain [{schema.get_domain()}] and dataset [{schema.get_dataset()}]"
+            f"Overwriting existing data for layer [{schema_utils.get_layer(schema)}], domain [{schema_utils.get_domain(schema)}] and dataset [{schema_utils.get_dataset(schema)}]"
         )
         try:
             self.s3_adapter.delete_previous_dataset_files(
@@ -171,14 +173,14 @@ class DataService:
             )
         except IndexError:
             AppLogger.warning(
-                f"No data to override for domain [{schema.get_domain()}] and dataset [{schema.get_dataset()}]"
+                f"No data to override for domain [{schema_utils.get_domain(schema)}] and dataset [{schema_utils.get_dataset(schema)}]"
             )
         except AWSServiceError as error:
             AppLogger.error(
-                f"Overriding existing data failed for layer [{schema.get_layer()}], domain [{schema.get_domain()}] and dataset [{schema.get_dataset()}]. Raw file identifier: {raw_file_identifier}. {error}"
+                f"Overriding existing data failed for layer [{schema_utils.get_layer(schema)}], domain [{schema_utils.get_domain(schema)}] and dataset [{schema_utils.get_dataset(schema)}]. Raw file identifier: {raw_file_identifier}. {error}"
             )
             raise AWSServiceError(
-                f"Overriding existing data failed for layer [{schema.get_layer()}], domain [{schema.get_domain()}] and dataset [{schema.get_dataset()}]. Raw file identifier: {raw_file_identifier}"
+                f"Overriding existing data failed for layer [{schema_utils.get_layer(schema)}], domain [{schema_utils.get_domain(schema)}] and dataset [{schema_utils.get_dataset(schema)}]. Raw file identifier: {raw_file_identifier}"
             )
 
     def get_last_updated_time(self, metadata: DatasetMetadata) -> str:
@@ -202,15 +204,15 @@ class DataService:
 
     def upload_data(
         self,
-        schema: Schema,
+        schema: pandera.DataFrameSchema,
         validated_dataframe: pd.DataFrame,
         filename: str,
     ):
         partitions = generate_partitioned_data(schema, validated_dataframe)
         self.s3_adapter.upload_partitioned_data(schema, filename, partitions)
 
-    def load_partitions(self, schema: Schema):
-        if schema.get_partition_columns():
+    def load_partitions(self, schema: pandera.DataFrameSchema):
+        if schema_utils.get_partition_columns(schema):
             query_id = self.athena_adapter.query_sql_async(
                 f"MSCK REPAIR TABLE `{schema.metadata.glue_table_name()}`;"
             )
@@ -267,8 +269,8 @@ class DataService:
             self.job_service.fail(query_job, build_error_message_list(error))
             raise error
 
-    def _build_query(self, schema: Schema) -> SQLQuery:
-        date_columns = schema.get_columns_by_type(DateType)
+    def _build_query(self, schema: pandera.DataFrameSchema) -> SQLQuery:
+        date_columns = schema_utils.get_columns_by_type(schema, DateType)
         date_range_queries = [
             *[
                 f"cast(max({column.name}) as date) as max_{column.name}"
@@ -287,7 +289,7 @@ class DataService:
 
     # TODO Pandera: change enriched schema logic
     def _enrich_metadata(
-        self, schema: Schema, statistics_dataframe: pd.DataFrame, last_updated: str
+        self, schema: pandera.DataFrameSchema, statistics_dataframe: pd.DataFrame, last_updated: str
     ):
         # dataset_size = statistics_dataframe.at[0, "data_size"]
         # return EnrichedSchemaMetadata(
@@ -299,11 +301,11 @@ class DataService:
         pass
 
     # def _enrich_columns(
-    #     self, schema: Schema, statistics_dataframe: pd.DataFrame
+    #     self, schema: pandera.DataFrameSchema, statistics_dataframe: pd.DataFrame
     # ) -> List[EnrichedColumn]:
     #     strftime_format = "%Y-%m-%d"
     #     enriched_columns = []
-    #     date_columns = schema.get_columns_by_type(DateType)
+    #     date_columns = schema_utils.get_columns_by_type(schema, DateType)
     #     for column in schema.columns:
     #         statistics = None
     #         if column in date_columns:

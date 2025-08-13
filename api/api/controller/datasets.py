@@ -43,7 +43,6 @@ from api.common.logger import AppLogger
 from api.common.utilities import construct_dataset_metadata
 from api.domain.dataset_filters import DatasetFilters
 from api.domain.dataset_metadata import DatasetMetadata
-from api.domain.schema_metadata import SchemaMetadata
 from api.domain.mime_type import MimeType
 from api.domain.sql_query import SQLQuery
 from api.domain.Jobs.Job import generate_uuid

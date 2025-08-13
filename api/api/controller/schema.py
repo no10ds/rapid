@@ -3,6 +3,8 @@ from fastapi import UploadFile, File, Security
 from fastapi import status as http_status
 from fastapi import Path as FastApiPath
 
+import pandera
+
 from api.application.services.authorisation.authorisation_service import secure_endpoint
 from api.application.services.delete_service import DeleteService
 from api.application.services.schema_infer_service import SchemaInferService
@@ -103,7 +105,7 @@ async def generate_schema(
     status_code=http_status.HTTP_201_CREATED,
     dependencies=[Security(secure_endpoint, scopes=[Action.DATA_ADMIN])],
 )
-async def upload_schema(schema: Schema):
+async def upload_schema(schema: pandera.DataFrameSchema):
     """
     ## Upload Schema
 
@@ -153,7 +155,7 @@ async def upload_schema(schema: Schema):
     status_code=http_status.HTTP_200_OK,
     dependencies=[Security(secure_endpoint, scopes=[Action.DATA_ADMIN])],
 )
-async def update_schema(schema: Schema):
+async def update_schema(schema: pandera.DataFrameSchema):
     """
     ## Update Schema
 
@@ -192,7 +194,7 @@ async def update_schema(schema: Schema):
         handle_schema_upload_failure(schema, error)
 
 
-def handle_schema_upload_failure(schema: Schema, error):
+def handle_schema_upload_failure(schema: pandera.DataFrameSchema, error):
     delete_service.delete_schema_upload(schema.metadata)
     AppLogger.error(f"Failed to upload schema {error.message}")
     raise AWSServiceError(message=error.message)

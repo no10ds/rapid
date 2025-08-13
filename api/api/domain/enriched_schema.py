@@ -2,7 +2,6 @@ from typing import List, Dict, Optional
 
 from pydantic import BaseModel
 
-from api.domain.schema_metadata import SchemaMetadata
 
 # TODO Pandera: Define enriched schema with Pandera
 # class EnrichedColumn(Column):

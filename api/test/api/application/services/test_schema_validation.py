@@ -2,6 +2,7 @@ from typing import List, Any
 
 import pytest
 from pydantic import ValidationError
+import pandera
 
 from api.application.services.schema_validation import validate_schema
 from api.application.services.schema_validation import (
@@ -48,7 +49,7 @@ class TestSchemaValidation:
         )
 
     def _assert_validate_schema_raises_error(
-        self, invalid_schema: Schema, message_pattern: str
+        self, invalid_schema: pandera.DataFrameSchema, message_pattern: str
     ):
         with pytest.raises(SchemaValidationError, match=message_pattern):
             validate_schema(invalid_schema)

@@ -1,6 +1,8 @@
 import re
 from typing import List, Union, Any, Optional
 
+import pandera
+
 from api.common.config.auth import Sensitivity
 from api.common.config.aws import INFERRED_UNNAMED_COLUMN_PREFIX, MAX_TAG_COUNT
 from api.common.config.constants import (
@@ -11,23 +13,23 @@ from api.common.config.constants import (
 )
 from api.common.custom_exceptions import SchemaValidationError
 from api.domain.data_types import AthenaDataType, is_date_type
-from api.domain.schema import Schema
-from api.domain.schema_metadata import UpdateBehaviour, Owner
+from api.domain import schema_utils
+from api.domain.schema_utils import UpdateBehaviour, Owner
 from api.application.services.column_validation import validate_column
 
 
-def validate_schema_for_upload(schema: Schema):
+def validate_schema_for_upload(schema: pandera.DataFrameSchema):
     validate_schema(schema)
     schema_has_valid_data_owner(schema)
     schema_has_valid_tag_set(schema)
 
 
-def validate_schema(schema: Schema):
+def validate_schema(schema: pandera.DataFrameSchema):
     schema_has_valid_column_definitions(schema)
     schema_has_valid_metadata(schema)
 
 
-def schema_has_valid_column_definitions(schema: Schema):
+def schema_has_valid_column_definitions(schema: pandera.DataFrameSchema):
     has_columns(schema)
     has_non_empty_column_names(schema)
     has_valid_inferred_column_names(schema)
@@ -42,17 +44,17 @@ def schema_has_valid_column_definitions(schema: Schema):
     has_valid_columns(schema)
 
 
-def has_columns(schema: Schema):
+def has_columns(schema: pandera.DataFrameSchema):
     if not schema.columns:
         raise SchemaValidationError("You need to define at least one column")
 
 
-def has_non_empty_column_names(schema: Schema):
+def has_non_empty_column_names(schema: pandera.DataFrameSchema):
     if any((not column.name for column in schema.columns)):
         raise SchemaValidationError("You can not have empty column names")
 
 
-def has_valid_inferred_column_names(schema: Schema):
+def has_valid_inferred_column_names(schema: pandera.DataFrameSchema):
     if any(
         (
             column.name.startswith(INFERRED_UNNAMED_COLUMN_PREFIX)
@@ -62,12 +64,12 @@ def has_valid_inferred_column_names(schema: Schema):
         raise SchemaValidationError("You can not have empty column names")
 
 
-def has_unique_column_names(schema: Schema):
-    __has_unique_value(schema.get_column_names(), schema.columns, "column names")
+def has_unique_column_names(schema: pandera.DataFrameSchema):
+    __has_unique_value(schema_utils.get_column_names(schema), schema.columns, "column names")
 
 
-def has_clean_column_headings(schema: Schema):
-    col_names = schema.get_column_names()
+def has_clean_column_headings(schema: pandera.DataFrameSchema):
+    col_names = schema_utils.get_column_names(schema)
     for col_name in col_names:
         if __has_punctuation_or_only_one_type_of_character(col_name):
             raise SchemaValidationError(
@@ -75,20 +77,20 @@ def has_clean_column_headings(schema: Schema):
             )
 
 
-def schema_has_valid_metadata(schema: Schema):
+def schema_has_valid_metadata(schema: pandera.DataFrameSchema):
     schema_has_metadata_values(schema)
     schema_has_valid_metadata_values(schema)
 
 
-def schema_has_metadata_values(schema: Schema):
+def schema_has_metadata_values(schema: pandera.DataFrameSchema):
     metadata = schema.metadata
     if not (metadata.domain and metadata.dataset and metadata.sensitivity):
         raise SchemaValidationError("You can not have empty metadata values")
 
 
-def schema_has_valid_metadata_values(schema: Schema):
-    domain_name = schema.get_domain()
-    dataset_name = schema.get_dataset()
+def schema_has_valid_metadata_values(schema: pandera.DataFrameSchema):
+    domain_name = schema_utils.get_domain(schema)
+    dataset_name = schema_utils.get_dataset(schema)
 
     if not valid_domain_name(domain_name):
         raise SchemaValidationError(
@@ -117,14 +119,14 @@ def validate_metadata_character_string(string_input: str) -> bool:
     return bool(match)
 
 
-def schema_has_valid_tag_set(schema: Schema):
-    schema.metadata.remove_duplicates()
-    if len(schema.get_tags()) > MAX_TAG_COUNT:
+def schema_has_valid_tag_set(schema: pandera.DataFrameSchema):
+    schema_utils.remove_duplicates(schema)
+    if len(schema_utils.get_tags(schema)) > MAX_TAG_COUNT:
         raise SchemaValidationError(
             f"You cannot specify more than {MAX_TAG_COUNT} tags"
         )
 
-    for key, value in schema.get_tags().items():
+    for key, value in schema_utils.get_tags(schema).items():
         if key.startswith("aws"):
             raise SchemaValidationError("You cannot prefix tags with `aws`")
         if not re.match(TAG_KEYS_REGEX, key):
@@ -137,20 +139,20 @@ def schema_has_valid_tag_set(schema: Schema):
             )
 
 
-def has_unique_partition_indexes(schema: Schema):
+def has_unique_partition_indexes(schema: pandera.DataFrameSchema):
     __has_unique_value(
-        schema.get_partition_indexes(), schema.get_partitions(), "partition indexes"
+        schema_utils.get_partition_indexes(schema), schema_utils.get_partitions(schema), "partition indexes"
     )
 
 
-def has_valid_partition_index_values(schema: Schema):
-    if any(partition < 0 for partition in schema.get_partition_indexes()):
+def has_valid_partition_index_values(schema: pandera.DataFrameSchema):
+    if any(partition < 0 for partition in schema_utils.get_partition_indexes(schema)):
         raise SchemaValidationError("You can not a negative partition number")
-    if len(schema.get_partition_indexes()) == len(schema.columns):
+    if len(schema_utils.get_partition_indexes(schema)) == len(schema.columns):
         raise SchemaValidationError("At least one column should not be partitioned")
     if any(
-        partition >= len(schema.get_partitions())
-        for partition in schema.get_partition_indexes()
+        partition >= len(schema_utils.get_partitions(schema))
+        for partition in schema_utils.get_partition_indexes(schema)
     ):
         raise SchemaValidationError(
             "You can not have a partition number greater than the number of partition columns"
@@ -158,14 +160,14 @@ def has_valid_partition_index_values(schema: Schema):
 
 
 def has_allow_null_false_on_partitioned_columns(schema):
-    for partitioned_col in schema.get_partition_columns():
+    for partitioned_col in schema_utils.get_partition_columns(schema):
         if partitioned_col.nullable:
             raise SchemaValidationError("Partition columns cannot allow null values")
 
 
 # TODO Pandera: replace data type validation
-# def has_only_accepted_data_types(schema: Schema):
-#     data_types = schema.get_data_types()
+# def has_only_accepted_data_types(schema: pandera.DataFrameSchema):
+#     data_types = schema_utils.get_data_types(schema)
 #     try:
 #         for data_type in data_types:
 #             AthenaDataType(data_type)
@@ -175,21 +177,21 @@ def has_allow_null_false_on_partitioned_columns(schema):
 #         )
 
 
-def has_valid_date_column_definition(schema: Schema):
+def has_valid_date_column_definition(schema: pandera.DataFrameSchema):
     for column in schema.columns:
         if is_date_type(column.dtype) and __has_value_for(column.metadata.get("format")):
             __has_valid_date_format(column.metadata.get("format"))
 
 
-def has_valid_sensitivity_level(schema: Schema):
-    if schema.get_sensitivity() not in list(Sensitivity):
+def has_valid_sensitivity_level(schema: pandera.DataFrameSchema):
+    if schema_utils.get_sensitivity(schema) not in list(Sensitivity):
         raise SchemaValidationError(
             f"You must specify a valid sensitivity level. Accepted values: {Sensitivity._member_names_}"
         )
 
 
-def schema_has_valid_data_owner(schema: Schema):
-    owners = schema.metadata.get_owners()
+def schema_has_valid_data_owner(schema: pandera.DataFrameSchema):
+    owners = schema_utils.get_owners(schema)
     if owners is None or len(owners) == 0:
         raise SchemaValidationError("You must specify at least one owner")
     else:
@@ -202,22 +204,22 @@ def _owner_email_is_changed(owner: Owner):
         raise SchemaValidationError("You must change the default owner")
 
 
-def has_valid_update_behaviour(schema: Schema):
-    if schema.get_update_behaviour() not in list(UpdateBehaviour):
+def has_valid_update_behaviour(schema: pandera.DataFrameSchema):
+    if schema_utils.get_update_behaviour(schema) not in list(UpdateBehaviour):
         raise SchemaValidationError(
             f"You must specify a valid update behaviour. Accepted values: {UpdateBehaviour._member_names_}"
         )
 
 
-def has_valid_allow_unique_columns(schema: Schema):
-    if not schema.has_overwrite_behaviour():
+def has_valid_allow_unique_columns(schema: pandera.DataFrameSchema):
+    if not schema_utils.has_overwrite_behaviour(schema):
         for column in schema.columns:
             if column.unique:
                 raise SchemaValidationError(
                     "Schema with APPEND update behaviour cannot force unique values in columns"
                 )
             
-def has_valid_columns(schema: Schema):
+def has_valid_columns(schema: pandera.DataFrameSchema):
     for column in schema.columns:
         validate_column(column)
 

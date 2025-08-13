@@ -14,13 +14,13 @@ from api.common.custom_exceptions import (
     UserError,
 )
 from api.common.logger import AppLogger
-from api.domain.schema import Schema, COLUMNS
-from api.domain.schema_metadata import SchemaMetadata
+from api.domain import schema_utils
 from api.domain.dataset_metadata import DatasetMetadata
 
 from api.domain.dataset_filters import DatasetFilters
 from api.common.config.auth import Sensitivity
 
+import pandera
 
 class SchemaService:
     def __init__(
@@ -35,7 +35,7 @@ class SchemaService:
 
     def get_schema(
         self, dataset: Type[DatasetMetadata], latest: bool = False
-    ) -> Schema:
+    ) -> pandera.DataFrameSchema:
         if latest or not dataset.get_version():
             schema_dict = self.dynamodb_adapter.get_latest_schema(dataset)
         else:
@@ -73,7 +73,7 @@ class SchemaService:
         if not schema:
             return FIRST_SCHEMA_VERSION_NUMBER
 
-        return self._parse_schema(schema).get_version()
+        return schema_utils.get_version(self._parse_schema(schema))
 
     def delete_schema(self, dataset: Type[DatasetMetadata]) -> int:
         return self.dynamodb_adapter.delete_schema(dataset)
@@ -89,7 +89,7 @@ class SchemaService:
             )
             self.dynamodb_adapter.delete_schema(metadata)
 
-    def upload_schema(self, schema: Schema) -> str:
+    def upload_schema(self, schema: pandera.DataFrameSchema) -> str:
         schema.metadata.version = FIRST_SCHEMA_VERSION_NUMBER
         dataset = schema.metadata
         try:
@@ -106,11 +106,11 @@ class SchemaService:
         self.dynamodb_adapter.store_schema(schema)
         return schema.metadata.glue_table_name()
 
-    def update_schema(self, schema: Schema) -> str:
+    def update_schema(self, schema: pandera.DataFrameSchema) -> str:
         original_schema = self.get_schema(schema.metadata, latest=True)
 
         schema.metadata.version = (
-            original_schema.get_version() + SCHEMA_VERSION_INCREMENT
+            schema_utils.get_version(original_schema) + SCHEMA_VERSION_INCREMENT
         )
 
         self.check_for_sensitivity_consistency(original_schema, schema)
@@ -124,25 +124,25 @@ class SchemaService:
         self.dynamodb_adapter.deprecate_schema(original_schema.metadata)
         return schema.metadata.dataset_identifier()
 
-    def check_for_protected_domain(self, schema: Schema) -> str:
-        if Sensitivity.PROTECTED == schema.get_sensitivity():
+    def check_for_protected_domain(self, schema: pandera.DataFrameSchema) -> str:
+        if Sensitivity.PROTECTED == schema_utils.get_sensitivity(schema):
             if (
-                schema.get_domain()
+                schema_utils.get_domain(schema)
                 not in self.protected_domain_service.list_protected_domains()
             ):
                 raise UserError(
-                    f"The protected domain '{schema.get_domain()}' does not exist."
+                    f"The protected domain '{schema_utils.get_domain(schema)}' does not exist."
                 )
-        return schema.get_domain()
+        return schema_utils.get_domain(schema)
 
     def check_for_sensitivity_consistency(
-        self, original_schema: Schema, schema: Schema
+        self, original_schema: pandera.DataFrameSchema, schema: pandera.DataFrameSchema
     ):
         original_sensitivity = original_schema.metadata.get_sensitivity()
         new_sensitivity = schema.metadata.get_sensitivity()
         if original_sensitivity != new_sensitivity:
             raise UserError(
                 f"The sensitivity of this updated schema [{new_sensitivity}] does not match"
-                + f" the original [{original_schema.get_sensitivity()}]. You cannot change"
+                + f" the original [{schema_utils.get_sensitivity(original_schema)}]. You cannot change"
                 + " the sensitivity when updating a schema",
             )

@@ -13,16 +13,16 @@ from api.domain.data_types import (
     StringType,
     DateType,
 )
-from api.domain.schema import Schema
 from api.domain.validation_context import ValidationContext
-from api.domain.schema import is_of_data_type
+from api.domain.schema_utils import column_has_data_type
+from api.domain import schema_utils
 
 
-def build_validated_dataframe(schema: Schema, dataframe: pd.DataFrame) -> pd.DataFrame:
+def build_validated_dataframe(schema: pandera.DataFrameSchema, dataframe: pd.DataFrame) -> pd.DataFrame:
     return transform_and_validate(schema, dataframe)
 
 
-def transform_and_validate(schema: Schema, data: pd.DataFrame) -> pd.DataFrame:
+def transform_and_validate(schema: pandera.DataFrameSchema, data: pd.DataFrame) -> pd.DataFrame:
     validation_context = (
         ValidationContext(data)
         .pipe(dataset_has_rows)
@@ -47,11 +47,11 @@ def dataset_has_rows(df: pd.DataFrame) -> Tuple[pd.DataFrame, list[str]]:
 
 
 def convert_date_columns(
-    data_frame: pd.DataFrame, schema: Schema
+    data_frame: pd.DataFrame, schema: pandera.DataFrameSchema
 ) -> Tuple[pd.DataFrame, list[str]]:
     error_list = []
 
-    for column in schema.get_columns_by_type(DateType):
+    for column in schema_utils.get_columns_by_type(schema, DateType):
         try:
             data_frame[column.name] = pd.to_datetime(
                 data_frame[column.name], format=column.metadata.get("format")
@@ -66,12 +66,12 @@ def convert_date_columns(
 
 
 def dataset_has_no_illegal_characters_in_partition_columns(
-    data_frame: pd.DataFrame, schema: Schema
+    data_frame: pd.DataFrame, schema: pandera.DataFrameSchema
 ) -> Tuple[pd.DataFrame, list[str]]:
     error_list = []
-    for column in schema.get_partition_columns():
+    for column in schema_utils.get_partition_columns(schema):
         series = data_frame[column.name]
-        if not is_of_data_type(column, DateType) and series.dtype == object:
+        if not column_has_data_type(column, DateType) and series.dtype == object:
             any_illegal_characters = any(
                 [value is True for value in series.str.contains("/")]
             )

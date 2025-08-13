@@ -15,8 +15,7 @@ from api.common.custom_exceptions import (
     UserError,
 )
 from api.domain.dataset_metadata import DatasetMetadata
-from api.domain.schema import Schema, Column
-from api.domain.schema_metadata import Owner, SchemaMetadata
+from api.domain import schema_utils
 
 
 class TestUploadSchema:
@@ -273,7 +272,7 @@ class TestUpdateSchema:
 
         with pytest.raises(
             UserError,
-            match=f"The protected domain '{new_schema.get_domain()}' does not exist.",
+            match=f"The protected domain '{schema_utils.get_domain(new_schema)}' does not exist.",
         ):
             self.schema_service.update_schema(new_schema)
 
@@ -320,7 +319,7 @@ class TestUpdateSchema:
 
         self.schema_service.get_schema = Mock(return_value=original_schema)
         self.protected_domain_service.list_protected_domains = Mock(
-            return_value=[original_schema.get_domain(), "other"]
+            return_value=[schema_utils.get_domain(original_schema), "other"]
         )
 
         result = self.schema_service.update_schema(new_schema)
