@@ -4,6 +4,7 @@ from typing import List, Dict, Optional, Set
 import awswrangler as wr
 from pydantic.main import BaseModel
 import pyarrow as pa
+import pandera
 
 from api.domain.schema_metadata import Owner, SchemaMetadata, UpdateBehaviour
 
@@ -11,21 +12,28 @@ METADATA = "metadata"
 COLUMNS = "columns"
 
 
-class Column(BaseModel):
-    name: str
-    partition_index: Optional[int]
-    data_type: str
-    allow_null: bool
-    format: Optional[str] = None
-    unique: bool = False
+# TODO Pandera: remove this 
+# class Column(BaseModel):
+#     name: str
+#     partition_index: Optional[int]
+#     data_type: str
+#     allow_null: bool
+#     format: Optional[str] = None
+#     unique: bool = False
 
-    def is_of_data_type(self, d_type: StrEnum) -> bool:
-        return self.data_type in list(d_type)
+#     def is_of_data_type(self, d_type: StrEnum) -> bool:
+#         return self.data_type in list(d_type)
 
+# TODO Pandera: is this the right place for this?
+def is_of_data_type(column: pandera.Column, d_type: StrEnum) -> bool:
+    return str(column.dtype) in list(d_type)
 
 class Schema(BaseModel):
     metadata: SchemaMetadata
-    columns: List[Column]
+    columns: List[pandera.Column]
+
+    def column_has_data_type(self, column: pandera.Column, d_type: StrEnum) -> bool:
+        return str(column.dtype) in [dt.value for dt in d_type]
 
     def get_layer(self) -> str:
         return self.metadata.get_layer()
@@ -66,24 +74,24 @@ class Schema(BaseModel):
 
     def get_partition_indexes(self) -> List[int]:
         sorted_cols = self.get_partition_columns()
-        return [column.partition_index for column in sorted_cols]
+        return [column.metadata.get("partition_index") for column in sorted_cols]
 
     def get_data_types(self) -> Set[str]:
-        return {column.data_type for column in self.columns}
+        return {column.dtype for column in self.columns}
 
-    def get_columns_by_type(self, d_type: StrEnum) -> List[Column]:
-        return [column for column in self.columns if column.is_of_data_type(d_type)]
+    def get_columns_by_type(self, d_type: StrEnum) -> List[pandera.Column]:
+        return [column for column in self.columns if self.column_has_data_type(column, d_type)]
 
     def get_column_names_by_type(self, d_type: StrEnum) -> List[str]:
         return [
-            column.name for column in self.columns if column.is_of_data_type(d_type)
+            column.name for column in self.columns if self.column_has_data_type(column, d_type)
         ]
 
     def get_non_partition_columns_for_glue(self) -> List[dict]:
         return [
             self.convert_column_to_glue_format(col)
             for col in self.columns
-            if col.partition_index is None
+            if col.metadata.get("partition_index") is None
         ]
 
     def get_partition_columns_for_glue(self) -> List[dict]:
@@ -92,19 +100,20 @@ class Schema(BaseModel):
             for col in self.get_partition_columns()
         ]
 
-    def convert_column_to_glue_format(self, column: List[Column]):
-        return {"Name": column.name, "Type": column.data_type}
+    def convert_column_to_glue_format(self, column: pandera.Column):
+        return {"Name": column.name, "Type": column.dtype}
 
-    def get_partition_columns(self) -> List[Column]:
+    def get_partition_columns(self) -> List[pandera.Column]:
         return sorted(
-            [column for column in self.columns if column.partition_index is not None],
-            key=lambda x: x.partition_index,
+            [column for column in self.columns
+            if column.metadata and column.metadata.get("partition_index") is not None],
+            key=lambda x: x.metadata.get("partition_index"),
         )
 
     def generate_storage_schema(self) -> pa.schema:
         return pa.schema(
             [
-                pa.field(column.name, wr._data_types.athena2pyarrow(column.data_type))
+                pa.field(column.name, wr._data_types.athena2pyarrow(column.dtype))
                 for column in self.columns
             ]
         )

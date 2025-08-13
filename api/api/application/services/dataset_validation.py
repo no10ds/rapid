@@ -2,6 +2,7 @@ from typing import Tuple
 
 import pandas as pd
 from pandas import Timestamp
+import pandera
 
 from api.common.custom_exceptions import (
     DatasetValidationError,
@@ -9,13 +10,12 @@ from api.common.custom_exceptions import (
 )
 from api.common.value_transformers import clean_column_name
 from api.domain.data_types import (
-    extract_athena_types,
-    AthenaDataType,
     StringType,
     DateType,
 )
 from api.domain.schema import Schema
 from api.domain.validation_context import ValidationContext
+from api.domain.schema import is_of_data_type
 
 
 def build_validated_dataframe(schema: Schema, dataframe: pd.DataFrame) -> pd.DataFrame:
@@ -28,11 +28,7 @@ def transform_and_validate(schema: Schema, data: pd.DataFrame) -> pd.DataFrame:
         .pipe(dataset_has_rows)
         .pipe(remove_empty_rows)
         .pipe(clean_column_headers)
-        .pipe(dataset_has_correct_columns, schema)
         .pipe(convert_date_columns, schema)
-        .pipe(dataset_has_acceptable_null_values, schema)
-        .pipe(dataset_has_acceptable_unique_values, schema)
-        .pipe(dataset_has_correct_data_types, schema)
         .pipe(dataset_has_no_illegal_characters_in_partition_columns, schema)
     )
 
@@ -50,48 +46,6 @@ def dataset_has_rows(df: pd.DataFrame) -> Tuple[pd.DataFrame, list[str]]:
     return df, []
 
 
-def dataset_has_correct_columns(
-    df: pd.DataFrame, schema: Schema
-) -> Tuple[pd.DataFrame, list[str]]:
-    expected_columns = schema.get_column_names()
-    actual_columns = list(df.columns)
-    error_list = []
-
-    has_expected_columns = all(
-        [expected_column in actual_columns for expected_column in expected_columns]
-    )
-
-    if not has_expected_columns or len(actual_columns) != len(expected_columns):
-        # Cannot reasonably proceed with further validation if we don't even have the correct columns
-        raise UnprocessableDatasetError(
-            [f"Expected columns: {expected_columns}, received: {actual_columns}"]
-        )
-
-    return df, error_list
-
-
-def dataset_has_acceptable_null_values(
-    data_frame: pd.DataFrame, schema: Schema
-) -> Tuple[pd.DataFrame, list[str]]:
-    error_list = []
-    for column in schema.columns:
-        if not column.allow_null and data_frame[column.name].isnull().values.any():
-            error_list.append(f"Column [{column.name}] does not allow null values")
-
-    return data_frame, error_list
-
-
-def dataset_has_acceptable_unique_values(
-    data_frame: pd.DataFrame, schema: Schema
-) -> Tuple[pd.DataFrame, list[str]]:
-    error_list = []
-    for column in schema.columns:
-        if column.unique and data_frame[column.name].dropna().duplicated().values.any():
-            error_list.append(f"Column [{column.name}] must have unique values")
-
-    return data_frame, error_list
-
-
 def convert_date_columns(
     data_frame: pd.DataFrame, schema: Schema
 ) -> Tuple[pd.DataFrame, list[str]]:
@@ -100,7 +54,7 @@ def convert_date_columns(
     for column in schema.get_columns_by_type(DateType):
         try:
             data_frame[column.name] = pd.to_datetime(
-                data_frame[column.name], format=column.format
+                data_frame[column.name], format=column.metadata.get("format")
             )
         except ValueError:
             error_list.append(
@@ -110,29 +64,6 @@ def convert_date_columns(
     return data_frame, error_list
 
 
-def dataset_has_correct_data_types(
-    data_frame: pd.DataFrame, schema: Schema
-) -> Tuple[pd.DataFrame, list[str]]:
-    error_list = []
-    column_types = extract_athena_types(
-        data_frame,
-    )
-    for column in schema.columns:
-        if column.name not in column_types:
-            continue
-        actual_type = column_types[column.name]
-        expected_type = column.data_type
-
-        types_match = isinstance(AthenaDataType(expected_type).value, type(actual_type))
-
-        if not types_match and not is_valid_custom_dtype(actual_type, expected_type):
-            error_list.append(
-                f"Column [{column.name}] has an incorrect data type. Expected {expected_type}, received {AthenaDataType(actual_type).value}"
-                # noqa: E501
-            )
-
-    return data_frame, error_list
-
 
 def dataset_has_no_illegal_characters_in_partition_columns(
     data_frame: pd.DataFrame, schema: Schema
@@ -140,7 +71,7 @@ def dataset_has_no_illegal_characters_in_partition_columns(
     error_list = []
     for column in schema.get_partition_columns():
         series = data_frame[column.name]
-        if not column.is_of_data_type(DateType) and series.dtype == object:
+        if not is_of_data_type(column, DateType) and series.dtype == object:
             any_illegal_characters = any(
                 [value is True for value in series.str.contains("/")]
             )

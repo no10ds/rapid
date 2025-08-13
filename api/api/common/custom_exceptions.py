@@ -54,6 +54,10 @@ class SchemaNotFoundError(UserError):
 class SchemaValidationError(UserError):
     pass
 
+# TODO Pandera: set up column validation error
+class ColumnValidationError(UserError):
+    pass
+
 
 class DatasetValidationError(UserError):
     pass
