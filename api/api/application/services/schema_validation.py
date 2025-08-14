@@ -14,7 +14,7 @@ from api.common.config.constants import (
 from api.common.custom_exceptions import SchemaValidationError
 from api.domain.data_types import AthenaDataType, is_date_type
 from api.domain import schema_utils
-from api.domain.schema_utils import UpdateBehaviour, Owner
+from api.domain.schema_metadata import UpdateBehaviour, Owner
 from api.application.services.column_validation import validate_column
 
 
