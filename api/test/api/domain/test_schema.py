@@ -4,41 +4,42 @@ import pyarrow as pa
 import pytest
 
 from api.adapter.s3_adapter import S3Adapter
-from api.domain.schema import Schema, Column
-from api.domain.schema_metadata import Owner, SchemaMetadata
+from api.domain.schema import Schema, Column, Owner
+from api.domain.dataset_metadata import DatasetMetadata
 from api.domain.data_types import BooleanType, NumericType, StringType
 
 
 class TestSchema:
     def setup_method(self):
         self.schema = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="test_domain",
                 dataset="test_dataset",
-                sensitivity="PUBLIC",
-                owners=[Owner(name="owner", email="owner@email.com")],
+                version=1,
             ),
-            columns=[
-                Column(
+            sensitivity="PUBLIC",
+            owners=[Owner(name="owner", email="owner@email.com")],
+            columns={
+                "colname1": Column(
                     name="colname1",
                     partition_index=1,
                     data_type="int",
                     allow_null=True,
                 ),
-                Column(
+                "colname2": Column(
                     name="colname2",
                     partition_index=0,
                     data_type="string",
                     allow_null=False,
                 ),
-                Column(
+                "colname3": Column(
                     name="colname3",
                     partition_index=None,
                     data_type="boolean",
                     allow_null=False,
                 ),
-            ],
+            },
         )
 
     def test_gets_column_names(self):
@@ -72,20 +73,20 @@ class TestSchema:
     def test_get_partition_columns(self):
         res = self.schema.get_partition_columns()
         expected = [
-            Column(
+            {"colname2", Column(
                 name="colname2",
                 partition_index=0,
                 data_type="string",
                 allow_null=False,
                 format=None,
-            ),
-            Column(
+            )},
+            {"colname1", Column(
                 name="colname1",
                 partition_index=1,
                 data_type="int",
                 allow_null=True,
                 format=None,
-            ),
+            )},
         ]
         assert res == expected
 
@@ -134,66 +135,3 @@ class TestSchema:
             ]
         )
         assert res == expected
-
-
-class TestSchemaMetadata:
-    def setup_method(self):
-        self.mock_s3_client = Mock()
-        self.s3_adapter = S3Adapter(s3_client=self.mock_s3_client, s3_bucket="dataset")
-
-    def test_schema_version(self):
-        schema_metadata = SchemaMetadata(
-            layer="raw",
-            domain="domain",
-            dataset="dataset",
-            sensitivity="PUBLIC",
-            version=3,
-            owners=[Owner(name="owner", email="owner@email.com")],
-        )
-        assert schema_metadata.get_version() == 3
-
-    def test_schema_for_default_version(self):
-        schema_metadata = SchemaMetadata(
-            layer="raw",
-            domain="domain",
-            dataset="dataset",
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
-        )
-        assert schema_metadata.get_version() is None
-
-    def test_get_tags_when_none_are_provided(self):
-        result = SchemaMetadata(
-            layer="raw",
-            domain="domain",
-            dataset="dataset",
-            sensitivity="PUBLIC",
-            version=1,
-            owners=[Owner(name="owner", email="owner@email.com")],
-        )
-
-        assert result.get_tags() == {}
-
-    def test_gets_tags(self):
-        provided_key_value_tags = {
-            "tag1_key": "tag1_value",
-            "tag2_key": "tag2_value",
-            "tag3_key": "tag3_value",
-        }
-        provided_key_only_tags = ["tag4_key", "tag5_key"]
-
-        result = SchemaMetadata(
-            layer="raw",
-            domain="domain",
-            dataset="dataset",
-            sensitivity="PUBLIC",
-            version=2,
-            owners=[Owner(name="owner", email="owner@email.com")],
-            key_value_tags=provided_key_value_tags,
-            key_only_tags=provided_key_only_tags,
-        )
-
-        assert result.get_tags() == {
-            **provided_key_value_tags,
-            **dict.fromkeys(provided_key_only_tags, ""),
-        }

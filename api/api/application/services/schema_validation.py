@@ -11,9 +11,7 @@ from api.common.config.constants import (
 )
 from api.common.custom_exceptions import SchemaValidationError
 from api.domain.data_types import AthenaDataType, is_date_type
-from api.domain.schema import Schema
-from api.domain.schema_metadata import UpdateBehaviour, Owner
-from api.application.services.column_validation import validate_column
+from api.domain.schema import Schema, UpdateBehaviour, Owner
 
 
 def validate_schema_for_upload(schema: Schema):
@@ -176,9 +174,9 @@ def has_allow_null_false_on_partitioned_columns(schema):
 
 
 def has_valid_date_column_definition(schema: Schema):
-    for column in schema.columns:
-        if is_date_type(column.dtype) and __has_value_for(column.metadata.get("format")):
-            __has_valid_date_format(column.metadata.get("format"))
+    for column in schema.columns.items():
+        if is_date_type(column.dtype) and __has_value_for(column.format):
+            __has_valid_date_format(column.format)
 
 
 def has_valid_sensitivity_level(schema: Schema):
@@ -189,7 +187,7 @@ def has_valid_sensitivity_level(schema: Schema):
 
 
 def schema_has_valid_data_owner(schema: Schema):
-    owners = schema.metadata.get_owners()
+    owners = schema.get_owners()
     if owners is None or len(owners) == 0:
         raise SchemaValidationError("You must specify at least one owner")
     else:
@@ -216,11 +214,6 @@ def has_valid_allow_unique_columns(schema: Schema):
                 raise SchemaValidationError(
                     "Schema with APPEND update behaviour cannot force unique values in columns"
                 )
-            
-def has_valid_columns(schema: Schema):
-    for column in schema.columns:
-        validate_column(column)
-
 
 def __has_unique_value(
     set_to_compare: List[Union[str, int]], actual_value: List[Any], field_name: str

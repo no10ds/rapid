@@ -14,7 +14,6 @@ from api.common.custom_exceptions import (
     AWSServiceError,
 )
 from api.domain.dataset_metadata import DatasetMetadata
-from api.domain.schema_metadata import SchemaMetadata
 from api.domain.schema import Schema, Column
 from test.test_utils import (
     mock_list_schemas_response,
@@ -96,22 +95,26 @@ class TestS3AdapterUpload:
             Partition(keys=[2020, 2], path="year=2020/month=2", df=partition_2),
         ]
 
-        schema = Schema(
-            metadata=SchemaMetadata(
+        self.schema = Schema(
+            dataset_metadata=DatasetMetadata(
                 layer=layer,
                 domain=domain,
                 dataset=dataset,
                 version=version,
-                sensitivity=Sensitivity.PRIVATE,
             ),
-            columns=[
-                Column(
-                    name="colname2",
-                    data_type="string",
-                    allow_null=True,
+            sensitivity=Sensitivity.PRIVATE,
+            columns={
+                "colname2": Column(
                     partition_index=None,
-                )
-            ],
+                    dtype="string",
+                    nullable=True,
+                ),
+                "colname2": Column(
+                    partition_index=None,
+                    dtype="string",
+                    nullable=True,
+                ),
+            },
         )
 
         self.persistence_adapter.upload_partitioned_data(
@@ -139,11 +142,10 @@ class TestS3AdapterUpload:
         self.mock_s3_client.put_object.assert_has_calls(calls)
 
     def test_raw_data_upload(self):
-        schema_metadata = SchemaMetadata(
+        schema_metadata = DatasetMetadata(
             layer="raw",
             domain="some",
             dataset="values",
-            sensitivity="PUBLIC",
             version=2,
         )
 

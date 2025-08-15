@@ -15,8 +15,7 @@ from api.common.custom_exceptions import (
     UserError,
 )
 from api.domain.dataset_metadata import DatasetMetadata
-from api.domain.schema import Schema, Column
-from api.domain.schema_metadata import Owner, SchemaMetadata
+from api.domain.schema import Schema, Column, Owner
 
 
 class TestUploadSchema:
@@ -30,27 +29,25 @@ class TestUploadSchema:
             self.protected_domain_service,
         )
         self.valid_schema = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
-                sensitivity="PUBLIC",
-                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            sensitivity="PUBLIC",
+            owners=[Owner(name="owner", email="owner@email.com")],
+            columns={
+                "colname1": Column(
                     partition_index=0,
                     data_type="int",
                     allow_null=False,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=None,
                     data_type="string",
                     allow_null=True,
                 ),
-            ],
+            },
         )
 
     def test_upload_schema(self):
@@ -87,21 +84,20 @@ class TestUploadSchema:
 
     def test_check_for_protected_domain_success(self):
         schema = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="domain",
                 dataset="dataset",
-                sensitivity="PROTECTED",
-                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            sensitivity="PROTECTED",
+            owners=[Owner(name="owner", email="owner@email.com")],
+            columns={
+                "colname1": Column(
                     partition_index=0,
                     data_type="int",
                     allow_null=True,
-                ),
-            ],
+                ), 
+            },
         )
         self.protected_domain_service.list_protected_domains = Mock(
             return_value=["domain", "other"]
@@ -114,21 +110,20 @@ class TestUploadSchema:
 
     def test_check_for_protected_domain_fails(self):
         schema = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="domain1",
                 dataset="dataset2",
-                sensitivity="PROTECTED",
-                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            sensitivity="PROTECTED",
+            owners=[Owner(name="owner", email="owner@email.com")],
+            columns={
+                "colname1": Column(
                     partition_index=0,
                     data_type="int",
                     allow_null=True,
                 ),
-            ],
+            },
         )
         self.protected_domain_service.list_protected_domains = Mock(
             return_value=["other"]
@@ -150,21 +145,20 @@ class TestUploadSchema:
 
         invalid_partition_index = -1
         invalid_schema = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
-                sensitivity="PUBLIC",
-                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            sensitivity="PUBLIC",
+            owners=[Owner(name="owner", email="owner@email.com")],
+            columns={
+                "colname1": Column(
                     partition_index=invalid_partition_index,
                     data_type="int",
                     allow_null=True,
                 )
-            ],
+            },
         )
 
         with pytest.raises(SchemaValidationError):
@@ -182,78 +176,73 @@ class TestUpdateSchema:
             self.protected_domain_service,
         )
         self.valid_schema = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="testdomain",
                 dataset="testdataset",
-                sensitivity="PUBLIC",
                 version=1,
-                owners=[Owner(name="owner", email="owner@email.com")],
-                key_value_tags={"key1": "val1", "testkey2": "testval2"},
-                key_only_tags=["ktag1", "ktag2"],
-                update_behaviour="APPEND",
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            sensitivity="PUBLIC",
+            owners=[Owner(name="owner", email="owner@email.com")],
+            key_value_tags={"key1": "val1", "testkey2": "testval2"},
+            key_only_tags=["ktag1", "ktag2"],
+            update_behaviour="APPEND",
+            columns={
+                "colname1": Column(
                     partition_index=0,
                     data_type="int",
                     allow_null=False,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=None,
                     data_type="string",
                     allow_null=True,
                 ),
-            ],
+            },
         )
         self.valid_updated_schema = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="testdomain",
                 dataset="testdataset",
-                sensitivity="PUBLIC",
-                owners=[Owner(name="owner", email="owner@email.com")],
-                key_value_tags={"key1": "val1", "testkey2": "testval2"},
-                key_only_tags=["ktag1", "ktag2"],
-                update_behaviour="APPEND",
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            sensitivity="PUBLIC",
+            owners=[Owner(name="owner", email="owner@email.com")],
+            key_value_tags={"key1": "val1", "testkey2": "testval2"},
+            key_only_tags=["ktag1", "ktag2"],
+            update_behaviour="APPEND",
+            columns={
+                "colname1": Column(
                     partition_index=0,
                     data_type="double",
                     allow_null=False,
                 ),
-                Column(
-                    name="colname_new",
+                "colname_new": Column(
                     partition_index=None,
                     data_type="string",
                     allow_null=True,
                 ),
-            ],
+            },
         )
 
     def test_update_schema_throws_error_when_schema_invalid(self):
         invalid_partition_index = -1
         invalid_schema = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
-                sensitivity="PUBLIC",
                 version=1,
-                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            sensitivity="PUBLIC",
+            owners=[Owner(name="owner", email="owner@email.com")],
+            columns={
+                "colname1": Column(
                     partition_index=invalid_partition_index,
                     data_type="int",
                     allow_null=True,
-                )
-            ],
+                ),
+            },
         )
         self.schema_service.get_schema = Mock(return_value=self.valid_schema)
 
@@ -343,30 +332,32 @@ class TestGetSchema:
             self.glue_adapter,
             self.protected_domain_service,
         )
-        self.metadata = SchemaMetadata(
+        self.metadata = DatasetMetadata(
             layer="raw",
             domain="some",
             dataset="other",
             version=2,
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
         )
 
-        self.columns = [
-            Column(
-                name="colname1",
+        self.columns = {
+            "colname1": Column(
                 partition_index=0,
                 data_type="int",
                 allow_null=False,
             ),
-            Column(
-                name="colname2",
+            "colname2": Column(
                 partition_index=None,
                 data_type="string",
                 allow_null=True,
             ),
-        ]
-        self.schema = Schema(metadata=self.metadata, columns=self.columns)
+        }
+
+        self.schema = Schema(
+            dataset_metadata=self.metadata,
+            sensitivity="PUBLIC",
+            owners=[Owner(name="owner", email="owner@email.com")],
+            columns=self.columns
+        )
 
         self.schema_dict = {
             "layer": "raw",

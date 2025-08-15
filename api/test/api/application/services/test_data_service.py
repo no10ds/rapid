@@ -24,8 +24,7 @@ from api.domain.enriched_schema import (
     EnrichedSchemaMetadata,
     EnrichedColumn,
 )
-from api.domain.schema import Schema, Column
-from api.domain.schema_metadata import Owner, SchemaMetadata
+from api.domain.schema import Schema, Column, Owner
 from api.domain.sql_query import SQLQuery
 
 
@@ -43,28 +42,26 @@ class TestUploadDataset:
             self.schema_service,
         )
         self.valid_schema = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
                 version="2",
-                sensitivity="PUBLIC",
-                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            sensitivity="PUBLIC",
+            owners=[Owner(name="owner", email="owner@email.com")],
+            columns={
+                "colname1": Column(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=True,
+                    dtype="int",
+                    nullable=True,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                 ),
-            ],
+            },
         )
 
     def chunked_dataframe_values(
@@ -388,29 +385,26 @@ class TestUploadDataset:
     ):
         # Given
         schema = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
-                sensitivity="PUBLIC",
                 version=4,
-                owners=[Owner(name="owner", email="owner@email.com")],
-                update_behaviour="OVERWRITE",
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            sensitivity="PUBLIC",
+            owners=[Owner(name="owner", email="owner@email.com")],
+            columns={
+                "colname1": Column(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=True,
+                    dtype="int",
+                    nullable=True,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                 ),
-            ],
+            },
         )
 
         def dataset_chunk():
@@ -565,35 +559,33 @@ class TestDatasetInfoRetrieval:
         self.job_service = Mock()
         self.schema_service = Mock()
         self.valid_schema = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
-                sensitivity="PUBLIC",
                 version=2,
-                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            sensitivity="PUBLIC",
+            owners=[Owner(name="owner", email="owner@email.com")],
+            columns={
+                "colname1": Column(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=True,
                 ),
-                Column(
+                "date": Column(
                     name="date",
                     partition_index=None,
-                    data_type="date",
-                    allow_null=False,
+                    dtype="date",
+                    nullable=False,
                     format="%d/%m/%Y",
                 ),
-            ],
+            },
         )
         self.data_service = DataService(
             self.s3_adapter,
@@ -688,38 +680,34 @@ class TestDatasetInfoRetrieval:
 
     def test_get_schema_information_for_multiple_dates(self):
         valid_schema = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
-                sensitivity="PUBLIC",
                 version=1,
-                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            sensitivity="PUBLIC",
+            owners=[Owner(name="owner", email="owner@email.com")],
+            columns={
+                "colname1": Column(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-                Column(
-                    name="date",
-                    partition_index=None,
-                    data_type="date",
-                    allow_null=False,
+                "date": Column(
+                    partition_inde=None, 
+                    dtype="date",
+                    nullable=False,
                     format="%d/%m/%Y",
                 ),
-                Column(
-                    name="date2",
-                    partition_index=None,
-                    data_type="date",
-                    allow_null=False,
+                "date2": Column(
+                    partition_index=None, 
+                    dtype="date",
+                    nullable=False,
                     format="%d/%m/%Y",
                 ),
-            ],
+            },
         )
-
         expected_schema = EnrichedSchema(
             metadata=EnrichedSchemaMetadata(
                 layer="raw",
@@ -790,22 +778,21 @@ class TestDatasetInfoRetrieval:
 
     def test_get_schema_size_for_datasets_with_no_dates(self):
         valid_schema = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
-                sensitivity="PUBLIC",
                 version=3,
-                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            sensitivity="PUBLIC",
+            owners=[Owner(name="owner", email="owner@email.com")],
+            columns={
+                "colname1": Column(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=False,
-                )
-            ],
+                    dtype="int",
+                    nullable=False,
+                ),
+            },
         )
         expected_schema = EnrichedSchema(
             metadata=EnrichedSchemaMetadata(

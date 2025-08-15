@@ -12,8 +12,8 @@ from api.common.custom_exceptions import (
     SchemaNotFoundError,
     AWSServiceError,
 )
-from api.domain.schema import Schema, Column
-from api.domain.schema_metadata import Owner, SchemaMetadata
+from api.domain.schema import Schema, Column, Owner
+from api.domain.dataset_metadata import DatasetMetadata
 from api.common.config.constants import BASE_API_PATH
 from test.api.common.controller_test_utils import BaseClientTest
 
@@ -46,8 +46,8 @@ class TestSchemaUpload(BaseClientTest):
                 {
                     "name": "colname1",
                     "partition_index": None,
-                    "data_type": "number",
-                    "allow_null": True,
+                    "dtype": "number",
+                    "nullable": True,
                 },
             ],
         }
@@ -124,46 +124,42 @@ class TestSchemaUpload(BaseClientTest):
                 "key_value_tags": {"tag1": "value1", "tag2": "value2"},
                 "key_only_tags": ["tag3", "tag4"],
             },
-            "columns": [
-                {
-                    "name": "colname1",
+            "columns": {
+                "colname1": {
                     "partition_index": None,
-                    "data_type": "number",
-                    "allow_null": True,
+                    "dtype": "number",
+                    "nullable": True,
                 },
-                {
-                    "name": "colname2",
+                "colname2": {
                     "partition_index": 0,
-                    "data_type": "str",
-                    "allow_null": False,
+                    "dtype": "str",
+                    "nullable": False,
                 },
-            ],
+            },
         }
         expected_schema = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="some",
                 dataset="thing",
-                sensitivity="PUBLIC",
                 version=1,
-                key_value_tags={"tag1": "value1", "tag2": "value2"},
-                key_only_tags=["tag3", "tag4"],
-                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            sensitivity="PUBLIC",
+            key_value_tags={"tag1": "value1", "tag2": "value2"},
+            key_only_tags=["tag3", "tag4"],
+            owners=[Owner(name="owner", email="owner@email.com")],
+            columns={
+                "colname1": Column(
                     partition_index=None,
-                    data_type="number",
-                    allow_null=True,
+                    dtype="number",
+                    nullable=True,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=0,
-                    data_type="str",
-                    allow_null=False,
+                    dtype="str",
+                    nullable=False,
                 ),
-            ],
+            },
         )
         return request_body, expected_schema
 
@@ -217,8 +213,8 @@ class TestSchemaUpdate(BaseClientTest):
                 {
                     "name": "colname1",
                     "partition_index": None,
-                    "data_type": "number",
-                    "allow_null": True,
+                    "dtype": "number",
+                    "nullable": True,
                 },
             ],
         }
@@ -295,45 +291,42 @@ class TestSchemaUpdate(BaseClientTest):
                 "key_value_tags": {"tag1": "value1", "tag2": "value2"},
                 "key_only_tags": ["tag3", "tag4"],
             },
-            "columns": [
-                {
-                    "name": "colname1",
+            "columns": {
+                "colname1": {
                     "partition_index": None,
-                    "data_type": "number",
-                    "allow_null": True,
+                    "dtype": "number",
+                    "nullable": True,
                 },
-                {
-                    "name": "colname2",
+                "colname2": {
                     "partition_index": 0,
-                    "data_type": "str",
-                    "allow_null": False,
+                    "dtype": "str",
+                    "nullable": False,
                 },
-            ],
+            },
         }
         expected_schema = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="some",
                 dataset="thing",
-                sensitivity="PUBLIC",
-                key_value_tags={"tag1": "value1", "tag2": "value2"},
-                key_only_tags=["tag3", "tag4"],
-                owners=[Owner(name="owner", email="owner@email.com")],
+                version=None,
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            sensitivity="PUBLIC",
+            key_value_tags={"tag1": "value1", "tag2": "value2"},
+            key_only_tags=["tag3", "tag4"],
+            owners=[Owner(name="owner", email="owner@email.com")],
+            columns={
+                "colname1": Column(
                     partition_index=None,
-                    data_type="number",
-                    allow_null=True,
+                    dtype="number",
+                    nullable=True,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=0,
-                    data_type="str",
-                    allow_null=False,
+                    dtype="str",
+                    nullable=False,
                 ),
-            ],
+            },
         )
         return request_body, expected_schema
 
@@ -367,29 +360,27 @@ class TestSchemaGeneration(BaseClientTest):
         self, mock_generate_uuid, mock_store_file_to_disk, mock_infer_schema
     ):
         expected_response = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="mydomain",
                 dataset="mydataset",
-                sensitivity="PUBLIC",
-                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            sensitivity="PUBLIC",
+            owners=[Owner(name="owner", email="owner@email.com")],
+            columns={
+                "colname1": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                     format=None,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=None,
-                    data_type="int",
-                    allow_null=True,
+                    dtype="int",
+                    nullable=True,
                     format=None,
                 ),
-            ],
+            },
         )
         file_content = b"colname1,colname2\nsomething,123\notherthing,456\n\n"
         file_name = "filename.csv"
@@ -421,29 +412,27 @@ class TestSchemaGeneration(BaseClientTest):
         self, mock_generate_uuid, mock_store_file_to_disk, mock_infer_schema
     ):
         expected_response = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="mydomain",
                 dataset="mydataset",
-                sensitivity="PUBLIC",
-                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            sensitivity="PUBLIC",
+            owners=[Owner(name="owner", email="owner@email.com")],
+            columns={
+                "colname1": Column(
                     partition_index=None,
-                    data_type="object",
-                    allow_null=True,
+                    dtype="object",
+                    nullable=True,
                     format=None,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=None,
-                    data_type="Int64",
-                    allow_null=True,
+                    dtype="Int64",
+                    nullable=True,
                     format=None,
                 ),
-            ],
+            },
         )
         file_content = b"colname1,colname2\nsomething,123\notherthing,456\n\n"
         file_name = "filename.parquet"

@@ -16,7 +16,6 @@ from api.common.custom_exceptions import (
 )
 from api.domain.dataset_metadata import DatasetMetadata
 from api.domain.schema import Schema, Column
-from api.domain.schema_metadata import SchemaMetadata
 
 
 class TestGlueAdapterTableMethods:
@@ -29,28 +28,26 @@ class TestGlueAdapterTableMethods:
             "GLUE_CATALOGUE_DB_NAME",
         )
         self.valid_schema = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="layer",
                 domain="domain",
                 dataset="dataset",
                 version=1,
-                description="description",
-                sensitivity="PUBLIC",
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            sensitivity="PUBLIC",
+            description="description",
+            columns={
+                "colname1": Column(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=True,
+                    dtype="int",
+                    nullable=True,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                 ),
-            ],
+            },
         )
 
     def test_create_table(self):

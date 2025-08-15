@@ -101,7 +101,7 @@ class DataService:
             self.validate_incoming_data(schema, file_path, raw_file_identifier)
             self.job_service.update_step(job, UploadStep.RAW_DATA_UPLOAD)
             self.s3_adapter.upload_raw_data(
-                schema.metadata, file_path, raw_file_identifier
+                schema.dataset_metadata, file_path, raw_file_identifier
             )
             self.job_service.update_step(job, UploadStep.DATA_UPLOAD)
             self.process_chunks(schema, file_path, raw_file_identifier)

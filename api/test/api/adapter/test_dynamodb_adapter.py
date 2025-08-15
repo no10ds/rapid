@@ -17,8 +17,7 @@ from api.domain.dataset_filters import DatasetFilters
 from api.domain.dataset_metadata import DatasetMetadata
 from api.domain.permission_item import PermissionItem
 from api.domain.subject_permissions import SubjectPermissions
-from api.domain.schema import Column, Schema
-from api.domain.schema_metadata import SchemaMetadata, Owner
+from api.domain.schema import Column, Schema, Owner
 
 
 class TestDynamoDBAdapterGeneric:
@@ -1000,31 +999,29 @@ class TestDynamoDBAdapterSchemaTable:
         self.dynamo_adapter = DynamoDBAdapter(self.dynamo_data_source)
 
         self.schema = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
                 version=2,
-                sensitivity="PUBLIC",
-                description="This is a test schema",
-                owners=[Owner(name="owner", email="owner@email.com")],
-                key_only_tags=["key"],
-                key_value_tags={"key": "value"},
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            sensitivity="PUBLIC",
+            description="This is a test schema",
+            owners=[Owner(name="owner", email="owner@email.com")],
+            key_only_tags=["key"],
+            key_value_tags={"key": "value"},
+            columns={
+                "colname1": Column(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-            ],
+            },
         )
 
     def test_store_schema(self):

@@ -8,8 +8,8 @@ from api.application.services.partitioning_service import (
     drop_columns,
     generate_partitioned_data,
 )
-from api.domain.schema import Column, Schema
-from api.domain.schema_metadata import Owner, SchemaMetadata
+from api.domain.schema import Column, Schema, Owner
+from api.domain.dataset_metadata import DatasetMetadata
 
 
 class TestPartitioningUtilities:
@@ -46,33 +46,30 @@ class TestPartitioning:
         column_dtype = "Int64"
 
         schema = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="test_domain",
                 dataset="test_dataset",
-                sensitivity="PUBLIC",
-                owners=[Owner(name="change_me", email="change_me@email.com")],
             ),
-            columns=[
-                Column(
-                    name="col1",
+            sensitivity="PUBLIC",
+            owners=[Owner(name="change_me", email="change_me@email.com")],
+            columns={
+                "col1": Column(
                     partition_index=0,
-                    data_type=column_dtype,
-                    allow_null=False,
+                    dtype=column_dtype,
+                    nullable=False,
                 ),
-                Column(
-                    name="col2",
+                "col2": Column(
                     partition_index=None,
-                    data_type=column_dtype,
-                    allow_null=True,
+                    dtype=column_dtype,
+                    nullable=True,
                 ),
-                Column(
-                    name="col3",
+                "col3": Column(
                     partition_index=1,
-                    data_type=column_dtype,
-                    allow_null=False,
+                    dtype=column_dtype,
+                    nullable=False,
                 ),
-            ],
+            },
         )
 
         df = pd.DataFrame(
@@ -115,27 +112,25 @@ class TestPartitioning:
         column_dtype = "Int64"
 
         schema = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="test_domain",
                 dataset="test_dataset",
-                sensitivity="PUBLIC",
-                owners=[Owner(name="change_me", email="change_me@email.com")],
             ),
-            columns=[
-                Column(
-                    name="col1",
+            sensitivity="PUBLIC",
+            owners=[Owner(name="change_me", email="change_me@email.com")],
+            columns={
+                "col1": Column(
                     partition_index=0,
-                    data_type=column_dtype,
-                    allow_null=False,
+                    dtype=column_dtype,
+                    nullable=False,
                 ),
-                Column(
-                    name="col2",
+                "col2": Column(
                     partition_index=None,
-                    data_type=column_dtype,
-                    allow_null=True,
+                    dtype=column_dtype,
+                    nullable=True,
                 ),
-            ],
+            },
         )
 
         df = pd.DataFrame({"col1": [1, 1, 2, 2], "col2": [4, 5, 6, 2]})
@@ -156,27 +151,25 @@ class TestPartitioning:
         column_dtype = "int"
 
         schema = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="test_domain",
                 dataset="test_dataset",
-                sensitivity="PUBLIC",
-                owners=[Owner(name="change_me", email="change_me@email.com")],
             ),
-            columns=[
-                Column(
-                    name="col1",
+            sensitivity="PUBLIC",
+            owners=[Owner(name="change_me", email="change_me@email.com")],
+            columns={
+                "col1": Column(
                     partition_index=None,
-                    data_type=column_dtype,
-                    allow_null=False,
+                    dtype=column_dtype,
+                    nullable=False,
                 ),
-                Column(
-                    name="col2",
+                "col2": Column(
                     partition_index=None,
-                    data_type=column_dtype,
-                    allow_null=True,
+                    dtype=column_dtype,
+                    nullable=True,
                 ),
-            ],
+            },
         )
 
         df = pd.DataFrame({"col1": [1, 1, 2, 2], "col2": [4, 5, 6, 2]})

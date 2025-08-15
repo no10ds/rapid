@@ -10,8 +10,8 @@ import pytest
 
 from api.application.services.schema_infer_service import SchemaInferService
 from api.common.custom_exceptions import UserError
-from api.domain.schema import Schema, Column
-from api.domain.schema_metadata import Owner, SchemaMetadata
+from api.domain.schema import Schema, Column, Owner
+from api.domain.dataset_metadata import DatasetMetadata
 
 
 class TestSchemaInfer:
@@ -20,43 +20,39 @@ class TestSchemaInfer:
 
     def test_infer_schema(self):
         expected_schema = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="mydomain",
                 dataset="mydataset",
-                sensitivity="PUBLIC",
-                owners=[Owner(name="change_me", email="change_me@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
-                    partition_index=None,
+            sensitivity="PUBLIC",
+            owners=[Owner(name="change_me", email="change_me@email.com")],
+            columns={
+                "colname1": Column(
+                    partition_index=0,
                     data_type="string",
                     allow_null=True,
                     format=None,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=None,
                     data_type="int",
                     allow_null=True,
                     format=None,
                 ),
-                Column(
-                    name="col_name_3",
+                "col_name_3": Column(
                     partition_index=None,
                     data_type="int",
                     allow_null=True,
                     format=None,
                 ),
-                Column(
-                    name="colname_4",
+                "colname_4": Column(
                     partition_index=None,
                     data_type="boolean",
                     allow_null=True,
                     format=None,
                 ),
-            ],
+            },
         ).dict(exclude={"metadata": {"version"}})
         file_content = b"colname1,colname2,Col name 3,Col/name 4! \nsomething,123,1,True\notherthing,123,3,False\n\n"
         temp_out_path = tempfile.mkstemp(suffix=".csv")[1]
@@ -72,29 +68,27 @@ class TestSchemaInfer:
 
     def test_infer_schema_with_date(self):
         expected_schema = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="mydomain",
                 dataset="mydataset",
-                sensitivity="PUBLIC",
-                owners=[Owner(name="change_me", email="change_me@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
-                    partition_index=None,
+            sensitivity="PUBLIC",
+            owners=[Owner(name="change_me", email="change_me@email.com")],
+            columns={
+                "colname1": Column(
+                    partition_index=0,
                     data_type="string",
                     allow_null=True,
                     format=None,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=None,
                     data_type="date",
                     allow_null=True,
                     format="%Y-%m-%d",
                 ),
-            ],
+            },
         ).dict(exclude={"metadata": {"version"}})
         df = pd.DataFrame(data={"colname1": ["something"], "colname2": ["2021-01-01"]})
         df["colname2"] = pd.to_datetime(df["colname2"])

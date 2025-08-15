@@ -14,10 +14,8 @@ from api.common.custom_exceptions import (
     UserError,
 )
 from api.common.logger import AppLogger
-from api.domain.schema import Schema, COLUMNS
-from api.domain.schema_metadata import SchemaMetadata
+from api.domain.schema import Schema
 from api.domain.dataset_metadata import DatasetMetadata
-
 from api.domain.dataset_filters import DatasetFilters
 from api.common.config.auth import Sensitivity
 
@@ -48,19 +46,19 @@ class SchemaService:
 
         return self._parse_schema(schema_dict)
 
-    # TODO Pandera: parse schema with pandera?
+    # TODO Pandera: parse schema with pandera/sort this out?
     def _parse_schema(self, schema: dict, only_metadata: bool = False):
-        metadata = SchemaMetadata.parse_obj(schema)
+        metadata = Schema.metadata.parse_obj(schema)
         if only_metadata:
             return metadata
         return Schema(
             metadata=metadata,
-            columns=[],
+            columns= schema.columns.items(),
         )
 
     def get_schema_metadatas(
         self, query: DatasetFilters = DatasetFilters()
-    ) -> List[SchemaMetadata]:
+    ) -> List[Schema]:
         schemas = self.dynamodb_adapter.get_latest_schemas(query)
         if schemas:
             return [
@@ -138,8 +136,8 @@ class SchemaService:
     def check_for_sensitivity_consistency(
         self, original_schema: Schema, schema: Schema
     ):
-        original_sensitivity = original_schema.metadata.get_sensitivity()
-        new_sensitivity = schema.metadata.get_sensitivity()
+        original_sensitivity = original_schema.get_sensitivity()
+        new_sensitivity = schema.get_sensitivity()
         if original_sensitivity != new_sensitivity:
             raise UserError(
                 f"The sensitivity of this updated schema [{new_sensitivity}] does not match"

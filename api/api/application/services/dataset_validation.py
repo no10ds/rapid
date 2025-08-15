@@ -15,7 +15,7 @@ from api.domain.data_types import (
 )
 from api.domain.schema import Schema
 from api.domain.validation_context import ValidationContext
-from api.domain.schema import is_of_data_type
+from api.domain.schema import Column
 
 
 def build_validated_dataframe(schema: Schema, dataframe: pd.DataFrame) -> pd.DataFrame:
@@ -54,7 +54,7 @@ def convert_date_columns(
     for column in schema.get_columns_by_type(DateType):
         try:
             data_frame[column.name] = pd.to_datetime(
-                data_frame[column.name], format=column.metadata.get("format")
+                data_frame[column.name], format=column.format
             )
         except ValueError:
             error_list.append(
@@ -71,7 +71,7 @@ def dataset_has_no_illegal_characters_in_partition_columns(
     error_list = []
     for column in schema.get_partition_columns():
         series = data_frame[column.name]
-        if not is_of_data_type(column, DateType) and series.dtype == object:
+        if not column.is_of_data_type(DateType) and series.dtype == object:
             any_illegal_characters = any(
                 [value is True for value in series.str.contains("/")]
             )

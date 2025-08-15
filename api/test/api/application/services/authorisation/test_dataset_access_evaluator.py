@@ -11,7 +11,6 @@ from api.common.custom_exceptions import AuthorisationError
 from api.domain.dataset_filters import DatasetFilters
 from api.domain.dataset_metadata import DatasetMetadata
 from api.domain.permission_item import PermissionItem
-from api.domain.schema_metadata import SchemaMetadata
 from api.domain.schema import Schema
 
 
@@ -171,7 +170,7 @@ class TestDatasetAccessEvaluator:
         [
             # 0. Success: All criteria overlap directly
             (
-                SchemaMetadata(
+                Schema(
                     layer="raw",
                     domain="test",
                     dataset="dataset",
@@ -184,7 +183,7 @@ class TestDatasetAccessEvaluator:
             ),
             # 1. Success: All criteria overlap directly with protected domain
             (
-                SchemaMetadata(
+                Schema(
                     layer="raw",
                     domain="test",
                     dataset="dataset",
@@ -201,7 +200,7 @@ class TestDatasetAccessEvaluator:
             ),
             # 2. Success: All criteria inherit overlaps
             (
-                SchemaMetadata(
+                Schema(
                     layer="raw",
                     domain="test",
                     dataset="dataset",
@@ -217,7 +216,7 @@ class TestDatasetAccessEvaluator:
             ),
             # 3. Failure: Sensitivity does not overlap
             (
-                SchemaMetadata(
+                Schema(
                     layer="raw",
                     domain="test",
                     dataset="dataset",
@@ -230,7 +229,7 @@ class TestDatasetAccessEvaluator:
             ),
             # 4. Failure: Layer does not overlap
             (
-                SchemaMetadata(
+                Schema(
                     layer="raw",
                     domain="test",
                     dataset="dataset",
@@ -246,7 +245,7 @@ class TestDatasetAccessEvaluator:
             ),
             # 5. Failure: Is protected and domain does not overlap
             (
-                SchemaMetadata(
+                Schema(
                     layer="raw",
                     domain="test_fail",
                     dataset="dataset",
@@ -264,10 +263,10 @@ class TestDatasetAccessEvaluator:
         ],
     )
     def test_schema_metadata_overlaps_with_permission(
-        self, metadata: SchemaMetadata, permission: PermissionItem, expected: bool
+        self, schema: Schema, permission: PermissionItem, expected: bool
     ):
         res = self.evaluator.schema_metadata_overlaps_with_permission(
-            metadata, permission
+            schema, permission
         )
         assert res == expected
 
@@ -320,13 +319,13 @@ class TestDatasetAccessEvaluator:
             ),
         ]
         schema = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="test_fail",
-                sensitivity="PRIVATE",
                 dataset="dataset",
             ),
-            columns=[],
+            sensitivity="PRIVATE",
+            columns={},
         )
 
         self.permission_service.get_subject_permissions = Mock(
@@ -361,13 +360,13 @@ class TestDatasetAccessEvaluator:
             ),
         ]
         schema = Schema(
-            metadata=SchemaMetadata(
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="test_fail",
                 dataset="dataset",
-                sensitivity="PRIVATE",
             ),
-            columns=[],
+            sensitivity="PRIVATE",
+            columns={},
         )
 
         self.permission_service.get_subject_permissions = Mock(

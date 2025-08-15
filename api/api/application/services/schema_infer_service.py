@@ -16,8 +16,9 @@ from api.common.data_handlers import (
 from api.common.value_transformers import clean_column_name
 
 from api.domain.data_types import is_date_type
-from api.domain.schema import Schema
-from api.domain.schema_metadata import Owner, SchemaMetadata
+from api.domain.schema import Column, Schema
+from api.domain.schema import Owner
+from api.domain.dataset_metadata import DatasetMetadata
 
 DEFAULT_DATE_FORMAT = "%Y-%m-%d"
 
@@ -34,50 +35,51 @@ class SchemaInferService:
         dataframe = self._construct_single_chunk_dataframe(file_path)
         
         pandera_schema = pandera.infer_schema(dataframe)
-        # TODO Pandera: infer whole schema with pandera
         customized_columns = self._customize_inferred_columns(pandera_schema.columns)
         
-        schema = Schema(
-            metadata=SchemaMetadata(
-                layer=layer,
-                domain=domain,
-                dataset=dataset,
-                sensitivity=sensitivity,
-                owners=[Owner(name="change_me", email="change_me@email.com")],
-            ),
-            columns=customized_columns,
+        dataset_metadata = DatasetMetadata(
+            layer=layer,
+            domain=domain,
+            dataset=dataset,
         )
+        
+        schema = Schema(
+            dataset_metadata=dataset_metadata,
+            columns=customized_columns,
+            sensitivity=sensitivity,
+            owners=[Owner(name="change_me", email="change_me@email.com")],
+        )
+        
         try:
             validate_schema(schema)
         finally:
             # We need to delete the incoming file from the local file system
             # regardless of the schema validation was successful or not
             delete_incoming_raw_file(schema, file_path)
-        schema_json = schema.json(exclude={"metadata": {"version"}})
-        return json.loads(schema_json)
+        
+        schema_json = schema.to_json(exclude={"metadata": {"version"}})
 
-    def _customize_inferred_columns(self, inferred_columns: Dict[str, pandera.Column]) -> List[pandera.Column]:
-        customized = []
+        return schema.to_dict()
+
+    def _customize_inferred_columns(self, inferred_columns: Dict[str, Column]) -> Dict[str, Column]:
+        customized = {}
         
         for name, column in inferred_columns.items():
-            custom_column = pandera.Column(
-                name=clean_column_name(name),  
+            clean_name = clean_column_name(name)
+            customized[clean_name] = Column(
                 dtype=column.dtype,          
                 nullable=True,                
-                unique=False,                      
-                metadata={
-                    "format": DEFAULT_DATE_FORMAT if is_date_type(column.dtype) else None,
-                    "partition_index": None,
-                },
+                unique=False, 
+                format=DEFAULT_DATE_FORMAT if is_date_type(column.dtype) else None,                     
+                partition_index=None,
             )
-            customized.append(custom_column)
         
         return customized
 
     def _construct_single_chunk_dataframe(self, file_path: Path) -> pd.DataFrame:
         try:
             for chunk in construct_chunked_dataframe(file_path):
-                # We only validate a schema based on the frist chunk
+                # We only validate a schema based on the first chunk
                 return get_dataframe_from_chunk_type(chunk)
         except ValueError as error:
             raise UserError(
@@ -86,19 +88,3 @@ class SchemaInferService:
 
     def _clean_error(self, error_message: str) -> str:
         return error_message.replace("\n", "")
-
-    # TODO Pandera: remove
-    # def _infer_columns(self, dataframe: pd.DataFrame) -> List[pandera.Column]:
-    #     return [
-    #         pandera.Column(
-    #             name=clean_column_name(name),
-    #             dtype=dataframe[name].dtype,
-    #             nullable=True,
-    #             unique=False,
-    #             metadata={
-    #                 "format": DEFAULT_DATE_FORMAT if is_date_type(dataframe[name].dtype) else None,
-    #                 "partition_index": None,
-    #             },
-    #         )
-    #         for name in dataframe.columns
-    #     ]
