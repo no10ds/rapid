@@ -15,7 +15,7 @@ from api.common.data_handlers import (
 )
 from api.common.value_transformers import clean_column_name
 
-from api.domain.data_types import is_date_type
+from api.domain.data_types import convert_pandera_column_to_athena, is_date_type
 from api.domain.schema import Column, Schema
 from api.domain.schema import Owner
 from api.domain.dataset_metadata import DatasetMetadata
@@ -56,21 +56,20 @@ class SchemaInferService:
             # We need to delete the incoming file from the local file system
             # regardless of the schema validation was successful or not
             delete_incoming_raw_file(schema, file_path)
-        
-        schema_json = schema.to_json(exclude={"metadata": {"version"}})
+        return schema.dict(exclude={"metadata": {"version"}})
 
-        return schema.to_dict()
-
-    def _customize_inferred_columns(self, inferred_columns: Dict[str, Column]) -> Dict[str, Column]:
+    def _customize_inferred_columns(self, inferred_columns: Dict[str, pandera.Column]) -> Dict[str, Column]:
         customized = {}
         
-        for name, column in inferred_columns.items():
+        for name, pandera_column in inferred_columns.items():
             clean_name = clean_column_name(name)
+            athena_dtype = convert_pandera_column_to_athena(pandera_column.dtype)
+            
             customized[clean_name] = Column(
-                dtype=column.dtype,          
+                dtype=athena_dtype,          
                 nullable=True,                
                 unique=False, 
-                format=DEFAULT_DATE_FORMAT if is_date_type(column.dtype) else None,                     
+                format=DEFAULT_DATE_FORMAT if is_date_type(athena_dtype) else None,                     
                 partition_index=None,
             )
         

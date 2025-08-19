@@ -1,7 +1,7 @@
 import uuid
 from pathlib import Path
 from threading import Thread
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 import pandas as pd
 
@@ -187,13 +187,15 @@ class DataService:
         )
         return last_updated or "Never updated"
 
-    def get_dataset_info(self, dataset: DatasetMetadata):
+    def get_dataset_info(self, dataset: DatasetMetadata) -> EnrichedSchema:
         schema = self.schema_service.get_schema(dataset)
         statistics_dataframe = self.athena_adapter.query(
             dataset, self._build_query(schema)
         )
         last_updated = self.get_last_updated_time(dataset)
-        return self._enrich_schema(schema, statistics_dataframe, last_updated)
+        return self._enrich_schema(
+            schema, statistics_dataframe, last_updated
+        )
 
 
     def upload_data(
@@ -282,22 +284,24 @@ class DataService:
         return SQLQuery(select_columns=columns_to_query)
 
     def _enrich_schema(
-        self, schema: Schema, statistics_dataframe: pd.DataFrame, last_updated: str
+    self, schema: Schema, statistics_dataframe: pd.DataFrame, last_updated: str
     ) -> EnrichedSchema:
         dataset_size = statistics_dataframe.at[0, "data_size"]
         return EnrichedSchema(
-            **schema.dataset_metadata.dict(),
+            dataset_metadata=schema.dataset_metadata,  
+            sensitivity=schema.get_sensitivity(),       
+            owners=schema.get_owners(),                
+            columns=self._enrich_columns(schema, statistics_dataframe),
             number_of_rows=dataset_size,
             number_of_columns=len(schema.columns.values()),
             last_updated=last_updated,
-            columns=self._enrich_columns(schema, statistics_dataframe),
         )
 
     def _enrich_columns(
         self, schema: Schema, statistics_dataframe: pd.DataFrame
-    ) -> List[EnrichedColumn]:
+    ) -> Dict[str, EnrichedColumn]:
         strftime_format = "%Y-%m-%d"
-        enriched_columns = []
+        enriched_columns = {}
         date_columns = schema.get_columns_by_type(DateType)
         for name, column in schema.columns.items():
             statistics = None
@@ -310,7 +314,14 @@ class DataService:
                         strftime_format
                     ),
                 }
-            enriched_columns.append(
-                EnrichedColumn(**column.to_dict(), statistics=statistics)
+            
+            enriched_columns[name] = EnrichedColumn(
+                dtype=column.dtype,
+                nullable=column.nullable,
+                partition_index=column.partition_index,
+                format=column.format,
+                unique=getattr(column, 'unique', False),
+                statistics=statistics
             )
+        
         return enriched_columns
