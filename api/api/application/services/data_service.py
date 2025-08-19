@@ -32,10 +32,10 @@ from api.common.logger import AppLogger
 from api.common.utilities import build_error_message_list
 from api.domain.data_types import DateType
 from api.domain.dataset_metadata import DatasetMetadata
-# from api.domain.enriched_schema import (
-#     EnrichedSchema,
-#     EnrichedSchemaMetadata,
-# )
+from api.domain.enriched_schema import (
+    EnrichedSchema,
+    EnrichedColumn
+)
 from api.domain.Jobs.QueryJob import QueryJob, QueryStep
 from api.domain.Jobs.UploadJob import UploadJob, UploadStep
 from api.domain.schema import Schema
@@ -187,18 +187,14 @@ class DataService:
         )
         return last_updated or "Never updated"
 
-    # TODO Pandera: change enriched schema logic
     def get_dataset_info(self, dataset: DatasetMetadata):
-        pass
-        # schema = self.schema_service.get_schema(dataset)
-        # statistics_dataframe = self.athena_adapter.query(
-        #     dataset, self._build_query(schema)
-        # )
-        # last_updated = self.get_last_updated_time(dataset)
-        # return EnrichedSchema(
-        #     metadata=self._enrich_metadata(schema, statistics_dataframe, last_updated),
-        #     columns=self._enrich_columns(schema, statistics_dataframe),
-        # )
+        schema = self.schema_service.get_schema(dataset)
+        statistics_dataframe = self.athena_adapter.query(
+            dataset, self._build_query(schema)
+        )
+        last_updated = self.get_last_updated_time(dataset)
+        return self._enrich_schema(schema, statistics_dataframe, last_updated)
+
 
     def upload_data(
         self,
@@ -285,37 +281,36 @@ class DataService:
         ]
         return SQLQuery(select_columns=columns_to_query)
 
-    # TODO Pandera: change enriched schema logic
-    def _enrich_metadata(
+    def _enrich_schema(
         self, schema: Schema, statistics_dataframe: pd.DataFrame, last_updated: str
-    ):
-        # dataset_size = statistics_dataframe.at[0, "data_size"]
-        # return EnrichedSchemaMetadata(
-        #     **schema.datset_metadata.dict(),
-        #     number_of_rows=dataset_size,
-        #     number_of_columns=len(schema.columns.values()),
-        #     last_updated=last_updated,
-        # )
-        pass
+    ) -> EnrichedSchema:
+        dataset_size = statistics_dataframe.at[0, "data_size"]
+        return EnrichedSchema(
+            **schema.dataset_metadata.dict(),
+            number_of_rows=dataset_size,
+            number_of_columns=len(schema.columns.values()),
+            last_updated=last_updated,
+            columns=self._enrich_columns(schema, statistics_dataframe),
+        )
 
-    # def _enrich_columns(
-    #     self, schema: Schema, statistics_dataframe: pd.DataFrame
-    # ) -> List[EnrichedColumn]:
-    #     strftime_format = "%Y-%m-%d"
-    #     enriched_columns = []
-    #     date_columns = schema.get_columns_by_type(DateType)
-    #     for name, column in schema.columns:
-    #         statistics = None
-    #         if column in date_columns:
-    #             statistics = {
-    #                 "max": statistics_dataframe.at[0, f"max_{name}"].strftime(
-    #                     strftime_format
-    #                 ),
-    #                 "min": statistics_dataframe.at[0, f"min_{name}"].strftime(
-    #                     strftime_format
-    #                 ),
-    #             }
-    #         enriched_columns.append(
-    #             EnrichedColumn(**column.dict(), statistics=statistics)
-    #         )
-    #     return enriched_columns
+    def _enrich_columns(
+        self, schema: Schema, statistics_dataframe: pd.DataFrame
+    ) -> List[EnrichedColumn]:
+        strftime_format = "%Y-%m-%d"
+        enriched_columns = []
+        date_columns = schema.get_columns_by_type(DateType)
+        for name, column in schema.columns.items():
+            statistics = None
+            if column in date_columns:
+                statistics = {
+                    "max": statistics_dataframe.at[0, f"max_{name}"].strftime(
+                        strftime_format
+                    ),
+                    "min": statistics_dataframe.at[0, f"min_{name}"].strftime(
+                        strftime_format
+                    ),
+                }
+            enriched_columns.append(
+                EnrichedColumn(**column.to_dict(), statistics=statistics)
+            )
+        return enriched_columns

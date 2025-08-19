@@ -86,7 +86,7 @@ class TestDataUpload(BaseClientTest):
         mock_get_subject_id,
         mock_store_file_to_disk,
         mock_upload_dataset,
-        mock_construct_datset_metadata,
+        mock_construct_dataset_metadata,
     ):
         file_content = b"some,content"
         incoming_file_path = Path("filename.csv")
@@ -94,7 +94,7 @@ class TestDataUpload(BaseClientTest):
         raw_file_identifier = "123-456-789"
         subject_id = "subject_id"
         job_id = "abc-123"
-        mock_construct_datset_metadata.return_value = DatasetMetadata(
+        mock_construct_dataset_metadata.return_value = DatasetMetadata(
             "layer", "domain", "dataset", 14
         )
         mock_get_subject_id.return_value = subject_id
@@ -138,7 +138,7 @@ class TestDataUpload(BaseClientTest):
         mock_get_subject_id,
         mock_store_file_to_disk,
         mock_upload_dataset,
-        mock_construct_datset_metadata,
+        mock_construct_dataset_metadata,
     ):
         file_content = b"some,content"
         incoming_file_path = Path("filename.parquet")
@@ -146,7 +146,7 @@ class TestDataUpload(BaseClientTest):
         raw_file_identifier = "123-456-789"
         subject_id = "subject_id"
         job_id = "abc-123"
-        mock_construct_datset_metadata.return_value = DatasetMetadata(
+        mock_construct_dataset_metadata.return_value = DatasetMetadata(
             "layer", "domain", "dataset", 14
         )
 
