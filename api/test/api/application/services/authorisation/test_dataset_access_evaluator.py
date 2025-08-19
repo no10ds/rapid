@@ -166,15 +166,18 @@ class TestDatasetAccessEvaluator:
         assert res == expected
 
     @pytest.mark.parametrize(
-        "metadata, permission, expected",
+        "schema, permission, expected",
         [
             # 0. Success: All criteria overlap directly
             (
                 Schema(
-                    layer="raw",
-                    domain="test",
-                    dataset="dataset",
+                    dataset_metadata=DatasetMetadata(
+                        layer="raw",
+                        domain="test",
+                        dataset="dataset",
+                    ),
                     sensitivity="PUBLIC",
+                    columns={},
                 ),
                 PermissionItem(
                     id="READ_RAW_PUBLIC", type="READ", layer="RAW", sensitivity="PUBLIC"
@@ -184,10 +187,13 @@ class TestDatasetAccessEvaluator:
             # 1. Success: All criteria overlap directly with protected domain
             (
                 Schema(
-                    layer="raw",
-                    domain="test",
-                    dataset="dataset",
+                    dataset_metadata=DatasetMetadata(
+                        layer="raw",
+                        domain="test",
+                        dataset="dataset",
+                    ),
                     sensitivity="PROTECTED",
+                    columns={},
                 ),
                 PermissionItem(
                     id="WRITE_RAW_PROTECTED_TEST",
@@ -201,10 +207,13 @@ class TestDatasetAccessEvaluator:
             # 2. Success: All criteria inherit overlaps
             (
                 Schema(
-                    layer="raw",
-                    domain="test",
-                    dataset="dataset",
+                    dataset_metadata=DatasetMetadata(
+                        layer="raw",
+                        domain="test",
+                        dataset="dataset",
+                    ),
                     sensitivity="PUBLIC",
+                    columns={},
                 ),
                 PermissionItem(
                     id="WRITE_ALL_PRIVATE",
@@ -217,10 +226,13 @@ class TestDatasetAccessEvaluator:
             # 3. Failure: Sensitivity does not overlap
             (
                 Schema(
-                    layer="raw",
-                    domain="test",
-                    dataset="dataset",
+                    dataset_metadata=DatasetMetadata(
+                        layer="raw",
+                        domain="test",
+                        dataset="dataset",
+                    ),
                     sensitivity="PRIVATE",
+                    columns={}
                 ),
                 PermissionItem(
                     id="READ_RAW_PUBLIC", type="READ", layer="RAW", sensitivity="PUBLIC"
@@ -230,10 +242,13 @@ class TestDatasetAccessEvaluator:
             # 4. Failure: Layer does not overlap
             (
                 Schema(
-                    layer="raw",
-                    domain="test",
-                    dataset="dataset",
+                    dataset_metadata=DatasetMetadata(
+                        layer="raw",
+                        domain="test",
+                        dataset="dataset",
+                    ),
                     sensitivity="PRIVATE",
+                    columns={}
                 ),
                 PermissionItem(
                     id="READ_LAYER_PRIVATE",
@@ -246,10 +261,13 @@ class TestDatasetAccessEvaluator:
             # 5. Failure: Is protected and domain does not overlap
             (
                 Schema(
-                    layer="raw",
-                    domain="test_fail",
-                    dataset="dataset",
+                    dataset_metadata=DatasetMetadata(
+                        layer="raw",
+                        domain="test_fail",
+                        dataset="dataset",
+                    ),
                     sensitivity="PROTECTED",
+                    columns={}
                 ),
                 PermissionItem(
                     id="READ_ANY_PROTECTED_TEST",

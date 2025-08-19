@@ -42,14 +42,13 @@ class TestSchemaUpload(BaseClientTest):
     def test_return_400_pydantic_error(self):
         request_body = {
             "metadata": {"tags": {"tag1": "value1", "tag2": "value2"}},
-            "columns": [
-                {
-                    "name": "colname1",
+            "columns": {
+                "colname1": {
                     "partition_index": None,
                     "dtype": "number",
                     "nullable": True,
-                },
-            ],
+                }
+            }
         }
 
         response = self.client.post(
@@ -182,7 +181,7 @@ class TestSchemaUpload(BaseClientTest):
 
         assert response.status_code == 500
         assert response.json() == {"details": "Upload error"}
-        mock_delete_schema_upload.assert_called_once_with(schema.metadata)
+        mock_delete_schema_upload.assert_called_once_with(schema.dataset_metadata)
 
 
 class TestSchemaUpdate(BaseClientTest):
@@ -209,14 +208,13 @@ class TestSchemaUpdate(BaseClientTest):
     def test_return_400_when_request_body_invalid(self):
         request_body = {
             "metadata": {"tags": {"tag1": "value1", "tag2": "value2"}},
-            "columns": [
-                {
-                    "name": "colname1",
+            "columns": {
+                "colname1": {
                     "partition_index": None,
                     "dtype": "number",
                     "nullable": True,
-                },
-            ],
+                }
+            }
         }
 
         response = self.client.put(
@@ -349,7 +347,7 @@ class TestSchemaUpdate(BaseClientTest):
 
         assert response.status_code == 500
         assert response.json() == {"details": "Upload error"}
-        mock_delete_schema_upload.assert_called_once_with(schema.metadata)
+        mock_delete_schema_upload.assert_called_once_with(schema.dataset_metadata)
 
 
 class TestSchemaGeneration(BaseClientTest):

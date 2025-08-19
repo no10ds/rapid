@@ -632,13 +632,13 @@ class TestDatasetInfo(BaseClientTest):
 
         columns = {
             "colname1": Column(
-                dtype="object",
+                dtype="string",
                 nullable=True,
                 partition_index=None,
                 format=None,
             ),
             "colname2": Column(
-                dtype="int64",
+                dtype="int",
                 nullable=True,
                 partition_index=None,
                 format=None,
@@ -652,7 +652,7 @@ class TestDatasetInfo(BaseClientTest):
             owners=[Owner(name="owner", email="owner@email.com")],
         )
 
-        mock_get_dataset_info.return_value = expected_response
+        mock_get_dataset_info.return_value = expected_response.dict()
 
         response = self.client.get(
             f"{BASE_API_PATH}/datasets/layer/mydomain/mydataset/info?version=2",
@@ -661,7 +661,7 @@ class TestDatasetInfo(BaseClientTest):
         )
 
         assert response.status_code == 200
-        assert response.json() == expected_response.to_dict()
+        assert response.json() == expected_response.dict()
         mock_get_dataset_info.assert_called_once_with(
             DatasetMetadata("layer", "mydomain", "mydataset", 2)
         )
@@ -680,13 +680,13 @@ class TestDatasetInfo(BaseClientTest):
 
         columns = {
             "colname1": Column(
-                dtype="object",
+                dtype="string",
                 nullable=True,
                 partition_index=None,
                 format=None,
             ),
             "colname2": Column(
-                dtype="int64",
+                dtype="int",
                 nullable=True,
                 partition_index=None,
                 format=None,
@@ -700,7 +700,7 @@ class TestDatasetInfo(BaseClientTest):
             owners=[Owner(name="owner", email="owner@email.com")],
         )
 
-        mock_get_dataset_info.return_value = expected_response
+        mock_get_dataset_info.return_value = expected_response.dict()
         mock_construct_dataset_metadata.return_value = dataset_metadata
 
         response = self.client.get(
@@ -710,7 +710,7 @@ class TestDatasetInfo(BaseClientTest):
         )
 
         assert response.status_code == 200
-        assert response.json() == expected_response.to_dict()
+        assert response.json() == expected_response.dict()
         mock_get_dataset_info.assert_called_once_with(dataset_metadata)
 
     @patch.object(DataService, "get_dataset_info")

@@ -30,26 +30,26 @@ class TestSchemaInfer:
             columns={
                 "colname1": Column(
                     partition_index=0,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                     format=None,
                 ),
                 "colname2": Column(
                     partition_index=None,
-                    data_type="int",
-                    allow_null=True,
+                    dtype="int",
+                    nullable=True,
                     format=None,
                 ),
                 "col_name_3": Column(
                     partition_index=None,
-                    data_type="int",
-                    allow_null=True,
+                    dtype="int",
+                    nullable=True,
                     format=None,
                 ),
                 "colname_4": Column(
                     partition_index=None,
-                    data_type="boolean",
-                    allow_null=True,
+                    dtype="boolean",
+                    nullable=True,
                     format=None,
                 ),
             },
@@ -78,14 +78,14 @@ class TestSchemaInfer:
             columns={
                 "colname1": Column(
                     partition_index=0,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                     format=None,
                 ),
                 "colname2": Column(
                     partition_index=None,
-                    data_type="date",
-                    allow_null=True,
+                    dtype="date",
+                    nullable=True,
                     format="%Y-%m-%d",
                 ),
             },

@@ -95,7 +95,7 @@ class TestS3AdapterUpload:
             Partition(keys=[2020, 2], path="year=2020/month=2", df=partition_2),
         ]
 
-        self.schema = Schema(
+        schema = Schema(
             dataset_metadata=DatasetMetadata(
                 layer=layer,
                 domain=domain,

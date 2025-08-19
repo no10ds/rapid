@@ -1042,24 +1042,22 @@ class TestDynamoDBAdapterSchemaTable:
                 "key_only_tags": ["key"],
                 "owners": [{"name": "owner", "email": "owner@email.com"}],
                 "is_latest_version": True,
-                "columns": [
-                    {
-                        "name": "colname1",
+                "columns": {
+                    "colname1": {
                         "partition_index": 0,
-                        "data_type": "int",
-                        "allow_null": False,
+                        "dtype": "int",
+                        "nullable": False,
                         "format": None,
                         "unique": False,
                     },
-                    {
-                        "name": "colname2",
+                    "colname2": {
                         "partition_index": None,
-                        "data_type": "string",
-                        "allow_null": True,
+                        "dtype": "string",
+                        "nullable": True,
                         "format": None,
                         "unique": False,
                     },
-                ],
+                }
             }
         )
 

@@ -2,6 +2,7 @@ from unittest.mock import Mock, call
 
 import pytest
 from botocore.exceptions import ClientError
+import copy
 
 
 from api.application.services.schema_service import (
@@ -39,13 +40,13 @@ class TestUploadSchema:
             columns={
                 "colname1": Column(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
                 "colname2": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
             },
         )
@@ -57,18 +58,18 @@ class TestUploadSchema:
 
         self.dynamodb_adapter.store_schema.assert_called_once_with(self.valid_schema)
         self.glue_adapter.create_table.assert_called_once_with(self.valid_schema)
-        assert result == self.valid_schema.metadata.glue_table_name()
+        assert result == self.valid_schema.dataset_metadata.glue_table_name()
 
     def test_upload_schema_uppercase_domain(self):
         self.schema_service.get_schema = Mock(return_value=None)
 
-        schema = self.valid_schema.copy()
-        schema.metadata.domain = schema.metadata.domain.upper()
+        schema = copy.copy(self.valid_schema)
+        schema.metadata["domain"] = schema.get_domain().upper()
         result = self.schema_service.upload_schema(schema)
 
         self.dynamodb_adapter.store_schema.assert_called_once_with(schema)
         self.glue_adapter.create_table.assert_called_once_with(schema)
-        result == schema.metadata.glue_table_name()
+        result == schema.dataset_metadata.glue_table_name()
 
     def test_aborts_uploading_if_create_table_fails(self):
         self.schema_service.get_schema = Mock(return_value=None)
@@ -94,8 +95,8 @@ class TestUploadSchema:
             columns={
                 "colname1": Column(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=True,
+                    dtype="int",
+                    nullable=True,
                 ), 
             },
         )
@@ -120,8 +121,8 @@ class TestUploadSchema:
             columns={
                 "colname1": Column(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=True,
+                    dtype="int",
+                    nullable=True,
                 ),
             },
         )
@@ -155,8 +156,8 @@ class TestUploadSchema:
             columns={
                 "colname1": Column(
                     partition_index=invalid_partition_index,
-                    data_type="int",
-                    allow_null=True,
+                    dtype="int",
+                    nullable=True,
                 )
             },
         )
@@ -190,13 +191,13 @@ class TestUpdateSchema:
             columns={
                 "colname1": Column(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
                 "colname2": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
             },
         )
@@ -214,13 +215,13 @@ class TestUpdateSchema:
             columns={
                 "colname1": Column(
                     partition_index=0,
-                    data_type="double",
-                    allow_null=False,
+                    dtype="double",
+                    nullable=False,
                 ),
                 "colname_new": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
             },
         )
@@ -239,8 +240,8 @@ class TestUpdateSchema:
             columns={
                 "colname1": Column(
                     partition_index=invalid_partition_index,
-                    data_type="int",
-                    allow_null=True,
+                    dtype="int",
+                    nullable=True,
                 ),
             },
         )
@@ -250,10 +251,10 @@ class TestUpdateSchema:
             self.schema_service.update_schema(invalid_schema)
 
     def test_update_schema_for_protected_domain_failure(self):
-        original_schema = self.valid_schema.copy(deep=True)
-        original_schema.metadata.sensitivity = Sensitivity.PROTECTED
-        new_schema = self.valid_updated_schema.copy(deep=True)
-        new_schema.metadata.sensitivity = Sensitivity.PROTECTED
+        original_schema = copy.deepcopy(self.valid_schema)
+        original_schema.metadata["sensitivity"] = Sensitivity.PROTECTED
+        new_schema = copy.deepcopy(self.valid_updated_schema)
+        new_schema.metadata["sensitivity"] = Sensitivity.PROTECTED
 
         self.schema_service.get_schema = Mock(return_value=original_schema)
         self.protected_domain_service.list_protected_domains = Mock(
@@ -268,10 +269,10 @@ class TestUpdateSchema:
 
     def test_update_schema_success(self):
         original_schema = self.valid_schema
-        original_schema.metadata.version = 2
+        original_schema.metadata["version"] = 2
         new_schema = self.valid_updated_schema
-        expected_schema = self.valid_updated_schema.copy(deep=True)
-        expected_schema.metadata.version = 3
+        expected_schema = copy.deepcopy(self.valid_updated_schema)
+        expected_schema.metadata["version"]= 3
 
         self.schema_service.get_schema = Mock(return_value=original_schema)
 
@@ -280,14 +281,14 @@ class TestUpdateSchema:
         self.glue_adapter.create_table.assert_called_once_with(new_schema)
         self.dynamodb_adapter.store_schema.assert_called_once_with(expected_schema)
         self.dynamodb_adapter.deprecate_schema.assert_called_once_with(
-            original_schema.metadata
+            original_schema.dataset_metadata
         )
         assert result == "raw/testdomain/testdataset/3"
 
     def test_update_schema_enforces_sensitivity_consistency(self):
         original_schema = self.valid_schema
-        new_schema = self.valid_updated_schema.copy(deep=True)
-        new_schema.metadata.sensitivity = Sensitivity.PRIVATE
+        new_schema = copy.deepcopy(self.valid_updated_schema)
+        new_schema.metadata["sensitivity"] = Sensitivity.PRIVATE
 
         self.schema_service.get_schema = Mock(return_value=original_schema)
         with pytest.raises(
@@ -299,13 +300,13 @@ class TestUpdateSchema:
             self.schema_service.update_schema(new_schema)
 
     def test_update_schema_for_protected_domain_success(self):
-        original_schema = self.valid_schema.copy(deep=True)
-        original_schema.metadata.sensitivity = Sensitivity.PROTECTED
-        new_schema = self.valid_updated_schema.copy(deep=True)
-        new_schema.metadata.sensitivity = Sensitivity.PROTECTED
-        expected_schema = self.valid_updated_schema.copy(deep=True)
-        expected_schema.metadata.version = 2
-        expected_schema.metadata.sensitivity = Sensitivity.PROTECTED
+        original_schema = copy.deepcopy(self.valid_schema)
+        original_schema.metadata["sensitivity"] = Sensitivity.PROTECTED
+        new_schema = copy.deepcopy(self.valid_updated_schema)
+        new_schema.metadata["sensitivity"] = Sensitivity.PROTECTED
+        expected_schema = copy.deepcopy(self.valid_updated_schema)
+        expected_schema.metadata["version"] = 2
+        expected_schema.metadata["sensitivity"] = Sensitivity.PROTECTED
 
         self.schema_service.get_schema = Mock(return_value=original_schema)
         self.protected_domain_service.list_protected_domains = Mock(
@@ -317,7 +318,7 @@ class TestUpdateSchema:
         self.glue_adapter.create_table.assert_called_once_with(expected_schema)
         self.dynamodb_adapter.store_schema.assert_called_once_with(expected_schema)
         self.dynamodb_adapter.deprecate_schema.assert_called_once_with(
-            original_schema.metadata
+            original_schema.dataset_metadata
         )
         assert result == "raw/testdomain/testdataset/2"
 
@@ -342,13 +343,13 @@ class TestGetSchema:
         self.columns = {
             "colname1": Column(
                 partition_index=0,
-                data_type="int",
-                allow_null=False,
+                dtype="int",
+                nullable=False,
             ),
             "colname2": Column(
                 partition_index=None,
-                data_type="string",
-                allow_null=True,
+                dtype="string",
+                nullable=True,
             ),
         }
 
@@ -369,7 +370,7 @@ class TestGetSchema:
             "update_behaviour": "APPEND",
             "is_latest_version": True,
             "owners": [{"name": "owner", "email": "owner@email.com"}],
-            "columns": [dict(col) for col in self.columns],
+            "columns": {col_name: col.to_dict() for col_name, col in self.columns.items()},
             "key_value_tags": {},
             "key_only_tags": [],
         }

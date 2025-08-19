@@ -24,20 +24,20 @@ class TestSchema:
                 "colname1": Column(
                     name="colname1",
                     partition_index=1,
-                    data_type="int",
-                    allow_null=True,
+                    dtype="int",
+                    nullable=True,
                 ),
                 "colname2": Column(
                     name="colname2",
                     partition_index=0,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                 ),
                 "colname3": Column(
                     name="colname3",
                     partition_index=None,
-                    data_type="boolean",
-                    allow_null=False,
+                    dtype="boolean",
+                    nullable=False,
                 ),
             },
         )
@@ -73,20 +73,20 @@ class TestSchema:
     def test_get_partition_columns(self):
         res = self.schema.get_partition_columns()
         expected = [
-            {"colname2", Column(
+            Column(
                 name="colname2",
                 partition_index=0,
-                data_type="string",
-                allow_null=False,
+                dtype="string",
+                nullable=False,
                 format=None,
-            )},
-            {"colname1", Column(
+            ),
+            Column(
                 name="colname1",
                 partition_index=1,
-                data_type="int",
-                allow_null=True,
+                dtype="int",
+                nullable=True,
                 format=None,
-            )},
+            ),
         ]
         assert res == expected
 

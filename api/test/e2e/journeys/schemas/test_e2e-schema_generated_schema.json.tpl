@@ -16,48 +16,42 @@
     "update_behaviour": "APPEND",
     "is_latest_version": true
   },
-  "columns": [
-    {
-      "name": "year",
-      "data_type": "int",
-      "allow_null": true,
+  "columns": {
+    "year": {
       "partition_index": null,
-      "format":null
+      "dtype": "int",
+      "nullable": true,
+      "format": null
     },
-    {
-      "name": "month",
-      "data_type": "int",
-      "allow_null": true,
+    "month": {
       "partition_index": null,
-      "format":null
+      "dtype": "int",
+      "nullable": true,
+      "format": null
     },
-    {
-      "name": "destination",
-      "data_type": "string",
-      "allow_null": true,
+    "destination": {
       "partition_index": null,
-      "format":null
+      "dtype": "string",
+      "nullable": true,
+      "format": null
     },
-    {
-      "name": "arrival",
-      "data_type": "string",
-      "allow_null": true,
+    "arrival": {
       "partition_index": null,
-      "format":null
+      "dtype": "string",
+      "nullable": true,
+      "format": null
     },
-    {
-      "name": "type",
-      "data_type": "string",
-      "allow_null": true,
+    "type": {
       "partition_index": null,
-      "format":null
+      "dtype": "string",
+      "nullable": true,
+      "format": null
     },
-    {
-      "name": "status",
-      "data_type": "string",
-      "allow_null": true,
+    "status": {
       "partition_index": null,
-      "format":null
+      "dtype": "string",
+      "nullable": true,
+      "format": null
     }
-  ]
+  }
 }
