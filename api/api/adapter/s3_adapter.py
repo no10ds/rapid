@@ -61,7 +61,7 @@ class S3Adapter:
     ):
         for partition in partitions:
             upload_path = self._construct_partitioned_data_path(
-                partition.path, filename, schema.metadata
+                partition.path, filename, schema.dataset_metadata
             )
             data_content = partition.df.to_parquet(
                 compression="gzip", index=False, schema=schema.generate_storage_schema()

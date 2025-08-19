@@ -166,7 +166,7 @@ class DataService:
         )
         try:
             self.s3_adapter.delete_previous_dataset_files(
-                schema.metadata,
+                schema.dataset_metadata,
                 raw_file_identifier,
             )
         except IndexError:
@@ -212,7 +212,7 @@ class DataService:
     def load_partitions(self, schema: Schema):
         if schema.get_partition_columns():
             query_id = self.athena_adapter.query_sql_async(
-                f"MSCK REPAIR TABLE `{schema.metadata.glue_table_name()}`;"
+                f"MSCK REPAIR TABLE `{schema.dataset_metadata.glue_table_name()}`;"
             )
             self.athena_adapter.wait_for_query_to_complete(query_id)
 
@@ -291,9 +291,9 @@ class DataService:
     ):
         # dataset_size = statistics_dataframe.at[0, "data_size"]
         # return EnrichedSchemaMetadata(
-        #     **schema.metadata.dict(),
+        #     **schema.datset_metadata.dict(),
         #     number_of_rows=dataset_size,
-        #     number_of_columns=len(schema.columns),
+        #     number_of_columns=len(schema.columns.values()),
         #     last_updated=last_updated,
         # )
         pass
@@ -304,14 +304,14 @@ class DataService:
     #     strftime_format = "%Y-%m-%d"
     #     enriched_columns = []
     #     date_columns = schema.get_columns_by_type(DateType)
-    #     for column in schema.columns:
+    #     for name, column in schema.columns:
     #         statistics = None
     #         if column in date_columns:
     #             statistics = {
-    #                 "max": statistics_dataframe.at[0, f"max_{column.name}"].strftime(
+    #                 "max": statistics_dataframe.at[0, f"max_{name}"].strftime(
     #                     strftime_format
     #                 ),
-    #                 "min": statistics_dataframe.at[0, f"min_{column.name}"].strftime(
+    #                 "min": statistics_dataframe.at[0, f"min_{name}"].strftime(
     #                     strftime_format
     #                 ),
     #             }
