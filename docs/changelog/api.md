@@ -2,11 +2,12 @@
 
 ## v7.12.0 - _2025-05-19_
 
-- Enhancement of E2E tests in rAPId. Should cover most endpoints now. 
+- Enhancement of E2E tests in rAPId. Should cover most endpoints now.
 - Enable SQL injection protection to be turned off conditionally in the WAF
 - Allow rAPId to set columns to have unique values
 
 ### Fixes:
+
 - Fix issue with empty string columns in rAPId
 
 ## v7.11.3 - _2025-03-26_
