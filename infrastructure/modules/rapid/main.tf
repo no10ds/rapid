@@ -37,12 +37,19 @@ module "app_cluster" {
 }
 
 module "auth" {
-  source               = "../auth"
-  tags                 = var.tags
-  domain_name          = var.domain_name
-  resource-name-prefix = var.resource-name-prefix
-  password_policy      = var.password_policy
-  layers               = var.layers
+  source                     = "../auth"
+  tags                       = var.tags
+  domain_name                = var.domain_name
+  resource-name-prefix       = var.resource-name-prefix
+  password_policy            = var.password_policy
+  layers                     = var.layers
+  cognito_ses_authentication = var.cognito_ses_authentication
+  hosted_zone_id             = var.hosted_zone_id != "" ? var.hosted_zone_id : module.app_cluster.hosted_zone_id
+  aws_account                = var.aws_account
+  aws_region                 = var.aws_region
+  ses_email_notifications    = var.ses_email_notifications
+  ses_allowed_from_emails    = var.ses_allowed_from_emails
+  allowed_email_domains      = var.allowed_email_domains
 }
 
 module "data_workflow" {
@@ -76,28 +83,35 @@ resource "aws_s3_bucket" "this" {
   #checkov:skip=CKV2_AWS_61:No need for lifecycle configuration
 
   bucket        = var.resource-name-prefix
-  acl           = "private"
   force_destroy = false
 
   tags = var.tags
 
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        kms_master_key_id = "" # use default
-        sse_algorithm     = "AES256"
-      }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
+  bucket = aws_s3_bucket.this.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = "" # use default
+      sse_algorithm     = "AES256"
     }
   }
+}
 
-  versioning {
-    enabled = true
+resource "aws_s3_bucket_versioning" "this" {
+  bucket = aws_s3_bucket.this.id
+  versioning_configuration {
+    status = "Enabled"
   }
+}
 
-  logging {
-    target_bucket = aws_s3_bucket.logs.bucket
-    target_prefix = "log/${var.resource-name-prefix}"
-  }
+resource "aws_s3_bucket_logging" "this" {
+  bucket = aws_s3_bucket.this.id
+
+  target_bucket = aws_s3_bucket.logs.bucket
+  target_prefix = "log/${var.resource-name-prefix}"
 }
 
 resource "aws_s3_bucket_notification" "this" {
@@ -121,16 +135,23 @@ resource "aws_s3_bucket" "logs" {
   #checkov:skip=CKV2_AWS_62:No need for event notifications
   #checkov:skip=CKV2_AWS_61:No need for lifecycle configuration
   bucket        = "${var.resource-name-prefix}-logs"
-  acl           = "private"
   force_destroy = false
 
   tags = var.tags
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        kms_master_key_id = "" # use default
-        sse_algorithm     = "AES256"
-      }
+}
+
+resource "aws_s3_bucket_acl" "logs" {
+  bucket = aws_s3_bucket.logs.id
+  acl    = "private"
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
+  bucket = aws_s3_bucket.logs.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = "" # use default
+      sse_algorithm     = "AES256"
     }
   }
 }

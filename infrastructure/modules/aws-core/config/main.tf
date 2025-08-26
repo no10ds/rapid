@@ -72,37 +72,60 @@ resource "aws_s3_bucket" "config_with_lifecycle" {
   #checkov:skip=CKV2_AWS_61:No need for lifecycle configuration
   count         = var.enable_lifecycle_management_for_s3 ? 1 : 0
   bucket_prefix = var.bucket_prefix
-  acl           = "private"
-
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        kms_master_key_id = var.s3_kms_sse_encryption_key_arn
-        sse_algorithm     = "aws:kms"
-      }
-    }
-  }
-
-  versioning {
-    enabled = true
-  }
 
   lifecycle {
     prevent_destroy = true
 
   }
 
-  lifecycle_rule {
-    enabled = true
-    prefix  = "${var.bucket_key_prefix}/"
+}
+
+resource "aws_s3_bucket_acl" "config_with_lifecycle" {
+  count  = var.enable_lifecycle_management_for_s3 ? 1 : 0
+  bucket = aws_s3_bucket.config_with_lifecycle[0].id
+  acl    = "private"
+}
+
+resource "aws_s3_bucket_versioning" "config_with_lifecycle" {
+  count  = var.enable_lifecycle_management_for_s3 ? 1 : 0
+  bucket = aws_s3_bucket.config_with_lifecycle[0].id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "config_with_lifecycle" {
+  count  = var.enable_lifecycle_management_for_s3 ? 1 : 0
+  bucket = aws_s3_bucket.config_with_lifecycle[0].id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = var.s3_kms_sse_encryption_key_arn
+      sse_algorithm     = "aws:kms"
+    }
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "config_with_lifecycle" {
+  count  = var.enable_lifecycle_management_for_s3 ? 1 : 0
+  bucket = aws_s3_bucket.config_with_lifecycle[0].id
+
+  rule {
+    id = "rule-1"
+
+    filter {
+      prefix = "${var.bucket_key_prefix}/"
+    }
 
     expiration {
       days = 365
     }
 
     noncurrent_version_expiration {
-      days = 365
+      noncurrent_days = 365
     }
+
+    status = "Enabled"
   }
 }
 
@@ -123,23 +146,38 @@ resource "aws_s3_bucket" "config_without_lifecycle" {
   #checkov:skip=CKV2_AWS_62:No need for event notifications
   count         = var.enable_lifecycle_management_for_s3 ? 0 : 1
   bucket_prefix = var.bucket_prefix
-  acl           = "private"
 
   force_destroy = true
+}
 
-  versioning {
-    enabled = true
+resource "aws_s3_bucket_acl" "config_without_lifecycle" {
+  count  = var.enable_lifecycle_management_for_s3 ? 1 : 0
+  bucket = aws_s3_bucket.config_without_lifecycle[0].id
+  acl    = "private"
+}
+
+resource "aws_s3_bucket_versioning" "config_without_lifecycle" {
+  count  = var.enable_lifecycle_management_for_s3 ? 1 : 0
+  bucket = aws_s3_bucket.config_without_lifecycle[0].id
+  versioning_configuration {
+    status = "Enabled"
   }
+}
 
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        kms_master_key_id = var.s3_kms_sse_encryption_key_arn
-        sse_algorithm     = "aws:kms"
-      }
+resource "aws_s3_bucket_server_side_encryption_configuration" "config_without_lifecycle" {
+  count  = var.enable_lifecycle_management_for_s3 ? 1 : 0
+  bucket = aws_s3_bucket.config_without_lifecycle[0].id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = var.s3_kms_sse_encryption_key_arn
+      sse_algorithm     = "aws:kms"
     }
   }
 }
+
+
+
 
 resource "aws_s3_bucket_public_access_block" "config_without_lifecycle" {
   count                   = var.enable_lifecycle_management_for_s3 ? 0 : 1
