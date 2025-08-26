@@ -39,8 +39,8 @@ resource "aws_internet_gateway" "core_igw" {
 
 # EIPs for NAT Gateways
 resource "aws_eip" "core_nat_gw_eip" {
-  count = length(data.aws_availability_zones.available.names)
-  vpc   = true
+  count  = length(data.aws_availability_zones.available.names)
+  domain = "vpc"
 
   depends_on = [aws_internet_gateway.core_igw]
 
