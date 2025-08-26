@@ -28,7 +28,7 @@ resource "aws_cognito_user_pool" "rapid_user_pool" {
     content {
       email_sending_account = "DEVELOPER"
       from_email_address    = "no-reply@${var.domain_name}"
-      source_arn            = aws_ses_domain_identity.ses_domain[0].arn
+      source_arn            = var.ses_domain_identity_arn
     }
   }
 }
