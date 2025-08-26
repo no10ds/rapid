@@ -12,6 +12,7 @@ from api.application.services.dataset_validation import (
     clean_column_headers,
     dataset_has_correct_columns,
     dataset_has_acceptable_null_values,
+    dataset_has_acceptable_unique_values,
     dataset_has_correct_data_types,
     dataset_has_no_illegal_characters_in_partition_columns,
     dataset_has_rows,
@@ -460,6 +461,47 @@ class TestDatasetValidation:
                 "Column [col2] does not allow null values",
                 "Column [col3] does not allow null values",
             ]
+
+    def test_return_error_message_when_not_accepted_unique_values(self):
+        df = pd.DataFrame(
+            {
+                "col1": [None, "a", None, "a"],
+                "col2": [None, "b", None, "a"],
+                "col3": ["c", "b", None, "b"],
+            }
+        )
+        schema = Schema(
+            metadata=self.schema_metadata,
+            columns=[
+                Column(
+                    name="col1",
+                    partition_index=None,
+                    data_type="string",
+                    allow_null=True,
+                    unique=True,
+                ),
+                Column(
+                    name="col2",
+                    partition_index=None,
+                    data_type="string",
+                    allow_null=False,
+                    unique=True,
+                ),
+                Column(
+                    name="col3",
+                    partition_index=None,
+                    data_type="string",
+                    allow_null=False,
+                    unique=True,
+                ),
+            ],
+        )
+
+        data_frame, error_list = dataset_has_acceptable_unique_values(df, schema)
+        assert error_list == [
+            "Column [col1] must have unique values",
+            "Column [col3] must have unique values",
+        ]
 
     def test_return_error_message_when_not_correct_datatypes(self):
         df = pd.DataFrame(
