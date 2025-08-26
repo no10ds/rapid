@@ -49,7 +49,7 @@ class Rapid:
     def generate_headers(self, is_file: bool = False) -> Dict:
         return {
             "Authorization": f"Bearer {self.auth.fetch_token()}",
-            **({} if is_file else {"Content-Type": "application/json"})
+            **({} if is_file else {"Content-Type": "application/json"}),
         }
 
     def list_datasets(self):
@@ -144,10 +144,13 @@ class Rapid:
             timeout=TIMEOUT_PERIOD,
         )
         if response.status_code == 200:
-            return pd.read_json(StringIO(response.content.decode("utf-8")), orient="index")
+            return pd.read_json(
+                StringIO(response.content.decode("utf-8")), orient="index"
+            )
 
         raise DatasetNotFoundException(
-            f"Could not find dataset, {layer}/{domain}/{dataset} to download", response.json()
+            f"Could not find dataset, {layer}/{domain}/{dataset} to download",
+            response.json(),
         )
 
     def upload_dataframe(
