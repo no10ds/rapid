@@ -1,7 +1,7 @@
 import uuid
 from pathlib import Path
 from threading import Thread
-from typing import List, Tuple, Dict
+from typing import Tuple, Dict
 
 import pandas as pd
 
@@ -197,7 +197,6 @@ class DataService:
             schema, statistics_dataframe, last_updated
         )
 
-
     def upload_data(
         self,
         schema: Schema,
@@ -284,13 +283,13 @@ class DataService:
         return SQLQuery(select_columns=columns_to_query)
 
     def _enrich_schema(
-    self, schema: Schema, statistics_dataframe: pd.DataFrame, last_updated: str
+        self, schema: Schema, statistics_dataframe: pd.DataFrame, last_updated: str
     ) -> EnrichedSchema:
         dataset_size = statistics_dataframe.at[0, "data_size"]
         return EnrichedSchema(
-            dataset_metadata=schema.dataset_metadata,  
-            sensitivity=schema.get_sensitivity(),       
-            owners=schema.get_owners(),                
+            dataset_metadata=schema.dataset_metadata,
+            sensitivity=schema.get_sensitivity(),
+            owners=schema.get_owners(),
             columns=self._enrich_columns(schema, statistics_dataframe),
             number_of_rows=dataset_size,
             number_of_columns=len(schema.columns.values()),
@@ -314,7 +313,7 @@ class DataService:
                         strftime_format
                     ),
                 }
-            
+
             enriched_columns[name] = EnrichedColumn(
                 dtype=column.dtype,
                 nullable=column.nullable,
@@ -323,5 +322,5 @@ class DataService:
                 unique=getattr(column, 'unique', False),
                 statistics=statistics
             )
-        
+
         return enriched_columns

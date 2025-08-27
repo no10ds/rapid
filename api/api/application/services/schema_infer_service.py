@@ -1,6 +1,5 @@
-from typing import List, Any, Dict
+from typing import Any, Dict
 from pathlib import Path
-import json
 
 import pandas as pd
 import pandera
@@ -33,23 +32,23 @@ class SchemaInferService:
         file_path: Path,
     ) -> dict[str, Any]:
         dataframe = self._construct_single_chunk_dataframe(file_path)
-        
+
         pandera_schema = pandera.infer_schema(dataframe)
         customized_columns = self._customize_inferred_columns(pandera_schema.columns)
-        
+
         dataset_metadata = DatasetMetadata(
             layer=layer,
             domain=domain,
             dataset=dataset,
         )
-        
+
         schema = Schema(
             dataset_metadata=dataset_metadata,
             columns=customized_columns,
             sensitivity=sensitivity,
             owners=[Owner(name="change_me", email="change_me@email.com")],
         )
-        
+
         try:
             validate_schema(schema)
         finally:
@@ -60,19 +59,19 @@ class SchemaInferService:
 
     def _customize_inferred_columns(self, inferred_columns: Dict[str, pandera.Column]) -> Dict[str, Column]:
         customized = {}
-        
+
         for name, pandera_column in inferred_columns.items():
             clean_name = clean_column_name(name)
             athena_dtype = convert_pandera_column_to_athena(pandera_column.dtype)
-            
+
             customized[clean_name] = Column(
-                dtype=athena_dtype,          
-                nullable=True,                
-                unique=False, 
-                format=DEFAULT_DATE_FORMAT if is_date_type(athena_dtype) else None,                     
+                dtype=athena_dtype,
+                nullable=True,
+                unique=False,
+                format=DEFAULT_DATE_FORMAT if is_date_type(athena_dtype) else None,
                 partition_index=None,
             )
-        
+
         return customized
 
     def _construct_single_chunk_dataframe(self, file_path: Path) -> pd.DataFrame:

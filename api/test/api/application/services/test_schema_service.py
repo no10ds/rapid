@@ -97,7 +97,7 @@ class TestUploadSchema:
                     partition_index=0,
                     dtype="int",
                     nullable=True,
-                ), 
+                ),
             },
         )
         self.protected_domain_service.list_protected_domains = Mock(
@@ -272,7 +272,7 @@ class TestUpdateSchema:
         original_schema.metadata["version"] = 2
         new_schema = self.valid_updated_schema
         expected_schema = copy.deepcopy(self.valid_updated_schema)
-        expected_schema.metadata["version"]= 3
+        expected_schema.metadata["version"] = 3
 
         self.schema_service.get_schema = Mock(return_value=original_schema)
 

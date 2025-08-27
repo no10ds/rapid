@@ -102,6 +102,7 @@ async def list_all_datasets(
     datasets = data_access_evaluator.get_authorised_datasets(
         subject_id, Action.READ, tag_filters
     )
+
     class EnrichedMetadata(DatasetMetadata):
         last_updated_date: str
 

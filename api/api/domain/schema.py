@@ -25,6 +25,7 @@ class Owner(BaseModel):
     name: str
     email: EmailStr
 
+
 class UpdateBehaviour(StrEnum):
     APPEND = "APPEND"
     OVERWRITE = "OVERWRITE"
@@ -32,33 +33,33 @@ class UpdateBehaviour(StrEnum):
 
 class Column(pandera.Column):
     def __init__(
-        self,  
-        dtype: str, 
-        nullable: bool, 
-        partition_index: Optional[int] = None, 
-        format: Optional[str] = None, 
-        unique: bool = False, 
+        self,
+        dtype: str,
+        nullable: bool,
+        partition_index: Optional[int] = None,
+        format: Optional[str] = None,
+        unique: bool = False,
         **kwargs
     ):
         super().__init__(dtype=dtype, nullable=nullable, unique=unique, **kwargs)
 
         if self.metadata is None:
             self.metadata = {}
-        
+
         self.metadata["partition_index"] = partition_index
         self.metadata["format"] = format
 
     @property
     def partition_index(self) -> Optional[int]:
         return self.metadata.get("partition_index")
-    
+
     @property
     def format(self) -> Optional[str]:
         return self.metadata.get("format")
-    
+
     def is_of_data_type(self, d_type: StrEnum) -> bool:
         return self.dtype in list(d_type)
-    
+
     def to_dict(self) -> dict:
         return {
             "partition_index": self.partition_index,
@@ -67,6 +68,7 @@ class Column(pandera.Column):
             "format": self.format,
             "unique": self.unique if hasattr(self, 'unique') else False,
         }
+
 
 class Schema(pandera.DataFrameSchema):
     def __init__(
@@ -95,7 +97,7 @@ class Schema(pandera.DataFrameSchema):
             "update_behaviour": update_behaviour,
             "is_latest_version": is_latest_version,
         }
-        
+
         super().__init__(columns=columns, metadata=metadata, **pandera_kwargs)
 
     @property
@@ -156,7 +158,7 @@ class Schema(pandera.DataFrameSchema):
 
     def get_column_names_by_type(self, d_type: StrEnum) -> List[str]:
         return [
-            name for name, column in self.columns.items() 
+            name for name, column in self.columns.items()
             if column.is_of_data_type(d_type)
         ]
 
@@ -189,33 +191,33 @@ class Schema(pandera.DataFrameSchema):
                 for name, column in self.columns.items()
             ]
         )
-    
+
     def string_representation(self) -> str:
         return f"{self.get_layer()}_{self.get_domain()}_{self.get_dataset()}_v{self.get_version()}"
-    
+
     def dataset_identifier(self, with_version: bool = True) -> str:
         base = f"{self.get_layer()}_{self.get_domain()}_{self.get_dataset()}"
         if with_version:
             return f"{base}_v{self.get_version()}"
         return base
-    
+
     def dict(self, exclude: dict = None) -> dict:
         layer_value = self.get_layer()
         if hasattr(layer_value, "value"):
             layer_value = layer_value.value
-        
+
         update_behaviour = self.get_update_behaviour()
         if hasattr(update_behaviour, "value"):
             update_behaviour = update_behaviour.value
-        
+
         owners = self.get_owners()
         if owners:
             owners = [owner.dict() if hasattr(owner, 'dict') else owner for owner in owners]
-        
+
         columns_dict = {}
         for column_name, column in self.columns.items():
             columns_dict[column_name] = column.to_dict()
-        
+
         result = {
             "layer": layer_value,
             "domain": self.get_domain(),
@@ -230,7 +232,7 @@ class Schema(pandera.DataFrameSchema):
             "is_latest_version": self.metadata.get("is_latest_version"),
             "columns": columns_dict,
         }
-        
+
         if exclude:
             for key, value in exclude.items():
                 if key == "metadata" and isinstance(value, dict):
@@ -238,5 +240,5 @@ class Schema(pandera.DataFrameSchema):
                         result.pop(field, None)
                 else:
                     result.pop(key, None)
-        
+
         return result

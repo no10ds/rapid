@@ -10,7 +10,7 @@ from api.common.config.constants import (
     COLUMN_NAME_REGEX,
 )
 from api.common.custom_exceptions import SchemaValidationError
-from api.domain.data_types import AthenaDataType, is_date_type
+from api.domain.data_types import is_date_type
 from api.domain.schema import Schema, UpdateBehaviour, Owner
 
 
@@ -122,7 +122,7 @@ def schema_has_valid_tag_set(schema: Schema):
                 seen.add(tag)
                 deduped_tags.append(tag)
         schema.metadata["key_only_tags"] = deduped_tags
-    
+
     if len(schema.get_tags()) > MAX_TAG_COUNT:
         raise SchemaValidationError(
             f"You cannot specify more than {MAX_TAG_COUNT} tags"
@@ -220,6 +220,7 @@ def has_valid_allow_unique_columns(schema: Schema):
                 raise SchemaValidationError(
                     "Schema with APPEND update behaviour cannot force unique values in columns"
                 )
+
 
 def __has_unique_value(
     set_to_compare: List[Union[str, int]], actual_value: List[Any], field_name: str

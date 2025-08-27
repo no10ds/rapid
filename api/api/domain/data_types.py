@@ -1,8 +1,4 @@
 from strenum import StrEnum
-from enum import Enum
-
-from pandas import DataFrame
-from pandas.api.types import infer_dtype
 
 import pandera.dtypes
 from api.common.custom_exceptions import UnsupportedTypeError
@@ -43,6 +39,7 @@ class DateType(StrEnum):
 class TimestampType(StrEnum):
     TIMESTAMP = "timestamp"
 
+
 class PanderaDataType(StrEnum):
     BOOLEAN = BooleanType.BOOLEAN
     DATE = DateType.DATE
@@ -56,6 +53,7 @@ class PanderaDataType(StrEnum):
     MIXED_INTEGER_FLOAT = NumericType.MIXED_INTEGER_FLOAT
     OBJECT = StringType.OBJECT
     STRING = StringType.STRING
+
 
 class AthenaDataType(StrEnum):
     BIGINT = NumericType.BIGINT
@@ -83,7 +81,7 @@ ATHENA_TO_PANDERA_CONVERTER = {
     AthenaDataType.TINYINT: pandera.dtypes.Int8,
     AthenaDataType.DOUBLE: pandera.dtypes.Float64,
     AthenaDataType.FLOAT: pandera.dtypes.Float32,
-    AthenaDataType.DECIMAL: pandera.dtypes.Float64, 
+    AthenaDataType.DECIMAL: pandera.dtypes.Float64,
     AthenaDataType.BOOLEAN: pandera.dtypes.Bool,
     AthenaDataType.DATE: pandera.dtypes.Timestamp,
     AthenaDataType.TIMESTAMP: pandera.dtypes.Timestamp,

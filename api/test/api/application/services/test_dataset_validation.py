@@ -157,7 +157,7 @@
 #                     partition_index=1,
 #                     dtype="string",
 #                     nullable=False,
-#                 ),  
+#                 ),
 #             }
 #         )
 
@@ -228,8 +228,8 @@
 #             ),
 #         ],
 #     )
-    
-    
+
+
 #     def test_checks_for_unacceptable_null_values(self, dataframe: pd.DataFrame):
 #         schema = Schema(
 #             dataset_metadata=self.valid_schema.dataset_metadata,
@@ -318,7 +318,7 @@
 #                     partition_index=None,
 #                     dtype="string",
 #                     nullable=True,
-#                 ),  
+#                 ),
 #             }
 #         )
 
@@ -530,7 +530,7 @@
 #     #                 nullable=False,
 #     #             ),
 #     #             "col5": Column(
-#     #                 partition_index=None, 
+#     #                 partition_index=None,
 #     #                 dtype="date",
 #     #                 nullable=False,
 #     #                 format="%Y-%m-%d",
@@ -713,10 +713,10 @@
 #         columns = {
 #             "date": Column(
 #                 partition_index=None,
-#                 dtype="date", 
+#                 dtype="date",
 #                 nullable=False,
 #                 format=date_format,
- 
+
 #             )
 #         }
 #         schema = Schema(

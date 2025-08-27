@@ -624,7 +624,7 @@ class TestDatasetInfoRetrieval:
 
     def test_get_schema_information(self):
         expected_schema = EnrichedSchema(
-            dataset_metadata=DatasetMetadata(  
+            dataset_metadata=DatasetMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
@@ -698,13 +698,13 @@ class TestDatasetInfoRetrieval:
                     nullable=False,
                 ),
                 "date": Column(
-                    partition_index=None, 
+                    partition_index=None,
                     dtype="date",
                     nullable=False,
                     format="%d/%m/%Y",
                 ),
                 "date2": Column(
-                    partition_index=None, 
+                    partition_index=None,
                     dtype="date",
                     nullable=False,
                     format="%d/%m/%Y",
@@ -742,8 +742,8 @@ class TestDatasetInfoRetrieval:
                     nullable=False,
                     format="%d/%m/%Y",
                     statistics={"max": "2020-07-01", "min": "2015-01-01"},
-                ),     
-            }   
+                ),
+            }
         )
         self.schema_service.get_schema.return_value = valid_schema
         self.athena_adapter.query.return_value = pd.DataFrame(

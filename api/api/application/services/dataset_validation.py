@@ -2,7 +2,6 @@ from typing import Tuple
 
 import pandas as pd
 from pandas import Timestamp
-import pandera
 
 from api.common.custom_exceptions import (
     DatasetValidationError,
@@ -15,7 +14,6 @@ from api.domain.data_types import (
 )
 from api.domain.schema import Schema
 from api.domain.validation_context import ValidationContext
-from api.domain.schema import Column
 
 
 def build_validated_dataframe(schema: Schema, dataframe: pd.DataFrame) -> pd.DataFrame:
@@ -62,7 +60,6 @@ def convert_date_columns(
             )
 
     return data_frame, error_list
-
 
 
 def dataset_has_no_illegal_characters_in_partition_columns(

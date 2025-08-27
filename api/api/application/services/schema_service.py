@@ -49,7 +49,7 @@ class SchemaService:
     def _parse_schema(self, schema: dict, only_metadata: bool = False):
         dataset_metadata = DatasetMetadata(
             layer=schema["layer"],
-            domain=schema["domain"], 
+            domain=schema["domain"],
             dataset=schema["dataset"],
             version=schema.get("version")
         )
@@ -68,7 +68,7 @@ class SchemaService:
                 "update_behaviour": schema.get("update_behaviour", UpdateBehaviour.APPEND),
                 "is_latest_version": schema.get("is_latest_version", True),
             }
-            
+
         columns = {}
         for col_name, col in schema[COLUMNS].items():
             columns[col_name] = Column(
@@ -78,7 +78,7 @@ class SchemaService:
                 format=col.get("format"),
                 unique=col.get("unique", False)
             )
-        
+
         return Schema(
             dataset_metadata=dataset_metadata,
             sensitivity=schema["sensitivity"],

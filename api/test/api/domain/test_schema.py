@@ -1,9 +1,6 @@
-from unittest.mock import Mock
-
 import pyarrow as pa
 import pytest
 
-from api.adapter.s3_adapter import S3Adapter
 from api.domain.schema import Schema, Column, Owner
 from api.domain.dataset_metadata import DatasetMetadata
 from api.domain.data_types import BooleanType, NumericType, StringType
