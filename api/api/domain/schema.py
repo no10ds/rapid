@@ -242,3 +242,46 @@ class Schema(pandera.DataFrameSchema):
                     result.pop(key, None)
 
         return result
+    
+    @classmethod
+    def __get_pydantic_json_schema__(cls, core_schema, handler):
+        """Provide a JSON schema for OpenAPI documentation"""
+        return {
+            "type": "object",
+            "properties": {
+                "layer": {"type": "string"},
+                "domain": {"type": "string"},
+                "dataset": {"type": "string"},
+                "version": {"type": "integer"},
+                "sensitivity": {"type": "string"},
+                "description": {"type": "string"},
+                "update_behaviour": {"type": "string", "enum": ["APPEND", "OVERWRITE"]},
+                "key_value_tags": {"type": "object", "additionalProperties": {"type": "string"}},
+                "key_only_tags": {"type": "array", "items": {"type": "string"}},
+                "owners": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"},
+                            "email": {"type": "string", "format": "email"}
+                        }
+                    }
+                },
+                "is_latest_version": {"type": "boolean"},
+                "columns": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                            "partition_index": {"type": "integer", "nullable": True},
+                            "dtype": {"type": "string"},
+                            "nullable": {"type": "boolean"},
+                            "format": {"type": "string", "nullable": True},
+                            "unique": {"type": "boolean"}
+                        }
+                    }
+                }
+            },
+            "required": ["layer", "domain", "dataset", "version", "sensitivity"]
+        }

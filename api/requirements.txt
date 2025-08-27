@@ -9,6 +9,7 @@ pandas
 psutil
 pyarrow
 pyjwt
+pandera
 pydantic[email]
 python-dotenv
 python-multipart
