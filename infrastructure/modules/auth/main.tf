@@ -23,13 +23,11 @@ resource "aws_cognito_user_pool" "rapid_user_pool" {
     enabled = true
   }
 
-  dynamic "email_configuration" {
-    for_each = var.ses_arn != null ? [1] : []
-    content {
-      email_sending_account = "DEVELOPER"
-      from_email_address    = "no-reply@${var.domain_name}"
-      source_arn            = var.ses_arn
-    }
+  email_configuration {
+    email_sending_account = var.ses_arn == null ? "COGNITO_DEFAULT" : "DEVELOPER"
+
+    from_email_address = var.ses_arn == null ? null : "no-reply@${var.domain_name}"
+    source_arn         = var.ses_arn
   }
 
 }
