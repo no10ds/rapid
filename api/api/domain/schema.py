@@ -249,26 +249,30 @@ class Schema(pandera.DataFrameSchema):
         return {
             "type": "object",
             "properties": {
-                "layer": {"type": "string"},
-                "domain": {"type": "string"},
-                "dataset": {"type": "string"},
-                "version": {"type": "integer"},
-                "sensitivity": {"type": "string"},
-                "description": {"type": "string"},
-                "update_behaviour": {"type": "string", "enum": ["APPEND", "OVERWRITE"]},
-                "key_value_tags": {"type": "object", "additionalProperties": {"type": "string"}},
-                "key_only_tags": {"type": "array", "items": {"type": "string"}},
-                "owners": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "name": {"type": "string"},
-                            "email": {"type": "string", "format": "email"}
+                "metadata": {
+                    "type": "object",
+                    "properties": {
+                        "layer": {"type": "string"},
+                        "domain": {"type": "string"},
+                        "dataset": {"type": "string"},
+                        "version": {"type": "integer"},
+                        "sensitivity": {"type": "string"},
+                        "description": {"type": "string"},
+                        "update_behaviour": {"type": "string", "enum": ["APPEND", "OVERWRITE"]},
+                        "tags": {"type": "object", "additionalProperties": {"type": "string"}},
+                        "owners": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {"type": "string"},
+                                    "email": {"type": "string", "format": "email"}
+                                }
+                            }
                         }
-                    }
+                    },
+                    "required": ["layer", "domain", "dataset", "sensitivity"]
                 },
-                "is_latest_version": {"type": "boolean"},
                 "columns": {
                     "type": "object",
                     "additionalProperties": {
@@ -283,5 +287,5 @@ class Schema(pandera.DataFrameSchema):
                     }
                 }
             },
-            "required": ["layer", "domain", "dataset", "version", "sensitivity"]
+            "required": ["metadata", "columns"]
         }
