@@ -107,3 +107,9 @@ variable "layers" {
   description = "A list of the layers that the rAPId instance will contain"
   default     = ["default"]
 }
+
+variable "ses_arn" {
+  type        = string
+  description = "SES service ARN that Cognito will use to send emails"
+  default     = null
+}

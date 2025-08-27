@@ -190,3 +190,27 @@ variable "task_cpu" {
   description = "rAPId ecs task cpu"
   default     = 256
 }
+
+variable "ses_service" {
+  type        = bool
+  description = "Create SES service for rAPId domain and use it in Cognito service"
+  default     = false
+}
+
+variable "ses_support_emails_for_cloudwatch_alerts" {
+  type        = list(string)
+  description = "List of email addresses that will receive SES notifications when an email results in a bounce or complaint response from the server"
+  default     = null
+}
+
+variable "allowed_sender_email_addresses" {
+  type        = list(string)
+  description = "List of email addresses that SES can use to send emails. no-reply@domainname address is enabled by default"
+  default     = null
+}
+
+variable "allowed_recipients_email_domains" {
+  type        = string
+  description = "List of allowed recipients email domains that SES service is allowed to send emails to. simulator.amazonses.com is enabled by default"
+  default     = null
+}

@@ -69,6 +69,21 @@ module "ui" {
   sql_injection_protection           = var.sql_injection_protection
 }
 
+module "ses" {
+  source = "../ses"
+
+  ses_service                              = var.ses_service
+  resource-name-prefix                     = var.resource-name-prefix
+  aws_account                              = var.aws_account
+  aws_region                               = var.aws_region
+  tags                                     = var.tags
+  domain_name                              = var.domain_name
+  hosted_zone_id                           = var.hosted_zone_id
+  ses_support_emails_for_cloudwatch_alerts = var.ses_support_emails_for_cloudwatch_alerts
+  allowed_sender_email_addresses           = var.allowed_sender_email_addresses
+  allowed_recipients_email_domains         = var.allowed_recipients_email_domains
+}
+
 resource "aws_s3_bucket" "this" {
   #checkov:skip=CKV_AWS_144:No need for cross region replication
   #checkov:skip=CKV_AWS_145:No need for non default key

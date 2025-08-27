@@ -22,6 +22,16 @@ resource "aws_cognito_user_pool" "rapid_user_pool" {
   software_token_mfa_configuration {
     enabled = true
   }
+
+  dynamic "email_configuration" {
+    for_each = var.ses_arn ? [1] : []
+    content {
+      email_sending_account = "DEVELOPER"
+      from_email_address    = "no-reply@${var.domain_name}"
+      source_arn            = var.ses_arn
+    }
+  }
+
 }
 
 resource "aws_cognito_resource_server" "rapid_resource_server" {
