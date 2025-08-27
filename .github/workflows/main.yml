@@ -95,9 +95,9 @@ jobs:
           eval "$(aws configure export-credentials --format env)"
           make api/test-e2e
 
-      - name: API Tag Image as Failure
-        if: always() && steps.await-running-app.conclusion == 'failure' || steps.e2e-tests.conclusion == 'failure'
-        run: make api/tag-prod-failure
+      # - name: API Tag Image as Failure
+      #   if: always() && steps.await-running-app.conclusion == 'failure' || steps.e2e-tests.conclusion == 'failure'
+      #   run: make api/tag-prod-failure
 
   cleanup:
     needs:
