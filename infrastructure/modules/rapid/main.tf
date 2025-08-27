@@ -82,7 +82,7 @@ module "ses" {
   hosted_zone_id                           = var.hosted_zone_id
   ses_support_emails_for_cloudwatch_alerts = var.ses_support_emails_for_cloudwatch_alerts
   allowed_sender_email_addresses           = var.allowed_sender_email_addresses
-  allowed_recipients_email_domains         = var.allowed_recipients_email_domains
+  allowed_recipients_email_domains         = var.allowed_email_domains
 }
 
 resource "aws_s3_bucket" "this" {

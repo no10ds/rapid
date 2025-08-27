@@ -208,9 +208,3 @@ variable "allowed_sender_email_addresses" {
   description = "List of email addresses that SES can use to send emails. no-reply@domainname address is enabled by default"
   default     = null
 }
-
-variable "allowed_recipients_email_domains" {
-  type        = string
-  description = "List of allowed recipients email domains that SES service is allowed to send emails to. simulator.amazonses.com is enabled by default"
-  default     = null
-}
