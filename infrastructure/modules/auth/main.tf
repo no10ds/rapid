@@ -22,6 +22,14 @@ resource "aws_cognito_user_pool" "rapid_user_pool" {
   software_token_mfa_configuration {
     enabled = true
   }
+
+  email_configuration {
+    email_sending_account = var.ses_arn == null ? "COGNITO_DEFAULT" : "DEVELOPER"
+
+    from_email_address = var.ses_arn == null ? null : "no-reply@${var.domain_name}"
+    source_arn         = var.ses_arn
+  }
+
 }
 
 resource "aws_cognito_resource_server" "rapid_resource_server" {

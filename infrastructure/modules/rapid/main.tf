@@ -43,6 +43,7 @@ module "auth" {
   resource-name-prefix = var.resource-name-prefix
   password_policy      = var.password_policy
   layers               = var.layers
+  ses_arn              = var.ses_service ? module.ses.ses_arn[0] : null
 }
 
 module "data_workflow" {
@@ -67,6 +68,21 @@ module "ui" {
   route_53_validation_record_fqdns   = module.app_cluster.route_53_validation_record_fqdns
   geo_restriction_locations          = var.geo_restriction_locations
   sql_injection_protection           = var.sql_injection_protection
+}
+
+module "ses" {
+  source = "../ses"
+
+  ses_service                              = var.ses_service
+  resource-name-prefix                     = var.resource-name-prefix
+  aws_account                              = var.aws_account
+  aws_region                               = var.aws_region
+  tags                                     = var.tags
+  domain_name                              = var.domain_name
+  hosted_zone_id                           = var.hosted_zone_id != "" ? var.hosted_zone_id : module.app_cluster.hosted_zone_id
+  ses_support_emails_for_cloudwatch_alerts = var.ses_support_emails_for_cloudwatch_alerts
+  allowed_sender_email_addresses           = var.allowed_sender_email_addresses
+  allowed_recipients_email_domains         = var.allowed_email_domains
 }
 
 resource "aws_s3_bucket" "this" {

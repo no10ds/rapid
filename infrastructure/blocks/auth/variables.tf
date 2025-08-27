@@ -12,3 +12,8 @@ variable "resource-name-prefix" {
   type        = string
   description = "The prefix to add to resources for easier identification"
 }
+
+variable "ses_arn" {
+  type        = string
+  description = "SES service ARN that Cognito will use to send emails"
+}
