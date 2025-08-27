@@ -212,6 +212,10 @@ class Schema(pandera.DataFrameSchema):
         if owners:
             owners = [owner.dict() if hasattr(owner, 'dict') else owner for owner in owners]
         
+        columns_dict = {}
+        for column_name, column in self.columns.items():
+            columns_dict[column_name] = column.to_dict()
+        
         result = {
             "layer": layer_value,
             "domain": self.get_domain(),
@@ -224,6 +228,7 @@ class Schema(pandera.DataFrameSchema):
             "key_only_tags": self.metadata.get("key_only_tags"),
             "owners": owners,
             "is_latest_version": self.metadata.get("is_latest_version"),
+            "columns": columns_dict,
         }
         
         if exclude:

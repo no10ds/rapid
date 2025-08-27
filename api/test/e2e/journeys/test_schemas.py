@@ -92,7 +92,8 @@ class TestSchemaJourney(BaseAuthenticatedJourneyTest):
     def test_invalid_column_upload(self, column_key, column_value):
         schema_v1 = self.read_schema_version(SchemaVersion.V1)
         schema_v1["metadata"]["dataset"] = "invalid_dataset"
-        schema_v1["columns"][0][column_key] = column_value
+        first_column_name = next(iter(schema_v1["columns"]))
+        schema_v1["columns"][first_column_name][column_key] = column_value
 
         response = self.upload_schema(schema_v1)
         assert response.status_code == HTTPStatus.BAD_REQUEST
