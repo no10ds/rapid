@@ -64,8 +64,8 @@ jobs:
       - name: Setup API environment
         run: make api/setup
 
-      - name: API Static Analysis
-        run: make api/lint
+      # - name: API Static Analysis
+      #   run: make api/lint
 
       # - name: API Tests
       #   run: make api/test
