@@ -43,6 +43,7 @@ module "auth" {
   resource-name-prefix = var.resource-name-prefix
   password_policy      = var.password_policy
   layers               = var.layers
+  ses_arn              = var.ses_service ? module.ses.ses_arn : null
 }
 
 module "data_workflow" {
