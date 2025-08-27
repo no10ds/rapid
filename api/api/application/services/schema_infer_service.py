@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 import pandera
+from pandera.errors import SchemaError, SchemaInitError, ParserError
 
 from api.application.services.schema_validation import validate_schema
 from api.common.config.layers import Layer
@@ -31,31 +32,35 @@ class SchemaInferService:
         sensitivity: str,
         file_path: Path,
     ) -> dict[str, Any]:
-        dataframe = self._construct_single_chunk_dataframe(file_path)
-
-        pandera_schema = pandera.infer_schema(dataframe)
-        customized_columns = self._customize_inferred_columns(pandera_schema.columns)
-
-        dataset_metadata = DatasetMetadata(
-            layer=layer,
-            domain=domain,
-            dataset=dataset,
-        )
-
-        schema = Schema(
-            dataset_metadata=dataset_metadata,
-            columns=customized_columns,
-            sensitivity=sensitivity,
-            owners=[Owner(name="change_me", email="change_me@email.com")],
-        )
-
         try:
-            validate_schema(schema)
-        finally:
-            # We need to delete the incoming file from the local file system
-            # regardless of the schema validation was successful or not
-            delete_incoming_raw_file(schema, file_path)
-        return schema.dict(exclude={"metadata": {"version"}})
+            dataframe = self._construct_single_chunk_dataframe(file_path)
+
+            pandera_schema = pandera.infer_schema(dataframe)
+            customized_columns = self._customize_inferred_columns(pandera_schema.columns)
+
+            dataset_metadata = DatasetMetadata(
+                layer=layer,
+                domain=domain,
+                dataset=dataset,
+            )
+
+            schema = Schema(
+                dataset_metadata=dataset_metadata,
+                columns=customized_columns,
+                sensitivity=sensitivity,
+                owners=[Owner(name="change_me", email="change_me@email.com")],
+            )
+
+            try:
+                validate_schema(schema)
+            finally:
+                # We need to delete the incoming file from the local file system
+                # regardless of the schema validation was successful or not
+                delete_incoming_raw_file(schema, file_path)
+            return schema.dict(exclude={"metadata": {"version"}})
+            
+        except (SchemaError, SchemaInitError, ParserError) as e:
+            raise UserError(f"Invalid data format: {str(e)}")
 
     def _customize_inferred_columns(self, inferred_columns: Dict[str, pandera.Column]) -> Dict[str, Column]:
         customized = {}
