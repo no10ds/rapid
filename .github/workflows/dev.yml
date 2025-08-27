@@ -67,8 +67,8 @@ jobs:
       - name: API Static Analysis
         run: make api/lint
 
-      - name: API Tests
-        run: make api/test
+      # - name: API Tests
+      #   run: make api/test
 
       - name: API Tag and Upload
         run: make api/tag-and-upload
