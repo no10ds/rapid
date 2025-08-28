@@ -67,13 +67,13 @@ class SchemaInferService:
 
         for name, pandera_column in inferred_columns.items():
             clean_name = clean_column_name(name)
-            athena_dtype = convert_pandera_column_to_athena(pandera_column.dtype)
+            athena_dtype_string = convert_pandera_column_to_athena(pandera_column.dtype)
 
             customized[clean_name] = Column(
-                dtype=athena_dtype,
+                dtype=pandera_column.dtype,
                 nullable=True,
                 unique=False,
-                format=DEFAULT_DATE_FORMAT if is_date_type(athena_dtype) else None,
+                format=DEFAULT_DATE_FORMAT if is_date_type(athena_dtype_string) else None,
                 partition_index=None,
             )
 

@@ -34,7 +34,7 @@ class UpdateBehaviour(StrEnum):
 class Column(pandera.Column):
     def __init__(
         self,
-        dtype: str,
+        dtype,
         nullable: bool,
         partition_index: Optional[int] = None,
         format: Optional[str] = None,

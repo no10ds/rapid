@@ -103,17 +103,78 @@ PANDERA_TO_ATHENA_CONVERTER = {
     pandera.dtypes.Date: AthenaDataType.DATE,
 }
 
+# TODO Pandera: tidy up
+PANDERA_ENGINE_TO_ATHENA_CONVERTER = {
+    # Numpy engine types
+    "object": AthenaDataType.STRING,
+    "str": AthenaDataType.STRING,
+    "bool": AthenaDataType.BOOLEAN,
+    "int8": AthenaDataType.TINYINT,
+    "int16": AthenaDataType.SMALLINT,
+    "int32": AthenaDataType.INT,
+    "int64": AthenaDataType.BIGINT,
+    "float16": AthenaDataType.FLOAT,
+    "float32": AthenaDataType.FLOAT,
+    "float64": AthenaDataType.DOUBLE,
+    "datetime64": AthenaDataType.TIMESTAMP,
+    "timedelta64[ns]": AthenaDataType.TIMESTAMP,
+    
+    # Pandas engine types  
+    "string": AthenaDataType.STRING,
+    "string[python]": AthenaDataType.STRING,
+    "boolean": AthenaDataType.BOOLEAN,
+    "Int8": AthenaDataType.TINYINT,
+    "Int16": AthenaDataType.SMALLINT,
+    "Int32": AthenaDataType.INT,
+    "Int64": AthenaDataType.BIGINT,
+    "Float32": AthenaDataType.FLOAT,
+    "Float64": AthenaDataType.DOUBLE,
+    "datetime64[ns]": AthenaDataType.TIMESTAMP,
+    "date": AthenaDataType.DATE,
+}
+
 
 def is_date_type(type: str) -> bool:
     return type in [AthenaDataType.DATE.value]
 
 
+# def convert_pandera_column_to_athena(pandera_dtype: pandera.dtypes) -> str:
+
+#     try:
+#         dtype = type(pandera_dtype)
+#         return PANDERA_TO_ATHENA_CONVERTER[dtype].value
+#     except KeyError:
+#         pass
+    
+#     # If that fails, try to convert using the string representation
+#     # This handles engine-specific types like pandera.engines.numpy_engine.Object
+#     try:
+#         dtype_str = str(pandera_dtype)
+#         return PANDERA_ENGINE_TO_ATHENA_CONVERTER[dtype_str].value
+#     except KeyError:
+#         pass
+    
+#     # If both approaches fail, raise the original error with more context
+#     dtype = type(pandera_dtype)
+#     dtype_str = str(pandera_dtype)
+#     raise UnsupportedTypeError(
+#         f"Unable to convert the pandera type [{dtype}] with string representation '{dtype_str}' to Athena Schema. "
+#         f"This type is currently unsupported. Supported type classes: {list(PANDERA_TO_ATHENA_CONVERTER.keys())}. "
+#         f"Supported string representations: {list(PANDERA_ENGINE_TO_ATHENA_CONVERTER.keys())}"
+#     )
+
 def convert_pandera_column_to_athena(pandera_dtype: pandera.dtypes) -> str:
 
     try:
-        dtype = type(pandera_dtype)
-        return PANDERA_TO_ATHENA_CONVERTER[dtype].value
+        dtype_str = str(pandera_dtype)
+        return PANDERA_ENGINE_TO_ATHENA_CONVERTER[dtype_str].value
     except KeyError:
-        raise UnsupportedTypeError(
-            f"Unable to convert the type [{dtype}] to Athena Schema. This type is currently unsupported."
-        )
+        pass
+    
+    dtype = type(pandera_dtype)
+    dtype_str = str(pandera_dtype)
+    raise UnsupportedTypeError(
+        f"Unable to convert the pandera type [{dtype}] with string representation '{dtype_str}' to Athena Schema. "
+        f"This type is currently unsupported. Supported type classes: {list(PANDERA_TO_ATHENA_CONVERTER.keys())}. "
+        f"Supported string representations: {list(PANDERA_ENGINE_TO_ATHENA_CONVERTER.keys())}"
+    )
