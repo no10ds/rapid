@@ -57,7 +57,41 @@ class SchemaInferService:
                 # We need to delete the incoming file from the local file system
                 # regardless of the schema validation was successful or not
                 delete_incoming_raw_file(schema, file_path)
-            return schema.dict(exclude={"metadata": {"version"}})
+            
+            # TODO Pandera: tidy this up
+            # Return the schema in the expected format with metadata and columns structure
+            schema_dict = schema.dict(exclude={"metadata": {"version"}})
+            
+            # Extract metadata fields
+            metadata = {
+                "layer": schema_dict["layer"],
+                "domain": schema_dict["domain"],
+                "dataset": schema_dict["dataset"],
+                "sensitivity": schema_dict["sensitivity"],
+                "description": schema_dict["description"],
+                "key_value_tags": schema_dict["key_value_tags"],
+                "key_only_tags": schema_dict["key_only_tags"],
+                "owners": schema_dict["owners"],
+                "update_behaviour": schema_dict["update_behaviour"],
+                "is_latest_version": schema_dict["is_latest_version"],
+            }
+            
+            # Convert columns dict to array format with proper field names
+            columns = []
+            for column_name, column_data in schema_dict["columns"].items():
+                columns.append({
+                    "name": column_name,
+                    "partition_index": column_data["partition_index"],
+                    "data_type": column_data["dtype"],
+                    "allow_null": column_data["nullable"],
+                    "format": column_data["format"],
+                })
+            
+            # Return structured format
+            return {
+                "metadata": metadata,
+                "columns": columns
+            }
             
         except (SchemaError, SchemaInitError, ParserError) as e:
             raise UserError(f"Invalid data format: {str(e)}")
