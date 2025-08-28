@@ -14,10 +14,8 @@ from api.common.custom_exceptions import (
     UserError,
 )
 from api.common.logger import AppLogger
-from api.domain.schema import Schema, Column, COLUMNS
-from api.domain.schema_metadata import SchemaMetadata
+from api.domain.schema import Schema, Column, Owner, COLUMNS, UpdateBehaviour
 from api.domain.dataset_metadata import DatasetMetadata
-
 from api.domain.dataset_filters import DatasetFilters
 from api.common.config.auth import Sensitivity
 
@@ -49,17 +47,53 @@ class SchemaService:
         return self._parse_schema(schema_dict)
 
     def _parse_schema(self, schema: dict, only_metadata: bool = False):
-        metadata = SchemaMetadata.parse_obj(schema)
+        dataset_metadata = DatasetMetadata(
+            layer=schema["layer"],
+            domain=schema["domain"],
+            dataset=schema["dataset"],
+            version=schema.get("version")
+        )
+
         if only_metadata:
-            return metadata
+            return {
+                "layer": dataset_metadata.layer,
+                "domain": dataset_metadata.domain,
+                "dataset": dataset_metadata.dataset,
+                "version": dataset_metadata.version,
+                "sensitivity": schema["sensitivity"],
+                "description": schema.get("description", ""),
+                "key_value_tags": schema.get("key_value_tags", {}),
+                "key_only_tags": schema.get("key_only_tags", []),
+                "owners": [Owner(**owner) for owner in schema.get("owners", [])],
+                "update_behaviour": schema.get("update_behaviour", UpdateBehaviour.APPEND),
+                "is_latest_version": schema.get("is_latest_version", True),
+            }
+
+        columns = {}
+        for col_name, col in schema[COLUMNS].items():
+            columns[col_name] = Column(
+                dtype=col["dtype"],
+                nullable=col["nullable"],
+                partition_index=col.get("partition_index"),
+                format=col.get("format"),
+                unique=col.get("unique", False)
+            )
+
         return Schema(
-            metadata=metadata,
-            columns=[Column.parse_obj(col) for col in schema[COLUMNS]],
+            dataset_metadata=dataset_metadata,
+            sensitivity=schema["sensitivity"],
+            description=schema.get("description", ""),
+            key_value_tags=schema.get("key_value_tags", {}),
+            key_only_tags=schema.get("key_only_tags", []),
+            owners=[Owner(**owner) for owner in schema.get("owners", [])],
+            update_behaviour=schema.get("update_behaviour", UpdateBehaviour.APPEND),
+            is_latest_version=schema.get("is_latest_version", True),
+            columns=columns,
         )
 
     def get_schema_metadatas(
         self, query: DatasetFilters = DatasetFilters()
-    ) -> List[SchemaMetadata]:
+    ) -> List[Schema]:
         schemas = self.dynamodb_adapter.get_latest_schemas(query)
         if schemas:
             return [
@@ -89,8 +123,8 @@ class SchemaService:
             self.dynamodb_adapter.delete_schema(metadata)
 
     def upload_schema(self, schema: Schema) -> str:
-        schema.metadata.version = FIRST_SCHEMA_VERSION_NUMBER
-        dataset = schema.metadata
+        schema.metadata["version"] = FIRST_SCHEMA_VERSION_NUMBER
+        dataset = schema.dataset_metadata
         try:
             if self.get_schema(dataset) is not None:
                 AppLogger.warning(
@@ -103,12 +137,12 @@ class SchemaService:
         validate_schema_for_upload(schema)
         self.glue_adapter.create_table(schema)
         self.dynamodb_adapter.store_schema(schema)
-        return schema.metadata.glue_table_name()
+        return schema.dataset_metadata.glue_table_name()
 
     def update_schema(self, schema: Schema) -> str:
-        original_schema = self.get_schema(schema.metadata, latest=True)
+        original_schema = self.get_schema(schema.dataset_metadata, latest=True)
 
-        schema.metadata.version = (
+        schema.metadata["version"] = (
             original_schema.get_version() + SCHEMA_VERSION_INCREMENT
         )
 
@@ -120,8 +154,8 @@ class SchemaService:
         self.glue_adapter.create_table(schema)
 
         self.dynamodb_adapter.store_schema(schema)
-        self.dynamodb_adapter.deprecate_schema(original_schema.metadata)
-        return schema.metadata.dataset_identifier()
+        self.dynamodb_adapter.deprecate_schema(original_schema.dataset_metadata)
+        return schema.dataset_metadata.dataset_identifier()
 
     def check_for_protected_domain(self, schema: Schema) -> str:
         if Sensitivity.PROTECTED == schema.get_sensitivity():
@@ -137,8 +171,8 @@ class SchemaService:
     def check_for_sensitivity_consistency(
         self, original_schema: Schema, schema: Schema
     ):
-        original_sensitivity = original_schema.metadata.get_sensitivity()
-        new_sensitivity = schema.metadata.get_sensitivity()
+        original_sensitivity = original_schema.get_sensitivity()
+        new_sensitivity = schema.get_sensitivity()
         if original_sensitivity != new_sensitivity:
             raise UserError(
                 f"The sensitivity of this updated schema [{new_sensitivity}] does not match"

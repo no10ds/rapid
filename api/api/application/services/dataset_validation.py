@@ -9,8 +9,6 @@ from api.common.custom_exceptions import (
 )
 from api.common.value_transformers import clean_column_name
 from api.domain.data_types import (
-    extract_athena_types,
-    AthenaDataType,
     StringType,
     DateType,
 )
@@ -28,11 +26,7 @@ def transform_and_validate(schema: Schema, data: pd.DataFrame) -> pd.DataFrame:
         .pipe(dataset_has_rows)
         .pipe(remove_empty_rows)
         .pipe(clean_column_headers)
-        .pipe(dataset_has_correct_columns, schema)
         .pipe(convert_date_columns, schema)
-        .pipe(dataset_has_acceptable_null_values, schema)
-        .pipe(dataset_has_acceptable_unique_values, schema)
-        .pipe(dataset_has_correct_data_types, schema)
         .pipe(dataset_has_no_illegal_characters_in_partition_columns, schema)
     )
 
@@ -50,48 +44,6 @@ def dataset_has_rows(df: pd.DataFrame) -> Tuple[pd.DataFrame, list[str]]:
     return df, []
 
 
-def dataset_has_correct_columns(
-    df: pd.DataFrame, schema: Schema
-) -> Tuple[pd.DataFrame, list[str]]:
-    expected_columns = schema.get_column_names()
-    actual_columns = list(df.columns)
-    error_list = []
-
-    has_expected_columns = all(
-        [expected_column in actual_columns for expected_column in expected_columns]
-    )
-
-    if not has_expected_columns or len(actual_columns) != len(expected_columns):
-        # Cannot reasonably proceed with further validation if we don't even have the correct columns
-        raise UnprocessableDatasetError(
-            [f"Expected columns: {expected_columns}, received: {actual_columns}"]
-        )
-
-    return df, error_list
-
-
-def dataset_has_acceptable_null_values(
-    data_frame: pd.DataFrame, schema: Schema
-) -> Tuple[pd.DataFrame, list[str]]:
-    error_list = []
-    for column in schema.columns:
-        if not column.allow_null and data_frame[column.name].isnull().values.any():
-            error_list.append(f"Column [{column.name}] does not allow null values")
-
-    return data_frame, error_list
-
-
-def dataset_has_acceptable_unique_values(
-    data_frame: pd.DataFrame, schema: Schema
-) -> Tuple[pd.DataFrame, list[str]]:
-    error_list = []
-    for column in schema.columns:
-        if column.unique and data_frame[column.name].dropna().duplicated().values.any():
-            error_list.append(f"Column [{column.name}] must have unique values")
-
-    return data_frame, error_list
-
-
 def convert_date_columns(
     data_frame: pd.DataFrame, schema: Schema
 ) -> Tuple[pd.DataFrame, list[str]]:
@@ -105,30 +57,6 @@ def convert_date_columns(
         except ValueError:
             error_list.append(
                 f"Column [{column.name}] does not match specified date format in at least one row"
-            )
-
-    return data_frame, error_list
-
-
-def dataset_has_correct_data_types(
-    data_frame: pd.DataFrame, schema: Schema
-) -> Tuple[pd.DataFrame, list[str]]:
-    error_list = []
-    column_types = extract_athena_types(
-        data_frame,
-    )
-    for column in schema.columns:
-        if column.name not in column_types:
-            continue
-        actual_type = column_types[column.name]
-        expected_type = column.data_type
-
-        types_match = isinstance(AthenaDataType(expected_type).value, type(actual_type))
-
-        if not types_match and not is_valid_custom_dtype(actual_type, expected_type):
-            error_list.append(
-                f"Column [{column.name}] has an incorrect data type. Expected {expected_type}, received {AthenaDataType(actual_type).value}"
-                # noqa: E501
             )
 
     return data_frame, error_list

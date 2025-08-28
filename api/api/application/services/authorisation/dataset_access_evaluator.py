@@ -7,7 +7,7 @@ from api.application.services.permissions_service import PermissionsService
 from api.application.services.schema_service import SchemaService
 from api.domain.dataset_filters import DatasetFilters
 from api.domain.dataset_metadata import DatasetMetadata, LAYER, DOMAIN
-from api.domain.schema_metadata import SchemaMetadata, SENSITIVITY
+from api.domain.schema import Schema, SENSITIVITY
 from api.domain.permission_item import PermissionItem
 
 
@@ -63,7 +63,7 @@ class DatasetAccessEvaluator:
         6. Raise Authorisation if the loop is over and there was no permission overlap
         """
         permissions = self.permission_service.get_subject_permissions(subject_id)
-        schema_metadata = self.schema_service.get_schema(dataset).metadata
+        schema = self.schema_service.get_schema(dataset)
 
         for action in actions:
             filtered_permissions = self.filter_permissions_by_action(
@@ -71,7 +71,7 @@ class DatasetAccessEvaluator:
             )
             if any(
                 self.schema_metadata_overlaps_with_permission(
-                    schema_metadata, permission
+                    schema, permission
                 )
                 for permission in filtered_permissions
             ):
@@ -81,15 +81,15 @@ class DatasetAccessEvaluator:
         )
 
     def schema_metadata_overlaps_with_permission(
-        self, schema_metadata: SchemaMetadata, permission: PermissionItem
+        self, schema: Schema, permission: PermissionItem
     ) -> bool:
         return all(
             [
-                schema_metadata.get_sensitivity()
+                schema.get_sensitivity()
                 in SensitivityPermissionConverter[permission.sensitivity].value,
-                schema_metadata.get_layer()
+                schema.get_layer()
                 in LayerPermissionConverter[permission.layer].value,
-                schema_metadata.get_domain() == permission.get_domain()
+                schema.get_domain() == permission.get_domain()
                 if permission.is_protected_permission()
                 else True,
             ]
@@ -104,7 +104,7 @@ class DatasetAccessEvaluator:
         self,
         permissions: List[PermissionItem],
         filters: DatasetFilters = DatasetFilters(),
-    ) -> List[SchemaMetadata]:
+    ) -> List[Schema]:
         authorised_datasets = set()
         for permission in permissions:
             authorised_datasets.update(
@@ -114,7 +114,7 @@ class DatasetAccessEvaluator:
 
     def extract_datasets_from_permission(
         self, permission: PermissionItem, filters: DatasetFilters = DatasetFilters()
-    ) -> List[SchemaMetadata]:
+    ) -> List[Schema]:
         """
         Extracts the datasets from the permission, while combining with the filters argument.
         The permission filters overwrite the filters argument to stop any injection of permissions via the filters.

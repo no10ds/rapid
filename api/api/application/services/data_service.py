@@ -1,7 +1,7 @@
 import uuid
 from pathlib import Path
 from threading import Thread
-from typing import List, Tuple
+from typing import Tuple, Dict
 
 import pandas as pd
 
@@ -33,9 +33,8 @@ from api.common.utilities import build_error_message_list
 from api.domain.data_types import DateType
 from api.domain.dataset_metadata import DatasetMetadata
 from api.domain.enriched_schema import (
-    EnrichedColumn,
     EnrichedSchema,
-    EnrichedSchemaMetadata,
+    EnrichedColumn
 )
 from api.domain.Jobs.QueryJob import QueryJob, QueryStep
 from api.domain.Jobs.UploadJob import UploadJob, UploadStep
@@ -102,7 +101,7 @@ class DataService:
             self.validate_incoming_data(schema, file_path, raw_file_identifier)
             self.job_service.update_step(job, UploadStep.RAW_DATA_UPLOAD)
             self.s3_adapter.upload_raw_data(
-                schema.metadata, file_path, raw_file_identifier
+                schema.dataset_metadata, file_path, raw_file_identifier
             )
             self.job_service.update_step(job, UploadStep.DATA_UPLOAD)
             self.process_chunks(schema, file_path, raw_file_identifier)
@@ -167,7 +166,7 @@ class DataService:
         )
         try:
             self.s3_adapter.delete_previous_dataset_files(
-                schema.metadata,
+                schema.dataset_metadata,
                 raw_file_identifier,
             )
         except IndexError:
@@ -194,9 +193,8 @@ class DataService:
             dataset, self._build_query(schema)
         )
         last_updated = self.get_last_updated_time(dataset)
-        return EnrichedSchema(
-            metadata=self._enrich_metadata(schema, statistics_dataframe, last_updated),
-            columns=self._enrich_columns(schema, statistics_dataframe),
+        return self._enrich_schema(
+            schema, statistics_dataframe, last_updated
         )
 
     def upload_data(
@@ -211,7 +209,7 @@ class DataService:
     def load_partitions(self, schema: Schema):
         if schema.get_partition_columns():
             query_id = self.athena_adapter.query_sql_async(
-                f"MSCK REPAIR TABLE `{schema.metadata.glue_table_name()}`;"
+                f"MSCK REPAIR TABLE `{schema.dataset_metadata.glue_table_name()}`;"
             )
             self.athena_adapter.wait_for_query_to_complete(query_id)
 
@@ -284,35 +282,45 @@ class DataService:
         ]
         return SQLQuery(select_columns=columns_to_query)
 
-    def _enrich_metadata(
+    def _enrich_schema(
         self, schema: Schema, statistics_dataframe: pd.DataFrame, last_updated: str
-    ) -> EnrichedSchemaMetadata:
+    ) -> EnrichedSchema:
         dataset_size = statistics_dataframe.at[0, "data_size"]
-        return EnrichedSchemaMetadata(
-            **schema.metadata.dict(),
+        return EnrichedSchema(
+            dataset_metadata=schema.dataset_metadata,
+            sensitivity=schema.get_sensitivity(),
+            owners=schema.get_owners(),
+            columns=self._enrich_columns(schema, statistics_dataframe),
             number_of_rows=dataset_size,
-            number_of_columns=len(schema.columns),
+            number_of_columns=len(schema.columns.values()),
             last_updated=last_updated,
         )
 
     def _enrich_columns(
         self, schema: Schema, statistics_dataframe: pd.DataFrame
-    ) -> List[EnrichedColumn]:
+    ) -> Dict[str, EnrichedColumn]:
         strftime_format = "%Y-%m-%d"
-        enriched_columns = []
+        enriched_columns = {}
         date_columns = schema.get_columns_by_type(DateType)
-        for column in schema.columns:
+        for name, column in schema.columns.items():
             statistics = None
             if column in date_columns:
                 statistics = {
-                    "max": statistics_dataframe.at[0, f"max_{column.name}"].strftime(
+                    "max": statistics_dataframe.at[0, f"max_{name}"].strftime(
                         strftime_format
                     ),
-                    "min": statistics_dataframe.at[0, f"min_{column.name}"].strftime(
+                    "min": statistics_dataframe.at[0, f"min_{name}"].strftime(
                         strftime_format
                     ),
                 }
-            enriched_columns.append(
-                EnrichedColumn(**column.dict(), statistics=statistics)
+
+            enriched_columns[name] = EnrichedColumn(
+                dtype=column.dtype,
+                nullable=column.nullable,
+                partition_index=column.partition_index,
+                format=column.format,
+                unique=getattr(column, 'unique', False),
+                statistics=statistics
             )
+
         return enriched_columns

@@ -10,9 +10,8 @@ from api.common.config.constants import (
     COLUMN_NAME_REGEX,
 )
 from api.common.custom_exceptions import SchemaValidationError
-from api.domain.data_types import AthenaDataType, is_date_type
-from api.domain.schema import Schema
-from api.domain.schema_metadata import UpdateBehaviour, Owner
+from api.domain.data_types import is_date_type
+from api.domain.schema import Schema, UpdateBehaviour, Owner
 
 
 def validate_schema_for_upload(schema: Schema):
@@ -35,7 +34,7 @@ def schema_has_valid_column_definitions(schema: Schema):
     has_unique_partition_indexes(schema)
     has_valid_partition_index_values(schema)
     has_allow_null_false_on_partitioned_columns(schema)
-    has_only_accepted_data_types(schema)
+    # has_only_accepted_data_types(schema)
     has_valid_date_column_definition(schema)
     has_valid_allow_unique_columns(schema)
 
@@ -46,15 +45,15 @@ def has_columns(schema: Schema):
 
 
 def has_non_empty_column_names(schema: Schema):
-    if any((not column.name for column in schema.columns)):
+    if any((not column_name for column_name in schema.columns.keys())):
         raise SchemaValidationError("You can not have empty column names")
 
 
 def has_valid_inferred_column_names(schema: Schema):
     if any(
         (
-            column.name.startswith(INFERRED_UNNAMED_COLUMN_PREFIX)
-            for column in schema.columns
+            column_name.startswith(INFERRED_UNNAMED_COLUMN_PREFIX)
+            for column_name in schema.columns.keys()
         )
     ):
         raise SchemaValidationError("You can not have empty column names")
@@ -79,8 +78,7 @@ def schema_has_valid_metadata(schema: Schema):
 
 
 def schema_has_metadata_values(schema: Schema):
-    metadata = schema.metadata
-    if not (metadata.domain and metadata.dataset and metadata.sensitivity):
+    if not (schema.get_domain() and schema.get_dataset() and schema.get_sensitivity()):
         raise SchemaValidationError("You can not have empty metadata values")
 
 
@@ -116,7 +114,15 @@ def validate_metadata_character_string(string_input: str) -> bool:
 
 
 def schema_has_valid_tag_set(schema: Schema):
-    schema.metadata.remove_duplicates()
+    if schema.metadata.get("key_only_tags"):
+        seen = set()
+        deduped_tags = []
+        for tag in schema.metadata["key_only_tags"]:
+            if tag not in seen:
+                seen.add(tag)
+                deduped_tags.append(tag)
+        schema.metadata["key_only_tags"] = deduped_tags
+
     if len(schema.get_tags()) > MAX_TAG_COUNT:
         raise SchemaValidationError(
             f"You cannot specify more than {MAX_TAG_COUNT} tags"
@@ -157,24 +163,25 @@ def has_valid_partition_index_values(schema: Schema):
 
 def has_allow_null_false_on_partitioned_columns(schema):
     for partitioned_col in schema.get_partition_columns():
-        if partitioned_col.allow_null:
+        if partitioned_col.nullable:
             raise SchemaValidationError("Partition columns cannot allow null values")
 
 
-def has_only_accepted_data_types(schema: Schema):
-    data_types = schema.get_data_types()
-    try:
-        for data_type in data_types:
-            AthenaDataType(data_type)
-    except ValueError:
-        raise SchemaValidationError(
-            "You are specifying one or more unaccepted data types",
-        )
+# TODO Pandera: replace data type validation
+# def has_only_accepted_data_types(schema: Schema):
+#     data_types = schema.get_data_types()
+#     try:
+#         for data_type in data_types:
+#             AthenaDataType(data_type)
+#     except ValueError:
+#         raise SchemaValidationError(
+#             "You are specifying one or more unaccepted data types",
+#         )
 
 
 def has_valid_date_column_definition(schema: Schema):
-    for column in schema.columns:
-        if is_date_type(column.data_type) and __has_value_for(column.format):
+    for column in schema.columns.values():
+        if is_date_type(column.dtype) and __has_value_for(column.format):
             __has_valid_date_format(column.format)
 
 
@@ -186,7 +193,7 @@ def has_valid_sensitivity_level(schema: Schema):
 
 
 def schema_has_valid_data_owner(schema: Schema):
-    owners = schema.metadata.get_owners()
+    owners = schema.get_owners()
     if owners is None or len(owners) == 0:
         raise SchemaValidationError("You must specify at least one owner")
     else:
@@ -208,7 +215,7 @@ def has_valid_update_behaviour(schema: Schema):
 
 def has_valid_allow_unique_columns(schema: Schema):
     if not schema.has_overwrite_behaviour():
-        for column in schema.columns:
+        for column in schema.columns.values():
             if column.unique:
                 raise SchemaValidationError(
                     "Schema with APPEND update behaviour cannot force unique values in columns"

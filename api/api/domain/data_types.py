@@ -1,9 +1,6 @@
 from strenum import StrEnum
-from enum import Enum
 
-from pandas import DataFrame
-from pandas.api.types import infer_dtype
-
+import pandera.dtypes
 from api.common.custom_exceptions import UnsupportedTypeError
 
 
@@ -43,7 +40,7 @@ class TimestampType(StrEnum):
     TIMESTAMP = "timestamp"
 
 
-class PandasDataType(StrEnum):
+class PanderaDataType(StrEnum):
     BOOLEAN = BooleanType.BOOLEAN
     DATE = DateType.DATE
     DATETIME = DateType.DATETIME
@@ -58,7 +55,7 @@ class PandasDataType(StrEnum):
     STRING = StringType.STRING
 
 
-class AthenaDataType(Enum):
+class AthenaDataType(StrEnum):
     BIGINT = NumericType.BIGINT
     BOOLEAN = BooleanType.BOOLEAN
     CHAR = StringType.CHAR
@@ -74,19 +71,66 @@ class AthenaDataType(Enum):
     VARCHAR = StringType.VARCHAR
 
 
-PANDAS_TO_ATHENA_CONVERTER = {
-    PandasDataType.BOOLEAN: AthenaDataType.BOOLEAN,
-    PandasDataType.DATE: AthenaDataType.DATE,
-    PandasDataType.DATETIME: AthenaDataType.DATE,
-    PandasDataType.DATETIME64: AthenaDataType.DATE,
-    PandasDataType.DECIMAL: AthenaDataType.DECIMAL,
-    PandasDataType.INTEGER: AthenaDataType.INT,
-    PandasDataType.FLOATING: AthenaDataType.DOUBLE,
-    PandasDataType.MIXED: AthenaDataType.STRING,
-    PandasDataType.MIXED_INTEGER: AthenaDataType.STRING,
-    PandasDataType.MIXED_INTEGER_FLOAT: AthenaDataType.DOUBLE,
-    PandasDataType.STRING: AthenaDataType.STRING,
-    PandasDataType.OBJECT: AthenaDataType.STRING,
+ATHENA_TO_PANDERA_CONVERTER = {
+    AthenaDataType.STRING: pandera.dtypes.String,
+    AthenaDataType.VARCHAR: pandera.dtypes.String,
+    AthenaDataType.CHAR: pandera.dtypes.String,
+    AthenaDataType.INT: pandera.dtypes.Int,
+    AthenaDataType.BIGINT: pandera.dtypes.Int64,
+    AthenaDataType.SMALLINT: pandera.dtypes.Int16,
+    AthenaDataType.TINYINT: pandera.dtypes.Int8,
+    AthenaDataType.DOUBLE: pandera.dtypes.Float64,
+    AthenaDataType.FLOAT: pandera.dtypes.Float32,
+    AthenaDataType.DECIMAL: pandera.dtypes.Float64,
+    AthenaDataType.BOOLEAN: pandera.dtypes.Bool,
+    AthenaDataType.DATE: pandera.dtypes.Timestamp,
+    AthenaDataType.TIMESTAMP: pandera.dtypes.Timestamp,
+}
+
+PANDERA_TO_ATHENA_CONVERTER = {
+    pandera.dtypes.Int: AthenaDataType.INT,
+    pandera.dtypes.Int8: AthenaDataType.TINYINT,
+    pandera.dtypes.Int16: AthenaDataType.SMALLINT,
+    pandera.dtypes.Int32: AthenaDataType.INT,
+    pandera.dtypes.Int64: AthenaDataType.BIGINT,
+    pandera.dtypes.Float: AthenaDataType.FLOAT,
+    pandera.dtypes.Float32: AthenaDataType.FLOAT,
+    pandera.dtypes.Float64: AthenaDataType.DOUBLE,
+    pandera.dtypes.Bool: AthenaDataType.BOOLEAN,
+    pandera.dtypes.String: AthenaDataType.STRING,
+    pandera.dtypes.Timestamp: AthenaDataType.TIMESTAMP,
+    pandera.dtypes.DateTime: AthenaDataType.TIMESTAMP,
+    pandera.dtypes.Date: AthenaDataType.DATE,
+}
+
+# TODO Pandera: tidy up
+PANDERA_ENGINE_TO_ATHENA_CONVERTER = {
+    # Numpy engine types
+    "object": AthenaDataType.STRING,
+    "str": AthenaDataType.STRING,
+    "bool": AthenaDataType.BOOLEAN,
+    "int8": AthenaDataType.TINYINT,
+    "int16": AthenaDataType.SMALLINT,
+    "int32": AthenaDataType.INT,
+    "int64": AthenaDataType.BIGINT,
+    "float16": AthenaDataType.FLOAT,
+    "float32": AthenaDataType.FLOAT,
+    "float64": AthenaDataType.DOUBLE,
+    "datetime64": AthenaDataType.TIMESTAMP,
+    "timedelta64[ns]": AthenaDataType.TIMESTAMP,
+    
+    # Pandas engine types  
+    "string": AthenaDataType.STRING,
+    "string[python]": AthenaDataType.STRING,
+    "boolean": AthenaDataType.BOOLEAN,
+    "Int8": AthenaDataType.TINYINT,
+    "Int16": AthenaDataType.SMALLINT,
+    "Int32": AthenaDataType.INT,
+    "Int64": AthenaDataType.BIGINT,
+    "Float32": AthenaDataType.FLOAT,
+    "Float64": AthenaDataType.DOUBLE,
+    "datetime64[ns]": AthenaDataType.TIMESTAMP,
+    "date": AthenaDataType.DATE,
 }
 
 
@@ -94,17 +138,43 @@ def is_date_type(type: str) -> bool:
     return type in [AthenaDataType.DATE.value]
 
 
-def extract_athena_types(df: DataFrame) -> dict:
-    types = {}
-    for column in df.columns:
-        if df[column].dropna().size == 0:
-            continue
-        dtype = str(infer_dtype(df[column], skipna=True))
-        try:
-            types[column] = PANDAS_TO_ATHENA_CONVERTER[dtype].value
-        except KeyError:
-            raise UnsupportedTypeError(
-                f"Unable to convert the column [{column}] of type [{dtype}] to Athena Schema. This type is currently unsupported."
-            )
+# def convert_pandera_column_to_athena(pandera_dtype: pandera.dtypes) -> str:
 
-    return types
+#     try:
+#         dtype = type(pandera_dtype)
+#         return PANDERA_TO_ATHENA_CONVERTER[dtype].value
+#     except KeyError:
+#         pass
+    
+#     # If that fails, try to convert using the string representation
+#     # This handles engine-specific types like pandera.engines.numpy_engine.Object
+#     try:
+#         dtype_str = str(pandera_dtype)
+#         return PANDERA_ENGINE_TO_ATHENA_CONVERTER[dtype_str].value
+#     except KeyError:
+#         pass
+    
+#     # If both approaches fail, raise the original error with more context
+#     dtype = type(pandera_dtype)
+#     dtype_str = str(pandera_dtype)
+#     raise UnsupportedTypeError(
+#         f"Unable to convert the pandera type [{dtype}] with string representation '{dtype_str}' to Athena Schema. "
+#         f"This type is currently unsupported. Supported type classes: {list(PANDERA_TO_ATHENA_CONVERTER.keys())}. "
+#         f"Supported string representations: {list(PANDERA_ENGINE_TO_ATHENA_CONVERTER.keys())}"
+#     )
+
+def convert_pandera_column_to_athena(pandera_dtype: pandera.dtypes) -> str:
+
+    try:
+        dtype_str = str(pandera_dtype)
+        return PANDERA_ENGINE_TO_ATHENA_CONVERTER[dtype_str].value
+    except KeyError:
+        pass
+    
+    dtype = type(pandera_dtype)
+    dtype_str = str(pandera_dtype)
+    raise UnsupportedTypeError(
+        f"Unable to convert the pandera type [{dtype}] with string representation '{dtype_str}' to Athena Schema. "
+        f"This type is currently unsupported. Supported type classes: {list(PANDERA_TO_ATHENA_CONVERTER.keys())}. "
+        f"Supported string representations: {list(PANDERA_ENGINE_TO_ATHENA_CONVERTER.keys())}"
+    )

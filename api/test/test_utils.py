@@ -41,14 +41,13 @@ def mock_schema_response():
             "description": "some test description",
             "version": 1,
         },
-        "columns": [
-            {
-                "name": "colname1",
+        "columns": {
+            "colname1": {
                 "partition_index": 0,
-                "data_type": "int",
-                "allow_null": True,
+                "dtype": "int",
+                "nullable": True,
             }
-        ],
+        }
     }
 
     body_encoded = json.dumps(body_json)

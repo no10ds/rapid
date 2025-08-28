@@ -54,7 +54,7 @@ class DatasetMetadata(BaseModel):
 
     def to_dict(self):
         return {
-            LAYER: self.layer,
+            LAYER: self.layer.value,
             DOMAIN: self.domain,
             DATASET: self.dataset,
             VERSION: self.version,

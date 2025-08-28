@@ -20,8 +20,7 @@ from api.common.config.auth import Action
 from api.common.config.constants import BASE_API_PATH
 from api.domain.dataset_filters import DatasetFilters
 from api.domain.dataset_metadata import DatasetMetadata
-from api.domain.schema import Schema, Column
-from api.domain.schema_metadata import Owner, SchemaMetadata
+from api.domain.schema import Schema, Column, Owner
 from api.domain.search_metadata import SearchMetadata, MatchField
 from api.domain.sql_query import SQLQuery
 from test.api.common.controller_test_utils import BaseClientTest
@@ -87,7 +86,7 @@ class TestDataUpload(BaseClientTest):
         mock_get_subject_id,
         mock_store_file_to_disk,
         mock_upload_dataset,
-        mock_construct_datset_metadata,
+        mock_construct_dataset_metadata,
     ):
         file_content = b"some,content"
         incoming_file_path = Path("filename.csv")
@@ -95,7 +94,7 @@ class TestDataUpload(BaseClientTest):
         raw_file_identifier = "123-456-789"
         subject_id = "subject_id"
         job_id = "abc-123"
-        mock_construct_datset_metadata.return_value = DatasetMetadata(
+        mock_construct_dataset_metadata.return_value = DatasetMetadata(
             "layer", "domain", "dataset", 14
         )
         mock_get_subject_id.return_value = subject_id
@@ -139,7 +138,7 @@ class TestDataUpload(BaseClientTest):
         mock_get_subject_id,
         mock_store_file_to_disk,
         mock_upload_dataset,
-        mock_construct_datset_metadata,
+        mock_construct_dataset_metadata,
     ):
         file_content = b"some,content"
         incoming_file_path = Path("filename.parquet")
@@ -147,7 +146,7 @@ class TestDataUpload(BaseClientTest):
         raw_file_identifier = "123-456-789"
         subject_id = "subject_id"
         job_id = "abc-123"
-        mock_construct_datset_metadata.return_value = DatasetMetadata(
+        mock_construct_dataset_metadata.return_value = DatasetMetadata(
             "layer", "domain", "dataset", 14
         )
 
@@ -407,23 +406,17 @@ class TestListDatasets(BaseClientTest):
         self, mock_get_subject_id, mock_get_authorised_datasets
     ):
         metadata_response = [
-            SchemaMetadata(
+            DatasetMetadata(
                 layer="layer",
                 domain="domain1",
                 dataset="dataset1",
-                key_value_tags={"tag1": "value1"},
-                description="",
                 version=1,
-                sensitivity="PUBLIC",
             ),
-            SchemaMetadata(
+            DatasetMetadata(
                 layer="layer",
                 domain="domain2",
                 dataset="dataset2",
-                key_value_tags={"tag2": "value2"},
                 version=1,
-                description="some test description",
-                sensitivity="PUBLIC",
             ),
         ]
         subject_id = "subject_id"
@@ -435,27 +428,13 @@ class TestListDatasets(BaseClientTest):
                 "layer": "layer",
                 "domain": "domain1",
                 "dataset": "dataset1",
-                "sensitivity": "PUBLIC",
                 "version": 1,
-                "description": "",
-                "key_value_tags": {"tag1": "value1"},
-                "key_only_tags": [],
-                "owners": None,
-                "update_behaviour": "APPEND",
-                "is_latest_version": True,
             },
             {
                 "layer": "layer",
                 "domain": "domain2",
                 "dataset": "dataset2",
-                "sensitivity": "PUBLIC",
                 "version": 1,
-                "description": "some test description",
-                "key_value_tags": {"tag2": "value2"},
-                "key_only_tags": [],
-                "update_behaviour": "APPEND",
-                "owners": None,
-                "is_latest_version": True,
             },
         ]
 
@@ -483,23 +462,17 @@ class TestListDatasets(BaseClientTest):
         mock_get_subject_id.return_value = subject_id
 
         metadata_response = [
-            SchemaMetadata(
+            DatasetMetadata(
                 layer="layer",
                 domain="domain1",
                 dataset="dataset1",
-                sensitivity="PUBLIC",
-                key_value_tags={"tag1": "value1"},
                 version=1,
-                description="",
             ),
-            SchemaMetadata(
+            DatasetMetadata(
                 layer="layer",
                 domain="domain2",
                 dataset="dataset2",
-                sensitivity="PUBLIC",
-                key_value_tags={"tag2": "value2"},
                 version=1,
-                description="some test description",
             ),
         ]
 
@@ -511,26 +484,12 @@ class TestListDatasets(BaseClientTest):
                 "domain": "domain1",
                 "dataset": "dataset1",
                 "version": 1,
-                "sensitivity": "PUBLIC",
-                "key_value_tags": {"tag1": "value1"},
-                "key_only_tags": [],
-                "description": "",
-                "owners": None,
-                "is_latest_version": True,
-                "update_behaviour": "APPEND",
             },
             {
                 "layer": "layer",
                 "domain": "domain2",
                 "dataset": "dataset2",
                 "version": 1,
-                "sensitivity": "PUBLIC",
-                "key_value_tags": {"tag2": "value2"},
-                "key_only_tags": [],
-                "description": "some test description",
-                "is_latest_version": True,
-                "owners": None,
-                "update_behaviour": "APPEND",
             },
         ]
 
@@ -564,23 +523,17 @@ class TestListDatasets(BaseClientTest):
         mock_get_last_updated_time,
     ):
         metadata_response = [
-            SchemaMetadata(
+            DatasetMetadata(
                 layer="layer",
                 domain="domain1",
                 dataset="dataset1",
                 version=1,
-                sensitivity="PUBLIC",
-                key_value_tags={"sensitivity": "PUBLIC", "tag1": "value1"},
-                description="",
             ),
-            SchemaMetadata(
+            DatasetMetadata(
                 layer="layer",
                 domain="domain2",
                 dataset="dataset2",
                 version=1,
-                sensitivity="PUBLIC",
-                key_value_tags={"sensitivity": "PUBLIC"},
-                description="some test description",
             ),
         ]
         subject_id = "abc-123"
@@ -596,27 +549,13 @@ class TestListDatasets(BaseClientTest):
                 "domain": "domain1",
                 "dataset": "dataset1",
                 "version": 1,
-                "is_latest_version": True,
-                "sensitivity": "PUBLIC",
-                "key_value_tags": {"sensitivity": "PUBLIC", "tag1": "value1"},
-                "key_only_tags": [],
-                "description": "",
-                "owners": None,
-                "update_behaviour": "APPEND",
                 "last_updated_date": "1234",
             },
             {
                 "layer": "layer",
                 "domain": "domain2",
                 "dataset": "dataset2",
-                "is_latest_version": True,
-                "key_value_tags": {"sensitivity": "PUBLIC"},
-                "key_only_tags": [],
-                "sensitivity": "PUBLIC",
                 "version": 1,
-                "description": "some test description",
-                "owners": None,
-                "update_behaviour": "APPEND",
                 "last_updated_date": "23456",
             },
         ]
@@ -684,34 +623,36 @@ class TestSearchDatasets(BaseClientTest):
 class TestDatasetInfo(BaseClientTest):
     @patch.object(DataService, "get_dataset_info")
     def test_returns_metadata_for_all_datasets(self, mock_get_dataset_info):
-        expected_response = Schema(
-            metadata=SchemaMetadata(
-                layer="raw",
-                domain="mydomain",
-                dataset="mydataset",
-                sensitivity="PUBLIC",
-                version=2,
-                owners=[Owner(name="owner", email="owner@email.com")],
-            ),
-            columns=[
-                Column(
-                    name="colname1",
-                    partition_index=None,
-                    data_type="string",
-                    allow_null=True,
-                    format=None,
-                ),
-                Column(
-                    name="colname2",
-                    partition_index=None,
-                    data_type="int",
-                    allow_null=True,
-                    format=None,
-                ),
-            ],
+        dataset_metadata = DatasetMetadata(
+            layer="raw",
+            domain="mydomain",
+            dataset="mydataset",
+            version=2,
         )
 
-        mock_get_dataset_info.return_value = expected_response
+        columns = {
+            "colname1": Column(
+                dtype="string",
+                nullable=True,
+                partition_index=None,
+                format=None,
+            ),
+            "colname2": Column(
+                dtype="int",
+                nullable=True,
+                partition_index=None,
+                format=None,
+            ),
+        }
+
+        expected_response = Schema(
+            dataset_metadata=dataset_metadata,
+            columns=columns,
+            sensitivity="PUBLIC",
+            owners=[Owner(name="owner", email="owner@email.com")],
+        )
+
+        mock_get_dataset_info.return_value = expected_response.dict()
 
         response = self.client.get(
             f"{BASE_API_PATH}/datasets/layer/mydomain/mydataset/info?version=2",
@@ -730,35 +671,36 @@ class TestDatasetInfo(BaseClientTest):
     def test_returns_metadata_for_all_datasets_for_latest_verion_when_none_provided(
         self, mock_construct_dataset_metadata, mock_get_dataset_info
     ):
-        expected_response = Schema(
-            metadata=SchemaMetadata(
-                layer="layer",
-                domain="mydomain",
-                dataset="mydataset",
-                sensitivity="PUBLIC",
-                version=2,
-                owners=[Owner(name="owner", email="owner@email.com")],
-            ),
-            columns=[
-                Column(
-                    name="colname1",
-                    partition_index=None,
-                    data_type="string",
-                    allow_null=True,
-                    format=None,
-                ),
-                Column(
-                    name="colname2",
-                    partition_index=None,
-                    data_type="int",
-                    allow_null=True,
-                    format=None,
-                ),
-            ],
+        dataset_metadata = DatasetMetadata(
+            layer="layer",
+            domain="mydomain",
+            dataset="mydataset",
+            version=2,
         )
-        dataset_metadata = DatasetMetadata("layer", "mydomain", "mydataset", 2)
 
-        mock_get_dataset_info.return_value = expected_response
+        columns = {
+            "colname1": Column(
+                dtype="string",
+                nullable=True,
+                partition_index=None,
+                format=None,
+            ),
+            "colname2": Column(
+                dtype="int",
+                nullable=True,
+                partition_index=None,
+                format=None,
+            ),
+        }
+
+        expected_response = Schema(
+            dataset_metadata=dataset_metadata,
+            columns=columns,
+            sensitivity="PUBLIC",
+            owners=[Owner(name="owner", email="owner@email.com")],
+        )
+
+        mock_get_dataset_info.return_value = expected_response.dict()
         mock_construct_dataset_metadata.return_value = dataset_metadata
 
         response = self.client.get(
