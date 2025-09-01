@@ -205,7 +205,7 @@ class Schema(pandera.DataFrameSchema):
             return f"{base}_v{self.get_version()}"
         return base
 
-    def dict(self, exclude: dict = None) -> dict:
+    def dict(self, exclude: str = None) -> dict:
         layer_value = self.get_layer()
         if hasattr(layer_value, "value"):
             layer_value = layer_value.value
@@ -240,12 +240,7 @@ class Schema(pandera.DataFrameSchema):
         }
 
         if exclude:
-            for key, value in exclude.items():
-                if key == "metadata" and isinstance(value, dict):
-                    for field in value:
-                        result.pop(field, None)
-                else:
-                    result.pop(key, None)
+            result.pop(exclude, None)
 
         return result
     

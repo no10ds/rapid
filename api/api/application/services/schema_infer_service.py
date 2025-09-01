@@ -58,42 +58,9 @@ class SchemaInferService:
                 # regardless of the schema validation was successful or not
                 delete_incoming_raw_file(schema, file_path)
             
-            # TODO Pandera: tidy this up
-            # Return the schema in the expected format with metadata and columns structure
-            schema_dict = schema.dict()
+            return schema.dict()
             
-            # Extract metadata fields
-            metadata = {
-                "layer": schema_dict["metadata"]["layer"],
-                "domain": schema_dict["metadata"]["domain"],
-                "dataset": schema_dict["metadata"]["dataset"],
-                "version": schema_dict["metadata"]["version"],
-                "sensitivity": schema_dict["metadata"]["sensitivity"],
-                "description": schema_dict["metadata"]["description"],
-                "key_value_tags": schema_dict["metadata"]["key_value_tags"],
-                "key_only_tags": schema_dict["metadata"]["key_only_tags"],
-                "owners": schema_dict["metadata"]["owners"],
-                "update_behaviour": schema_dict["metadata"]["update_behaviour"],
-                "is_latest_version": schema_dict["metadata"]["is_latest_version"],
-            }
             
-            columns = {}
-            for column_name, column_data in schema_dict["columns"].items():
-                columns[column_name] = {
-                    "dtype": column_data["dtype"],
-                    "nullable": column_data["nullable"],
-                    "unique": column_data["unique"],
-                    "metadata": {
-                        "format": column_data["metadata"]["format"],
-                        "partition_index": column_data["metadata"]["partition_index"],
-                    }
-                }
-            
-            # Return structured format
-            return {
-                "metadata": metadata,
-                "columns": columns
-            }
             
         except (SchemaError, SchemaInitError, ParserError) as e:
             raise UserError(f"Invalid data format: {str(e)}")

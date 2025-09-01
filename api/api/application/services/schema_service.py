@@ -55,19 +55,7 @@ class SchemaService:
         )
 
         if only_metadata:
-            return {
-                "layer": dataset_metadata.layer,
-                "domain": dataset_metadata.domain,
-                "dataset": dataset_metadata.dataset,
-                "version": dataset_metadata.version,
-                "sensitivity": schema["sensitivity"],
-                "description": schema.get("description", ""),
-                "key_value_tags": schema.get("key_value_tags", {}),
-                "key_only_tags": schema.get("key_only_tags", []),
-                "owners": [Owner(**owner) for owner in schema.get("owners", [])],
-                "update_behaviour": schema.get("update_behaviour", UpdateBehaviour.APPEND),
-                "is_latest_version": schema.get("is_latest_version", True),
-            }
+            return dataset_metadata
 
         columns = {}
         for col_name, col in schema[COLUMNS].items():
