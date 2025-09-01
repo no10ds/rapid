@@ -2,6 +2,7 @@ from typing import Tuple
 
 import pandas as pd
 from pandas import Timestamp
+from pandera.errors import SchemaError
 
 from api.common.custom_exceptions import (
     DatasetValidationError,
@@ -9,7 +10,6 @@ from api.common.custom_exceptions import (
 )
 from api.common.value_transformers import clean_column_name
 from api.domain.data_types import (
-    StringType,
     DateType,
 )
 from api.domain.schema import Schema
@@ -26,7 +26,9 @@ def transform_and_validate(schema: Schema, data: pd.DataFrame) -> pd.DataFrame:
         .pipe(dataset_has_rows)
         .pipe(remove_empty_rows)
         .pipe(clean_column_headers)
+        .pipe(dataset_has_correct_columns, schema)
         .pipe(convert_date_columns, schema)
+        .pipe(validate_with_pandera, schema)
         .pipe(dataset_has_no_illegal_characters_in_partition_columns, schema)
     )
 
@@ -42,6 +44,54 @@ def dataset_has_rows(df: pd.DataFrame) -> Tuple[pd.DataFrame, list[str]]:
         raise UnprocessableDatasetError(["Dataset has no rows, it cannot be processed"])
 
     return df, []
+
+
+def dataset_has_correct_columns(
+    df: pd.DataFrame, schema: Schema
+) -> Tuple[pd.DataFrame, list[str]]:
+    expected_columns = schema.get_column_names()
+    actual_columns = list(df.columns)
+    error_list = []
+
+    has_expected_columns = all(
+        [expected_column in actual_columns for expected_column in expected_columns]
+    )
+
+    if not has_expected_columns or len(actual_columns) != len(expected_columns):
+        # Cannot reasonably proceed with further validation if we don't even have the correct columns
+        raise UnprocessableDatasetError(
+            [f"Expected columns: {expected_columns}, received: {actual_columns}"]
+        )
+
+    return df, error_list
+
+
+def validate_with_pandera(
+    data_frame: pd.DataFrame, schema: Schema
+) -> Tuple[pd.DataFrame, list[str]]:
+    error_list = []
+    try:
+        validated_df = schema.validate(data_frame, lazy=True)
+        return validated_df, error_list
+    except SchemaError as e:
+        # Convert Pandera errors to the expected format
+        for failure in e.failure_cases.itertuples():
+            if hasattr(failure, 'column'):
+                column_name = failure.column
+                check_type = str(failure.check)
+                
+                if 'nullable' in check_type.lower():
+                    error_list.append(f"Column [{column_name}] does not allow null values")
+                elif 'unique' in check_type.lower():
+                    error_list.append(f"Column [{column_name}] must have unique values")
+                elif 'dtype' in check_type.lower():
+                    error_list.append(f"Column [{column_name}] has an incorrect data type")
+                else:
+                    error_list.append(f"Column [{column_name}] validation failed: {check_type}")
+            else:
+                error_list.append(str(failure))
+        
+        return data_frame, error_list
 
 
 def convert_date_columns(
@@ -113,10 +163,3 @@ def convert_date_column_to_ymd(
 def format_timestamp_as_ymd(timestamp: Timestamp) -> str:
     return f"{timestamp.year}-{str(timestamp.month).zfill(2)}-{str(timestamp.day).zfill(2)}"
 
-
-def is_valid_custom_dtype(actual_type: str, expected_type: str) -> bool:
-    """
-    Custom data types should be validated separately, rather than by column type comparisons
-    """
-    is_custom_dtype = expected_type in list(DateType)
-    return is_custom_dtype and actual_type in list(StringType)
