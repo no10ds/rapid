@@ -60,32 +60,34 @@ class SchemaInferService:
             
             # TODO Pandera: tidy this up
             # Return the schema in the expected format with metadata and columns structure
-            schema_dict = schema.dict(exclude={"metadata": {"version"}})
+            schema_dict = schema.dict()
             
             # Extract metadata fields
             metadata = {
-                "layer": schema_dict["layer"],
-                "domain": schema_dict["domain"],
-                "dataset": schema_dict["dataset"],
-                "sensitivity": schema_dict["sensitivity"],
-                "description": schema_dict["description"],
-                "key_value_tags": schema_dict["key_value_tags"],
-                "key_only_tags": schema_dict["key_only_tags"],
-                "owners": schema_dict["owners"],
-                "update_behaviour": schema_dict["update_behaviour"],
-                "is_latest_version": schema_dict["is_latest_version"],
+                "layer": schema_dict["metadata"]["layer"],
+                "domain": schema_dict["metadata"]["domain"],
+                "dataset": schema_dict["metadata"]["dataset"],
+                "version": schema_dict["metadata"]["version"],
+                "sensitivity": schema_dict["metadata"]["sensitivity"],
+                "description": schema_dict["metadata"]["description"],
+                "key_value_tags": schema_dict["metadata"]["key_value_tags"],
+                "key_only_tags": schema_dict["metadata"]["key_only_tags"],
+                "owners": schema_dict["metadata"]["owners"],
+                "update_behaviour": schema_dict["metadata"]["update_behaviour"],
+                "is_latest_version": schema_dict["metadata"]["is_latest_version"],
             }
             
-            # Convert columns dict to array format with proper field names
-            columns = []
+            columns = {}
             for column_name, column_data in schema_dict["columns"].items():
-                columns.append({
-                    "name": column_name,
-                    "partition_index": column_data["partition_index"],
-                    "data_type": column_data["dtype"],
-                    "allow_null": column_data["nullable"],
-                    "format": column_data["format"],
-                })
+                columns[column_name] = {
+                    "dtype": column_data["dtype"],
+                    "nullable": column_data["nullable"],
+                    "unique": column_data["unique"],
+                    "metadata": {
+                        "format": column_data["metadata"]["format"],
+                        "partition_index": column_data["metadata"]["partition_index"],
+                    }
+                }
             
             # Return structured format
             return {
@@ -101,13 +103,12 @@ class SchemaInferService:
 
         for name, pandera_column in inferred_columns.items():
             clean_name = clean_column_name(name)
-            athena_dtype_string = convert_pandera_column_to_athena(pandera_column.dtype)
 
             customized[clean_name] = Column(
                 dtype=pandera_column.dtype,
                 nullable=True,
                 unique=False,
-                format=DEFAULT_DATE_FORMAT if is_date_type(athena_dtype_string) else None,
+                format=DEFAULT_DATE_FORMAT if is_date_type(pandera_column.dtype) else None,
                 partition_index=None,
             )
 

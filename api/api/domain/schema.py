@@ -58,15 +58,19 @@ class Column(pandera.Column):
         return self.metadata.get("format")
 
     def is_of_data_type(self, d_type: StrEnum) -> bool:
-        return self.dtype in list(d_type)
+        dtype_values = [item.value for item in d_type]
+        dtype_str = str(self.dtype)
+        return dtype_str in dtype_values
 
     def to_dict(self) -> dict:
         return {
-            "partition_index": self.partition_index,
             "dtype": convert_pandera_column_to_athena(self.dtype),
             "nullable": self.nullable,
-            "format": self.format,
             "unique": self.unique if hasattr(self, 'unique') else False,
+            "metadata": {
+                "partition_index": self.partition_index,
+                "format": self.format,
+            }
         }
 
 
@@ -219,17 +223,19 @@ class Schema(pandera.DataFrameSchema):
             columns_dict[column_name] = column.to_dict()
 
         result = {
-            "layer": layer_value,
-            "domain": self.get_domain(),
-            "dataset": self.get_dataset(),
-            "version": self.get_version(),
-            "sensitivity": self.get_sensitivity(),
-            "description": self.get_description(),
-            "update_behaviour": update_behaviour,
-            "key_value_tags": self.metadata.get("key_value_tags"),
-            "key_only_tags": self.metadata.get("key_only_tags"),
-            "owners": owners,
-            "is_latest_version": self.metadata.get("is_latest_version"),
+            "metadata": {
+                "layer": layer_value,
+                "domain": self.get_domain(),
+                "dataset": self.get_dataset(),
+                "version": self.get_version(),
+                "sensitivity": self.get_sensitivity(),
+                "description": self.get_description(),
+                "update_behaviour": update_behaviour,
+                "key_value_tags": self.metadata.get("key_value_tags"),
+                "key_only_tags": self.metadata.get("key_only_tags"),
+                "owners": owners,
+                "is_latest_version": self.metadata.get("is_latest_version"),
+            },
             "columns": columns_dict,
         }
 

@@ -6,12 +6,12 @@
   "columns": {
     "colname1": {
       "partition_index": null,
-      "dtype": "number",
+      "dtype": "int",
       "nullable": true
     },
     "colname2": {
       "partition_index": 0,
-      "dtype": "number",
+      "dtype": "int",
       "nullable": true
     },
     "colname3": {

@@ -58,7 +58,7 @@ class TestGlueAdapterTableMethods:
                 "Name": "layer_domain_dataset_1",
                 "Owner": "hadoop",
                 "StorageDescriptor": {
-                    "Columns": [{"Name": "colname2", "Type": "string"}],
+                    "Columns": [{"Name": "colname2", "Type": "string[python]"}],
                     "Location": f"s3://{DATA_BUCKET}/data/layer/domain/dataset/1",
                     "InputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
                     "OutputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
@@ -71,7 +71,7 @@ class TestGlueAdapterTableMethods:
                     "StoredAsSubDirectories": False,
                 },
                 "PartitionKeys": [
-                    {"Name": "colname1", "Type": "int"},
+                    {"Name": "colname1", "Type": "int64"},
                 ],
                 "TableType": "EXTERNAL_TABLE",
                 "Parameters": {

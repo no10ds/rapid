@@ -104,11 +104,6 @@ class TestS3AdapterUpload:
             ),
             sensitivity=Sensitivity.PRIVATE,
             columns={
-                "colname1": Column(
-                    partition_index=None,
-                    dtype="string",
-                    nullable=True,
-                ),
                 "colname2": Column(
                     partition_index=None,
                     dtype="string",

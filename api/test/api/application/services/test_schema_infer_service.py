@@ -29,7 +29,7 @@ class TestSchemaInfer:
             owners=[Owner(name="change_me", email="change_me@email.com")],
             columns={
                 "colname1": Column(
-                    partition_index=0,
+                    partition_index=None,
                     dtype="string",
                     nullable=True,
                     format=None,
@@ -53,7 +53,7 @@ class TestSchemaInfer:
                     format=None,
                 ),
             },
-        ).dict(exclude={"metadata": {"version"}})
+        ).dict()
         file_content = b"colname1,colname2,Col name 3,Col/name 4! \nsomething,123,1,True\notherthing,123,3,False\n\n"
         temp_out_path = tempfile.mkstemp(suffix=".csv")[1]
         path = Path(temp_out_path)
@@ -77,19 +77,21 @@ class TestSchemaInfer:
             owners=[Owner(name="change_me", email="change_me@email.com")],
             columns={
                 "colname1": Column(
-                    partition_index=0,
-                    dtype="string",
+                    partition_index=None,
+                    dtype="object",
                     nullable=True,
                     format=None,
                 ),
                 "colname2": Column(
                     partition_index=None,
-                    dtype="date",
+                    dtype="datetime64[ns]",
                     nullable=True,
                     format="%Y-%m-%d",
                 ),
             },
-        ).dict(exclude={"metadata": {"version"}})
+        ).dict()
+
+        print("expected_schema:", expected_schema)
         df = pd.DataFrame(data={"colname1": ["something"], "colname2": ["2021-01-01"]})
         df["colname2"] = pd.to_datetime(df["colname2"])
         temp_out_path = tempfile.mkstemp(suffix=".parquet")[1]
@@ -99,6 +101,9 @@ class TestSchemaInfer:
         actual_schema = self.infer_schema_service.infer_schema(
             "raw", "mydomain", "mydataset", "PUBLIC", path
         )
+
+        print("actual_schema:", actual_schema)
+        
         assert actual_schema == expected_schema
         os.remove(temp_out_path)
 
