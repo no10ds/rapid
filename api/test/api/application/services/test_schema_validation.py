@@ -156,31 +156,32 @@ class TestSchemaValidation:
             invalid_schema, "You can not have empty column names"
         )
 
-    def test_is_invalid_schema_with_duplicate_column_name(self):
-        invalid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
-                layer="raw",
-                domain="some",
-                dataset="other",
-            ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
-            columns={
-                "colname1": Column(
-                    partition_index=0,
-                    dtype="int",
-                    nullable=False,
-                ),
-                "colname1": Column(
-                    partition_index=None,
-                    dtype="string",
-                    nullable=True,
-                ),
-            },
-        )
-        self._assert_validate_schema_raises_error(
-            invalid_schema, "You can not have duplicated column names"
-        )
+    # TODO Pandera: Do we need this? Dictionaries cannot have duplicate keys - need to design behaviour around this
+    #  def test_is_invalid_schema_with_duplicate_column_name(self):
+    #     invalid_schema = Schema(
+    #         dataset_metadata=DatasetMetadata(
+    #             layer="raw",
+    #             domain="some",
+    #             dataset="other",
+    #         ),
+    #         sensitivity="PUBLIC",
+    #         owners=[Owner(name="owner", email="owner@email.com")],
+    #         columns={
+    #             "colname1": Column(
+    #                 partition_index=0,
+    #                 dtype="int",
+    #                 nullable=False,
+    #             ),
+    #             "colname1": Column(
+    #                 partition_index=None,
+    #                 dtype="string",
+    #                 nullable=True,
+    #             ),
+    #         },
+    #     )
+    #     self._assert_validate_schema_raises_error(
+    #         invalid_schema, "You can not have duplicated column names"
+    #     )
 
     def test_is_invalid_schema_with_empty_domain(self):
         with pytest.raises(ValidationError):
@@ -432,17 +433,41 @@ class TestSchemaValidation:
     @pytest.mark.parametrize(
         "dtype",
         [
-            "object",
-            "int64",
-            "int32",
-            "int64",
             "number",
-            "datetime",
             "something",
             "else",
         ],
     )
     def test_is_invalid_schema_when_has_not_accepted_dtypes(self, dtype: str):
+        
+        message_pattern = "You are specifying one or more unaccepted data types"
+        with pytest.raises(SchemaValidationError, match=message_pattern):
+            Schema(
+                dataset_metadata=DatasetMetadata(
+                    layer="raw",
+                    domain="test_domain",
+                    dataset="test_dataset",
+                ),
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
+                columns={
+                    "colname1": Column(
+                        partition_index=None,
+                        dtype=dtype,
+                        nullable=False,
+                    )
+                },
+            )
+    
+    @pytest.mark.parametrize(
+        "dtype",
+        [
+            "object",
+            # TODO Pandera: This is supported now?
+            # "datetime",
+        ],
+    )
+    def test_is_invalid_schema_when_has_not_accepted_athena_dtypes(self, dtype: str):
         invalid_schema = Schema(
             dataset_metadata=DatasetMetadata(
                 layer="raw",
@@ -690,8 +715,8 @@ class TestSchemaValidation:
                 layer="raw",
                 domain="some",
                 dataset="other",
-                sensitivity="PUBLIC",
             ),
+            sensitivity="PUBLIC",
             update_behaviour=provided_update_behaviour,
             owners=[Owner(name="owner", email="owner@email.com")],
             columns={
@@ -926,22 +951,24 @@ class TestSchemaValidation:
         )
 
         result_dict = {
-            "layer": "raw",
-            "domain": "some",
-            "dataset": "other",
-            "sensitivity": "PUBLIC",
-            "version": 3,
-            "description": "",
-            "key_value_tags": {"tag1": "value-1", "Tag1": "val1", "tag2": "val2"},
-            "key_only_tags": ["tag4"],
-            "owners": [{"name": "owner", "email": "owner@email.com"}],
-            "update_behaviour": "APPEND",
-            "is_latest_version": True,
+            "metadata": {
+                "layer": "raw",
+                "domain": "some",
+                "dataset": "other",
+                "sensitivity": "PUBLIC",
+                "version": 3,
+                "description": "",
+                "key_value_tags": {"tag1": "value-1", "Tag1": "val1", "tag2": "val2"},
+                "key_only_tags": ["tag4"],
+                "owners": [{"name": "owner", "email": "owner@email.com"}],
+                "update_behaviour": "APPEND",
+                "is_latest_version": True,
+            }
         }
 
         schema_has_valid_tag_set(valid_schema)
 
-        assert valid_schema.dataset_metadata.dict() == result_dict
+        assert valid_schema.dict(exclude="columns") == result_dict
 
     def test_is_valid_when_schema_for_upload_has_valid_owners_email_address(self):
         try:

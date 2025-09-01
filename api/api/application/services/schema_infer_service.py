@@ -2,7 +2,7 @@ from typing import Any, Dict
 from pathlib import Path
 
 import pandas as pd
-import pandera
+import pandera.pandas as pandera
 from pandera.errors import SchemaError, SchemaInitError, ParserError
 
 from api.application.services.schema_validation import validate_schema
@@ -15,7 +15,7 @@ from api.common.data_handlers import (
 )
 from api.common.value_transformers import clean_column_name
 
-from api.domain.data_types import convert_pandera_column_to_athena, is_date_type
+from api.domain.data_types import is_date_type, convert_pandera_column_to_athena
 from api.domain.schema import Column, Schema
 from api.domain.schema import Owner
 from api.domain.dataset_metadata import DatasetMetadata

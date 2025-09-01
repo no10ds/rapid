@@ -9,8 +9,8 @@ from api.common.config.constants import (
     DATE_FORMAT_REGEX,
     COLUMN_NAME_REGEX,
 )
-from api.common.custom_exceptions import SchemaValidationError
-from api.domain.data_types import is_date_type
+from api.common.custom_exceptions import SchemaValidationError, UnsupportedTypeError
+from api.domain.data_types import AthenaDataType, is_date_type, convert_pandera_column_to_athena
 from api.domain.schema import Schema, UpdateBehaviour, Owner
 
 
@@ -29,12 +29,11 @@ def schema_has_valid_column_definitions(schema: Schema):
     has_columns(schema)
     has_non_empty_column_names(schema)
     has_valid_inferred_column_names(schema)
-    has_unique_column_names(schema)
     has_clean_column_headings(schema)
     has_unique_partition_indexes(schema)
     has_valid_partition_index_values(schema)
     has_allow_null_false_on_partitioned_columns(schema)
-    # has_only_accepted_data_types(schema)
+    has_only_accepted_data_types(schema)
     has_valid_date_column_definition(schema)
     has_valid_allow_unique_columns(schema)
 
@@ -57,10 +56,6 @@ def has_valid_inferred_column_names(schema: Schema):
         )
     ):
         raise SchemaValidationError("You can not have empty column names")
-
-
-def has_unique_column_names(schema: Schema):
-    __has_unique_value(schema.get_column_names(), schema.columns, "column names")
 
 
 def has_clean_column_headings(schema: Schema):
@@ -115,10 +110,12 @@ def validate_metadata_character_string(string_input: str) -> bool:
 
 def schema_has_valid_tag_set(schema: Schema):
     if schema.metadata.get("key_only_tags"):
+        key_value_tag_keys = set(schema.metadata.get("key_value_tags", {}).keys())
+        
         seen = set()
         deduped_tags = []
         for tag in schema.metadata["key_only_tags"]:
-            if tag not in seen:
+            if tag not in seen and tag not in key_value_tag_keys:
                 seen.add(tag)
                 deduped_tags.append(tag)
         schema.metadata["key_only_tags"] = deduped_tags
@@ -139,7 +136,6 @@ def schema_has_valid_tag_set(schema: Schema):
             raise SchemaValidationError(
                 "Tag values can only include alphanumeric characters, underscores and hyphens up to 256 characters"
             )
-
 
 def has_unique_partition_indexes(schema: Schema):
     __has_unique_value(
@@ -167,21 +163,21 @@ def has_allow_null_false_on_partitioned_columns(schema):
             raise SchemaValidationError("Partition columns cannot allow null values")
 
 
-# TODO Pandera: replace data type validation
-# def has_only_accepted_data_types(schema: Schema):
-#     data_types = schema.get_data_types()
-#     try:
-#         for data_type in data_types:
-#             AthenaDataType(data_type)
-#     except ValueError:
-#         raise SchemaValidationError(
-#             "You are specifying one or more unaccepted data types",
-#         )
+def has_only_accepted_data_types(schema: Schema):
+    data_types = schema.get_data_types()
+    try:
+        for data_type in data_types:
+            data_type=convert_pandera_column_to_athena(data_type)
+            AthenaDataType(data_type)
+    except (ValueError, UnsupportedTypeError):
+        raise SchemaValidationError(
+            "You are specifying one or more unaccepted data types",
+        )
 
 
 def has_valid_date_column_definition(schema: Schema):
     for column in schema.columns.values():
-        if is_date_type(column.dtype) and __has_value_for(column.format):
+        if is_date_type(convert_pandera_column_to_athena(column.dtype)) and __has_value_for(column.format):
             __has_valid_date_format(column.format)
 
 

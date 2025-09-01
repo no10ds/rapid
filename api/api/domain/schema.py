@@ -4,10 +4,13 @@ from pydantic import BaseModel, EmailStr
 
 import awswrangler as wr
 import pyarrow as pa
-import pandera
+import pandera.pandas as pandera
+from pandera.backends.pandas.container import DataFrameSchemaBackend
+from pandera.backends.pandas.components import ColumnBackend
 
 from api.domain.dataset_metadata import DatasetMetadata
 from api.domain.data_types import convert_pandera_column_to_athena
+from api.common.custom_exceptions import SchemaValidationError
 
 METADATA = "metadata"
 COLUMNS = "columns"
@@ -41,14 +44,24 @@ class Column(pandera.Column):
         unique: bool = False,
         **kwargs
     ):
-        super().__init__(dtype=dtype, nullable=nullable, unique=unique, **kwargs)
+        try:
+            super().__init__(dtype=dtype, nullable=nullable, unique=unique, **kwargs)
+        except TypeError as e:
+            raise SchemaValidationError(
+            "You are specifying one or more unaccepted data types",
+        )
 
         if self.metadata is None:
             self.metadata = {}
 
         self.metadata["partition_index"] = partition_index
         self.metadata["format"] = format
-
+  
+    @classmethod
+    def get_backend(cls, check_obj=None, check_type=None):
+        """Override to use the standard ColumnBackend"""
+        return ColumnBackend()
+    
     @property
     def partition_index(self) -> Optional[int]:
         return self.metadata.get("partition_index")
@@ -77,7 +90,7 @@ class Column(pandera.Column):
 class Schema(pandera.DataFrameSchema):
     def __init__(
         self,
-        columns,
+        columns: Dict[str, Column], 
         dataset_metadata: DatasetMetadata,
         sensitivity: str,
         description: Optional[str] = "",
@@ -103,6 +116,18 @@ class Schema(pandera.DataFrameSchema):
         }
 
         super().__init__(columns=columns, metadata=metadata, **pandera_kwargs)
+
+    @classmethod
+    def get_backend(cls, check_obj=None, check_type=None):
+        if check_obj is not None:
+            check_obj_cls = type(check_obj)
+        elif check_type is not None:
+            check_obj_cls = check_type
+        else:
+            raise ValueError("Must pass in one of `check_obj` or `check_type`.")
+        
+        cls.register_default_backends(check_obj_cls)
+        return DataFrameSchemaBackend()
 
     @property
     def dataset_metadata(self) -> DatasetMetadata:
@@ -155,7 +180,7 @@ class Schema(pandera.DataFrameSchema):
         return [column.partition_index for column in sorted_cols]
 
     def get_data_types(self) -> Set[str]:
-        return {str(column.dtype) for column in self.columns.values()}
+        return {column.dtype for column in self.columns.values()}
 
     def get_columns_by_type(self, d_type: StrEnum) -> List[Column]:
         return [column for column in self.columns.values() if column.is_of_data_type(d_type)]

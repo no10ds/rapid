@@ -1,6 +1,5 @@
 from strenum import StrEnum
-
-import pandera.dtypes
+from pandera.pandas import dtypes as pandera_dtypes
 from api.common.custom_exceptions import UnsupportedTypeError
 
 
@@ -57,7 +56,6 @@ class PanderaDataType(StrEnum):
     DATETIME64_NS = DateType.DATETIME64_NS
     MIXED = StringType.MIXED
     MIXED_INTEGER = StringType.MIXED_INTEGER
-    OBJECT = StringType.OBJECT
     STRING = StringType.STRING
     STRING_PYTHON = StringType.STRING_PYTHON
     INT = NumericType.INT
@@ -88,7 +86,6 @@ class AthenaDataType(StrEnum):
     
 
 PANDERA_ENGINE_TO_ATHENA_CONVERTER = {
-    PanderaDataType.OBJECT: AthenaDataType.STRING,
     PanderaDataType.INT: AthenaDataType.INT,
     PanderaDataType.INT8: AthenaDataType.TINYINT,
     PanderaDataType.INT16: AthenaDataType.SMALLINT,
@@ -113,7 +110,7 @@ def is_date_type(type) -> bool:
     return type_str in date_type_values
 
 
-def convert_pandera_column_to_athena(pandera_dtype: pandera.dtypes) -> str:
+def convert_pandera_column_to_athena(pandera_dtype: pandera_dtypes) -> str:
 
     try:
         dtype_str = str(pandera_dtype)
@@ -125,6 +122,5 @@ def convert_pandera_column_to_athena(pandera_dtype: pandera.dtypes) -> str:
     dtype_str = str(pandera_dtype)
     raise UnsupportedTypeError(
         f"Unable to convert the pandera type [{dtype}] with string representation '{dtype_str}' to Athena Schema. "
-        f"This type is currently unsupported. Supported type classes: {list(PANDERA_TO_ATHENA_CONVERTER.keys())}. "
-        f"Supported string representations: {list(PANDERA_ENGINE_TO_ATHENA_CONVERTER.keys())}"
+        f"Supported: {list(PANDERA_ENGINE_TO_ATHENA_CONVERTER.keys())}"
     )
