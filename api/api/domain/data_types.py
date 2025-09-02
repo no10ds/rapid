@@ -97,6 +97,7 @@ PANDERA_ENGINE_TO_ATHENA_CONVERTER = {
     PanderaDataType.FLOAT64: AthenaDataType.DOUBLE,
     PanderaDataType.DATETIME64: AthenaDataType.TIMESTAMP,
     StringType.STRING: AthenaDataType.STRING,
+    StringType.OBJECT: AthenaDataType.STRING,
     PanderaDataType.STRING_PYTHON: AthenaDataType.STRING,
     PanderaDataType.BOOLEAN: AthenaDataType.BOOLEAN,
     PanderaDataType.DATETIME64_NS: AthenaDataType.TIMESTAMP,

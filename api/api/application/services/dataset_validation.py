@@ -71,7 +71,7 @@ def validate_with_pandera(
 ) -> Tuple[pd.DataFrame, list[str]]:
     error_list = []
     try:
-        validated_df = schema.validate(data_frame, lazy=True)
+        validated_df = schema.validate(data_frame)
         return validated_df, error_list
     except SchemaError as e:
         # Convert Pandera errors to the expected format
@@ -99,14 +99,16 @@ def convert_date_columns(
 ) -> Tuple[pd.DataFrame, list[str]]:
     error_list = []
 
-    for column in schema.get_columns_by_type(DateType):
+    date_column_names = schema.get_column_names_by_type(DateType)
+    for column_name in date_column_names:
+        column = schema.columns[column_name]
         try:
-            data_frame[column.name] = pd.to_datetime(
-                data_frame[column.name], format=column.format
+            data_frame[column_name] = pd.to_datetime(
+                data_frame[column_name], format=column.format
             )
         except ValueError:
             error_list.append(
-                f"Column [{column.name}] does not match specified date format in at least one row"
+                f"Column [{column_name}] does not match specified date format in at least one row"
             )
 
     return data_frame, error_list
@@ -116,15 +118,16 @@ def dataset_has_no_illegal_characters_in_partition_columns(
     data_frame: pd.DataFrame, schema: Schema
 ) -> Tuple[pd.DataFrame, list[str]]:
     error_list = []
-    for column in schema.get_partition_columns():
-        series = data_frame[column.name]
+    partition_columns = schema.get_partition_columns()
+    for column_name, column in partition_columns:
+        series = data_frame[column_name]
         if not column.is_of_data_type(DateType) and series.dtype == object:
             any_illegal_characters = any(
                 [value is True for value in series.str.contains("/")]
             )
             if any_illegal_characters:
                 error_list.append(
-                    f"Partition column [{column.name}] has values with illegal characters '/'"
+                    f"Partition column [{column_name}] has values with illegal characters '/'"
                 )
 
     return data_frame, error_list

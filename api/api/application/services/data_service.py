@@ -207,7 +207,8 @@ class DataService:
         self.s3_adapter.upload_partitioned_data(schema, filename, partitions)
 
     def load_partitions(self, schema: Schema):
-        if schema.get_partition_columns():
+        partition_columns = schema.get_partition_columns()
+        if partition_columns:
             query_id = self.athena_adapter.query_sql_async(
                 f"MSCK REPAIR TABLE `{schema.dataset_metadata.glue_table_name()}`;"
             )
@@ -265,15 +266,15 @@ class DataService:
             raise error
 
     def _build_query(self, schema: Schema) -> SQLQuery:
-        date_columns = schema.get_columns_by_type(DateType)
+        date_column_names = schema.get_column_names_by_type(DateType)
         date_range_queries = [
             *[
-                f"cast(max({column.name}) as date) as max_{column.name}"
-                for column in date_columns
+                f"cast(max({column_name}) as date) as max_{column_name}"
+                for column_name in date_column_names
             ],
             *[
-                f"cast(min({column.name}) as date) as min_{column.name}"
-                for column in date_columns
+                f"cast(min({column_name}) as date) as min_{column_name}"
+                for column_name in date_column_names
             ],
         ]
         columns_to_query = [
@@ -301,10 +302,10 @@ class DataService:
     ) -> Dict[str, EnrichedColumn]:
         strftime_format = "%Y-%m-%d"
         enriched_columns = {}
-        date_columns = schema.get_columns_by_type(DateType)
+        date_column_names = schema.get_column_names_by_type(DateType)
         for name, column in schema.columns.items():
             statistics = None
-            if column in date_columns:
+            if name in date_column_names:
                 statistics = {
                     "max": statistics_dataframe.at[0, f"max_{name}"].strftime(
                         strftime_format

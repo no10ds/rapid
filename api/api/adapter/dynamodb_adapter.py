@@ -172,12 +172,17 @@ class DynamoDBAdapter(DatabaseAdapter):
             AppLogger.info(
                 f"Storing schema for {schema.dataset_metadata.string_representation()}"
             )
+            
+            columns_for_storage = {}
+            for column_name, column in schema.columns.items():
+                columns_for_storage[column_name] = column.to_dict()
+            
             self.schema_table.put_item(
                 Item={
                     "PK": schema.dataset_metadata.dataset_identifier(with_version=False),
-                    "SK": schema.dataset_metadata.get_version(),
+                    "SK": schema.get_version(),
                     **schema.dict(exclude="columns"),
-                    COLUMNS: [col.to_dict() for col in schema.columns.values()],
+                    COLUMNS: columns_for_storage,
                 }
             )
         except ClientError as error:

@@ -15,7 +15,7 @@ from api.common.data_handlers import (
 )
 from api.common.value_transformers import clean_column_name
 
-from api.domain.data_types import is_date_type, convert_pandera_column_to_athena
+from api.domain.data_types import is_date_type
 from api.domain.schema import Column, Schema
 from api.domain.schema import Owner
 from api.domain.dataset_metadata import DatasetMetadata
@@ -38,17 +38,23 @@ class SchemaInferService:
             pandera_schema = pandera.infer_schema(dataframe)
             customized_columns = self._customize_inferred_columns(pandera_schema.columns)
 
-            dataset_metadata = DatasetMetadata(
-                layer=layer,
-                domain=domain,
-                dataset=dataset,
-            )
+            metadata = {
+                "layer": layer,
+                "domain": domain,
+                "dataset": dataset,
+                "version": None,
+                "sensitivity": sensitivity,
+                "description": "",
+                "key_value_tags": {},
+                "key_only_tags": [],
+                "owners": [{"name": "change_me", "email": "change_me@email.com"}],
+                "update_behaviour": "APPEND",
+                "is_latest_version": True,
+            }
 
             schema = Schema(
-                dataset_metadata=dataset_metadata,
+                metadata=metadata,
                 columns=customized_columns,
-                sensitivity=sensitivity,
-                owners=[Owner(name="change_me", email="change_me@email.com")],
             )
 
             try:
@@ -72,7 +78,7 @@ class SchemaInferService:
             clean_name = clean_column_name(name)
 
             customized[clean_name] = Column(
-                dtype=pandera_column.dtype,
+                dtype=str(pandera_column.dtype),
                 nullable=True,
                 unique=False,
                 format=DEFAULT_DATE_FORMAT if is_date_type(pandera_column.dtype) else None,

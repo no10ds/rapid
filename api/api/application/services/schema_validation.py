@@ -158,8 +158,9 @@ def has_valid_partition_index_values(schema: Schema):
 
 
 def has_allow_null_false_on_partitioned_columns(schema):
-    for partitioned_col in schema.get_partition_columns():
-        if partitioned_col.nullable:
+    partition_cols = schema.get_partition_columns()
+    for name, column in partition_cols:
+        if column.nullable:
             raise SchemaValidationError("Partition columns cannot allow null values")
 
 

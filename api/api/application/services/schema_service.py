@@ -111,7 +111,7 @@ class SchemaService:
             self.dynamodb_adapter.delete_schema(metadata)
 
     def upload_schema(self, schema: Schema) -> str:
-        schema.metadata["version"] = FIRST_SCHEMA_VERSION_NUMBER
+        schema.dataset_metadata.version = FIRST_SCHEMA_VERSION_NUMBER
         dataset = schema.dataset_metadata
         try:
             if self.get_schema(dataset) is not None:

@@ -19,19 +19,16 @@ class TestSchema:
             owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
-                    name="colname1",
                     partition_index=1,
                     dtype="int",
                     nullable=True,
                 ),
                 "colname2": Column(
-                    name="colname2",
                     partition_index=0,
                     dtype="string",
                     nullable=False,
                 ),
                 "colname3": Column(
-                    name="colname3",
                     partition_index=None,
                     dtype="boolean",
                     nullable=False,

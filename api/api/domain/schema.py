@@ -1,5 +1,5 @@
 from strenum import StrEnum
-from typing import List, Dict, Optional, Set
+from typing import List, Dict, Optional, Set, Any
 from pydantic import BaseModel, EmailStr
 
 import awswrangler as wr
@@ -34,41 +34,37 @@ class UpdateBehaviour(StrEnum):
     OVERWRITE = "OVERWRITE"
 
 
-class Column(pandera.Column):
-    def __init__(
-        self,
-        dtype,
-        nullable: bool,
-        partition_index: Optional[int] = None,
-        format: Optional[str] = None,
-        unique: bool = False,
-        **kwargs
-    ):
+class Column(BaseModel):
+    dtype: str
+    nullable: bool
+    unique: bool = False
+    partition_index: Optional[int] = None
+    format: Optional[str] = None
+    
+    class Config:
+        arbitrary_types_allowed = True
+
+    def __init__(self, **data):
+        super().__init__(**data)
         try:
-            super().__init__(dtype=dtype, nullable=nullable, unique=unique, **kwargs)
+            self._pandera_column = pandera.Column(
+                dtype=self.dtype, 
+                nullable=self.nullable, 
+                unique=self.unique
+            )
+            if self._pandera_column.metadata is None:
+                self._pandera_column.metadata = {}
+            self._pandera_column.metadata["partition_index"] = self.partition_index
+            self._pandera_column.metadata["format"] = self.format
         except TypeError as e:
             raise SchemaValidationError(
-            "You are specifying one or more unaccepted data types",
-        )
-
-        if self.metadata is None:
-            self.metadata = {}
-
-        self.metadata["partition_index"] = partition_index
-        self.metadata["format"] = format
+                "You are specifying one or more unaccepted data types",
+            )
   
     @classmethod
     def get_backend(cls, check_obj=None, check_type=None):
         """Override to use the standard ColumnBackend"""
         return ColumnBackend()
-    
-    @property
-    def partition_index(self) -> Optional[int]:
-        return self.metadata.get("partition_index")
-
-    @property
-    def format(self) -> Optional[str]:
-        return self.metadata.get("format")
 
     def is_of_data_type(self, d_type: StrEnum) -> bool:
         dtype_values = [item.value for item in d_type]
@@ -77,45 +73,61 @@ class Column(pandera.Column):
 
     def to_dict(self) -> dict:
         return {
-            "dtype": convert_pandera_column_to_athena(self.dtype),
+            "dtype": self.dtype,
             "nullable": self.nullable,
             "unique": self.unique if hasattr(self, 'unique') else False,
-            "metadata": {
-                "partition_index": self.partition_index,
-                "format": self.format,
-            }
+            "partition_index": self.partition_index,
+            "format": self.format,
         }
 
 
-class Schema(pandera.DataFrameSchema):
-    def __init__(
-        self,
-        columns: Dict[str, Column], 
-        dataset_metadata: DatasetMetadata,
-        sensitivity: str,
-        description: Optional[str] = "",
-        key_value_tags: Dict[str, str] = dict(),
-        key_only_tags: List[str] = list(),
-        owners: Optional[List[Owner]] = None,
-        update_behaviour: str = UpdateBehaviour.APPEND,
-        is_latest_version: bool = True,
-        **pandera_kwargs
-    ):
-        metadata = {
-            "layer": dataset_metadata.layer,
-            "domain": dataset_metadata.domain,
-            "dataset": dataset_metadata.dataset,
-            "version": dataset_metadata.version,
-            "sensitivity": sensitivity,
-            "description": description,
-            "key_value_tags": key_value_tags,
-            "key_only_tags": key_only_tags,
-            "owners": owners,
-            "update_behaviour": update_behaviour,
-            "is_latest_version": is_latest_version,
+class Schema(BaseModel):
+    metadata: Dict[str, Any]
+    columns: Dict[str, Column]
+    
+    class Config:
+        arbitrary_types_allowed = True
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        
+        metadata = self.metadata
+        self._dataset_metadata = DatasetMetadata(
+            layer=metadata.get("layer"),
+            domain=metadata.get("domain"), 
+            dataset=metadata.get("dataset"),
+            version=metadata.get("version")
+        )
+        self._sensitivity = metadata.get("sensitivity", "")
+        self._description = metadata.get("description", "")
+        self._key_value_tags = metadata.get("key_value_tags", {})
+        self._key_only_tags = metadata.get("key_only_tags", [])
+        self._owners = [Owner(**owner) for owner in metadata.get("owners", [])] if metadata.get("owners") else None
+        self._update_behaviour = metadata.get("update_behaviour", UpdateBehaviour.APPEND)
+        self._is_latest_version = metadata.get("is_latest_version", True)
+        
+        pandera_metadata = {
+            "layer": self._dataset_metadata.layer,
+            "domain": self._dataset_metadata.domain,
+            "dataset": self._dataset_metadata.dataset,
+            "version": self._dataset_metadata.version,
+            "sensitivity": self._sensitivity,
+            "description": self._description,
+            "key_value_tags": self._key_value_tags,
+            "key_only_tags": self._key_only_tags,
+            "owners": self._owners,
+            "update_behaviour": self._update_behaviour,
+            "is_latest_version": self._is_latest_version,
         }
 
-        super().__init__(columns=columns, metadata=metadata, **pandera_kwargs)
+        pandera_columns = {}
+        for name, column in self.columns.items():
+            pandera_columns[name] = column._pandera_column
+
+        self._pandera_schema = pandera.DataFrameSchema(
+            columns=pandera_columns, 
+            metadata=pandera_metadata
+        )
 
     @classmethod
     def get_backend(cls, check_obj=None, check_type=None):
@@ -129,41 +141,43 @@ class Schema(pandera.DataFrameSchema):
         cls.register_default_backends(check_obj_cls)
         return DataFrameSchemaBackend()
 
+    def validate(self, df, **kwargs):
+        return self._pandera_schema.validate(df, **kwargs)
+    
+    @property
+    def pandera_metadata(self):
+        return self._pandera_schema.metadata
+
     @property
     def dataset_metadata(self) -> DatasetMetadata:
-        return DatasetMetadata(
-            layer=self.get_layer(),
-            domain=self.get_domain(),
-            dataset=self.get_dataset(),
-            version=self.get_version(),
-        )
+        return self._dataset_metadata
 
     def get_layer(self) -> str:
-        return self.metadata["layer"]
+        return self._dataset_metadata.layer
 
     def get_domain(self) -> str:
-        return self.metadata["domain"]
+        return self._dataset_metadata.domain
 
     def get_dataset(self) -> str:
-        return self.metadata["dataset"]
+        return self._dataset_metadata.dataset
 
     def get_description(self) -> str:
-        return self.metadata["description"]
+        return self._description
 
     def get_sensitivity(self) -> str:
-        return self.metadata["sensitivity"]
+        return self._sensitivity
 
     def get_version(self) -> int:
-        return self.metadata["version"]
+        return self._dataset_metadata.version
 
     def get_tags(self) -> Dict[str, str]:
-        return {**self.metadata["key_value_tags"], **dict.fromkeys(self.metadata["key_only_tags"], "")}
+        return {**self._key_value_tags, **dict.fromkeys(self._key_only_tags, "")}
 
     def get_owners(self) -> Optional[List[Owner]]:
-        return self.metadata["owners"]
+        return self._owners
 
     def get_update_behaviour(self) -> str:
-        return self.metadata["update_behaviour"]
+        return self._update_behaviour
 
     def has_overwrite_behaviour(self) -> bool:
         return self.get_update_behaviour() == UpdateBehaviour.OVERWRITE
@@ -173,45 +187,48 @@ class Schema(pandera.DataFrameSchema):
 
     def get_partitions(self) -> List[str]:
         sorted_cols = self.get_partition_columns()
-        return [column.name for column in sorted_cols]
+        return [name for name, column in sorted_cols]
 
     def get_partition_indexes(self) -> List[int]:
         sorted_cols = self.get_partition_columns()
-        return [column.partition_index for column in sorted_cols]
+        return [column.partition_index for name, column in sorted_cols]
 
     def get_data_types(self) -> Set[str]:
         return {column.dtype for column in self.columns.values()}
 
-    def get_columns_by_type(self, d_type: StrEnum) -> List[Column]:
-        return [column for column in self.columns.values() if column.is_of_data_type(d_type)]
+    def get_columns_by_type(self, d_type: StrEnum) -> List[str]:
+        dtype_values = [item.value for item in d_type]
+        return [
+            name for name, col_def in self.columns.items()
+            if col_def.dtype in dtype_values
+        ]
 
     def get_column_names_by_type(self, d_type: StrEnum) -> List[str]:
-        return [
-            name for name, column in self.columns.items()
-            if column.is_of_data_type(d_type)
-        ]
+        return self.get_columns_by_type(d_type)
 
     def get_non_partition_columns_for_glue(self) -> List[dict]:
         return [
-            self.convert_column_to_glue_format(name, col)
-            for name, col in self.columns.items()
-            if col.metadata.get("partition_index") is None
+            self.convert_column_to_glue_format(name, col_def)
+            for name, col_def in self.columns.items()
+            if col_def.partition_index is None
         ]
 
     def get_partition_columns_for_glue(self) -> List[dict]:
+        sorted_cols = self.get_partition_columns()
         return [
-            self.convert_column_to_glue_format(col.name, col)
-            for col in self.get_partition_columns()
+            self.convert_column_to_glue_format(name, col_def)
+            for name, col_def in sorted_cols
         ]
 
     def convert_column_to_glue_format(self, name: str, column: Column):
-        return {"Name": name, "Type": str(column.dtype)}
+        return {"Name": name, "Type": column.dtype}
 
-    def get_partition_columns(self) -> List[Column]:
-        return sorted(
-            [column for column in self.columns.values() if column.partition_index is not None],
-            key=lambda x: x.partition_index,
-        )
+    def get_partition_columns(self) -> List[tuple[str, Column]]:
+        partition_cols = [
+            (name, column) for name, column in self.columns.items()
+            if column.partition_index is not None
+        ]
+        return sorted(partition_cols, key=lambda x: x[1].partition_index)
 
     def generate_storage_schema(self) -> pa.schema:
         return pa.schema(
@@ -256,10 +273,10 @@ class Schema(pandera.DataFrameSchema):
                 "sensitivity": self.get_sensitivity(),
                 "description": self.get_description(),
                 "update_behaviour": update_behaviour,
-                "key_value_tags": self.metadata.get("key_value_tags"),
-                "key_only_tags": self.metadata.get("key_only_tags"),
+                "key_value_tags": self._key_value_tags,
+                "key_only_tags": self._key_only_tags,
                 "owners": owners,
-                "is_latest_version": self.metadata.get("is_latest_version"),
+                "is_latest_version": self._is_latest_version,
             },
             "columns": columns_dict,
         }
@@ -268,50 +285,3 @@ class Schema(pandera.DataFrameSchema):
             result.pop(exclude, None)
 
         return result
-    
-    @classmethod
-    def __get_pydantic_json_schema__(cls, core_schema, handler):
-        """Provide a JSON schema for OpenAPI documentation"""
-        return {
-            "type": "object",
-            "properties": {
-                "metadata": {
-                    "type": "object",
-                    "properties": {
-                        "layer": {"type": "string"},
-                        "domain": {"type": "string"},
-                        "dataset": {"type": "string"},
-                        "version": {"type": "integer"},
-                        "sensitivity": {"type": "string"},
-                        "description": {"type": "string"},
-                        "update_behaviour": {"type": "string", "enum": ["APPEND", "OVERWRITE"]},
-                        "tags": {"type": "object", "additionalProperties": {"type": "string"}},
-                        "owners": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "name": {"type": "string"},
-                                    "email": {"type": "string", "format": "email"}
-                                }
-                            }
-                        }
-                    },
-                    "required": ["layer", "domain", "dataset", "sensitivity"]
-                },
-                "columns": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "object",
-                        "properties": {
-                            "partition_index": {"type": "integer", "nullable": True},
-                            "dtype": {"type": "string"},
-                            "nullable": {"type": "boolean"},
-                            "format": {"type": "string", "nullable": True},
-                            "unique": {"type": "boolean"}
-                        }
-                    }
-                }
-            },
-            "required": ["metadata", "columns"]
-        }
