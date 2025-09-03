@@ -193,6 +193,6 @@ async def update_schema(schema: Schema):
 
 
 def handle_schema_upload_failure(schema: Schema, error):
-    delete_service.delete_schema_upload(schema.dataset_metadata)
+    delete_service.delete_schema_upload(schema.metadata)
     AppLogger.error(f"Failed to upload schema {error.message}")
     raise AWSServiceError(message=error.message)

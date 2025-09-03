@@ -43,6 +43,7 @@ from api.common.logger import AppLogger
 from api.common.utilities import construct_dataset_metadata
 from api.domain.dataset_filters import DatasetFilters
 from api.domain.dataset_metadata import DatasetMetadata
+from api.domain.schema_metadata import SchemaMetadata
 from api.domain.mime_type import MimeType
 from api.domain.sql_query import SQLQuery
 from api.domain.Jobs.Job import generate_uuid
@@ -103,7 +104,7 @@ async def list_all_datasets(
         subject_id, Action.READ, tag_filters
     )
 
-    class EnrichedMetadata(DatasetMetadata):
+    class EnrichedMetadata(SchemaMetadata):
         last_updated_date: str
 
     if enriched:

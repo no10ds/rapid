@@ -10,8 +10,8 @@ import pytest
 
 from api.application.services.schema_infer_service import SchemaInferService
 from api.common.custom_exceptions import UserError
-from api.domain.schema import Schema, Column, Owner
-from api.domain.dataset_metadata import DatasetMetadata
+from api.domain.schema import Schema, Column
+from api.domain.schema_metadata import Owner, SchemaMetadata
 
 
 class TestSchemaInfer:
@@ -20,13 +20,13 @@ class TestSchemaInfer:
 
     def test_infer_schema(self):
         expected_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="mydomain",
                 dataset="mydataset",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="change_me", email="change_me@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="change_me", email="change_me@email.com")],
             columns={
                 "colname1": Column(
                     partition_index=None,
@@ -53,7 +53,7 @@ class TestSchemaInfer:
                     format=None,
                 ),
             },
-        ).dict()
+        ).dict(exclude={"metadata": {"version"}})
         file_content = b"colname1,colname2,Col name 3,Col/name 4! \nsomething,123,1,True\notherthing,123,3,False\n\n"
         temp_out_path = tempfile.mkstemp(suffix=".csv")[1]
         path = Path(temp_out_path)
@@ -68,13 +68,13 @@ class TestSchemaInfer:
 
     def test_infer_schema_with_date(self):
         expected_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="mydomain",
                 dataset="mydataset",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="change_me", email="change_me@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="change_me", email="change_me@email.com")],
             columns={
                 "colname1": Column(
                     partition_index=None,
@@ -89,9 +89,8 @@ class TestSchemaInfer:
                     format="%Y-%m-%d",
                 ),
             },
-        ).dict()
+        ).dict(exclude={"metadata": {"version"}})
 
-        print("expected_schema:", expected_schema)
         df = pd.DataFrame(data={"colname1": ["something"], "colname2": ["2021-01-01"]})
         df["colname2"] = pd.to_datetime(df["colname2"])
         temp_out_path = tempfile.mkstemp(suffix=".parquet")[1]
@@ -101,9 +100,6 @@ class TestSchemaInfer:
         actual_schema = self.infer_schema_service.infer_schema(
             "raw", "mydomain", "mydataset", "PUBLIC", path
         )
-
-        print("actual_schema:", actual_schema)
-        
         assert actual_schema == expected_schema
         os.remove(temp_out_path)
 

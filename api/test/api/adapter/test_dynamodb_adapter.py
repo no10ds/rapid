@@ -17,7 +17,8 @@ from api.domain.dataset_filters import DatasetFilters
 from api.domain.dataset_metadata import DatasetMetadata
 from api.domain.permission_item import PermissionItem
 from api.domain.subject_permissions import SubjectPermissions
-from api.domain.schema import Column, Schema, Owner
+from api.domain.schema import Column, Schema
+from api.domain.schema_metadata import SchemaMetadata, Owner
 
 
 class TestDynamoDBAdapterGeneric:
@@ -999,17 +1000,17 @@ class TestDynamoDBAdapterSchemaTable:
         self.dynamo_adapter = DynamoDBAdapter(self.dynamo_data_source)
 
         self.schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
                 version=2,
+                sensitivity="PUBLIC",
+                description="This is a test schema",
+                owners=[Owner(name="owner", email="owner@email.com")],
+                key_only_tags=["key"],
+                key_value_tags={"key": "value"},
             ),
-            sensitivity="PUBLIC",
-            description="This is a test schema",
-            owners=[Owner(name="owner", email="owner@email.com")],
-            key_only_tags=["key"],
-            key_value_tags={"key": "value"},
             columns={
                 "colname1": Column(
                     partition_index=0,

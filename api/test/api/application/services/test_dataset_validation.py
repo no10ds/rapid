@@ -20,24 +20,22 @@ from api.common.custom_exceptions import (
     UserError,
     UnprocessableDatasetError,
 )
-from api.domain.schema import Schema, Column, Owner
-from api.domain.dataset_metadata import DatasetMetadata
+from api.domain.schema import Schema, Column
+from api.domain.schema_metadata import Owner, SchemaMetadata
 
 
 class TestDatasetValidation:
     def setup_method(self):
-        self.dataset_metadata = DatasetMetadata(
+        self.schema_metadata = SchemaMetadata(
             layer="raw",
             domain="test_domain",
             dataset="test_dataset",
+            sensitivity="PUBLIC",
+            owners=[Owner(name="owner", email="owner@email.com")],
         )
-        self.sensitivity="PUBLIC",
-        self.owners=[Owner(name="owner", email="owner@email.com")],
 
         self.valid_schema = Schema(
-            dataset_metadata=self.dataset_metadata,
-            sensitivity=self.sensitivity,
-            owners=self.owners,
+            metadata=self.schema_metadata,
             columns={
                 "colname1": Column(
                     name="colname1",
@@ -62,9 +60,7 @@ class TestDatasetValidation:
 
     def test_fully_valid_dataset(self):
         full_valid_schema = Schema(
-            dataset_metadata=self.dataset_metadata,
-            sensitivity=self.sensitivity,
-            owners=self.owners,
+            metadata=self.schema_metadata,
             columns={
                 "colname1": Column(
                     name="colname1",
@@ -153,9 +149,7 @@ class TestDatasetValidation:
 
     def test_invalid_when_partition_column_with_illegal_characters(self):
         valid_schema = Schema(
-            dataset_metadata=self.dataset_metadata,
-            sensitivity=self.sensitivity,
-            owners=self.owners,
+            metadata=self.schema_metadata,
             columns={
                 "colname1": Column(
                     name="colname1",
@@ -181,9 +175,7 @@ class TestDatasetValidation:
 
     def test_valid_when_date_partition_column_with_illegal_slash_character(self):
         valid_schema = Schema(
-            dataset_metadata=self.dataset_metadata,
-            sensitivity=self.sensitivity,
-            owners=self.owners,
+            metadata=self.schema_metadata,
             columns={
                 "colname1": Column(
                     name="colname1",
@@ -242,9 +234,7 @@ class TestDatasetValidation:
     )
     def test_checks_for_unacceptable_null_values(self, dataframe: pd.DataFrame):
         schema = Schema(
-            dataset_metadata=self.dataset_metadata,
-            sensitivity=self.sensitivity,
-            owners=self.owners,
+            metadata=self.schema_metadata,
             columns={
                 "col1": Column(
                     name="col1",
@@ -276,9 +266,7 @@ class TestDatasetValidation:
         )
 
         schema = Schema(
-            dataset_metadata=self.dataset_metadata,
-            sensitivity=self.sensitivity,
-            owners=self.owners,
+            metadata=self.schema_metadata,
             columns={
                 "col1": Column(
                     name="col1",
@@ -316,9 +304,7 @@ class TestDatasetValidation:
         )
 
         schema = Schema(
-            dataset_metadata=self.dataset_metadata,
-            sensitivity=self.sensitivity,
-            owners=self.owners,
+            metadata=self.schema_metadata,
             columns={
                 "col1": Column(
                     name="col1",
@@ -357,9 +343,7 @@ class TestDatasetValidation:
         )
 
         schema = Schema(
-            dataset_metadata=self.dataset_metadata,
-            sensitivity=self.sensitivity,
-            owners=self.owners,
+            metadata=self.schema_metadata,
             columns={
                 "col1": Column(
                     name="col1",
@@ -419,9 +403,7 @@ class TestDatasetValidation:
         }
 
         schema = Schema(
-            dataset_metadata=self.dataset_metadata,
-            sensitivity=self.sensitivity,
-            owners=self.owners,
+            metadata=self.schema_metadata,
             columns=columns,
         )
 
@@ -447,9 +429,7 @@ class TestDatasetValidation:
             {"col1": ["a", "b", None], "col2": ["d", "e", None], "col3": [1, 5, None]}
         )
         schema = Schema(
-            dataset_metadata=self.dataset_metadata,
-            sensitivity=self.sensitivity,
-            owners=self.owners,
+            metadata=self.schema_metadata,
             columns={
                 "col1": Column(
                     name="col1",
@@ -489,9 +469,7 @@ class TestDatasetValidation:
             }
         )
         schema = Schema(
-            dataset_metadata=self.dataset_metadata,
-            sensitivity=self.sensitivity,
-            owners=self.owners,
+            metadata=self.schema_metadata,
             columns={
                 "col1": Column(
                     name="col1",
@@ -536,9 +514,7 @@ class TestDatasetValidation:
             }
         )
         schema = Schema(
-            dataset_metadata=self.dataset_metadata,
-            sensitivity=self.sensitivity,
-            owners=self.owners,
+            metadata=self.schema_metadata,
             columns={
                 "col1": Column(
                     name="col1",
@@ -605,9 +581,7 @@ class TestDatasetValidation:
             }
         )
         schema = Schema(
-            dataset_metadata=self.dataset_metadata,
-            sensitivity=self.sensitivity,
-            owners=self.owners,
+            metadata=self.schema_metadata,
             columns={
                 "col1": Column(
                     name="col1",
@@ -663,9 +637,7 @@ class TestDatasetValidation:
             }
         )
         schema = Schema(
-            dataset_metadata=self.dataset_metadata,
-            sensitivity=self.sensitivity,
-            owners=self.owners,
+            metadata=self.schema_metadata,
             columns={
                 "col1": Column(
                     name="col1",
@@ -714,13 +686,13 @@ class TestDatasetValidation:
 
 class TestDatasetTransformation:
     def setup_method(self):
-        self.dataset_metadata = DatasetMetadata(
+        self.schema_metadata = SchemaMetadata(
             layer="raw",
             domain="test_domain",
             dataset="test_dataset",
+            sensitivity="PUBLIC",
+            owners=[Owner(name="owner", email="owner@email.com")],
         )
-        self.sensitivity="PUBLIC",
-        self.owners=[Owner(name="owner", email="owner@email.com")]
 
     @pytest.mark.parametrize(
         "date_format,date_column_data,expected_date_column_data",
@@ -761,9 +733,7 @@ class TestDatasetTransformation:
         data = pd.DataFrame({"date": date_column_data, "value": [1, 5, 4, 8]})
 
         schema = Schema(
-            dataset_metadata=self.dataset_metadata,
-            sensitivity=self.sensitivity,
-            owners=self.owners,
+            metadata=self.schema_metadata,
             columns={
                 "date": Column(
                     name="date",
@@ -793,9 +763,7 @@ class TestDatasetTransformation:
             }
         )
         schema = Schema(
-            dataset_metadata=self.dataset_metadata,
-            sensitivity=self.sensitivity,
-            owners=self.owners,
+            metadata=self.schema_metadata,
             columns={
                 "date1": Column(
                     name="date1",
@@ -836,9 +804,7 @@ class TestDatasetTransformation:
             }
         )
         schema = Schema(
-            dataset_metadata=self.dataset_metadata,
-            sensitivity=self.sensitivity,
-            owners=self.owners,
+            metadata=self.schema_metadata,
             columns={
                 "date1": Column(
                     name="date1",

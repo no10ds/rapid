@@ -8,38 +8,19 @@ import pandera.pandas as pandera
 from pandera.backends.pandas.container import DataFrameSchemaBackend
 from pandera.backends.pandas.components import ColumnBackend
 
-from api.domain.dataset_metadata import DatasetMetadata
-from api.domain.data_types import convert_pandera_column_to_athena
+from api.domain.schema_metadata import Owner, SchemaMetadata, UpdateBehaviour
+from api.domain.data_types import convert_pandera_column_to_athena, PANDERA_ENGINE_TO_ATHENA_CONVERTER
 from api.common.custom_exceptions import SchemaValidationError
 
 METADATA = "metadata"
 COLUMNS = "columns"
 
-SENSITIVITY = "sensitivity"
-DESCRIPTION = "description"
-KEY_VALUE_TAGS = "key_value_tags"
-KEY_ONLY_TAGS = "key_only_tags"
-OWNERS = "owners"
-UPDATE_BEHAVIOUR = "update_behaviour"
-IS_LATEST_VERSION = "is_latest_version"
-
-
-class Owner(BaseModel):
-    name: str
-    email: EmailStr
-
-
-class UpdateBehaviour(StrEnum):
-    APPEND = "APPEND"
-    OVERWRITE = "OVERWRITE"
-
-
 class Column(BaseModel):
+    partition_index: Optional[int]
     dtype: str
     nullable: bool
-    unique: bool = False
-    partition_index: Optional[int] = None
     format: Optional[str] = None
+    unique: bool = False
     
     class Config:
         arbitrary_types_allowed = True
@@ -71,18 +52,10 @@ class Column(BaseModel):
         dtype_str = str(self.dtype)
         return dtype_str in dtype_values
 
-    def to_dict(self) -> dict:
-        return {
-            "dtype": self.dtype,
-            "nullable": self.nullable,
-            "unique": self.unique if hasattr(self, 'unique') else False,
-            "partition_index": self.partition_index,
-            "format": self.format,
-        }
 
 
 class Schema(BaseModel):
-    metadata: Dict[str, Any]
+    metadata: SchemaMetadata
     columns: Dict[str, Column]
     
     class Config:
@@ -92,32 +65,36 @@ class Schema(BaseModel):
         super().__init__(**data)
         
         metadata = self.metadata
-        self._dataset_metadata = DatasetMetadata(
-            layer=metadata.get("layer"),
-            domain=metadata.get("domain"), 
-            dataset=metadata.get("dataset"),
-            version=metadata.get("version")
-        )
-        self._sensitivity = metadata.get("sensitivity", "")
-        self._description = metadata.get("description", "")
-        self._key_value_tags = metadata.get("key_value_tags", {})
-        self._key_only_tags = metadata.get("key_only_tags", [])
-        self._owners = [Owner(**owner) for owner in metadata.get("owners", [])] if metadata.get("owners") else None
-        self._update_behaviour = metadata.get("update_behaviour", UpdateBehaviour.APPEND)
-        self._is_latest_version = metadata.get("is_latest_version", True)
         
+        if isinstance(metadata, SchemaMetadata):
+            self._metadata = metadata
+        else:
+            self._metadata = SchemaMetadata(
+                layer=metadata.get("layer"),
+                domain=metadata.get("domain"), 
+                dataset=metadata.get("dataset"),
+                version=metadata.get("version"),
+                sensitivity=metadata.get("sensitivity", ""),
+                description=metadata.get("description", ""),
+                key_value_tags=metadata.get("key_value_tags", {}),
+                key_only_tags=metadata.get("key_only_tags", []),
+                owners=[Owner(**owner) for owner in metadata.get("owners", [])] if metadata.get("owners") else None,
+                update_behaviour=metadata.get("update_behaviour", UpdateBehaviour.APPEND),
+                is_latest_version=metadata.get("is_latest_version", True),
+            )
+
         pandera_metadata = {
-            "layer": self._dataset_metadata.layer,
-            "domain": self._dataset_metadata.domain,
-            "dataset": self._dataset_metadata.dataset,
-            "version": self._dataset_metadata.version,
-            "sensitivity": self._sensitivity,
-            "description": self._description,
-            "key_value_tags": self._key_value_tags,
-            "key_only_tags": self._key_only_tags,
-            "owners": self._owners,
-            "update_behaviour": self._update_behaviour,
-            "is_latest_version": self._is_latest_version,
+            "layer": self._metadata.layer,
+            "domain": self._metadata.domain,
+            "dataset": self._metadata.dataset,
+            "version": self._metadata.version,
+            "sensitivity": self._metadata.sensitivity,
+            "description": self._metadata.description,
+            "key_value_tags": self._metadata.key_value_tags,
+            "key_only_tags": self._metadata.key_only_tags,
+            "owners": self._metadata.owners,
+            "update_behaviour": self._metadata.update_behaviour,
+            "is_latest_version": self._metadata.is_latest_version,
         }
 
         pandera_columns = {}
@@ -148,37 +125,33 @@ class Schema(BaseModel):
     def pandera_metadata(self):
         return self._pandera_schema.metadata
 
-    @property
-    def dataset_metadata(self) -> DatasetMetadata:
-        return self._dataset_metadata
-
     def get_layer(self) -> str:
-        return self._dataset_metadata.layer
+        return self.metadata.get_layer()
 
     def get_domain(self) -> str:
-        return self._dataset_metadata.domain
+        return self.metadata.get_domain().lower()
 
     def get_dataset(self) -> str:
-        return self._dataset_metadata.dataset
+        return self.metadata.get_dataset()
 
     def get_description(self) -> str:
-        return self._description
+        return self.metadata.get_description()
 
     def get_sensitivity(self) -> str:
-        return self._sensitivity
+        return self.metadata.get_sensitivity()
 
     def get_version(self) -> int:
-        return self._dataset_metadata.version
+        return self.metadata.get_version()
 
     def get_tags(self) -> Dict[str, str]:
-        return {**self._key_value_tags, **dict.fromkeys(self._key_only_tags, "")}
+        return self.metadata.get_tags()
 
     def get_owners(self) -> Optional[List[Owner]]:
-        return self._owners
+        return self.metadata.get_owners()
 
     def get_update_behaviour(self) -> str:
-        return self._update_behaviour
-
+        return self.metadata.get_update_behaviour()
+    
     def has_overwrite_behaviour(self) -> bool:
         return self.get_update_behaviour() == UpdateBehaviour.OVERWRITE
 
@@ -221,7 +194,9 @@ class Schema(BaseModel):
         ]
 
     def convert_column_to_glue_format(self, name: str, column: Column):
-        return {"Name": name, "Type": column.dtype}
+        
+        athena_type = convert_pandera_column_to_athena(column.dtype)
+        return {"Name": name, "Type": athena_type}
 
     def get_partition_columns(self) -> List[tuple[str, Column]]:
         partition_cols = [
@@ -237,51 +212,3 @@ class Schema(BaseModel):
                 for name, column in self.columns.items()
             ]
         )
-
-    def string_representation(self) -> str:
-        return f"{self.get_layer()}_{self.get_domain()}_{self.get_dataset()}_v{self.get_version()}"
-
-    def dataset_identifier(self, with_version: bool = True) -> str:
-        base = f"{self.get_layer()}_{self.get_domain()}_{self.get_dataset()}"
-        if with_version:
-            return f"{base}_v{self.get_version()}"
-        return base
-
-    def dict(self, exclude: str = None) -> dict:
-        layer_value = self.get_layer()
-        if hasattr(layer_value, "value"):
-            layer_value = layer_value.value
-
-        update_behaviour = self.get_update_behaviour()
-        if hasattr(update_behaviour, "value"):
-            update_behaviour = update_behaviour.value
-
-        owners = self.get_owners()
-        if owners:
-            owners = [owner.dict() if hasattr(owner, 'dict') else owner for owner in owners]
-
-        columns_dict = {}
-        for column_name, column in self.columns.items():
-            columns_dict[column_name] = column.to_dict()
-
-        result = {
-            "metadata": {
-                "layer": layer_value,
-                "domain": self.get_domain(),
-                "dataset": self.get_dataset(),
-                "version": self.get_version(),
-                "sensitivity": self.get_sensitivity(),
-                "description": self.get_description(),
-                "update_behaviour": update_behaviour,
-                "key_value_tags": self._key_value_tags,
-                "key_only_tags": self._key_only_tags,
-                "owners": owners,
-                "is_latest_version": self._is_latest_version,
-            },
-            "columns": columns_dict,
-        }
-
-        if exclude:
-            result.pop(exclude, None)
-
-        return result

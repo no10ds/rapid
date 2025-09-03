@@ -8,8 +8,8 @@ from api.application.services.partitioning_service import (
     drop_columns,
     generate_partitioned_data,
 )
-from api.domain.schema import Column, Schema, Owner
-from api.domain.dataset_metadata import DatasetMetadata
+from api.domain.schema import Column, Schema
+from api.domain.schema_metadata import Owner, SchemaMetadata
 
 
 class TestPartitioningUtilities:
@@ -46,13 +46,13 @@ class TestPartitioning:
         column_dtype = "Int64"
 
         schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="test_domain",
                 dataset="test_dataset",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="change_me", email="change_me@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="change_me", email="change_me@email.com")],
             columns={
                 "col1": Column(
                     partition_index=0,
@@ -112,13 +112,13 @@ class TestPartitioning:
         column_dtype = "Int64"
 
         schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="test_domain",
                 dataset="test_dataset",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="change_me", email="change_me@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="change_me", email="change_me@email.com")],
             columns={
                 "col1": Column(
                     partition_index=0,
@@ -151,13 +151,13 @@ class TestPartitioning:
         column_dtype = "int"
 
         schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="test_domain",
                 dataset="test_dataset",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="change_me", email="change_me@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="change_me", email="change_me@email.com")],
             columns={
                 "col1": Column(
                     partition_index=None,

@@ -2,7 +2,8 @@ from typing import List, Union
 from strenum import StrEnum
 
 from api.domain.dataset_metadata import DatasetMetadata, DATASET
-from api.domain.schema import COLUMNS, DESCRIPTION
+from api.domain.schema_metadata import DESCRIPTION
+from api.domain.schema import COLUMNS
 
 
 class MatchField(StrEnum):

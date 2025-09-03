@@ -35,11 +35,11 @@ class GlueAdapter:
             self.glue_client.create_table(
                 DatabaseName=self.glue_catalogue_db_name,
                 TableInput={
-                    "Name": schema.dataset_metadata.glue_table_name(),
+                    "Name": schema.metadata.glue_table_name(),
                     "Owner": "hadoop",
                     "StorageDescriptor": {
                         "Columns": schema.get_non_partition_columns_for_glue(),
-                        "Location": schema.dataset_metadata.s3_file_location(),
+                        "Location": schema.metadata.s3_file_location(),
                         "InputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
                         "OutputFormat": "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
                         "Compressed": False,

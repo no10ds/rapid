@@ -19,6 +19,7 @@ from api.common.config.constants import (
 from api.common.custom_exceptions import AWSServiceError, UserError
 from api.common.logger import AppLogger
 from api.domain.dataset_metadata import DatasetMetadata
+from api.domain.schema_metadata import SchemaMetadata
 from api.domain.schema import Schema
 
 
@@ -61,7 +62,7 @@ class S3Adapter:
     ):
         for partition in partitions:
             upload_path = self._construct_partitioned_data_path(
-                partition.path, filename, schema.dataset_metadata
+                partition.path, filename, schema.metadata
             )
             data_content = partition.df.to_parquet(
                 compression="gzip", index=False, schema=schema.generate_storage_schema()
@@ -69,18 +70,18 @@ class S3Adapter:
             self.store_data(upload_path, data_content)
 
     def upload_raw_data(
-        self, dataset_metadata: DatasetMetadata, file_path: Path, raw_file_identifier: str
+        self, schema_metadata: SchemaMetadata, file_path: Path, raw_file_identifier: str
     ):
         AppLogger.info(
-            f"Raw data upload for {dataset_metadata.raw_data_location()} started"
+            f"Raw data upload for {schema_metadata.raw_data_location()} started"
         )
         filename = f"{raw_file_identifier}.csv"
-        raw_data_path = dataset_metadata.raw_data_path(filename)
+        raw_data_path = schema_metadata.raw_data_path(filename)
         self.__s3_client.upload_file(
             Filename=file_path.name, Bucket=self.__s3_bucket, Key=raw_data_path
         )
         AppLogger.info(
-            f"Raw data upload for {dataset_metadata.glue_table_name()} completed"
+            f"Raw data upload for {schema_metadata.glue_table_name()} completed"
         )
 
     def list_raw_files(self, dataset: DatasetMetadata) -> List[str]:

@@ -103,9 +103,9 @@ def delete_incoming_raw_file(
     try:
         os.remove(file_path.name)
         AppLogger.info(
-            f"""Temporary upload file for {schema.dataset_metadata.string_representation()} deleted. {raw_file_identifier_string if raw_file_identifier is not None else ''}"""
+            f"""Temporary upload file for {schema.metadata.string_representation()} deleted. {raw_file_identifier_string if raw_file_identifier is not None else ''}"""
         )
     except (FileNotFoundError, TypeError) as error:
         AppLogger.error(
-            f"Temporary upload file for {schema.dataset_metadata.string_representation()} not deleted. {raw_file_identifier_string if raw_file_identifier is not None else ''}. Detail: {error}"
+            f"Temporary upload file for {schema.metadata.string_representation()} not deleted. {raw_file_identifier_string if raw_file_identifier is not None else ''}. Detail: {error}"
         )

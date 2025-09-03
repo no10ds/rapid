@@ -11,6 +11,7 @@ from api.common.custom_exceptions import AuthorisationError
 from api.domain.dataset_filters import DatasetFilters
 from api.domain.dataset_metadata import DatasetMetadata
 from api.domain.permission_item import PermissionItem
+from api.domain.schema_metadata import SchemaMetadata
 from api.domain.schema import Schema
 
 
@@ -166,18 +167,15 @@ class TestDatasetAccessEvaluator:
         assert res == expected
 
     @pytest.mark.parametrize(
-        "schema, permission, expected",
+        "metadata, permission, expected",
         [
             # 0. Success: All criteria overlap directly
             (
-                Schema(
-                    dataset_metadata=DatasetMetadata(
-                        layer="raw",
-                        domain="test",
-                        dataset="dataset",
-                    ),
+                SchemaMetadata(
+                    layer="raw",
+                    domain="test",
+                    dataset="dataset",
                     sensitivity="PUBLIC",
-                    columns={},
                 ),
                 PermissionItem(
                     id="READ_RAW_PUBLIC", type="READ", layer="RAW", sensitivity="PUBLIC"
@@ -186,14 +184,11 @@ class TestDatasetAccessEvaluator:
             ),
             # 1. Success: All criteria overlap directly with protected domain
             (
-                Schema(
-                    dataset_metadata=DatasetMetadata(
-                        layer="raw",
-                        domain="test",
-                        dataset="dataset",
-                    ),
+                SchemaMetadata(
+                    layer="raw",
+                    domain="test",
+                    dataset="dataset",
                     sensitivity="PROTECTED",
-                    columns={},
                 ),
                 PermissionItem(
                     id="WRITE_RAW_PROTECTED_TEST",
@@ -206,14 +201,11 @@ class TestDatasetAccessEvaluator:
             ),
             # 2. Success: All criteria inherit overlaps
             (
-                Schema(
-                    dataset_metadata=DatasetMetadata(
-                        layer="raw",
-                        domain="test",
-                        dataset="dataset",
-                    ),
+                SchemaMetadata(
+                    layer="raw",
+                    domain="test",
+                    dataset="dataset",
                     sensitivity="PUBLIC",
-                    columns={},
                 ),
                 PermissionItem(
                     id="WRITE_ALL_PRIVATE",
@@ -225,14 +217,11 @@ class TestDatasetAccessEvaluator:
             ),
             # 3. Failure: Sensitivity does not overlap
             (
-                Schema(
-                    dataset_metadata=DatasetMetadata(
-                        layer="raw",
-                        domain="test",
-                        dataset="dataset",
-                    ),
+                SchemaMetadata(
+                    layer="raw",
+                    domain="test",
+                    dataset="dataset",
                     sensitivity="PRIVATE",
-                    columns={}
                 ),
                 PermissionItem(
                     id="READ_RAW_PUBLIC", type="READ", layer="RAW", sensitivity="PUBLIC"
@@ -241,14 +230,11 @@ class TestDatasetAccessEvaluator:
             ),
             # 4. Failure: Layer does not overlap
             (
-                Schema(
-                    dataset_metadata=DatasetMetadata(
-                        layer="raw",
-                        domain="test",
-                        dataset="dataset",
-                    ),
+                SchemaMetadata(
+                    layer="raw",
+                    domain="test",
+                    dataset="dataset",
                     sensitivity="PRIVATE",
-                    columns={}
                 ),
                 PermissionItem(
                     id="READ_LAYER_PRIVATE",
@@ -260,14 +246,11 @@ class TestDatasetAccessEvaluator:
             ),
             # 5. Failure: Is protected and domain does not overlap
             (
-                Schema(
-                    dataset_metadata=DatasetMetadata(
-                        layer="raw",
-                        domain="test_fail",
-                        dataset="dataset",
-                    ),
+                SchemaMetadata(
+                    layer="raw",
+                    domain="test_fail",
+                    dataset="dataset",
                     sensitivity="PROTECTED",
-                    columns={}
                 ),
                 PermissionItem(
                     id="READ_ANY_PROTECTED_TEST",
@@ -281,10 +264,10 @@ class TestDatasetAccessEvaluator:
         ],
     )
     def test_schema_metadata_overlaps_with_permission(
-        self, schema: Schema, permission: PermissionItem, expected: bool
+        self, metadata: SchemaMetadata, permission: PermissionItem, expected: bool
     ):
         res = self.evaluator.schema_metadata_overlaps_with_permission(
-            schema, permission
+            metadata, permission
         )
         assert res == expected
 
@@ -337,12 +320,12 @@ class TestDatasetAccessEvaluator:
             ),
         ]
         schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="test_fail",
+                sensitivity="PRIVATE",
                 dataset="dataset",
             ),
-            sensitivity="PRIVATE",
             columns={},
         )
 
@@ -378,12 +361,12 @@ class TestDatasetAccessEvaluator:
             ),
         ]
         schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="test_fail",
                 dataset="dataset",
+                sensitivity="PRIVATE",
             ),
-            sensitivity="PRIVATE",
             columns={},
         )
 

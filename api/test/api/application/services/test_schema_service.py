@@ -2,8 +2,6 @@ from unittest.mock import Mock, call
 
 import pytest
 from botocore.exceptions import ClientError
-import copy
-
 
 from api.application.services.schema_service import (
     SchemaService,
@@ -16,7 +14,8 @@ from api.common.custom_exceptions import (
     UserError,
 )
 from api.domain.dataset_metadata import DatasetMetadata
-from api.domain.schema import Schema, Column, Owner
+from api.domain.schema import Schema, Column
+from api.domain.schema_metadata import Owner, SchemaMetadata
 
 
 class TestUploadSchema:
@@ -30,13 +29,13 @@ class TestUploadSchema:
             self.protected_domain_service,
         )
         self.valid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
                     partition_index=0,
@@ -58,18 +57,18 @@ class TestUploadSchema:
 
         self.dynamodb_adapter.store_schema.assert_called_once_with(self.valid_schema)
         self.glue_adapter.create_table.assert_called_once_with(self.valid_schema)
-        assert result == self.valid_schema.dataset_metadata.glue_table_name()
+        assert result == self.valid_schema.metadata.glue_table_name()
 
     def test_upload_schema_uppercase_domain(self):
         self.schema_service.get_schema = Mock(return_value=None)
 
-        schema = copy.copy(self.valid_schema)
-        schema.metadata["domain"] = schema.get_domain().upper()
+        schema = self.valid_schema.copy()
+        schema.metadata.domain = schema.metadata.domain.upper()
         result = self.schema_service.upload_schema(schema)
 
         self.dynamodb_adapter.store_schema.assert_called_once_with(schema)
         self.glue_adapter.create_table.assert_called_once_with(schema)
-        result == schema.dataset_metadata.glue_table_name()
+        result == schema.metadata.glue_table_name()
 
     def test_aborts_uploading_if_create_table_fails(self):
         self.schema_service.get_schema = Mock(return_value=None)
@@ -85,13 +84,13 @@ class TestUploadSchema:
 
     def test_check_for_protected_domain_success(self):
         schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="domain",
                 dataset="dataset",
+                sensitivity="PROTECTED",
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PROTECTED",
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
                     partition_index=0,
@@ -111,13 +110,13 @@ class TestUploadSchema:
 
     def test_check_for_protected_domain_fails(self):
         schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="domain1",
                 dataset="dataset2",
+                sensitivity="PROTECTED",
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PROTECTED",
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
                     partition_index=0,
@@ -146,13 +145,13 @@ class TestUploadSchema:
 
         invalid_partition_index = -1
         invalid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
                     partition_index=invalid_partition_index,
@@ -177,17 +176,17 @@ class TestUpdateSchema:
             self.protected_domain_service,
         )
         self.valid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="testdomain",
                 dataset="testdataset",
+                sensitivity="PUBLIC",
                 version=1,
+                owners=[Owner(name="owner", email="owner@email.com")],
+                key_value_tags={"key1": "val1", "testkey2": "testval2"},
+                key_only_tags=["ktag1", "ktag2"],
+                update_behaviour="APPEND",
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
-            key_value_tags={"key1": "val1", "testkey2": "testval2"},
-            key_only_tags=["ktag1", "ktag2"],
-            update_behaviour="APPEND",
             columns={
                 "colname1": Column(
                     partition_index=0,
@@ -202,16 +201,16 @@ class TestUpdateSchema:
             },
         )
         self.valid_updated_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="testdomain",
                 dataset="testdataset",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
+                key_value_tags={"key1": "val1", "testkey2": "testval2"},
+                key_only_tags=["ktag1", "ktag2"],
+                update_behaviour="APPEND",
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
-            key_value_tags={"key1": "val1", "testkey2": "testval2"},
-            key_only_tags=["ktag1", "ktag2"],
-            update_behaviour="APPEND",
             columns={
                 "colname1": Column(
                     partition_index=0,
@@ -229,14 +228,14 @@ class TestUpdateSchema:
     def test_update_schema_throws_error_when_schema_invalid(self):
         invalid_partition_index = -1
         invalid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
                 version=1,
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
                     partition_index=invalid_partition_index,
@@ -251,10 +250,10 @@ class TestUpdateSchema:
             self.schema_service.update_schema(invalid_schema)
 
     def test_update_schema_for_protected_domain_failure(self):
-        original_schema = copy.deepcopy(self.valid_schema)
-        original_schema.metadata["sensitivity"] = Sensitivity.PROTECTED
-        new_schema = copy.deepcopy(self.valid_updated_schema)
-        new_schema.metadata["sensitivity"] = Sensitivity.PROTECTED
+        original_schema = self.valid_schema.copy(deep=True)
+        original_schema.metadata.sensitivity = Sensitivity.PROTECTED
+        new_schema = self.valid_updated_schema.copy(deep=True)
+        new_schema.metadata.sensitivity = Sensitivity.PROTECTED
 
         self.schema_service.get_schema = Mock(return_value=original_schema)
         self.protected_domain_service.list_protected_domains = Mock(
@@ -271,7 +270,7 @@ class TestUpdateSchema:
         original_schema = self.valid_schema
         original_schema.metadata["version"] = 2
         new_schema = self.valid_updated_schema
-        expected_schema = copy.deepcopy(self.valid_updated_schema)
+        expected_schema = self.valid_updated_schema.copy(deep=True)
         expected_schema.metadata["version"] = 3
 
         self.schema_service.get_schema = Mock(return_value=original_schema)
@@ -281,13 +280,13 @@ class TestUpdateSchema:
         self.glue_adapter.create_table.assert_called_once_with(new_schema)
         self.dynamodb_adapter.store_schema.assert_called_once_with(expected_schema)
         self.dynamodb_adapter.deprecate_schema.assert_called_once_with(
-            original_schema.dataset_metadata
+            original_schema.metadata
         )
         assert result == "raw/testdomain/testdataset/3"
 
     def test_update_schema_enforces_sensitivity_consistency(self):
         original_schema = self.valid_schema
-        new_schema = copy.deepcopy(self.valid_updated_schema)
+        new_schema = self.valid_updated_schema.copy(deep=True)
         new_schema.metadata["sensitivity"] = Sensitivity.PRIVATE
 
         self.schema_service.get_schema = Mock(return_value=original_schema)
@@ -300,13 +299,13 @@ class TestUpdateSchema:
             self.schema_service.update_schema(new_schema)
 
     def test_update_schema_for_protected_domain_success(self):
-        original_schema = copy.deepcopy(self.valid_schema)
-        original_schema.metadata["sensitivity"] = Sensitivity.PROTECTED
-        new_schema = copy.deepcopy(self.valid_updated_schema)
-        new_schema.metadata["sensitivity"] = Sensitivity.PROTECTED
-        expected_schema = copy.deepcopy(self.valid_updated_schema)
-        expected_schema.metadata["version"] = 2
-        expected_schema.metadata["sensitivity"] = Sensitivity.PROTECTED
+        original_schema = self.valid_schema.copy(deep=True)
+        original_schema.metadata.sensitivity = Sensitivity.PROTECTED
+        new_schema = self.valid_updated_schema.copy(deep=True)
+        new_schema.metadata.sensitivity = Sensitivity.PROTECTED
+        expected_schema = self.valid_updated_schema.copy(deep=True)
+        expected_schema.metadata.version = 2
+        expected_schema.metadata.sensitivity = Sensitivity.PROTECTED
 
         self.schema_service.get_schema = Mock(return_value=original_schema)
         self.protected_domain_service.list_protected_domains = Mock(
@@ -318,7 +317,7 @@ class TestUpdateSchema:
         self.glue_adapter.create_table.assert_called_once_with(expected_schema)
         self.dynamodb_adapter.store_schema.assert_called_once_with(expected_schema)
         self.dynamodb_adapter.deprecate_schema.assert_called_once_with(
-            original_schema.dataset_metadata
+            original_schema.metadata
         )
         assert result == "raw/testdomain/testdataset/2"
 
@@ -333,11 +332,13 @@ class TestGetSchema:
             self.glue_adapter,
             self.protected_domain_service,
         )
-        self.metadata = DatasetMetadata(
+        self.metadata = SchemaMetadata(
             layer="raw",
             domain="some",
             dataset="other",
             version=2,
+            sensitivity="PUBLIC",
+            owners=[Owner(name="owner", email="owner@email.com")],
         )
 
         self.columns = {
@@ -353,12 +354,7 @@ class TestGetSchema:
             ),
         }
 
-        self.schema = Schema(
-            dataset_metadata=self.metadata,
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
-            columns=self.columns
-        )
+        self.schema = Schema(metadata=self.metadata, columns=self.columns)
 
         self.schema_dict = {
             "layer": "raw",

@@ -11,7 +11,8 @@ from api.common.config.constants import (
 )
 from api.common.custom_exceptions import SchemaValidationError, UnsupportedTypeError
 from api.domain.data_types import AthenaDataType, is_date_type, convert_pandera_column_to_athena
-from api.domain.schema import Schema, UpdateBehaviour, Owner
+from api.domain.schema import Schema
+from api.domain.schema_metadata import UpdateBehaviour, Owner
 
 
 def validate_schema_for_upload(schema: Schema):
@@ -109,16 +110,7 @@ def validate_metadata_character_string(string_input: str) -> bool:
 
 
 def schema_has_valid_tag_set(schema: Schema):
-    if schema.metadata.get("key_only_tags"):
-        key_value_tag_keys = set(schema.metadata.get("key_value_tags", {}).keys())
-        
-        seen = set()
-        deduped_tags = []
-        for tag in schema.metadata["key_only_tags"]:
-            if tag not in seen and tag not in key_value_tag_keys:
-                seen.add(tag)
-                deduped_tags.append(tag)
-        schema.metadata["key_only_tags"] = deduped_tags
+    schema.metadata.remove_duplicates()
 
     if len(schema.get_tags()) > MAX_TAG_COUNT:
         raise SchemaValidationError(
@@ -141,6 +133,7 @@ def has_unique_partition_indexes(schema: Schema):
     __has_unique_value(
         schema.get_partition_indexes(), schema.get_partitions(), "partition indexes"
     )
+
 
 
 def has_valid_partition_index_values(schema: Schema):

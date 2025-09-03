@@ -8,7 +8,7 @@ from pydantic.main import BaseModel
 from api.common.custom_exceptions import UserError
 from api.common.config.auth import Layer
 from api.domain.dataset_metadata import LAYER, DOMAIN
-from api.domain.schema import SENSITIVITY, KEY_ONLY_TAGS, KEY_VALUE_TAGS
+from api.domain.schema_metadata import SENSITIVITY, KEY_ONLY_TAGS, KEY_VALUE_TAGS
 
 
 class DatasetFilters(BaseModel):

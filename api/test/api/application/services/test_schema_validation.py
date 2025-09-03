@@ -11,19 +11,19 @@ from api.application.services.schema_validation import (
 from api.common.config.auth import Sensitivity
 from api.common.config.aws import MAX_TAG_COUNT
 from api.common.custom_exceptions import SchemaValidationError
-from api.domain.schema import Schema, Column, Owner, UpdateBehaviour
-from api.domain.dataset_metadata import DatasetMetadata
+from api.domain.schema import Schema, Column
+from api.domain.schema_metadata import Owner, UpdateBehaviour, SchemaMetadata
 
 class TestSchemaValidation:
     def setup_method(self):
         self.valid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="somedomain",
                 dataset="otherDataset",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
                     partition_index=0,
@@ -57,13 +57,13 @@ class TestSchemaValidation:
 
     def test_is_invalid_schema_with_no_columns(self):
         invalid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={},
         )
         self._assert_validate_schema_raises_error(
@@ -72,10 +72,12 @@ class TestSchemaValidation:
 
     def test_is_invalid_schema_with_domain_name_containing_hyphen(self):
         invalid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="test-domain",
                 dataset="dataset",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
             sensitivity="PUBLIC",
             owners=[Owner(name="owner", email="owner@email.com")],
@@ -94,13 +96,13 @@ class TestSchemaValidation:
 
     def test_is_invalid_schema_with_dataset_name_containing_hyphen(self):
         invalid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="domain",
                 dataset="test-dataset",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
                     partition_index=None,
@@ -116,13 +118,13 @@ class TestSchemaValidation:
 
     def test_is_invalid_schema_with_empty_column_name(self):
         invalid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "": Column(
                     partition_index=None,
@@ -137,13 +139,13 @@ class TestSchemaValidation:
 
     def test_is_invalid_schema_with_invalid_inferred_column_name_from_empty_name(self):
         invalid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "unnamed_1": Column(
                     partition_index=None,
@@ -159,13 +161,13 @@ class TestSchemaValidation:
     # TODO Pandera: Do we need this? Dictionaries cannot have duplicate keys - need to design behaviour around this
     #  def test_is_invalid_schema_with_duplicate_column_name(self):
     #     invalid_schema = Schema(
-    #         dataset_metadata=DatasetMetadata(
-    #             layer="raw",
-    #             domain="some",
-    #             dataset="other",
-    #         ),
-    #         sensitivity="PUBLIC",
-    #         owners=[Owner(name="owner", email="owner@email.com")],
+    #         metadata=SchemaMetadata(
+            #     layer="raw",
+            #     domain="some",
+            #     dataset="other",
+            #     sensitivity="PUBLIC",
+            #     owners=[Owner(name="owner", email="owner@email.com")],
+            # ),
     #         columns={
     #             "colname1": Column(
     #                 partition_index=0,
@@ -186,13 +188,13 @@ class TestSchemaValidation:
     def test_is_invalid_schema_with_empty_domain(self):
         with pytest.raises(ValidationError):
             Schema(
-                dataset_metadata=DatasetMetadata(
+                metadata=SchemaMetadata(
                     layer="raw",
                     domain="",
                     dataset="other",
+                    sensitivity="PUBLIC",
+                    owners=[Owner(name="owner", email="owner@email.com")],
                 ),
-                sensitivity="PUBLIC",
-                owners=[Owner(name="owner", email="owner@email.com")],
                 columns={
                     "colname1": Column(
                         partition_index=0,
@@ -210,12 +212,12 @@ class TestSchemaValidation:
     def test_is_invalid_schema_with_empty_dataset(self):
         with pytest.raises(ValidationError):
             Schema(
-                dataset_metadata=DatasetMetadata(
+                metadata=SchemaMetadata(
                     layer="raw",
                     domain="domain",
+                    sensitivity="PUBLIC",
+                    owners=[Owner(name="owner", email="owner@email.com")],
                 ),
-                sensitivity="PUBLIC",
-                owners=[Owner(name="owner", email="owner@email.com")],
                 columns={
                     "colname1": Column(
                         partition_index=0,
@@ -232,13 +234,13 @@ class TestSchemaValidation:
 
     def test_is_invalid_schema_with_empty_sensitivity(self):
         invalid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="domain",
                 dataset="dataset",
+                sensitivity="",
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="",
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
                     partition_index=None,
@@ -268,13 +270,13 @@ class TestSchemaValidation:
     )
     def test_is_invalid_schema_with_invalid_column_name(self, col_name: str):
         invalid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="domain",
                 dataset="dataset",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 col_name: Column(
                     partition_index=0,
@@ -289,13 +291,13 @@ class TestSchemaValidation:
 
     def test_is_invalid_schema_with_duplicate_partition_number(self):
         invalid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
                     partition_index=0,
@@ -315,13 +317,13 @@ class TestSchemaValidation:
 
     def test_is_invalid_schema_with_negative_partition_number(self):
         invalid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="change_me", email="change_me@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="change_me", email="change_me@email.com")],
             columns={
                 "colname1": Column(
                     partition_index=-1,
@@ -343,13 +345,13 @@ class TestSchemaValidation:
         self,
     ):
         invalid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
                     partition_index=2,
@@ -375,13 +377,13 @@ class TestSchemaValidation:
 
     def test_is_invalid_schema_when_all_columns_are_partitioned(self):
         invalid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
                     partition_index=1,
@@ -401,13 +403,13 @@ class TestSchemaValidation:
 
     def test_is_invalid_schema_when_partitioned_columns_nullable_values(self):
         invalid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
                     partition_index=1,
@@ -443,13 +445,13 @@ class TestSchemaValidation:
         message_pattern = "You are specifying one or more unaccepted data types"
         with pytest.raises(SchemaValidationError, match=message_pattern):
             Schema(
-                dataset_metadata=DatasetMetadata(
-                    layer="raw",
-                    domain="test_domain",
-                    dataset="test_dataset",
-                ),
+                metadata=SchemaMetadata(
+                layer="raw",
+                domain="test_domain",
+                dataset="test_dataset",
                 sensitivity="PUBLIC",
                 owners=[Owner(name="owner", email="owner@email.com")],
+            ),
                 columns={
                     "colname1": Column(
                         partition_index=None,
@@ -459,45 +461,45 @@ class TestSchemaValidation:
                 },
             )
     
-    @pytest.mark.parametrize(
-        "dtype",
-        [
-            "object",
-            # TODO Pandera: This is supported now?
-            # "datetime",
-        ],
-    )
-    def test_is_invalid_schema_when_has_not_accepted_athena_dtypes(self, dtype: str):
-        invalid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
-                layer="raw",
-                domain="test_domain",
-                dataset="test_dataset",
-            ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
-            columns={
-                "colname1": Column(
-                    partition_index=None,
-                    dtype=dtype,
-                    nullable=False,
-                )
-            },
-        )
+    # @pytest.mark.parametrize(
+    #     "dtype",
+    #     [
+    #         "object",
+    #         # TODO Pandera: This is supported now?
+    #         # "datetime",
+    #     ],
+    # )
+    # def test_is_invalid_schema_when_has_not_accepted_athena_dtypes(self, dtype: str):
+    #     invalid_schema = Schema(
+    #         dataset_metadata=DatasetMetadata(
+    #             layer="raw",
+    #             domain="test_domain",
+    #             dataset="test_dataset",
+    #         ),
+    #         sensitivity="PUBLIC",
+    #         owners=[Owner(name="owner", email="owner@email.com")],
+    #         columns={
+    #             "colname1": Column(
+    #                 partition_index=None,
+    #                 dtype=dtype,
+    #                 nullable=False,
+    #             )
+    #         },
+    #     )
 
-        self._assert_validate_schema_raises_error(
-            invalid_schema, "You are specifying one or more unaccepted data types"
-        )
+    #     self._assert_validate_schema_raises_error(
+    #         invalid_schema, "You are specifying one or more unaccepted data types"
+    #     )
 
     def test_is_invalid_when_date_type_column_does_not_define_format(self):
         invalid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
                     partition_index=None,
@@ -530,13 +532,13 @@ class TestSchemaValidation:
         self, date_format: str
     ):
         invalid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
                     partition_index=None,
@@ -573,13 +575,13 @@ class TestSchemaValidation:
         self, date_format: str
     ):
         valid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
                     partition_index=None,
@@ -603,13 +605,13 @@ class TestSchemaValidation:
         self, provided_sensitivity: str
     ):
         valid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity=provided_sensitivity,
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity=provided_sensitivity,
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
                     partition_index=None,
@@ -642,13 +644,13 @@ class TestSchemaValidation:
         self, provided_sensitivity: str
     ):
         invalid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity=provided_sensitivity,
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity=provided_sensitivity,
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
                     partition_index=None,
@@ -671,14 +673,14 @@ class TestSchemaValidation:
         self, provided_update_behaviour: str
     ):
         valid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
+                update_behaviour=provided_update_behaviour,
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PUBLIC",
-            update_behaviour=provided_update_behaviour,
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
 
@@ -711,14 +713,14 @@ class TestSchemaValidation:
         self, provided_update_behaviour: str
     ):
         invalid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
+                update_behaviour=provided_update_behaviour,
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PUBLIC",
-            update_behaviour=provided_update_behaviour,
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
 
@@ -738,15 +740,15 @@ class TestSchemaValidation:
         tags = {f"tag_{index}": "" for index in range(MAX_TAG_COUNT - 1)}
 
         valid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
+                key_value_tags=tags,
+                key_only_tags=["tag"],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
-            key_value_tags=tags,
-            key_only_tags=["tag"],
             columns={
                 "colname1": Column(
 
@@ -767,15 +769,15 @@ class TestSchemaValidation:
         key_only_tags = ["tag1", "tag2"]
 
         invalid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
+                key_value_tags=key_value_tags,
+                key_only_tags=key_only_tags,
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
-            key_value_tags=key_value_tags,
-            key_only_tags=key_only_tags,
             columns={
                 "colname1": Column(
 
@@ -823,15 +825,15 @@ class TestSchemaValidation:
     ):
         key_only_tags = [tag.split(":")[0].strip('"') for tag in tags]
         invalid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
+                key_value_tags=tags,
+                key_only_tags=key_only_tags,
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
-            key_value_tags=tags,
-            key_only_tags=key_only_tags,
             columns={
                 "colname1": Column(
 
@@ -870,14 +872,14 @@ class TestSchemaValidation:
         self, tags: List[Any], message: str
     ):
         invalid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
+                key_value_tags=tags,
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
-            key_value_tags=tags,
             columns={
                 "colname1": Column(
 
@@ -904,15 +906,15 @@ class TestSchemaValidation:
     def test_valid_schema_when_tags_are_correct(self, tags: List[Any]):
         key_only_tags = [tag.split(":")[0].strip('"') for tag in tags]
         valid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
+                key_value_tags=tags,
+                key_only_tags=key_only_tags,
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
-            key_value_tags=tags,
-            key_only_tags=key_only_tags,
             columns={
                 "colname1": Column(
 
@@ -930,16 +932,16 @@ class TestSchemaValidation:
 
     def test_validate_schema_removes_duplicated_tags(self):
         valid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
                 version=3,
+                owners=[Owner(name="owner", email="owner@email.com")],
+                key_value_tags={"tag1": "value-1", "Tag1": "val1", "tag2": "val2"},
+                key_only_tags=["Tag1", "tag2", "tag4"],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
-            key_value_tags={"tag1": "value-1", "Tag1": "val1", "tag2": "val2"},
-            key_only_tags=["Tag1", "tag2", "tag4"],
             columns={
                 "colname1": Column(
 
@@ -951,19 +953,17 @@ class TestSchemaValidation:
         )
 
         result_dict = {
-            "metadata": {
-                "layer": "raw",
-                "domain": "some",
-                "dataset": "other",
-                "sensitivity": "PUBLIC",
-                "version": 3,
-                "description": "",
-                "key_value_tags": {"tag1": "value-1", "Tag1": "val1", "tag2": "val2"},
-                "key_only_tags": ["tag4"],
-                "owners": [{"name": "owner", "email": "owner@email.com"}],
-                "update_behaviour": "APPEND",
-                "is_latest_version": True,
-            }
+            "layer": "raw",
+            "domain": "some",
+            "dataset": "other",
+            "sensitivity": "PUBLIC",
+            "version": 3,
+            "description": "",
+            "key_value_tags": {"tag1": "value-1", "Tag1": "val1", "tag2": "val2"},
+            "key_only_tags": ["tag4"],
+            "owners": [{"name": "owner", "email": "owner@email.com"}],
+            "update_behaviour": "APPEND",
+            "is_latest_version": True,
         }
 
         schema_has_valid_tag_set(valid_schema)
@@ -994,13 +994,13 @@ class TestSchemaValidation:
         self, owners: List[Owner]
     ):
         invalid_upload_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
+                owners=owners,
             ),
-            sensitivity="PUBLIC",
-            owners=owners,
             columns={
                 "colname1": Column(
 
@@ -1032,13 +1032,13 @@ class TestSchemaValidation:
     )
     def test_is_invalid_when_schema_for_upload_has_no_owners(self, owners: List[Owner]):
         invalid_upload_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
+                owners=owners,
             ),
-            sensitivity="PUBLIC",
-            owners=owners,
             columns={
                 "colname1": Column(
 
@@ -1075,13 +1075,13 @@ class TestSchemaValidation:
     )
     def test_is_invalid_when_domain_has_incorrect_format(self, domain):
         invalid_upload_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+             metadata=SchemaMetadata(
                 layer="raw",
                 domain=domain,
                 dataset="dataset",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
 
@@ -1120,13 +1120,13 @@ class TestSchemaValidation:
     )
     def test_is_invalid_when_dataset_has_incorrect_format(self, dataset):
         invalid_upload_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset=dataset,
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
 
@@ -1154,14 +1154,14 @@ class TestSchemaValidation:
 
     def test_is_invalid_when_dataset_is_append_and_forces_unique(self):
         invalid_upload_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="dataset",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
+                update_behaviour="APPEND",
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
-            update_behaviour="APPEND",
             columns={
                 "colname1": Column(
 

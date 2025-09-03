@@ -28,7 +28,8 @@ from api.domain.Jobs.Job import Job
 from api.domain.Jobs.QueryJob import QueryJob
 from api.domain.Jobs.UploadJob import UploadJob
 from api.domain.permission_item import PermissionItem
-from api.domain.schema import Schema, COLUMNS, IS_LATEST_VERSION
+from api.domain.schema import Schema, COLUMNS
+from api.domain.schema_metadata import IS_LATEST_VERSION
 from api.domain.subject_permissions import SubjectPermissions
 
 
@@ -170,24 +171,20 @@ class DynamoDBAdapter(DatabaseAdapter):
     def store_schema(self, schema: Schema) -> None:
         try:
             AppLogger.info(
-                f"Storing schema for {schema.dataset_metadata.string_representation()}"
+                f"Storing schema for {schema.metadata.string_representation()}"
             )
-            
-            columns_for_storage = {}
-            for column_name, column in schema.columns.items():
-                columns_for_storage[column_name] = column.to_dict()
             
             self.schema_table.put_item(
                 Item={
-                    "PK": schema.dataset_metadata.dataset_identifier(with_version=False),
-                    "SK": schema.get_version(),
-                    **schema.dict(exclude="columns"),
-                    COLUMNS: columns_for_storage,
+                    "PK": schema.metadata.dataset_identifier(with_version=False),
+                    "SK": schema.metadata.get_version(),
+                    **schema.metadata.dict(),
+                    COLUMNS: [{**dict(col), "name": name} for name, col in schema.columns.items()],
                 }
             )
         except ClientError as error:
             self._handle_client_error(
-                f"Error storing schema for {schema.dataset_metadata.string_representation()}",
+                f"Error storing schema for {schema.metadata.string_representation()}",
                 error,
             )
 

@@ -16,6 +16,7 @@ from api.common.custom_exceptions import (
 )
 from api.domain.dataset_metadata import DatasetMetadata
 from api.domain.schema import Schema, Column
+from api.domain.schema_metadata import SchemaMetadata
 
 
 class TestGlueAdapterTableMethods:
@@ -28,14 +29,14 @@ class TestGlueAdapterTableMethods:
             "GLUE_CATALOGUE_DB_NAME",
         )
         self.valid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="layer",
                 domain="domain",
                 dataset="dataset",
                 version=1,
+                description="description",
+                sensitivity="PUBLIC",
             ),
-            sensitivity="PUBLIC",
-            description="description",
             columns={
                 "colname1": Column(
                     partition_index=0,

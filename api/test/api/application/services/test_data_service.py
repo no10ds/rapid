@@ -21,9 +21,11 @@ from api.domain.Jobs.UploadJob import UploadStep
 from api.domain.dataset_metadata import DatasetMetadata
 from api.domain.enriched_schema import (
     EnrichedSchema,
+    EnrichedSchemaMetadata,
     EnrichedColumn,
 )
-from api.domain.schema import Schema, Column, Owner
+from api.domain.schema import Schema, Column
+from api.domain.schema_metadata import Owner, SchemaMetadata
 from api.domain.sql_query import SQLQuery
 
 
@@ -41,14 +43,14 @@ class TestUploadDataset:
             self.schema_service,
         )
         self.valid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
                 version="2",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
                     partition_index=0,
@@ -172,7 +174,7 @@ class TestUploadDataset:
             schema, Path("data.csv"), "123-456-789"
         )
         self.s3_adapter.upload_raw_data.assert_called_once_with(
-            schema.dataset_metadata, Path("data.csv"), "123-456-789"
+            schema.metadata, Path("data.csv"), "123-456-789"
         )
         mock_process_chunks.assert_called_once_with(
             schema, Path("data.csv"), "123-456-789"
@@ -245,30 +247,27 @@ class TestUploadDataset:
         mock_build_validated_dataframe.assert_has_calls(expected_calls)
 
     # Dataset chunk validation -------------------------------
-    # TODO Pandera: Add pandera data validation
-    # @patch("api.application.services.data_service.construct_chunked_dataframe")
-    # def test_validates_dataset_in_chunks_with_invalid_column_headers(
-    #     self, mock_construct_chunked_dataframe
-    # ):
-    #     schema = self.valid_schema
+    @patch("api.application.services.data_service.construct_chunked_dataframe")
+    def test_validates_dataset_in_chunks_with_invalid_column_headers(
+        self, mock_construct_chunked_dataframe
+    ):
+        schema = self.valid_schema
 
-    #     self.schema_service.get_schema.return_value = schema
+        self.schema_service.get_schema.return_value = schema
 
-    #     print(f"Schema columns: {schema.get_column_names()}")
+        self.chunked_dataframe_values(
+            mock_construct_chunked_dataframe,
+            [
+                pd.DataFrame(
+                    {"colname1": [1234, 4567], "colnamewrong": ["Carlos", "Ada"]}
+                )
+            ],
+        )
 
-    #     self.chunked_dataframe_values(
-    #         mock_construct_chunked_dataframe,
-    #         [
-    #             pd.DataFrame(
-    #                 {"colname1": [1234, 4567], "colnamewrong": ["Carlos", "Ada"]}
-    #             )
-    #         ],
-    #     )
-
-    #     with pytest.raises(UnprocessableDatasetError):
-    #         self.data_service.validate_incoming_data(
-    #             schema, Path("data.csv"), "123-456-789"
-    #         )
+        with pytest.raises(UnprocessableDatasetError):
+            self.data_service.validate_incoming_data(
+                schema, Path("data.csv"), "123-456-789"
+            )
 
     @patch("api.application.services.data_service.construct_chunked_dataframe")
     def test_upload_dataset_in_chunks_with_invalid_data(
@@ -387,15 +386,15 @@ class TestUploadDataset:
     ):
         # Given
         schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
                 version=4,
+                owners=[Owner(name="owner", email="owner@email.com")],
+                update_behaviour="OVERWRITE",
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
-            update_behaviour="OVERWRITE",
             columns={
                 "colname1": Column(
                     partition_index=0,
@@ -439,7 +438,7 @@ class TestUploadDataset:
         self.data_service.process_chunk.assert_has_calls(expected_calls)
 
         self.s3_adapter.delete_previous_dataset_files.assert_called_once_with(
-            schema.dataset_metadata, "123-456-789"
+            schema.metadata, "123-456-789"
         )
 
     # Process Chunks -----------------------------------------
@@ -562,14 +561,14 @@ class TestDatasetInfoRetrieval:
         self.job_service = Mock()
         self.schema_service = Mock()
         self.valid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
                 version=2,
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
                     partition_index=0,
@@ -604,37 +603,37 @@ class TestDatasetInfoRetrieval:
         self.s3_adapter.get_last_updated_time.return_value = time
 
         last_updated_time = self.data_service.get_last_updated_time(
-            self.valid_schema.dataset_metadata
+            self.valid_schema.metadata
         )
         assert last_updated_time == "2022-03-01 11:03:49+00:00"
         self.s3_adapter.get_last_updated_time.assert_called_once_with(
-            self.valid_schema.dataset_metadata.dataset_location()
+            self.valid_schema.metadata.dataset_location()
         )
 
     def test_get_last_updated_time_empty(self):
         self.s3_adapter.get_last_updated_time.return_value = None
 
         last_updated_time = self.data_service.get_last_updated_time(
-            self.valid_schema.dataset_metadata
+            self.valid_schema.metadata
         )
         assert last_updated_time == "Never updated"
         self.s3_adapter.get_last_updated_time.assert_called_once_with(
-            self.valid_schema.dataset_metadata.dataset_location()
+            self.valid_schema.metadata.dataset_location()
         )
 
     def test_get_schema_information(self):
         expected_schema = EnrichedSchema(
-            dataset_metadata=DatasetMetadata(
+            metadata=EnrichedSchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
                 version=2,
+                owners=[Owner(name="owner", email="owner@email.com")],
+                number_of_rows=48718,
+                number_of_columns=3,
+                last_updated="2022-03-01 11:03:49+00:00",
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
-            number_of_rows=48718,
-            number_of_columns=3,
-            last_updated="2022-03-01 11:03:49+00:00",
             columns={
                 "colname1": EnrichedColumn(
                     name="colname1",
@@ -683,14 +682,14 @@ class TestDatasetInfoRetrieval:
 
     def test_get_schema_information_for_multiple_dates(self):
         valid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
                 version=1,
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
                     partition_index=0,
@@ -712,17 +711,17 @@ class TestDatasetInfoRetrieval:
             },
         )
         expected_schema = EnrichedSchema(
-            dataset_metadata=DatasetMetadata(
+            metadata=EnrichedSchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
                 version=1,
+                owners=[Owner(name="owner", email="owner@email.com")],
+                number_of_rows=48718,
+                number_of_columns=3,
+                last_updated="2022-03-01 11:03:49+00:00",
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
-            number_of_rows=48718,
-            number_of_columns=3,
-            last_updated="2022-03-01 11:03:49+00:00",
             columns={
                 "colname1": EnrichedColumn(
                     partition_index=0,
@@ -778,14 +777,14 @@ class TestDatasetInfoRetrieval:
 
     def test_get_schema_size_for_datasets_with_no_dates(self):
         valid_schema = Schema(
-            dataset_metadata=DatasetMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
                 version=3,
+                owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
             columns={
                 "colname1": Column(
                     partition_index=0,
@@ -795,17 +794,17 @@ class TestDatasetInfoRetrieval:
             },
         )
         expected_schema = EnrichedSchema(
-            dataset_metadata=DatasetMetadata(
+            metadata=EnrichedSchemaMetadata(
                 layer="raw",
                 domain="some",
                 dataset="other",
+                sensitivity="PUBLIC",
                 version=3,
+                owners=[Owner(name="owner", email="owner@email.com")],
+                number_of_rows=48718,
+                number_of_columns=1,
+                last_updated="2022-03-01 11:03:49+00:00",
             ),
-            sensitivity="PUBLIC",
-            owners=[Owner(name="owner", email="owner@email.com")],
-            number_of_rows=48718,
-            number_of_columns=1,
-            last_updated="2022-03-01 11:03:49+00:00",
             columns={
                 "colname1": EnrichedColumn(
                     partition_index=0,

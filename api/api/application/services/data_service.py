@@ -33,8 +33,9 @@ from api.common.utilities import build_error_message_list
 from api.domain.data_types import DateType
 from api.domain.dataset_metadata import DatasetMetadata
 from api.domain.enriched_schema import (
+    EnrichedColumn,
     EnrichedSchema,
-    EnrichedColumn
+    EnrichedSchemaMetadata,
 )
 from api.domain.Jobs.QueryJob import QueryJob, QueryStep
 from api.domain.Jobs.UploadJob import UploadJob, UploadStep
@@ -101,7 +102,7 @@ class DataService:
             self.validate_incoming_data(schema, file_path, raw_file_identifier)
             self.job_service.update_step(job, UploadStep.RAW_DATA_UPLOAD)
             self.s3_adapter.upload_raw_data(
-                schema.dataset_metadata, file_path, raw_file_identifier
+                schema.metadata, file_path, raw_file_identifier
             )
             self.job_service.update_step(job, UploadStep.DATA_UPLOAD)
             self.process_chunks(schema, file_path, raw_file_identifier)
@@ -193,8 +194,9 @@ class DataService:
             dataset, self._build_query(schema)
         )
         last_updated = self.get_last_updated_time(dataset)
-        return self._enrich_schema(
-            schema, statistics_dataframe, last_updated
+        return EnrichedSchema(
+            metadata=self._enrich_metadata(schema, statistics_dataframe, last_updated),
+            columns=self._enrich_columns(schema, statistics_dataframe),
         )
 
     def upload_data(
@@ -210,7 +212,7 @@ class DataService:
         partition_columns = schema.get_partition_columns()
         if partition_columns:
             query_id = self.athena_adapter.query_sql_async(
-                f"MSCK REPAIR TABLE `{schema.dataset_metadata.glue_table_name()}`;"
+                f"MSCK REPAIR TABLE `{schema.metadata.glue_table_name()}`;"
             )
             self.athena_adapter.wait_for_query_to_complete(query_id)
 
@@ -283,15 +285,12 @@ class DataService:
         ]
         return SQLQuery(select_columns=columns_to_query)
 
-    def _enrich_schema(
+    def _enrich_metadata(
         self, schema: Schema, statistics_dataframe: pd.DataFrame, last_updated: str
-    ) -> EnrichedSchema:
+    ) -> EnrichedSchemaMetadata:
         dataset_size = statistics_dataframe.at[0, "data_size"]
         return EnrichedSchema(
-            dataset_metadata=schema.dataset_metadata,
-            sensitivity=schema.get_sensitivity(),
-            owners=schema.get_owners(),
-            columns=self._enrich_columns(schema, statistics_dataframe),
+            **schema.metadata.dict(),
             number_of_rows=dataset_size,
             number_of_columns=len(schema.columns.values()),
             last_updated=last_updated,

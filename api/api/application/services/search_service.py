@@ -6,7 +6,8 @@ from api.adapter.athena_adapter import AthenaAdapter
 from api.adapter.dynamodb_adapter import DynamoDBAdapter, ExpressionAttribute
 from api.domain.search_metadata import SearchMetadata, MatchField
 from api.domain.dataset_metadata import DatasetMetadata, LAYER, DOMAIN, DATASET, VERSION
-from api.domain.schema import DESCRIPTION, COLUMNS
+from api.domain.schema_metadata import DESCRIPTION
+from api.domain.schema import COLUMNS
 
 MATCHING_DATA = "matching_data"
 MATCHING_FIELD = "matching_field"

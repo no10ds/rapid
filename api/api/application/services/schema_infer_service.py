@@ -17,8 +17,8 @@ from api.common.value_transformers import clean_column_name
 
 from api.domain.data_types import is_date_type
 from api.domain.schema import Column, Schema
-from api.domain.schema import Owner
-from api.domain.dataset_metadata import DatasetMetadata
+from api.domain.schema import Schema, Column
+from api.domain.schema_metadata import Owner, SchemaMetadata
 
 DEFAULT_DATE_FORMAT = "%Y-%m-%d"
 
@@ -32,44 +32,30 @@ class SchemaInferService:
         sensitivity: str,
         file_path: Path,
     ) -> dict[str, Any]:
+        
+        dataframe = self._construct_single_chunk_dataframe(file_path)
+        pandera_schema = pandera.infer_schema(dataframe)
+        customized_columns = self._customize_inferred_columns(pandera_schema.columns)
+        schema = Schema(
+            metadata=SchemaMetadata(
+                layer=layer,
+                domain=domain,
+                dataset=dataset,
+                sensitivity=sensitivity,
+                owners=[Owner(name="change_me", email="change_me@email.com")],
+            ),
+            columns=customized_columns,
+        )
+
         try:
-            dataframe = self._construct_single_chunk_dataframe(file_path)
-
-            pandera_schema = pandera.infer_schema(dataframe)
-            customized_columns = self._customize_inferred_columns(pandera_schema.columns)
-
-            metadata = {
-                "layer": layer,
-                "domain": domain,
-                "dataset": dataset,
-                "version": None,
-                "sensitivity": sensitivity,
-                "description": "",
-                "key_value_tags": {},
-                "key_only_tags": [],
-                "owners": [{"name": "change_me", "email": "change_me@email.com"}],
-                "update_behaviour": "APPEND",
-                "is_latest_version": True,
-            }
-
-            schema = Schema(
-                metadata=metadata,
-                columns=customized_columns,
-            )
-
-            try:
-                validate_schema(schema)
-            finally:
-                # We need to delete the incoming file from the local file system
-                # regardless of the schema validation was successful or not
-                delete_incoming_raw_file(schema, file_path)
+            validate_schema(schema)
+        finally:
+            # We need to delete the incoming file from the local file system
+            # regardless of the schema validation was successful or not
+            delete_incoming_raw_file(schema, file_path)
             
-            return schema.dict()
-            
-            
-            
-        except (SchemaError, SchemaInitError, ParserError) as e:
-            raise UserError(f"Invalid data format: {str(e)}")
+        return schema.dict()
+
 
     def _customize_inferred_columns(self, inferred_columns: Dict[str, pandera.Column]) -> Dict[str, Column]:
         customized = {}
@@ -90,7 +76,7 @@ class SchemaInferService:
     def _construct_single_chunk_dataframe(self, file_path: Path) -> pd.DataFrame:
         try:
             for chunk in construct_chunked_dataframe(file_path):
-                # We only validate a schema based on the first chunk
+                # We only validate a schema based on the frist chunk
                 return get_dataframe_from_chunk_type(chunk)
         except ValueError as error:
             raise UserError(
