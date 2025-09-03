@@ -30,25 +30,25 @@ class TestSchemaInfer:
             columns={
                 "colname1": Column(
                     partition_index=None,
-                    dtype="string",
+                    dtype="object",
                     nullable=True,
                     format=None,
                 ),
                 "colname2": Column(
                     partition_index=None,
-                    dtype="int",
+                    dtype="int64",
                     nullable=True,
                     format=None,
                 ),
                 "col_name_3": Column(
                     partition_index=None,
-                    dtype="int",
+                    dtype="int64",
                     nullable=True,
                     format=None,
                 ),
                 "colname_4": Column(
                     partition_index=None,
-                    dtype="boolean",
+                    dtype="bool",
                     nullable=True,
                     format=None,
                 ),

@@ -1046,7 +1046,7 @@ class TestDynamoDBAdapterSchemaTable:
                 "columns": {
                     "colname1": {
                         "partition_index": 0,
-                        "dtype": "bigint",
+                        "dtype": "int",
                         "nullable": False,
                         "format": None,
                         "unique": False,

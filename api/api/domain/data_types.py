@@ -25,6 +25,7 @@ class NumericType(StrEnum):
 
 class BooleanType(StrEnum):
     BOOLEAN = "boolean"
+    BOOL = "bool"
 
 
 class StringType(StrEnum):
@@ -50,6 +51,7 @@ class TimestampType(StrEnum):
 
 class PanderaDataType(StrEnum):
     BOOLEAN = BooleanType.BOOLEAN
+    BOOL = BooleanType.BOOL
     DATE = DateType.DATE
     DATETIME = DateType.DATETIME
     DATETIME64 = DateType.DATETIME64
@@ -58,6 +60,7 @@ class PanderaDataType(StrEnum):
     MIXED_INTEGER = StringType.MIXED_INTEGER
     STRING = StringType.STRING
     STRING_PYTHON = StringType.STRING_PYTHON
+    OBJECT = StringType.OBJECT
     INT = NumericType.INT
     INT8 = NumericType.INT8
     INT16 = NumericType.INT16
@@ -96,10 +99,11 @@ PANDERA_ENGINE_TO_ATHENA_CONVERTER = {
     PanderaDataType.FLOAT32: AthenaDataType.FLOAT,
     PanderaDataType.FLOAT64: AthenaDataType.DOUBLE,
     PanderaDataType.DATETIME64: AthenaDataType.TIMESTAMP,
-    StringType.STRING: AthenaDataType.STRING,
-    StringType.OBJECT: AthenaDataType.STRING,
+    PanderaDataType.STRING: AthenaDataType.STRING,
+    PanderaDataType.OBJECT: AthenaDataType.STRING,
     PanderaDataType.STRING_PYTHON: AthenaDataType.STRING,
     PanderaDataType.BOOLEAN: AthenaDataType.BOOLEAN,
+    PanderaDataType.BOOL: AthenaDataType.BOOLEAN, 
     PanderaDataType.DATETIME64_NS: AthenaDataType.TIMESTAMP,
     PanderaDataType.DATE: AthenaDataType.DATE,
 }

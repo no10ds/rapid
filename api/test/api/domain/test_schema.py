@@ -60,7 +60,7 @@ class TestSchema:
         assert actual_partitions_numbers == expected_partitions_numbers
 
     def test_get_data_types(self):
-        expected_data_types = {"int64", "string[python]", "boolean"}
+        expected_data_types = {"int", "string", "boolean"}
 
         actual_data_types = self.schema.get_data_types()
 
@@ -69,20 +69,19 @@ class TestSchema:
     def test_get_partition_columns(self):
         res = self.schema.get_partition_columns()
         expected = [
+            ("colname2",
             Column(
-                name="colname2",
                 partition_index=0,
                 dtype="string",
                 nullable=False,
                 format=None,
-            ),
-            Column(
-                name="colname1",
+            )),
+            ("colname1", Column(
                 partition_index=1,
                 dtype="int",
                 nullable=True,
                 format=None,
-            ),
+            )),
         ]
         assert res == expected
 
@@ -91,9 +90,9 @@ class TestSchema:
         expected = [
             {
                 "Name": "colname2",
-                "Type": "string[python]",
+                "Type": "string",
             },
-            {"Name": "colname1", "Type": "int64"},
+            {"Name": "colname1", "Type": "int"},
         ]
 
         assert res == expected
@@ -125,7 +124,7 @@ class TestSchema:
 
         expected = pa.schema(
             [
-                pa.field("colname1", pa.int64()),
+                pa.field("colname1", pa.int32()),
                 pa.field("colname2", pa.string()),
                 pa.field("colname3", pa.bool_()),
             ]

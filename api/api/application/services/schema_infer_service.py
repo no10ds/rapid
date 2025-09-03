@@ -32,7 +32,6 @@ class SchemaInferService:
         sensitivity: str,
         file_path: Path,
     ) -> dict[str, Any]:
-        
         dataframe = self._construct_single_chunk_dataframe(file_path)
         pandera_schema = pandera.infer_schema(dataframe)
         customized_columns = self._customize_inferred_columns(pandera_schema.columns)
@@ -46,7 +45,6 @@ class SchemaInferService:
             ),
             columns=customized_columns,
         )
-
         try:
             validate_schema(schema)
         finally:
@@ -54,7 +52,7 @@ class SchemaInferService:
             # regardless of the schema validation was successful or not
             delete_incoming_raw_file(schema, file_path)
             
-        return schema.dict()
+        return schema.dict(exclude={"metadata": {"version"}})
 
 
     def _customize_inferred_columns(self, inferred_columns: Dict[str, pandera.Column]) -> Dict[str, Column]:

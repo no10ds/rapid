@@ -435,13 +435,27 @@ class TestListDatasets(BaseClientTest):
                 "layer": "layer",
                 "domain": "domain1",
                 "dataset": "dataset1",
+                "sensitivity": "PUBLIC",
                 "version": 1,
+                "description": "",
+                "key_value_tags": {"tag1": "value1"},
+                "key_only_tags": [],
+                "owners": None,
+                "update_behaviour": "APPEND",
+                "is_latest_version": True,
             },
             {
                 "layer": "layer",
                 "domain": "domain2",
                 "dataset": "dataset2",
+                "sensitivity": "PUBLIC",
                 "version": 1,
+                "description": "some test description",
+                "key_value_tags": {"tag2": "value2"},
+                "key_only_tags": [],
+                "update_behaviour": "APPEND",
+                "owners": None,
+                "is_latest_version": True,
             },
         ]
 
@@ -696,7 +710,7 @@ class TestDatasetInfo(BaseClientTest):
             }
         )
 
-        mock_get_dataset_info.return_value = expected_response.dict()
+        mock_get_dataset_info.return_value = expected_response
 
         response = self.client.get(
             f"{BASE_API_PATH}/datasets/layer/mydomain/mydataset/info?version=2",
@@ -739,6 +753,7 @@ class TestDatasetInfo(BaseClientTest):
                 ),
             }
         )
+        dataset_metadata = DatasetMetadata("layer", "mydomain", "mydataset", 2)
 
         mock_get_dataset_info.return_value = expected_response
         mock_construct_dataset_metadata.return_value = dataset_metadata

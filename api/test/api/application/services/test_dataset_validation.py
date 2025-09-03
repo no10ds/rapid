@@ -71,7 +71,7 @@ class TestDatasetValidation:
                 "colname2": Column(
                     name="colname2",
                     partition_index=None,
-                    dtype="string",
+                    dtype="string[python]",
                     nullable=False,
                 ),
                 "colname3": Column(

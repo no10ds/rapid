@@ -174,12 +174,27 @@ class DynamoDBAdapter(DatabaseAdapter):
                 f"Storing schema for {schema.metadata.string_representation()}"
             )
             
+            metadata_dict = schema.metadata.dict()
+
+            if 'layer' in metadata_dict:
+                metadata_dict['layer'] = metadata_dict['layer'].value
+ 
+            if 'update_behaviour' in metadata_dict:
+                metadata_dict['update_behaviour'] = metadata_dict['update_behaviour'].value
+
+            
+            columns_dict = {}
+            for name, col in schema.columns.items():
+                col_dict = dict(col)
+                columns_dict[name] = col_dict
+            
             self.schema_table.put_item(
                 Item={
                     "PK": schema.metadata.dataset_identifier(with_version=False),
                     "SK": schema.metadata.get_version(),
-                    **schema.metadata.dict(),
-                    COLUMNS: [{**dict(col), "name": name} for name, col in schema.columns.items()],
+                    **metadata_dict,
+                    COLUMNS: columns_dict,
+                    # COLUMNS: [{**dict(col), "name": name} for name, col in schema.columns.items()],
                 }
             )
         except ClientError as error:

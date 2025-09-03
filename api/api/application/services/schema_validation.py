@@ -111,7 +111,6 @@ def validate_metadata_character_string(string_input: str) -> bool:
 
 def schema_has_valid_tag_set(schema: Schema):
     schema.metadata.remove_duplicates()
-
     if len(schema.get_tags()) > MAX_TAG_COUNT:
         raise SchemaValidationError(
             f"You cannot specify more than {MAX_TAG_COUNT} tags"
@@ -133,7 +132,6 @@ def has_unique_partition_indexes(schema: Schema):
     __has_unique_value(
         schema.get_partition_indexes(), schema.get_partitions(), "partition indexes"
     )
-
 
 
 def has_valid_partition_index_values(schema: Schema):

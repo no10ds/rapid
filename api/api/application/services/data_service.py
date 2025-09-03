@@ -167,7 +167,7 @@ class DataService:
         )
         try:
             self.s3_adapter.delete_previous_dataset_files(
-                schema.dataset_metadata,
+                schema.metadata,
                 raw_file_identifier,
             )
         except IndexError:
@@ -289,7 +289,7 @@ class DataService:
         self, schema: Schema, statistics_dataframe: pd.DataFrame, last_updated: str
     ) -> EnrichedSchemaMetadata:
         dataset_size = statistics_dataframe.at[0, "data_size"]
-        return EnrichedSchema(
+        return EnrichedSchemaMetadata(
             **schema.metadata.dict(),
             number_of_rows=dataset_size,
             number_of_columns=len(schema.columns.values()),

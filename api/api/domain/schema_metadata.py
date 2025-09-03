@@ -59,4 +59,3 @@ class SchemaMetadata(DatasetMetadata):
                     updated_key_only_list.append(key)
 
         self.key_only_tags = updated_key_only_list
-	

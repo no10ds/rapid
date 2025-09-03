@@ -214,7 +214,7 @@ class TestUpdateSchema:
             columns={
                 "colname1": Column(
                     partition_index=0,
-                    dtype="double",
+                    dtype="float64",
                     nullable=False,
                 ),
                 "colname_new": Column(
@@ -268,10 +268,10 @@ class TestUpdateSchema:
 
     def test_update_schema_success(self):
         original_schema = self.valid_schema
-        original_schema.metadata["version"] = 2
+        original_schema.metadata.version = 2
         new_schema = self.valid_updated_schema
         expected_schema = self.valid_updated_schema.copy(deep=True)
-        expected_schema.metadata["version"] = 3
+        expected_schema.metadata.version = 3
 
         self.schema_service.get_schema = Mock(return_value=original_schema)
 
@@ -287,7 +287,7 @@ class TestUpdateSchema:
     def test_update_schema_enforces_sensitivity_consistency(self):
         original_schema = self.valid_schema
         new_schema = self.valid_updated_schema.copy(deep=True)
-        new_schema.metadata["sensitivity"] = Sensitivity.PRIVATE
+        new_schema.metadata.sensitivity = Sensitivity.PRIVATE
 
         self.schema_service.get_schema = Mock(return_value=original_schema)
         with pytest.raises(
@@ -366,7 +366,7 @@ class TestGetSchema:
             "update_behaviour": "APPEND",
             "is_latest_version": True,
             "owners": [{"name": "owner", "email": "owner@email.com"}],
-            "columns": {col_name: col.to_dict() for col_name, col in self.columns.items()},
+            "columns": {col_name: dict(col) for col_name, col in self.columns.items()},
             "key_value_tags": {},
             "key_only_tags": [],
         }

@@ -17,6 +17,7 @@ from api.common.logger import AppLogger
 from api.domain.schema import Schema, Column, COLUMNS
 from api.domain.schema_metadata import SchemaMetadata
 from api.domain.dataset_metadata import DatasetMetadata
+
 from api.domain.dataset_filters import DatasetFilters
 from api.common.config.auth import Sensitivity
 
@@ -52,7 +53,6 @@ class SchemaService:
             metadata = SchemaMetadata.parse_obj(schema["metadata"])
         else:
             metadata = SchemaMetadata.parse_obj(schema)
-
 
         if only_metadata:
             return metadata
@@ -120,7 +120,7 @@ class SchemaService:
     def update_schema(self, schema: Schema) -> str:
         original_schema = self.get_schema(schema.metadata, latest=True)
 
-        schema.metadata["version"] = (
+        schema.metadata.version = (
             original_schema.get_version() + SCHEMA_VERSION_INCREMENT
         )
 
