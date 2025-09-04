@@ -19,39 +19,45 @@
   "columns": {
     "year": {
       "partition_index": null,
-      "dtype": "int",
+      "dtype": "int64",
       "nullable": true,
-      "format": null
+      "format": null,
+      "unique": false
     },
     "month": {
       "partition_index": null,
-      "dtype": "int",
+      "dtype": "int64",
       "nullable": true,
-      "format": null
+      "format": null,
+      "unique": false
     },
     "destination": {
       "partition_index": null,
-      "dtype": "string",
+      "dtype": "object",
       "nullable": true,
-      "format": null
+      "format": null,
+      "unique": false
     },
     "arrival": {
       "partition_index": null,
-      "dtype": "string",
+      "dtype": "object",
       "nullable": true,
-      "format": null
+      "format": null,
+      "unique": false
     },
     "type": {
       "partition_index": null,
-      "dtype": "string",
+      "dtype": "object",
       "nullable": true,
-      "format": null
+      "format": null,
+      "unique": false
     },
     "status": {
       "partition_index": null,
-      "dtype": "string",
+      "dtype": "object",
       "nullable": true,
-      "format": null
+      "format": null,
+      "unique": false
     }
   }
 }
