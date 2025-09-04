@@ -51,20 +51,18 @@ class TestUploadDataset:
                 sensitivity="PUBLIC",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=True,
+                    dtype="int",
+                    nullable=True,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                 ),
-            ],
+            },
         )
 
     def chunked_dataframe_values(
@@ -397,20 +395,18 @@ class TestUploadDataset:
                 owners=[Owner(name="owner", email="owner@email.com")],
                 update_behaviour="OVERWRITE",
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=True,
+                    dtype="int",
+                    nullable=True,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                 ),
-            ],
+            },
         )
 
         def dataset_chunk():
@@ -573,27 +569,25 @@ class TestDatasetInfoRetrieval:
                 version=2,
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=True,
                 ),
-                Column(
+                "date": Column(
                     name="date",
                     partition_index=None,
-                    data_type="date",
-                    allow_null=False,
+                    dtype="date",
+                    nullable=False,
                     format="%d/%m/%Y",
                 ),
-            ],
+            },
         )
         self.data_service = DataService(
             self.s3_adapter,
@@ -640,28 +634,28 @@ class TestDatasetInfoRetrieval:
                 number_of_columns=3,
                 last_updated="2022-03-01 11:03:49+00:00",
             ),
-            columns=[
-                EnrichedColumn(
+            columns={
+                "colname1": EnrichedColumn(
                     name="colname1",
                     partition_index=0,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-                EnrichedColumn(
+                "colname2": EnrichedColumn(
                     name="colname2",
                     partition_index=None,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=True,
                 ),
-                EnrichedColumn(
+                "date": EnrichedColumn(
                     name="date",
                     partition_index=None,
-                    data_type="date",
-                    allow_null=False,
+                    dtype="date",
+                    nullable=False,
                     format="%d/%m/%Y",
                     statistics={"max": "2021-07-01", "min": "2014-01-01"},
                 ),
-            ],
+            }
         )
         self.schema_service.get_schema.return_value = self.valid_schema
         self.athena_adapter.query.return_value = pd.DataFrame(
@@ -696,30 +690,26 @@ class TestDatasetInfoRetrieval:
                 version=1,
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-                Column(
-                    name="date",
+                "date": Column(
                     partition_index=None,
-                    data_type="date",
-                    allow_null=False,
+                    dtype="date",
+                    nullable=False,
                     format="%d/%m/%Y",
                 ),
-                Column(
-                    name="date2",
+                "date2": Column(
                     partition_index=None,
-                    data_type="date",
-                    allow_null=False,
+                    dtype="date",
+                    nullable=False,
                     format="%d/%m/%Y",
                 ),
-            ],
+            },
         )
-
         expected_schema = EnrichedSchema(
             metadata=EnrichedSchemaMetadata(
                 layer="raw",
@@ -732,30 +722,27 @@ class TestDatasetInfoRetrieval:
                 number_of_columns=3,
                 last_updated="2022-03-01 11:03:49+00:00",
             ),
-            columns=[
-                EnrichedColumn(
-                    name="colname1",
+            columns={
+                "colname1": EnrichedColumn(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-                EnrichedColumn(
-                    name="date",
+                "date": EnrichedColumn(
                     partition_index=None,
-                    data_type="date",
-                    allow_null=False,
+                    dtype="date",
+                    nullable=False,
                     format="%d/%m/%Y",
                     statistics={"max": "2021-07-01", "min": "2014-01-01"},
                 ),
-                EnrichedColumn(
-                    name="date2",
+                "date2": EnrichedColumn(
                     partition_index=None,
-                    data_type="date",
-                    allow_null=False,
+                    dtype="date",
+                    nullable=False,
                     format="%d/%m/%Y",
                     statistics={"max": "2020-07-01", "min": "2015-01-01"},
                 ),
-            ],
+            }
         )
         self.schema_service.get_schema.return_value = valid_schema
         self.athena_adapter.query.return_value = pd.DataFrame(
@@ -798,14 +785,13 @@ class TestDatasetInfoRetrieval:
                 version=3,
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=False,
-                )
-            ],
+                    dtype="int",
+                    nullable=False,
+                ),
+            },
         )
         expected_schema = EnrichedSchema(
             metadata=EnrichedSchemaMetadata(
@@ -819,14 +805,13 @@ class TestDatasetInfoRetrieval:
                 number_of_columns=1,
                 last_updated="2022-03-01 11:03:49+00:00",
             ),
-            columns=[
-                EnrichedColumn(
-                    name="colname1",
+            columns={
+                "colname1": EnrichedColumn(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=False,
-                )
-            ],
+                    dtype="int",
+                    nullable=False,
+                ),
+            },
         )
         self.schema_service.get_schema.return_value = valid_schema
         self.athena_adapter.query.return_value = pd.DataFrame({"data_size": [48718]})

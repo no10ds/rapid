@@ -11,11 +11,9 @@ from api.application.services.dataset_validation import (
     remove_empty_rows,
     clean_column_headers,
     dataset_has_correct_columns,
-    dataset_has_acceptable_null_values,
-    dataset_has_acceptable_unique_values,
-    dataset_has_correct_data_types,
     dataset_has_no_illegal_characters_in_partition_columns,
     dataset_has_rows,
+    validate_with_pandera,
 )
 from api.common.custom_exceptions import (
     DatasetValidationError,
@@ -38,58 +36,58 @@ class TestDatasetValidation:
 
         self.valid_schema = Schema(
             metadata=self.schema_metadata,
-            columns=[
-                Column(
+            columns={
+                "colname1": Column(
                     name="colname1",
                     partition_index=0,
-                    data_type="int",
-                    allow_null=True,
+                    dtype="int",
+                    nullable=True,
                 ),
-                Column(
+                "colname2": Column(
                     name="colname2",
                     partition_index=None,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                 ),
-                Column(
+                "colname3": Column(
                     name="colname3",
                     partition_index=None,
-                    data_type="boolean",
-                    allow_null=True,
+                    dtype="boolean",
+                    nullable=True,
                 ),
-            ],
+            },
         )
 
     def test_fully_valid_dataset(self):
         full_valid_schema = Schema(
             metadata=self.schema_metadata,
-            columns=[
-                Column(
+            columns={
+                "colname1": Column(
                     name="colname1",
                     partition_index=0,
-                    data_type="bigint",
-                    allow_null=True,
+                    dtype="int64",
+                    nullable=True,
                 ),
-                Column(
+                "colname2": Column(
                     name="colname2",
                     partition_index=None,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string[python]",
+                    nullable=False,
                 ),
-                Column(
+                "colname3": Column(
                     name="colname3",
                     partition_index=None,
-                    data_type="boolean",
-                    allow_null=True,
+                    dtype="boolean",
+                    nullable=True,
                 ),
-                Column(
+                "colname4": Column(
                     name="colname4",
                     partition_index=None,
-                    data_type="date",
+                    dtype="date",
                     format="%d/%m/%Y",
-                    allow_null=True,
+                    nullable=True,
                 ),
-            ],
+            },
         )
 
         dataframe = pd.DataFrame(
@@ -152,20 +150,20 @@ class TestDatasetValidation:
     def test_invalid_when_partition_column_with_illegal_characters(self):
         valid_schema = Schema(
             metadata=self.schema_metadata,
-            columns=[
-                Column(
+            columns={
+                "colname1": Column(
                     name="colname1",
                     partition_index=0,
-                    data_type="int",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-                Column(
+                "colname2": Column(
                     name="colname2",
                     partition_index=1,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                 ),
-            ],
+            },
         )
 
         dataframe = pd.DataFrame(
@@ -178,15 +176,15 @@ class TestDatasetValidation:
     def test_valid_when_date_partition_column_with_illegal_slash_character(self):
         valid_schema = Schema(
             metadata=self.schema_metadata,
-            columns=[
-                Column(
+            columns={
+                "colname1": Column(
                     name="colname1",
                     partition_index=0,
-                    data_type="date",
+                    dtype="date",
                     format="%d/%m/%Y",
-                    allow_null=True,
-                )
-            ],
+                    nullable=True,
+                ),
+            },
         )
 
         dataframe = pd.DataFrame({"colname1": ["01/02/2021", "01/02/2021"]})
@@ -237,26 +235,26 @@ class TestDatasetValidation:
     def test_checks_for_unacceptable_null_values(self, dataframe: pd.DataFrame):
         schema = Schema(
             metadata=self.schema_metadata,
-            columns=[
-                Column(
+            columns={
+                "col1": Column(
                     name="col1",
                     partition_index=None,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-                Column(
+                "col2": Column(
                     name="col2",
                     partition_index=None,
-                    data_type="double",
-                    allow_null=False,
+                    dtype="double",
+                    nullable=False,
                 ),
-                Column(
+                "col3": Column(
                     name="col3",
                     partition_index=None,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                 ),
-            ],
+            },
         )
 
         with pytest.raises(DatasetValidationError):
@@ -269,26 +267,26 @@ class TestDatasetValidation:
 
         schema = Schema(
             metadata=self.schema_metadata,
-            columns=[
-                Column(
+            columns={
+                "col1": Column(
                     name="col1",
                     partition_index=None,
-                    data_type="bigint",
-                    allow_null=True,
+                    dtype="int",
+                    nullable=True,
                 ),
-                Column(
+                "col2": Column(
                     name="col2",
                     partition_index=None,
-                    data_type="double",
-                    allow_null=True,
+                    dtype="double",
+                    nullable=True,
                 ),
-                Column(
+                "col3": Column(
                     name="col3",
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-            ],
+            },
         )
 
         try:
@@ -307,27 +305,27 @@ class TestDatasetValidation:
 
         schema = Schema(
             metadata=self.schema_metadata,
-            columns=[
-                Column(
+            columns={
+                "col1": Column(
                     name="col1",
                     partition_index=None,
-                    data_type="date",
+                    dtype="date",
                     format="%d/%m/%Y",
-                    allow_null=True,
+                    nullable=True,
                 ),
-                Column(
+                "col2": Column(
                     name="col2",
                     partition_index=None,
-                    data_type="double",
-                    allow_null=True,
+                    dtype="double",
+                    nullable=True,
                 ),
-                Column(
+                "col3": Column(
                     name="col3",
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-            ],
+            },
         )
 
         try:
@@ -346,27 +344,27 @@ class TestDatasetValidation:
 
         schema = Schema(
             metadata=self.schema_metadata,
-            columns=[
-                Column(
+            columns={
+                "col1": Column(
                     name="col1",
                     partition_index=None,
-                    data_type="date",
+                    dtype="date",
                     format="%d/%m/%Y",
-                    allow_null=True,
+                    nullable=True,
                 ),
-                Column(
+                "col2": Column(
                     name="col2",
                     partition_index=None,
-                    data_type="double",
-                    allow_null=True,
+                    dtype="double",
+                    nullable=True,
                 ),
-                Column(
+                "col3": Column(
                     name="col3",
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-            ],
+            },
         )
 
         try:
@@ -394,15 +392,15 @@ class TestDatasetValidation:
     ):
         df = pd.DataFrame(columns=dataframe_columns)
 
-        columns = [
-            Column(
+        columns = {
+            schema_column: Column(
                 name=schema_column,
                 partition_index=None,
-                data_type="string",
-                allow_null=True,
+                dtype="string",
+                nullable=True,
             )
             for schema_column in schema_columns
-        ]
+        }
 
         schema = Schema(
             metadata=self.schema_metadata,
@@ -432,30 +430,30 @@ class TestDatasetValidation:
         )
         schema = Schema(
             metadata=self.schema_metadata,
-            columns=[
-                Column(
+            columns={
+                "col1": Column(
                     name="col1",
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-                Column(
+                "col2": Column(
                     name="col2",
                     partition_index=None,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                 ),
-                Column(
+                "col3": Column(
                     name="col3",
                     partition_index=None,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-            ],
+            },
         )
 
         try:
-            dataset_has_acceptable_null_values(df, schema)
+            validate_with_pandera(df, schema)
         except DatasetValidationError as error:
             assert error.message == [
                 "Column [col2] does not allow null values",
@@ -472,32 +470,32 @@ class TestDatasetValidation:
         )
         schema = Schema(
             metadata=self.schema_metadata,
-            columns=[
-                Column(
+            columns={
+                "col1": Column(
                     name="col1",
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                     unique=True,
                 ),
-                Column(
+                "col2": Column(
                     name="col2",
                     partition_index=None,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                     unique=True,
                 ),
-                Column(
+                "col3": Column(
                     name="col3",
                     partition_index=None,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                     unique=True,
                 ),
-            ],
+            },
         )
 
-        data_frame, error_list = dataset_has_acceptable_unique_values(df, schema)
+        data_frame, error_list = validate_with_pandera(df, schema)
         assert error_list == [
             "Column [col1] must have unique values",
             "Column [col3] must have unique values",
@@ -517,57 +515,57 @@ class TestDatasetValidation:
         )
         schema = Schema(
             metadata=self.schema_metadata,
-            columns=[
-                Column(
+            columns={
+                "col1": Column(
                     name="col1",
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-                Column(
+                "col2": Column(
                     name="col2",
                     partition_index=None,
-                    data_type="boolean",
-                    allow_null=False,
+                    dtype="boolean",
+                    nullable=False,
                 ),
-                Column(
+                "col3": Column(
                     name="col3",
                     partition_index=None,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-                Column(
+                "col4": Column(
                     name="col4",
                     partition_index=None,
-                    data_type="bigint",
-                    allow_null=False,
+                    dtype="int64",
+                    nullable=False,
                 ),
-                Column(
+                "col5": Column(
                     name="col5",
                     partition_index=None,
-                    data_type="date",
-                    allow_null=False,
+                    dtype="date",
+                    nullable=False,
                 ),
-                Column(
+                "col6": Column(
                     name="col6",
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-                Column(
+                "col7": Column(
                     name="col7",
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-            ],
+            },
         )
 
-        data_frame, error_list = dataset_has_correct_data_types(df, schema)
+        data_frame, error_list = validate_with_pandera(df, schema)
         assert error_list == [
             "Column [col2] has an incorrect data type. Expected boolean, received string",
             "Column [col3] has an incorrect data type. Expected int, received string",
-            "Column [col4] has an incorrect data type. Expected bigint, received string",
+            "Column [col4] has an incorrect data type. Expected int64, received string",
         ]
 
     def test_return_error_message_when_dataset_has_illegal_chars_in_partition_columns(
@@ -584,38 +582,38 @@ class TestDatasetValidation:
         )
         schema = Schema(
             metadata=self.schema_metadata,
-            columns=[
-                Column(
+            columns={
+                "col1": Column(
                     name="col1",
                     partition_index=0,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-                Column(
+                "col2": Column(
                     name="col2",
                     partition_index=1,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                 ),
-                Column(
+                "col3": Column(
                     name="col3",
                     partition_index=2,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                 ),
-                Column(
+                "col4": Column(
                     name="col4",
                     partition_index=3,
-                    data_type="date",
-                    allow_null=False,
+                    dtype="date",
+                    nullable=False,
                 ),
-                Column(
+                "col5": Column(
                     name="col5",
                     partition_index=4,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-            ],
+            },
         )
 
         try:
@@ -640,38 +638,38 @@ class TestDatasetValidation:
         )
         schema = Schema(
             metadata=self.schema_metadata,
-            columns=[
-                Column(
+            columns={
+                "col1": Column(
                     name="col1",
                     partition_index=0,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-                Column(
+                "col2": Column(
                     name="col2",
                     partition_index=1,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                 ),
-                Column(
+                "col3": Column(
                     name="col3",
                     partition_index=None,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                 ),
-                Column(
+                "col4": Column(
                     name="col4",
                     partition_index=None,
-                    data_type="date",
-                    allow_null=False,
+                    dtype="date",
+                    nullable=False,
                 ),
-                Column(
+                "col5": Column(
                     name="col5",
                     partition_index=None,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-            ],
+            },
         )
 
         try:
@@ -736,15 +734,15 @@ class TestDatasetTransformation:
 
         schema = Schema(
             metadata=self.schema_metadata,
-            columns=[
-                Column(
+            columns={
+                "date": Column(
                     name="date",
                     partition_index=None,
-                    data_type="date",
+                    dtype="date",
                     format=date_format,
-                    allow_null=False,
+                    nullable=False,
                 )
-            ],
+            },
         )
 
         transformed_df, _ = convert_date_columns(data, schema)
@@ -766,22 +764,22 @@ class TestDatasetTransformation:
         )
         schema = Schema(
             metadata=self.schema_metadata,
-            columns=[
-                Column(
+            columns={
+                "date1": Column(
                     name="date1",
                     partition_index=None,
-                    data_type="date",
+                    dtype="date",
                     format="%d/%m/%Y",
-                    allow_null=False,
+                    nullable=False,
                 ),
-                Column(
+                "date2": Column(
                     name="date2",
                     partition_index=None,
-                    data_type="date",
+                    dtype="date",
                     format="%m-%d-%Y",
-                    allow_null=False,
+                    nullable=False,
                 ),
-            ],
+            },
         )
         transformed_df, _ = convert_date_columns(data, schema)
 
@@ -807,28 +805,28 @@ class TestDatasetTransformation:
         )
         schema = Schema(
             metadata=self.schema_metadata,
-            columns=[
-                Column(
+            columns={
+                "date1": Column(
                     name="date1",
                     partition_index=None,
-                    data_type="date",
+                    dtype="date",
                     format="%Y-%m-%d",
-                    allow_null=False,
+                    nullable=False,
                 ),
-                Column(
+                "date2": Column(
                     name="date2",
                     partition_index=None,
-                    data_type="date",
+                    dtype="date",
                     format="%d-%m-%Y",
-                    allow_null=False,
+                    nullable=False,
                 ),
-                Column(
+                "value": Column(
                     name="value",
                     partition_index=None,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-            ],
+            },
         )
 
         try:

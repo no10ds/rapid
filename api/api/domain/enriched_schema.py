@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional
+from typing import Dict, Optional
 
 from pydantic import BaseModel
 
@@ -18,4 +18,4 @@ class EnrichedSchemaMetadata(SchemaMetadata):
 
 class EnrichedSchema(BaseModel):
     metadata: EnrichedSchemaMetadata
-    columns: List[EnrichedColumn]
+    columns: Dict[str, EnrichedColumn]

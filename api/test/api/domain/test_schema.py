@@ -19,26 +19,23 @@ class TestSchema:
                 sensitivity="PUBLIC",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=1,
-                    data_type="int",
-                    allow_null=True,
+                    dtype="int",
+                    nullable=True,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=0,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                 ),
-                Column(
-                    name="colname3",
+                "colname3": Column(
                     partition_index=None,
-                    data_type="boolean",
-                    allow_null=False,
+                    dtype="boolean",
+                    nullable=False,
                 ),
-            ],
+            },
         )
 
     def test_gets_column_names(self):
@@ -72,20 +69,19 @@ class TestSchema:
     def test_get_partition_columns(self):
         res = self.schema.get_partition_columns()
         expected = [
+            ("colname2",
             Column(
-                name="colname2",
                 partition_index=0,
-                data_type="string",
-                allow_null=False,
+                dtype="string",
+                nullable=False,
                 format=None,
-            ),
-            Column(
-                name="colname1",
+            )),
+            ("colname1", Column(
                 partition_index=1,
-                data_type="int",
-                allow_null=True,
+                dtype="int",
+                nullable=True,
                 format=None,
-            ),
+            )),
         ]
         assert res == expected
 
@@ -134,7 +130,6 @@ class TestSchema:
             ]
         )
         assert res == expected
-
 
 class TestSchemaMetadata:
     def setup_method(self):

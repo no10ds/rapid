@@ -1011,20 +1011,18 @@ class TestDynamoDBAdapterSchemaTable:
                 key_only_tags=["key"],
                 key_value_tags={"key": "value"},
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-            ],
+            },
         )
 
     def test_store_schema(self):
@@ -1045,24 +1043,22 @@ class TestDynamoDBAdapterSchemaTable:
                 "key_only_tags": ["key"],
                 "owners": [{"name": "owner", "email": "owner@email.com"}],
                 "is_latest_version": True,
-                "columns": [
-                    {
-                        "name": "colname1",
+                "columns": {
+                    "colname1": {
                         "partition_index": 0,
-                        "data_type": "int",
-                        "allow_null": False,
+                        "dtype": "int",
+                        "nullable": False,
                         "format": None,
                         "unique": False,
                     },
-                    {
-                        "name": "colname2",
+                    "colname2": {
                         "partition_index": None,
-                        "data_type": "string",
-                        "allow_null": True,
+                        "dtype": "string",
+                        "nullable": True,
                         "format": None,
                         "unique": False,
                     },
-                ],
+                }
             }
         )
 

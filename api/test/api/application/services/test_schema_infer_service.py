@@ -27,36 +27,32 @@ class TestSchemaInfer:
                 sensitivity="PUBLIC",
                 owners=[Owner(name="change_me", email="change_me@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="object",
+                    nullable=True,
                     format=None,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=None,
-                    data_type="int",
-                    allow_null=True,
+                    dtype="int64",
+                    nullable=True,
                     format=None,
                 ),
-                Column(
-                    name="col_name_3",
+                "col_name_3": Column(
                     partition_index=None,
-                    data_type="int",
-                    allow_null=True,
+                    dtype="int64",
+                    nullable=True,
                     format=None,
                 ),
-                Column(
-                    name="colname_4",
+                "colname_4": Column(
                     partition_index=None,
-                    data_type="boolean",
-                    allow_null=True,
+                    dtype="bool",
+                    nullable=True,
                     format=None,
                 ),
-            ],
+            },
         ).dict(exclude={"metadata": {"version"}})
         file_content = b"colname1,colname2,Col name 3,Col/name 4! \nsomething,123,1,True\notherthing,123,3,False\n\n"
         temp_out_path = tempfile.mkstemp(suffix=".csv")[1]
@@ -79,23 +75,22 @@ class TestSchemaInfer:
                 sensitivity="PUBLIC",
                 owners=[Owner(name="change_me", email="change_me@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="object",
+                    nullable=True,
                     format=None,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=None,
-                    data_type="date",
-                    allow_null=True,
+                    dtype="datetime64[ns]",
+                    nullable=True,
                     format="%Y-%m-%d",
                 ),
-            ],
+            },
         ).dict(exclude={"metadata": {"version"}})
+
         df = pd.DataFrame(data={"colname1": ["something"], "colname2": ["2021-01-01"]})
         df["colname2"] = pd.to_datetime(df["colname2"])
         temp_out_path = tempfile.mkstemp(suffix=".parquet")[1]

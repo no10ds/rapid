@@ -37,20 +37,18 @@ class TestGlueAdapterTableMethods:
                 description="description",
                 sensitivity="PUBLIC",
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=True,
+                    dtype="int",
+                    nullable=True,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                 ),
-            ],
+            },
         )
 
     def test_create_table(self):

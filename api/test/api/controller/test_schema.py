@@ -1,3 +1,4 @@
+# TODO PANDERA
 from pathlib import Path
 from typing import Tuple, Dict
 from unittest.mock import patch, ANY
@@ -42,14 +43,13 @@ class TestSchemaUpload(BaseClientTest):
     def test_return_400_pydantic_error(self):
         request_body = {
             "metadata": {"tags": {"tag1": "value1", "tag2": "value2"}},
-            "columns": [
-                {
-                    "name": "colname1",
+            "columns": {
+                "colname1": {
                     "partition_index": None,
-                    "data_type": "number",
-                    "allow_null": True,
-                },
-            ],
+                    "dtype": "int",
+                    "nullable": True,
+                }
+            }
         }
 
         response = self.client.post(
@@ -124,20 +124,18 @@ class TestSchemaUpload(BaseClientTest):
                 "key_value_tags": {"tag1": "value1", "tag2": "value2"},
                 "key_only_tags": ["tag3", "tag4"],
             },
-            "columns": [
-                {
-                    "name": "colname1",
+            "columns": {
+                "colname1": {
                     "partition_index": None,
-                    "data_type": "number",
-                    "allow_null": True,
+                    "dtype": "int",
+                    "nullable": True,
                 },
-                {
-                    "name": "colname2",
+                "colname2": {
                     "partition_index": 0,
-                    "data_type": "str",
-                    "allow_null": False,
+                    "dtype": "str",
+                    "nullable": False,
                 },
-            ],
+            },
         }
         expected_schema = Schema(
             metadata=SchemaMetadata(
@@ -150,20 +148,18 @@ class TestSchemaUpload(BaseClientTest):
                 key_only_tags=["tag3", "tag4"],
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=None,
-                    data_type="number",
-                    allow_null=True,
+                    dtype="int",
+                    nullable=True,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=0,
-                    data_type="str",
-                    allow_null=False,
+                    dtype="str",
+                    nullable=False,
                 ),
-            ],
+            },
         )
         return request_body, expected_schema
 
@@ -213,14 +209,13 @@ class TestSchemaUpdate(BaseClientTest):
     def test_return_400_when_request_body_invalid(self):
         request_body = {
             "metadata": {"tags": {"tag1": "value1", "tag2": "value2"}},
-            "columns": [
-                {
-                    "name": "colname1",
+            "columns": {
+                "colname1": {
                     "partition_index": None,
-                    "data_type": "number",
-                    "allow_null": True,
-                },
-            ],
+                    "dtype": "int",
+                    "nullable": True,
+                }
+            }
         }
 
         response = self.client.put(
@@ -295,20 +290,18 @@ class TestSchemaUpdate(BaseClientTest):
                 "key_value_tags": {"tag1": "value1", "tag2": "value2"},
                 "key_only_tags": ["tag3", "tag4"],
             },
-            "columns": [
-                {
-                    "name": "colname1",
+            "columns": {
+                "colname1": {
                     "partition_index": None,
-                    "data_type": "number",
-                    "allow_null": True,
+                    "dtype": "int",
+                    "nullable": True,
                 },
-                {
-                    "name": "colname2",
+                "colname2": {
                     "partition_index": 0,
-                    "data_type": "str",
-                    "allow_null": False,
+                    "dtype": "str",
+                    "nullable": False,
                 },
-            ],
+            },
         }
         expected_schema = Schema(
             metadata=SchemaMetadata(
@@ -320,20 +313,18 @@ class TestSchemaUpdate(BaseClientTest):
                 key_only_tags=["tag3", "tag4"],
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=None,
-                    data_type="number",
-                    allow_null=True,
+                    dtype="int",
+                    nullable=True,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=0,
-                    data_type="str",
-                    allow_null=False,
+                    dtype="str",
+                    nullable=False,
                 ),
-            ],
+            },
         )
         return request_body, expected_schema
 
@@ -374,22 +365,20 @@ class TestSchemaGeneration(BaseClientTest):
                 sensitivity="PUBLIC",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                     format=None,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=None,
-                    data_type="int",
-                    allow_null=True,
+                    dtype="int",
+                    nullable=True,
                     format=None,
                 ),
-            ],
+            },
         )
         file_content = b"colname1,colname2\nsomething,123\notherthing,456\n\n"
         file_name = "filename.csv"
@@ -428,22 +417,20 @@ class TestSchemaGeneration(BaseClientTest):
                 sensitivity="PUBLIC",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=None,
-                    data_type="object",
-                    allow_null=True,
+                    dtype="object",
+                    nullable=True,
                     format=None,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=None,
-                    data_type="Int64",
-                    allow_null=True,
+                    dtype="Int64",
+                    nullable=True,
                     format=None,
                 ),
-            ],
+            },
         )
         file_content = b"colname1,colname2\nsomething,123\notherthing,456\n\n"
         file_name = "filename.parquet"

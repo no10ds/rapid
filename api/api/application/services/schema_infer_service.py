@@ -1,7 +1,9 @@
-from typing import List, Any
+from typing import Any, Dict
 from pathlib import Path
 
 import pandas as pd
+import pandera.pandas as pandera
+from pandera.errors import SchemaError, SchemaInitError, ParserError
 
 from api.application.services.schema_validation import validate_schema
 from api.common.config.layers import Layer
@@ -13,7 +15,8 @@ from api.common.data_handlers import (
 )
 from api.common.value_transformers import clean_column_name
 
-from api.domain.data_types import extract_athena_types, is_date_type
+from api.domain.data_types import is_date_type
+from api.domain.schema import Column, Schema
 from api.domain.schema import Schema, Column
 from api.domain.schema_metadata import Owner, SchemaMetadata
 
@@ -30,7 +33,8 @@ class SchemaInferService:
         file_path: Path,
     ) -> dict[str, Any]:
         dataframe = self._construct_single_chunk_dataframe(file_path)
-        columns = self._infer_columns(dataframe)
+        pandera_schema = pandera.infer_schema(dataframe)
+        customized_columns = self._customize_inferred_columns(pandera_schema.columns)
         schema = Schema(
             metadata=SchemaMetadata(
                 layer=layer,
@@ -39,7 +43,7 @@ class SchemaInferService:
                 sensitivity=sensitivity,
                 owners=[Owner(name="change_me", email="change_me@email.com")],
             ),
-            columns=columns,
+            columns=customized_columns,
         )
         try:
             validate_schema(schema)
@@ -47,7 +51,25 @@ class SchemaInferService:
             # We need to delete the incoming file from the local file system
             # regardless of the schema validation was successful or not
             delete_incoming_raw_file(schema, file_path)
+            
         return schema.dict(exclude={"metadata": {"version"}})
+
+
+    def _customize_inferred_columns(self, inferred_columns: Dict[str, pandera.Column]) -> Dict[str, Column]:
+        customized = {}
+
+        for name, pandera_column in inferred_columns.items():
+            clean_name = clean_column_name(name)
+
+            customized[clean_name] = Column(
+                dtype=str(pandera_column.dtype),
+                nullable=True,
+                unique=False,
+                format=DEFAULT_DATE_FORMAT if is_date_type(pandera_column.dtype) else None,
+                partition_index=None,
+            )
+
+        return customized
 
     def _construct_single_chunk_dataframe(self, file_path: Path) -> pd.DataFrame:
         try:
@@ -61,16 +83,3 @@ class SchemaInferService:
 
     def _clean_error(self, error_message: str) -> str:
         return error_message.replace("\n", "")
-
-    def _infer_columns(self, dataframe: pd.DataFrame) -> List[Column]:
-        return [
-            Column(
-                name=clean_column_name(name),
-                partition_index=None,
-                data_type=_type,
-                allow_null=True,
-                format=DEFAULT_DATE_FORMAT if is_date_type(_type) else None,
-                unique=False,
-            )
-            for name, _type in extract_athena_types(dataframe).items()
-        ]

@@ -49,13 +49,25 @@ class SchemaService:
         return self._parse_schema(schema_dict)
 
     def _parse_schema(self, schema: dict, only_metadata: bool = False):
-        metadata = SchemaMetadata.parse_obj(schema)
+        if "metadata" in schema:
+            metadata = SchemaMetadata.parse_obj(schema["metadata"])
+        else:
+            metadata = SchemaMetadata.parse_obj(schema)
+
         if only_metadata:
             return metadata
-        return Schema(
-            metadata=metadata,
-            columns=[Column.parse_obj(col) for col in schema[COLUMNS]],
-        )
+        
+        if COLUMNS in schema and isinstance(schema[COLUMNS], dict):
+            return Schema(
+                metadata=metadata,
+                columns={key: Column.parse_obj(col) for key, col in schema[COLUMNS].items()},
+            )
+        
+        else:
+            return Schema(
+                metadata=metadata,
+                columns={col['name']: Column.parse_obj(col) for col in schema[COLUMNS]},
+            )
 
     def get_schema_metadatas(
         self, query: DatasetFilters = DatasetFilters()
@@ -124,7 +136,7 @@ class SchemaService:
         return schema.metadata.dataset_identifier()
 
     def check_for_protected_domain(self, schema: Schema) -> str:
-        if Sensitivity.PROTECTED == schema.get_sensitivity():
+        if Sensitivity.PROTECTED == schema.metadata.get_sensitivity():
             if (
                 schema.get_domain()
                 not in self.protected_domain_service.list_protected_domains()

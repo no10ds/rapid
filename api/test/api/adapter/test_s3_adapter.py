@@ -104,14 +104,13 @@ class TestS3AdapterUpload:
                 version=version,
                 sensitivity=Sensitivity.PRIVATE,
             ),
-            columns=[
-                Column(
-                    name="colname2",
-                    data_type="string",
-                    allow_null=True,
+            columns={
+                "colname2": Column(
                     partition_index=None,
-                )
-            ],
+                    dtype="string",
+                    nullable=True,
+                ),
+            },
         )
 
         self.persistence_adapter.upload_partitioned_data(

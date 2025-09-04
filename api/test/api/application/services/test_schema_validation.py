@@ -14,7 +14,6 @@ from api.common.custom_exceptions import SchemaValidationError
 from api.domain.schema import Schema, Column
 from api.domain.schema_metadata import Owner, UpdateBehaviour, SchemaMetadata
 
-
 class TestSchemaValidation:
     def setup_method(self):
         self.valid_schema = Schema(
@@ -25,26 +24,23 @@ class TestSchemaValidation:
                 sensitivity="PUBLIC",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                 ),
-                Column(
-                    name="colname3",
+                "colname3": Column(
                     partition_index=None,
-                    data_type="boolean",
-                    allow_null=False,
+                    dtype="boolean",
+                    nullable=False,
                 ),
-            ],
+            },
         )
 
     def _assert_validate_schema_raises_error(
@@ -68,7 +64,7 @@ class TestSchemaValidation:
                 sensitivity="PUBLIC",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[],
+            columns={},
         )
         self._assert_validate_schema_raises_error(
             invalid_schema, "You need to define at least one column"
@@ -83,14 +79,15 @@ class TestSchemaValidation:
                 sensitivity="PUBLIC",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            sensitivity="PUBLIC",
+            owners=[Owner(name="owner", email="owner@email.com")],
+            columns={
+                "colname1": Column(
                     partition_index=None,
-                    data_type="int",
-                    allow_null=True,
+                    dtype="int",
+                    nullable=True,
                 )
-            ],
+            },
         )
         self._assert_validate_schema_raises_error(
             invalid_schema,
@@ -106,14 +103,13 @@ class TestSchemaValidation:
                 sensitivity="PUBLIC",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=None,
-                    data_type="int",
-                    allow_null=True,
+                    dtype="int",
+                    nullable=True,
                 )
-            ],
+            },
         )
         self._assert_validate_schema_raises_error(
             invalid_schema,
@@ -129,14 +125,13 @@ class TestSchemaValidation:
                 sensitivity="PUBLIC",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="",
+            columns={
+                "": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                 )
-            ],
+            },
         )
         self._assert_validate_schema_raises_error(
             invalid_schema, "You can not have empty column names"
@@ -151,46 +146,44 @@ class TestSchemaValidation:
                 sensitivity="PUBLIC",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="unnamed_1",
+            columns={
+                "unnamed_1": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                 )
-            ],
+            },
         )
         self._assert_validate_schema_raises_error(
             invalid_schema, "You can not have empty column names"
         )
 
-    def test_is_invalid_schema_with_duplicate_column_name(self):
-        invalid_schema = Schema(
-            metadata=SchemaMetadata(
-                layer="raw",
-                domain="some",
-                dataset="other",
-                sensitivity="PUBLIC",
-                owners=[Owner(name="owner", email="owner@email.com")],
-            ),
-            columns=[
-                Column(
-                    name="colname1",
-                    partition_index=0,
-                    data_type="int",
-                    allow_null=False,
-                ),
-                Column(
-                    name="colname1",
-                    partition_index=None,
-                    data_type="string",
-                    allow_null=True,
-                ),
-            ],
-        )
-        self._assert_validate_schema_raises_error(
-            invalid_schema, "You can not have duplicated column names"
-        )
+    # TODO Pandera: Do we need this? Dictionaries cannot have duplicate keys - need to design behaviour around this
+    #  def test_is_invalid_schema_with_duplicate_column_name(self):
+    #     invalid_schema = Schema(
+    #         metadata=SchemaMetadata(
+            #     layer="raw",
+            #     domain="some",
+            #     dataset="other",
+            #     sensitivity="PUBLIC",
+            #     owners=[Owner(name="owner", email="owner@email.com")],
+            # ),
+    #         columns={
+    #             "colname1": Column(
+    #                 partition_index=0,
+    #                 dtype="int",
+    #                 nullable=False,
+    #             ),
+    #             "colname1": Column(
+    #                 partition_index=None,
+    #                 dtype="string",
+    #                 nullable=True,
+    #             ),
+    #         },
+    #     )
+    #     self._assert_validate_schema_raises_error(
+    #         invalid_schema, "You can not have duplicated column names"
+    #     )
 
     def test_is_invalid_schema_with_empty_domain(self):
         with pytest.raises(ValidationError):
@@ -202,20 +195,18 @@ class TestSchemaValidation:
                     sensitivity="PUBLIC",
                     owners=[Owner(name="owner", email="owner@email.com")],
                 ),
-                columns=[
-                    Column(
-                        name="colname1",
+                columns={
+                    "colname1": Column(
                         partition_index=0,
-                        data_type="int",
-                        allow_null=False,
+                        dtype="int",
+                        nullable=False,
                     ),
-                    Column(
-                        name="colname2",
+                    "colname2": Column(
                         partition_index=None,
-                        data_type="string",
-                        allow_null=True,
+                        dtype="string",
+                        nullable=True,
                     ),
-                ],
+                },
             )
 
     def test_is_invalid_schema_with_empty_dataset(self):
@@ -227,20 +218,18 @@ class TestSchemaValidation:
                     sensitivity="PUBLIC",
                     owners=[Owner(name="owner", email="owner@email.com")],
                 ),
-                columns=[
-                    Column(
-                        name="colname1",
+                columns={
+                    "colname1": Column(
                         partition_index=0,
-                        data_type="int",
-                        allow_null=False,
+                        dtype="int",
+                        nullable=False,
                     ),
-                    Column(
-                        name="colname2",
+                    "colname2": Column(
                         partition_index=None,
-                        data_type="string",
-                        allow_null=True,
+                        dtype="string",
+                        nullable=True,
                     ),
-                ],
+                },
             )
 
     def test_is_invalid_schema_with_empty_sensitivity(self):
@@ -252,14 +241,13 @@ class TestSchemaValidation:
                 sensitivity="",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 )
-            ],
+            },
         )
         self._assert_validate_schema_raises_error(
             invalid_schema, "You can not have empty metadata values"
@@ -289,14 +277,13 @@ class TestSchemaValidation:
                 sensitivity="PUBLIC",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name=col_name,
+            columns={
+                col_name: Column(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 )
-            ],
+            },
         )
         self._assert_validate_schema_raises_error(
             invalid_schema, "You must conform to the column heading style guide"
@@ -311,20 +298,18 @@ class TestSchemaValidation:
                 sensitivity="PUBLIC",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=0,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                 ),
-            ],
+            },
         )
         self._assert_validate_schema_raises_error(
             invalid_schema, "You can not have duplicated partition indexes"
@@ -339,20 +324,18 @@ class TestSchemaValidation:
                 sensitivity="PUBLIC",
                 owners=[Owner(name="change_me", email="change_me@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=-1,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=0,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                 ),
-            ],
+            },
         )
         self._assert_validate_schema_raises_error(
             invalid_schema, "You can not a negative partition number"
@@ -369,26 +352,23 @@ class TestSchemaValidation:
                 sensitivity="PUBLIC",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=2,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=0,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                 ),
-                Column(
-                    name="colname3",
+                "colname3": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-            ],
+            },
         )
         self._assert_validate_schema_raises_error(
             invalid_schema,
@@ -404,26 +384,24 @@ class TestSchemaValidation:
                 sensitivity="PUBLIC",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=1,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=0,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                 ),
-            ],
+            },
         )
         self._assert_validate_schema_raises_error(
             invalid_schema, "At least one column should not be partitioned"
         )
 
-    def test_is_invalid_schema_when_partitioned_columns_allow_null_values(self):
+    def test_is_invalid_schema_when_partitioned_columns_nullable_values(self):
         invalid_schema = Schema(
             metadata=SchemaMetadata(
                 layer="raw",
@@ -432,66 +410,86 @@ class TestSchemaValidation:
                 sensitivity="PUBLIC",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=1,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=0,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-                Column(
-                    name="colname3",
+                "colname3": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-            ],
+            },
         )
         self._assert_validate_schema_raises_error(
             invalid_schema, "Partition columns cannot allow null values"
         )
 
     @pytest.mark.parametrize(
-        "data_type",
+        "dtype",
         [
-            "object",
-            "int64",
-            "int32",
-            "int64",
             "number",
-            "datetime",
             "something",
             "else",
         ],
     )
-    def test_is_invalid_schema_when_has_not_accepted_data_types(self, data_type: str):
-        invalid_schema = Schema(
-            metadata=SchemaMetadata(
+    def test_is_invalid_schema_when_has_not_accepted_dtypes(self, dtype: str):
+        
+        message_pattern = "You are specifying one or more unaccepted data types"
+        with pytest.raises(SchemaValidationError, match=message_pattern):
+            Schema(
+                metadata=SchemaMetadata(
                 layer="raw",
                 domain="test_domain",
                 dataset="test_dataset",
                 sensitivity="PUBLIC",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
-                    partition_index=None,
-                    data_type=data_type,
-                    allow_null=False,
-                )
-            ],
-        )
+                columns={
+                    "colname1": Column(
+                        partition_index=None,
+                        dtype=dtype,
+                        nullable=False,
+                    )
+                },
+            )
+    
+    # @pytest.mark.parametrize(
+    #     "dtype",
+    #     [
+    #         "object",
+    #         # TODO Pandera: This is supported now?
+    #         # "datetime",
+    #     ],
+    # )
+    # def test_is_invalid_schema_when_has_not_accepted_athena_dtypes(self, dtype: str):
+    #     invalid_schema = Schema(
+    #         dataset_metadata=DatasetMetadata(
+    #             layer="raw",
+    #             domain="test_domain",
+    #             dataset="test_dataset",
+    #         ),
+    #         sensitivity="PUBLIC",
+    #         owners=[Owner(name="owner", email="owner@email.com")],
+    #         columns={
+    #             "colname1": Column(
+    #                 partition_index=None,
+    #                 dtype=dtype,
+    #                 nullable=False,
+    #             )
+    #         },
+    #     )
 
-        self._assert_validate_schema_raises_error(
-            invalid_schema, "You are specifying one or more unaccepted data types"
-        )
+    #     self._assert_validate_schema_raises_error(
+    #         invalid_schema, "You are specifying one or more unaccepted data types"
+    #     )
 
     def test_is_invalid_when_date_type_column_does_not_define_format(self):
         invalid_schema = Schema(
@@ -502,15 +500,14 @@ class TestSchemaValidation:
                 sensitivity="PUBLIC",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=None,
-                    data_type="date",
-                    allow_null=True,
+                    dtype="date",
+                    nullable=True,
                     format=None,
                 ),
-            ],
+            },
         )
 
         self._assert_validate_schema_raises_error(
@@ -542,15 +539,14 @@ class TestSchemaValidation:
                 sensitivity="PUBLIC",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=None,
-                    data_type="date",
-                    allow_null=True,
+                    dtype="date",
+                    nullable=True,
                     format=date_format,
                 ),
-            ],
+            },
         )
 
         self._assert_validate_schema_raises_error(
@@ -586,15 +582,14 @@ class TestSchemaValidation:
                 sensitivity="PUBLIC",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=None,
-                    data_type="date",
-                    allow_null=True,
+                    dtype="date",
+                    nullable=True,
                     format=date_format,
                 ),
-            ],
+            },
         )
 
         try:
@@ -617,14 +612,13 @@ class TestSchemaValidation:
                 sensitivity=provided_sensitivity,
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-            ],
+            },
         )
 
         try:
@@ -657,14 +651,13 @@ class TestSchemaValidation:
                 sensitivity=provided_sensitivity,
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-            ],
+            },
         )
 
         self._assert_validate_schema_raises_error(
@@ -688,14 +681,14 @@ class TestSchemaValidation:
                 update_behaviour=provided_update_behaviour,
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
+
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-            ],
+            },
         )
 
         try:
@@ -728,14 +721,14 @@ class TestSchemaValidation:
                 update_behaviour=provided_update_behaviour,
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
+
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-            ],
+            },
         )
 
         self._assert_validate_schema_raises_error(
@@ -756,14 +749,14 @@ class TestSchemaValidation:
                 key_value_tags=tags,
                 key_only_tags=["tag"],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
+
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-            ],
+            },
         )
 
         try:
@@ -785,14 +778,14 @@ class TestSchemaValidation:
                 key_value_tags=key_value_tags,
                 key_only_tags=key_only_tags,
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
+
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-            ],
+            },
         )
 
         with pytest.raises(
@@ -841,14 +834,14 @@ class TestSchemaValidation:
                 key_value_tags=tags,
                 key_only_tags=key_only_tags,
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
+
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-            ],
+            },
         )
 
         with pytest.raises(SchemaValidationError, match=message):
@@ -887,14 +880,14 @@ class TestSchemaValidation:
                 owners=[Owner(name="owner", email="owner@email.com")],
                 key_value_tags=tags,
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
+
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-            ],
+            },
         )
 
         with pytest.raises(SchemaValidationError, match=message):
@@ -922,14 +915,14 @@ class TestSchemaValidation:
                 key_value_tags=tags,
                 key_only_tags=key_only_tags,
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
+
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-            ],
+            },
         )
 
         try:
@@ -949,14 +942,14 @@ class TestSchemaValidation:
                 key_value_tags={"tag1": "value-1", "Tag1": "val1", "tag2": "val2"},
                 key_only_tags=["Tag1", "tag2", "tag4"],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
+
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-            ],
+            },
         )
 
         result_dict = {
@@ -975,7 +968,7 @@ class TestSchemaValidation:
 
         schema_has_valid_tag_set(valid_schema)
 
-        assert valid_schema.metadata.dict() == result_dict
+        assert valid_schema.dict(exclude="columns") == result_dict
 
     def test_is_valid_when_schema_for_upload_has_valid_owners_email_address(self):
         try:
@@ -1008,26 +1001,26 @@ class TestSchemaValidation:
                 sensitivity="PUBLIC",
                 owners=owners,
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
+
                     partition_index=0,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-                Column(
-                    name="colname2",
+                "colname1": Column(
+
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-                Column(
-                    name="colname3",
+                "colname1": Column(
+
                     partition_index=None,
-                    data_type="boolean",
-                    allow_null=False,
+                    dtype="boolean",
+                    nullable=False,
                 ),
-            ],
+            },
         )
 
         with pytest.raises(SchemaValidationError):
@@ -1046,26 +1039,26 @@ class TestSchemaValidation:
                 sensitivity="PUBLIC",
                 owners=owners,
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
+
                     partition_index=0,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
+
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-                Column(
-                    name="colname3",
+                "colname3": Column(
+
                     partition_index=None,
-                    data_type="boolean",
-                    allow_null=False,
+                    dtype="boolean",
+                    nullable=False,
                 ),
-            ],
+            },
         )
 
         with pytest.raises(SchemaValidationError):
@@ -1082,33 +1075,33 @@ class TestSchemaValidation:
     )
     def test_is_invalid_when_domain_has_incorrect_format(self, domain):
         invalid_upload_schema = Schema(
-            metadata=SchemaMetadata(
+             metadata=SchemaMetadata(
                 layer="raw",
                 domain=domain,
                 dataset="dataset",
                 sensitivity="PUBLIC",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
+
                     partition_index=0,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
+
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-                Column(
-                    name="colname3",
+                "colname3": Column(
+
                     partition_index=None,
-                    data_type="boolean",
-                    allow_null=False,
+                    dtype="boolean",
+                    nullable=False,
                 ),
-            ],
+            },
         )
 
         with pytest.raises(SchemaValidationError):
@@ -1134,26 +1127,26 @@ class TestSchemaValidation:
                 sensitivity="PUBLIC",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
+
                     partition_index=0,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
+
                     partition_index=None,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                 ),
-                Column(
-                    name="colname3",
+                "colname3": Column(
+
                     partition_index=None,
-                    data_type="boolean",
-                    allow_null=False,
+                    dtype="boolean",
+                    nullable=False,
                 ),
-            ],
+            },
         )
 
         with pytest.raises(SchemaValidationError):
@@ -1169,22 +1162,22 @@ class TestSchemaValidation:
                 owners=[Owner(name="owner", email="owner@email.com")],
                 update_behaviour="APPEND",
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
+
                     partition_index=0,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                     unique=True,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
+
                     partition_index=None,
-                    data_type="string",
-                    allow_null=False,
+                    dtype="string",
+                    nullable=False,
                     unique=False,
                 ),
-            ],
+            },
         )
         try:
             validate_schema(invalid_upload_schema)

@@ -326,7 +326,7 @@ class TestDatasetAccessEvaluator:
                 sensitivity="PRIVATE",
                 dataset="dataset",
             ),
-            columns=[],
+            columns={},
         )
 
         self.permission_service.get_subject_permissions = Mock(
@@ -367,7 +367,7 @@ class TestDatasetAccessEvaluator:
                 dataset="dataset",
                 sensitivity="PRIVATE",
             ),
-            columns=[],
+            columns={},
         )
 
         self.permission_service.get_subject_permissions = Mock(

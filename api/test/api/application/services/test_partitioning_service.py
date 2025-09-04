@@ -53,26 +53,23 @@ class TestPartitioning:
                 sensitivity="PUBLIC",
                 owners=[Owner(name="change_me", email="change_me@email.com")],
             ),
-            columns=[
-                Column(
-                    name="col1",
+            columns={
+                "col1": Column(
                     partition_index=0,
-                    data_type=column_dtype,
-                    allow_null=False,
+                    dtype=column_dtype,
+                    nullable=False,
                 ),
-                Column(
-                    name="col2",
+                "col2": Column(
                     partition_index=None,
-                    data_type=column_dtype,
-                    allow_null=True,
+                    dtype=column_dtype,
+                    nullable=True,
                 ),
-                Column(
-                    name="col3",
+                "col3": Column(
                     partition_index=1,
-                    data_type=column_dtype,
-                    allow_null=False,
+                    dtype=column_dtype,
+                    nullable=False,
                 ),
-            ],
+            },
         )
 
         df = pd.DataFrame(
@@ -122,20 +119,18 @@ class TestPartitioning:
                 sensitivity="PUBLIC",
                 owners=[Owner(name="change_me", email="change_me@email.com")],
             ),
-            columns=[
-                Column(
-                    name="col1",
+            columns={
+                "col1": Column(
                     partition_index=0,
-                    data_type=column_dtype,
-                    allow_null=False,
+                    dtype=column_dtype,
+                    nullable=False,
                 ),
-                Column(
-                    name="col2",
+                "col2": Column(
                     partition_index=None,
-                    data_type=column_dtype,
-                    allow_null=True,
+                    dtype=column_dtype,
+                    nullable=True,
                 ),
-            ],
+            },
         )
 
         df = pd.DataFrame({"col1": [1, 1, 2, 2], "col2": [4, 5, 6, 2]})
@@ -163,20 +158,18 @@ class TestPartitioning:
                 sensitivity="PUBLIC",
                 owners=[Owner(name="change_me", email="change_me@email.com")],
             ),
-            columns=[
-                Column(
-                    name="col1",
+            columns={
+                "col1": Column(
                     partition_index=None,
-                    data_type=column_dtype,
-                    allow_null=False,
+                    dtype=column_dtype,
+                    nullable=False,
                 ),
-                Column(
-                    name="col2",
+                "col2": Column(
                     partition_index=None,
-                    data_type=column_dtype,
-                    allow_null=True,
+                    dtype=column_dtype,
+                    nullable=True,
                 ),
-            ],
+            },
         )
 
         df = pd.DataFrame({"col1": [1, 1, 2, 2], "col2": [4, 5, 6, 2]})

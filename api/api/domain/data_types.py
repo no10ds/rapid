@@ -1,15 +1,18 @@
 from strenum import StrEnum
-from enum import Enum
-
-from pandas import DataFrame
-from pandas.api.types import infer_dtype
-
+from pandera.pandas import dtypes as pandera_dtypes
 from api.common.custom_exceptions import UnsupportedTypeError
 
 
 class NumericType(StrEnum):
     INTEGER = "integer"
     INT = "int"
+    INT8 = "int8"
+    INT16 = "int16"
+    INT32 = "int32"
+    INT64 = "int64"
+    FLOAT16 = "float16"
+    FLOAT32 = "float32"
+    FLOAT64 = "float64"
     MIXED_INTEGER_FLOAT = "mixed-integer-float"
     FLOATING = "floating"
     TINYINT = "tinyint"
@@ -22,6 +25,7 @@ class NumericType(StrEnum):
 
 class BooleanType(StrEnum):
     BOOLEAN = "boolean"
+    BOOL = "bool"
 
 
 class StringType(StrEnum):
@@ -31,34 +35,44 @@ class StringType(StrEnum):
     VARCHAR = "varchar"
     MIXED_INTEGER = "mixed-integer"
     MIXED = "mixed"
+    STRING_PYTHON = "string[python]"
 
 
 class DateType(StrEnum):
     DATE = "date"
     DATETIME = "datetime"
     DATETIME64 = "datetime64"
+    DATETIME64_NS = "datetime64[ns]"
 
 
 class TimestampType(StrEnum):
     TIMESTAMP = "timestamp"
 
 
-class PandasDataType(StrEnum):
+class PanderaDataType(StrEnum):
     BOOLEAN = BooleanType.BOOLEAN
+    BOOL = BooleanType.BOOL
     DATE = DateType.DATE
     DATETIME = DateType.DATETIME
     DATETIME64 = DateType.DATETIME64
-    DECIMAL = NumericType.DECIMAL
-    INTEGER = NumericType.INTEGER
-    FLOATING = NumericType.FLOATING
+    DATETIME64_NS = DateType.DATETIME64_NS
     MIXED = StringType.MIXED
     MIXED_INTEGER = StringType.MIXED_INTEGER
-    MIXED_INTEGER_FLOAT = NumericType.MIXED_INTEGER_FLOAT
-    OBJECT = StringType.OBJECT
     STRING = StringType.STRING
+    STRING_PYTHON = StringType.STRING_PYTHON
+    OBJECT = StringType.OBJECT
+    INT = NumericType.INT
+    INT8 = NumericType.INT8
+    INT16 = NumericType.INT16
+    INT32 = NumericType.INT32
+    INT64 = NumericType.INT64
+    FLOAT = NumericType.FLOAT
+    FLOAT16 = NumericType.FLOAT16
+    FLOAT32 = NumericType.FLOAT32
+    FLOAT64 = NumericType.FLOAT64
 
 
-class AthenaDataType(Enum):
+class AthenaDataType(StrEnum):
     BIGINT = NumericType.BIGINT
     BOOLEAN = BooleanType.BOOLEAN
     CHAR = StringType.CHAR
@@ -72,39 +86,46 @@ class AthenaDataType(Enum):
     TIMESTAMP = TimestampType.TIMESTAMP
     TINYINT = NumericType.TINYINT
     VARCHAR = StringType.VARCHAR
+    
 
-
-PANDAS_TO_ATHENA_CONVERTER = {
-    PandasDataType.BOOLEAN: AthenaDataType.BOOLEAN,
-    PandasDataType.DATE: AthenaDataType.DATE,
-    PandasDataType.DATETIME: AthenaDataType.DATE,
-    PandasDataType.DATETIME64: AthenaDataType.DATE,
-    PandasDataType.DECIMAL: AthenaDataType.DECIMAL,
-    PandasDataType.INTEGER: AthenaDataType.INT,
-    PandasDataType.FLOATING: AthenaDataType.DOUBLE,
-    PandasDataType.MIXED: AthenaDataType.STRING,
-    PandasDataType.MIXED_INTEGER: AthenaDataType.STRING,
-    PandasDataType.MIXED_INTEGER_FLOAT: AthenaDataType.DOUBLE,
-    PandasDataType.STRING: AthenaDataType.STRING,
-    PandasDataType.OBJECT: AthenaDataType.STRING,
+PANDERA_ENGINE_TO_ATHENA_CONVERTER = {
+    PanderaDataType.INT: AthenaDataType.INT,
+    PanderaDataType.INT8: AthenaDataType.TINYINT,
+    PanderaDataType.INT16: AthenaDataType.SMALLINT,
+    PanderaDataType.INT32: AthenaDataType.INT,
+    PanderaDataType.INT64: AthenaDataType.BIGINT,
+    PanderaDataType.FLOAT: AthenaDataType.FLOAT,
+    PanderaDataType.FLOAT16: AthenaDataType.FLOAT,
+    PanderaDataType.FLOAT32: AthenaDataType.FLOAT,
+    PanderaDataType.FLOAT64: AthenaDataType.DOUBLE,
+    PanderaDataType.DATETIME64: AthenaDataType.TIMESTAMP,
+    PanderaDataType.STRING: AthenaDataType.STRING,
+    PanderaDataType.OBJECT: AthenaDataType.STRING,
+    PanderaDataType.STRING_PYTHON: AthenaDataType.STRING,
+    PanderaDataType.BOOLEAN: AthenaDataType.BOOLEAN,
+    PanderaDataType.BOOL: AthenaDataType.BOOLEAN, 
+    PanderaDataType.DATETIME64_NS: AthenaDataType.TIMESTAMP,
+    PanderaDataType.DATE: AthenaDataType.DATE,
 }
 
 
-def is_date_type(type: str) -> bool:
-    return type in [AthenaDataType.DATE.value]
+def is_date_type(type) -> bool:
+    type_str = str(type)
+    date_type_values = [date_type.value for date_type in DateType]
+    return type_str in date_type_values
 
 
-def extract_athena_types(df: DataFrame) -> dict:
-    types = {}
-    for column in df.columns:
-        if df[column].dropna().size == 0:
-            continue
-        dtype = str(infer_dtype(df[column], skipna=True))
-        try:
-            types[column] = PANDAS_TO_ATHENA_CONVERTER[dtype].value
-        except KeyError:
-            raise UnsupportedTypeError(
-                f"Unable to convert the column [{column}] of type [{dtype}] to Athena Schema. This type is currently unsupported."
-            )
+def convert_pandera_column_to_athena(pandera_dtype: pandera_dtypes) -> str:
 
-    return types
+    try:
+        dtype_str = str(pandera_dtype)
+        return PANDERA_ENGINE_TO_ATHENA_CONVERTER[dtype_str].value
+    except KeyError:
+        pass
+    
+    dtype = type(pandera_dtype)
+    dtype_str = str(pandera_dtype)
+    raise UnsupportedTypeError(
+        f"Unable to convert the pandera type [{dtype}] with string representation '{dtype_str}' to Athena Schema. "
+        f"Supported: {list(PANDERA_ENGINE_TO_ATHENA_CONVERTER.keys())}"
+    )

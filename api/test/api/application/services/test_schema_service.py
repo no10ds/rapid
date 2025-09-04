@@ -3,7 +3,6 @@ from unittest.mock import Mock, call
 import pytest
 from botocore.exceptions import ClientError
 
-
 from api.application.services.schema_service import (
     SchemaService,
 )
@@ -37,20 +36,18 @@ class TestUploadSchema:
                 sensitivity="PUBLIC",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-            ],
+            },
         )
 
     def test_upload_schema(self):
@@ -94,14 +91,13 @@ class TestUploadSchema:
                 sensitivity="PROTECTED",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=True,
+                    dtype="int",
+                    nullable=True,
                 ),
-            ],
+            },
         )
         self.protected_domain_service.list_protected_domains = Mock(
             return_value=["domain", "other"]
@@ -121,14 +117,13 @@ class TestUploadSchema:
                 sensitivity="PROTECTED",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=True,
+                    dtype="int",
+                    nullable=True,
                 ),
-            ],
+            },
         )
         self.protected_domain_service.list_protected_domains = Mock(
             return_value=["other"]
@@ -157,14 +152,13 @@ class TestUploadSchema:
                 sensitivity="PUBLIC",
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=invalid_partition_index,
-                    data_type="int",
-                    allow_null=True,
+                    dtype="int",
+                    nullable=True,
                 )
-            ],
+            },
         )
 
         with pytest.raises(SchemaValidationError):
@@ -193,20 +187,18 @@ class TestUpdateSchema:
                 key_only_tags=["ktag1", "ktag2"],
                 update_behaviour="APPEND",
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=0,
-                    data_type="int",
-                    allow_null=False,
+                    dtype="int",
+                    nullable=False,
                 ),
-                Column(
-                    name="colname2",
+                "colname2": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-            ],
+            },
         )
         self.valid_updated_schema = Schema(
             metadata=SchemaMetadata(
@@ -219,20 +211,18 @@ class TestUpdateSchema:
                 key_only_tags=["ktag1", "ktag2"],
                 update_behaviour="APPEND",
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=0,
-                    data_type="double",
-                    allow_null=False,
+                    dtype="float64",
+                    nullable=False,
                 ),
-                Column(
-                    name="colname_new",
+                "colname_new": Column(
                     partition_index=None,
-                    data_type="string",
-                    allow_null=True,
+                    dtype="string",
+                    nullable=True,
                 ),
-            ],
+            },
         )
 
     def test_update_schema_throws_error_when_schema_invalid(self):
@@ -246,14 +236,13 @@ class TestUpdateSchema:
                 version=1,
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns=[
-                Column(
-                    name="colname1",
+            columns={
+                "colname1": Column(
                     partition_index=invalid_partition_index,
-                    data_type="int",
-                    allow_null=True,
-                )
-            ],
+                    dtype="int",
+                    nullable=True,
+                ),
+            },
         )
         self.schema_service.get_schema = Mock(return_value=self.valid_schema)
 
@@ -352,20 +341,19 @@ class TestGetSchema:
             owners=[Owner(name="owner", email="owner@email.com")],
         )
 
-        self.columns = [
-            Column(
-                name="colname1",
+        self.columns = {
+            "colname1": Column(
                 partition_index=0,
-                data_type="int",
-                allow_null=False,
+                dtype="int",
+                nullable=False,
             ),
-            Column(
-                name="colname2",
+            "colname2": Column(
                 partition_index=None,
-                data_type="string",
-                allow_null=True,
+                dtype="string",
+                nullable=True,
             ),
-        ]
+        }
+
         self.schema = Schema(metadata=self.metadata, columns=self.columns)
 
         self.schema_dict = {
@@ -378,7 +366,7 @@ class TestGetSchema:
             "update_behaviour": "APPEND",
             "is_latest_version": True,
             "owners": [{"name": "owner", "email": "owner@email.com"}],
-            "columns": [dict(col) for col in self.columns],
+            "columns": {col_name: dict(col) for col_name, col in self.columns.items()},
             "key_value_tags": {},
             "key_only_tags": [],
         }

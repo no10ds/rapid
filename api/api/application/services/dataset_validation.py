@@ -2,6 +2,7 @@ from typing import Tuple
 
 import pandas as pd
 from pandas import Timestamp
+from pandera.errors import SchemaError
 
 from api.common.custom_exceptions import (
     DatasetValidationError,
@@ -9,9 +10,6 @@ from api.common.custom_exceptions import (
 )
 from api.common.value_transformers import clean_column_name
 from api.domain.data_types import (
-    extract_athena_types,
-    AthenaDataType,
-    StringType,
     DateType,
 )
 from api.domain.schema import Schema
@@ -30,9 +28,7 @@ def transform_and_validate(schema: Schema, data: pd.DataFrame) -> pd.DataFrame:
         .pipe(clean_column_headers)
         .pipe(dataset_has_correct_columns, schema)
         .pipe(convert_date_columns, schema)
-        .pipe(dataset_has_acceptable_null_values, schema)
-        .pipe(dataset_has_acceptable_unique_values, schema)
-        .pipe(dataset_has_correct_data_types, schema)
+        .pipe(validate_with_pandera, schema)
         .pipe(dataset_has_no_illegal_characters_in_partition_columns, schema)
     )
 
@@ -70,26 +66,32 @@ def dataset_has_correct_columns(
     return df, error_list
 
 
-def dataset_has_acceptable_null_values(
+def validate_with_pandera(
     data_frame: pd.DataFrame, schema: Schema
 ) -> Tuple[pd.DataFrame, list[str]]:
     error_list = []
-    for column in schema.columns:
-        if not column.allow_null and data_frame[column.name].isnull().values.any():
-            error_list.append(f"Column [{column.name}] does not allow null values")
-
-    return data_frame, error_list
-
-
-def dataset_has_acceptable_unique_values(
-    data_frame: pd.DataFrame, schema: Schema
-) -> Tuple[pd.DataFrame, list[str]]:
-    error_list = []
-    for column in schema.columns:
-        if column.unique and data_frame[column.name].dropna().duplicated().values.any():
-            error_list.append(f"Column [{column.name}] must have unique values")
-
-    return data_frame, error_list
+    try:
+        validated_df = schema.validate(data_frame)
+        return validated_df, error_list
+    except SchemaError as e:
+        # Convert Pandera errors to the expected format
+        for failure in e.failure_cases.itertuples():
+            if hasattr(failure, 'column'):
+                column_name = failure.column
+                check_type = str(failure.check)
+                
+                if 'nullable' in check_type.lower():
+                    error_list.append(f"Column [{column_name}] does not allow null values")
+                elif 'unique' in check_type.lower():
+                    error_list.append(f"Column [{column_name}] must have unique values")
+                elif 'dtype' in check_type.lower():
+                    error_list.append(f"Column [{column_name}] has an incorrect data type")
+                else:
+                    error_list.append(f"Column [{column_name}] validation failed: {check_type}")
+            else:
+                error_list.append(str(failure))
+        
+        return data_frame, error_list
 
 
 def convert_date_columns(
@@ -97,38 +99,16 @@ def convert_date_columns(
 ) -> Tuple[pd.DataFrame, list[str]]:
     error_list = []
 
-    for column in schema.get_columns_by_type(DateType):
+    date_column_names = schema.get_column_names_by_type(DateType)
+    for column_name in date_column_names:
+        column = schema.columns[column_name]
         try:
-            data_frame[column.name] = pd.to_datetime(
-                data_frame[column.name], format=column.format
+            data_frame[column_name] = pd.to_datetime(
+                data_frame[column_name], format=column.format
             )
         except ValueError:
             error_list.append(
-                f"Column [{column.name}] does not match specified date format in at least one row"
-            )
-
-    return data_frame, error_list
-
-
-def dataset_has_correct_data_types(
-    data_frame: pd.DataFrame, schema: Schema
-) -> Tuple[pd.DataFrame, list[str]]:
-    error_list = []
-    column_types = extract_athena_types(
-        data_frame,
-    )
-    for column in schema.columns:
-        if column.name not in column_types:
-            continue
-        actual_type = column_types[column.name]
-        expected_type = column.data_type
-
-        types_match = isinstance(AthenaDataType(expected_type).value, type(actual_type))
-
-        if not types_match and not is_valid_custom_dtype(actual_type, expected_type):
-            error_list.append(
-                f"Column [{column.name}] has an incorrect data type. Expected {expected_type}, received {AthenaDataType(actual_type).value}"
-                # noqa: E501
+                f"Column [{column_name}] does not match specified date format in at least one row"
             )
 
     return data_frame, error_list
@@ -138,15 +118,16 @@ def dataset_has_no_illegal_characters_in_partition_columns(
     data_frame: pd.DataFrame, schema: Schema
 ) -> Tuple[pd.DataFrame, list[str]]:
     error_list = []
-    for column in schema.get_partition_columns():
-        series = data_frame[column.name]
+    partition_columns = schema.get_partition_columns()
+    for column_name, column in partition_columns:
+        series = data_frame[column_name]
         if not column.is_of_data_type(DateType) and series.dtype == object:
             any_illegal_characters = any(
                 [value is True for value in series.str.contains("/")]
             )
             if any_illegal_characters:
                 error_list.append(
-                    f"Partition column [{column.name}] has values with illegal characters '/'"
+                    f"Partition column [{column_name}] has values with illegal characters '/'"
                 )
 
     return data_frame, error_list
@@ -185,10 +166,3 @@ def convert_date_column_to_ymd(
 def format_timestamp_as_ymd(timestamp: Timestamp) -> str:
     return f"{timestamp.year}-{str(timestamp.month).zfill(2)}-{str(timestamp.day).zfill(2)}"
 
-
-def is_valid_custom_dtype(actual_type: str, expected_type: str) -> bool:
-    """
-    Custom data types should be validated separately, rather than by column type comparisons
-    """
-    is_custom_dtype = expected_type in list(DateType)
-    return is_custom_dtype and actual_type in list(StringType)

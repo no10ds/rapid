@@ -18,48 +18,48 @@
     ],
     "update_behaviour": "OVERWRITE"
   },
-  "columns": [
-    {
-      "name": "year",
+  "columns": {
+    "year": {
       "partition_index": null,
-      "data_type": "int",
-      "allow_null": true
+      "dtype": "int",
+      "nullable": true,
+      "format": null
     },
-    {
-      "name": "month",
+    "month": {
       "partition_index": null,
-      "data_type": "double",
-      "allow_null": true
+      "dtype": "double",
+      "nullable": true,
+      "format": null
     },
-    {
-      "name": "destination",
+    "destination": {
       "partition_index": null,
-      "data_type": "string",
-      "allow_null": true
+      "dtype": "string",
+      "nullable": true,
+      "format": null
     },
-    {
-      "name": "arrival",
+    "arrival": {
       "partition_index": null,
-      "data_type": "string",
-      "allow_null": true
+      "dtype": "string",
+      "nullable": true,
+      "format": null
     },
-    {
-      "name": "type",
+    "type": {
       "partition_index": null,
-      "data_type": "string",
-      "allow_null": true
+      "dtype": "string",
+      "nullable": true,
+      "format": null
     },
-    {
-      "name": "status",
+    "status": {
       "partition_index": null,
-      "data_type": "string",
-      "allow_null": true
+      "dtype": "string",
+      "nullable": true,
+      "format": null
     },
-    {
-      "name": "newcolumn",
+    "newcolumn": {
       "partition_index": null,
-      "data_type": "int",
-      "allow_null": true
+      "dtype": "int",
+      "nullable": true,
+      "format": null
     }
-  ]
+  }
 }
