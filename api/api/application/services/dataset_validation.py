@@ -69,31 +69,37 @@ def dataset_has_correct_columns(
 def validate_with_pandera(
     data_frame: pd.DataFrame, schema: Schema
 ) -> Tuple[pd.DataFrame, list[str]]:
-    error_list = []
     try:
         validated_df = schema.validate(data_frame)
-        return validated_df, error_list
+        return validated_df, []
     except SchemaError as e:
-        # Convert Pandera errors to the expected format
-        for failure in e.failure_cases.itertuples():
-            if hasattr(failure, 'column'):
-                column_name = failure.column
-                check_type = str(failure.check)
-                
-                if 'nullable' in check_type.lower():
-                    error_list.append(f"Column [{column_name}] does not allow null values")
-                elif 'unique' in check_type.lower():
-                    error_list.append(f"Column [{column_name}] must have unique values")
-                elif 'dtype' in check_type.lower():
-                    error_list.append(f"Column [{column_name}] has an incorrect data type")
+        if hasattr(e, 'failure_cases') and hasattr(e.failure_cases, 'itertuples'):
+            error_list = []
+            for failure in e.failure_cases.itertuples():
+                if hasattr(failure, 'column'):
+                    column_name = failure.column
+                    check_type = str(failure.check)
+                    check_name = getattr(failure, 'check_name', None)
+                    failure_case = getattr(failure, 'failure_case', None)
+                    
+                    if 'nullable' in check_type.lower():
+                        error_list.append(f"Column [{column_name}] does not allow null values")
+                    elif 'unique' in check_type.lower():
+                        error_list.append(f"Column [{column_name}] must have unique values")
+                    elif 'dtype' in check_type.lower():
+                        error_list.append(f"Column [{column_name}] has an incorrect data type")
+                    else:
+                        if check_name:
+                            error_list.append(f"Column [{column_name}] failed check '{check_name}': {failure_case}")
+                        else:
+                            error_list.append(f"Column [{column_name}] validation failed: {check_type}")
                 else:
-                    error_list.append(f"Column [{column_name}] validation failed: {check_type}")
-            else:
-                error_list.append(str(failure))
+                    error_list.append(str(failure))
+            raise UnprocessableDatasetError(error_list)
+        else:
+            raise UnprocessableDatasetError([str(e)])
         
-        return data_frame, error_list
-
-
+        
 def convert_date_columns(
     data_frame: pd.DataFrame, schema: Schema
 ) -> Tuple[pd.DataFrame, list[str]]:

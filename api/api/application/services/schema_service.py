@@ -50,23 +50,37 @@ class SchemaService:
 
     def _parse_schema(self, schema: dict, only_metadata: bool = False):
         if "metadata" in schema:
-            metadata = SchemaMetadata.parse_obj(schema["metadata"])
+            metadata = SchemaMetadata.model_validate(schema["metadata"])
         else:
-            metadata = SchemaMetadata.parse_obj(schema)
+            metadata = SchemaMetadata.model_validate(schema)
 
         if only_metadata:
             return metadata
         
         if COLUMNS in schema and isinstance(schema[COLUMNS], dict):
+            cleaned_columns = {}
+            for key, col in schema[COLUMNS].items():
+                col_copy = col.copy()
+                if col_copy.get('checks') is None:
+                    col_copy['checks'] = []
+                cleaned_columns[key] = col_copy
+            
             return Schema(
                 metadata=metadata,
-                columns={key: Column.parse_obj(col) for key, col in schema[COLUMNS].items()},
+                columns={key: Column.model_validate(col) for key, col in cleaned_columns.items()},
             )
         
         else:
+            cleaned_columns = []
+            for col in schema[COLUMNS]:
+                col_copy = col.copy()
+                if col_copy.get('checks') is None:
+                    col_copy['checks'] = []
+                cleaned_columns.append(col_copy)
+            
             return Schema(
                 metadata=metadata,
-                columns={col['name']: Column.parse_obj(col) for col in schema[COLUMNS]},
+                columns={col['name']: Column.model_validate(col) for col in cleaned_columns},
             )
 
     def get_schema_metadatas(

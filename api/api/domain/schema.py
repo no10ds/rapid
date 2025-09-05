@@ -1,5 +1,5 @@
 from strenum import StrEnum
-from typing import List, Dict, Optional, Set, Any
+from typing import List, Dict, Optional, Set, Any, Union
 from pydantic import BaseModel, EmailStr
 
 import awswrangler as wr
@@ -21,6 +21,7 @@ class Column(BaseModel):
     nullable: bool
     format: Optional[str] = None
     unique: bool = False
+    checks: List[Union[Dict[str, Any], pandera.Check]] = []
     
     class Config:
         arbitrary_types_allowed = True
@@ -28,10 +29,24 @@ class Column(BaseModel):
     def __init__(self, **data):
         super().__init__(**data)
         try:
+            pandera_checks = []
+
+            for i, check in enumerate(self.checks):
+                if isinstance(check, dict):
+                    pandera_check = self._dict_to_pandera_check(check)
+                    pandera_checks.append(pandera_check)
+                elif isinstance(check, pandera.Check):
+                    pandera_checks.append(check)
+                elif check is None:
+                    continue
+                else:
+                    raise ValueError(f"Invalid check type: {type(check)}")
+                            
             self._pandera_column = pandera.Column(
                 dtype=self.dtype, 
                 nullable=self.nullable, 
-                unique=self.unique
+                unique=self.unique,
+                checks=pandera_checks
             )
             if self._pandera_column.metadata is None:
                 self._pandera_column.metadata = {}
@@ -46,6 +61,34 @@ class Column(BaseModel):
     def get_backend(cls, check_obj=None, check_type=None):
         """Override to use the standard ColumnBackend"""
         return ColumnBackend()
+    
+    def _dict_to_pandera_check(self, check_dict: Dict[str, Any]) -> pandera.Check:
+        """Convert dictionary representation to Pandera check"""
+        check_type = check_dict.get("check_type")
+        params = check_dict.get("parameters", {})
+
+        if check_type == "in_range":
+            min_val = params.get("min_value")
+            max_val = params.get("max_value")
+            return pandera.Check.in_range(min_value=min_val, max_value=max_val)
+        elif check_type == "isin":
+            allowed_values = params.get("allowed_values", [])
+            return pandera.Check.isin(allowed_values)
+        elif check_type == "str_length":
+            min_val = params.get("min_value")
+            max_val = params.get("max_value")
+            return pandera.Check.str_length(min_value=min_val, max_value=max_val)
+        elif check_type == "greater_than":
+            min_val = params.get("min_value")
+            return pandera.Check.greater_than(min_val)
+        elif check_type == "less_than":
+            max_val = params.get("max_value")
+            return pandera.Check.less_than(max_val)
+        elif check_type == "str_matches":
+            pattern = params.get("pattern")
+            return pandera.Check.str_matches(pattern)
+        else:
+            raise ValueError(f"Unsupported check type: {check_type}")
 
     def is_of_data_type(self, d_type: StrEnum) -> bool:
         dtype_values = [item.value for item in d_type]
