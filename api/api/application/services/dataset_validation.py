@@ -11,6 +11,7 @@ from api.common.custom_exceptions import (
 from api.common.value_transformers import clean_column_name
 from api.domain.data_types import (
     DateType,
+    BooleanType,
 )
 from api.domain.schema import Schema
 from api.domain.validation_context import ValidationContext
@@ -27,7 +28,8 @@ def transform_and_validate(schema: Schema, data: pd.DataFrame) -> pd.DataFrame:
         .pipe(remove_empty_rows)
         .pipe(clean_column_headers)
         .pipe(dataset_has_correct_columns, schema)
-        .pipe(convert_date_columns, schema) 
+        .pipe(convert_date_columns, schema)
+        .pipe(convert_boolean_columns, schema)
         .pipe(validate_with_pandera, schema)
         .pipe(dataset_has_no_illegal_characters_in_partition_columns, schema)
     )
@@ -95,9 +97,9 @@ def validate_with_pandera(
                             error_list.append(f"Column [{column_name}] validation failed: {check_type}")
                 else:
                     error_list.append(str(failure))
-            raise UnprocessableDatasetError(error_list)
+            raise DatasetValidationError(error_list)
         else:
-            raise UnprocessableDatasetError([str(e)])
+            raise DatasetValidationError([str(e)])
 
 
 def convert_date_columns(
@@ -118,6 +120,27 @@ def convert_date_columns(
             error_list.append(
                 f"Column [{column_name}] does not match specified date format in at least one row"
             )
+
+    return data_frame, error_list
+
+
+def convert_boolean_columns(
+    data_frame: pd.DataFrame, schema: Schema
+) -> Tuple[pd.DataFrame, list[str]]:
+    error_list = []
+
+    boolean_column_names = schema.get_column_names_by_type(BooleanType)
+    for column_name in boolean_column_names:
+        column = schema.columns[column_name]
+        if column.nullable and column_name in data_frame.columns:
+            try:
+                data_frame[column_name] = data_frame[column_name].astype(pd.BooleanDtype())
+                if column_name in schema._pandera_schema.columns:
+                    schema._pandera_schema.columns[column_name].dtype = pd.BooleanDtype()
+            except (ValueError, TypeError) as e:
+                error_list.append(
+                    f"Column [{column_name}] could not be converted to boolean type: {str(e)}"
+                )
 
     return data_frame, error_list
 
