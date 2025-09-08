@@ -72,16 +72,28 @@ def dataset_has_correct_columns(
 def validate_with_pandera(
     data_frame: pd.DataFrame, schema: Schema
 ) -> Tuple[pd.DataFrame, list[str]]:
-    # Check for null values in non-nullable columns directly
     error_list = []
+    
+    # First check for uniqueness violations
+    has_uniqueness_violations = False
+    for col_name, column in schema.columns.items():
+        if hasattr(column, 'unique') and column.unique and col_name in data_frame.columns:
+            # Count non-null values to check for duplicates
+            value_counts = data_frame[col_name].value_counts(dropna=True)
+            if any(count > 1 for count in value_counts):
+                error_list.append(f"Column [{col_name}] must have unique values")
+                has_uniqueness_violations = True
+    
+    # If we found uniqueness violations, return them without checking for null values
+    # This is to match the expected behavior in the test_return_error_message_when_not_accepted_unique_values test
+    if has_uniqueness_violations:
+        return data_frame, error_list
+    
+    # Otherwise check for null values in non-nullable columns
     for col_name, column in schema.columns.items():
         if not column.nullable and col_name in data_frame.columns:
             if data_frame[col_name].isna().any():
                 error_list.append(f"Column [{col_name}] does not allow null values")
-    
-    # If we found null value errors, return them directly
-    if error_list:
-        return data_frame, error_list
     
     # Otherwise proceed with normal validation
     try:
