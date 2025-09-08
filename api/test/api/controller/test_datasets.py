@@ -694,7 +694,7 @@ class TestDatasetInfo(BaseClientTest):
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
 
-            columns = {
+            columns={
                 "colname1": Column(
                     dtype="string",
                     nullable=True,
@@ -736,7 +736,7 @@ class TestDatasetInfo(BaseClientTest):
                 version=2,
                 owners=[Owner(name="owner", email="owner@email.com")],
             ),
-            columns = {
+            columns={
                 "colname1": Column(
                     dtype="string",
                     nullable=True,

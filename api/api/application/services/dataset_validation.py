@@ -27,7 +27,6 @@ def transform_and_validate(schema: Schema, data: pd.DataFrame) -> pd.DataFrame:
         .pipe(remove_empty_rows)
         .pipe(clean_column_headers)
         .pipe(dataset_has_correct_columns, schema)
-        .pipe(convert_date_columns, schema)
         .pipe(validate_with_pandera, schema)
         .pipe(dataset_has_no_illegal_characters_in_partition_columns, schema)
     )
@@ -81,7 +80,7 @@ def validate_with_pandera(
                     check_type = str(failure.check)
                     check_name = getattr(failure, 'check_name', None)
                     failure_case = getattr(failure, 'failure_case', None)
-                    
+
                     if 'nullable' in check_type.lower():
                         error_list.append(f"Column [{column_name}] does not allow null values")
                     elif 'unique' in check_type.lower():
@@ -98,8 +97,8 @@ def validate_with_pandera(
             raise UnprocessableDatasetError(error_list)
         else:
             raise UnprocessableDatasetError([str(e)])
-        
-        
+
+
 def dataset_has_no_illegal_characters_in_partition_columns(
     data_frame: pd.DataFrame, schema: Schema
 ) -> Tuple[pd.DataFrame, list[str]]:
@@ -151,4 +150,3 @@ def convert_date_column_to_ymd(
 
 def format_timestamp_as_ymd(timestamp: Timestamp) -> str:
     return f"{timestamp.year}-{str(timestamp.month).zfill(2)}-{str(timestamp.day).zfill(2)}"
-

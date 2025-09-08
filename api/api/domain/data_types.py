@@ -86,7 +86,7 @@ class AthenaDataType(StrEnum):
     TIMESTAMP = TimestampType.TIMESTAMP
     TINYINT = NumericType.TINYINT
     VARCHAR = StringType.VARCHAR
-    
+
 
 PANDERA_ENGINE_TO_ATHENA_CONVERTER = {
     PanderaDataType.INT: AthenaDataType.INT,
@@ -103,7 +103,7 @@ PANDERA_ENGINE_TO_ATHENA_CONVERTER = {
     PanderaDataType.OBJECT: AthenaDataType.STRING,
     PanderaDataType.STRING_PYTHON: AthenaDataType.STRING,
     PanderaDataType.BOOLEAN: AthenaDataType.BOOLEAN,
-    PanderaDataType.BOOL: AthenaDataType.BOOLEAN, 
+    PanderaDataType.BOOL: AthenaDataType.BOOLEAN,
     PanderaDataType.DATETIME64_NS: AthenaDataType.TIMESTAMP,
     PanderaDataType.DATE: AthenaDataType.DATE,
 }
@@ -122,7 +122,7 @@ def convert_pandera_column_to_athena(pandera_dtype: pandera_dtypes) -> str:
         return PANDERA_ENGINE_TO_ATHENA_CONVERTER[dtype_str].value
     except KeyError:
         pass
-    
+
     dtype = type(pandera_dtype)
     dtype_str = str(pandera_dtype)
     raise UnsupportedTypeError(

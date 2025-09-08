@@ -14,6 +14,7 @@ from api.common.custom_exceptions import SchemaValidationError
 from api.domain.schema import Schema, Column
 from api.domain.schema_metadata import Owner, UpdateBehaviour, SchemaMetadata
 
+
 class TestSchemaValidation:
     def setup_method(self):
         self.valid_schema = Schema(
@@ -162,12 +163,12 @@ class TestSchemaValidation:
     #  def test_is_invalid_schema_with_duplicate_column_name(self):
     #     invalid_schema = Schema(
     #         metadata=SchemaMetadata(
-            #     layer="raw",
-            #     domain="some",
-            #     dataset="other",
-            #     sensitivity="PUBLIC",
-            #     owners=[Owner(name="owner", email="owner@email.com")],
-            # ),
+    #             layer="raw",
+    #             domain="some",
+    #             dataset="other",
+    #             sensitivity="PUBLIC",
+    #             owners=[Owner(name="owner", email="owner@email.com")],
+    #         ),
     #         columns={
     #             "colname1": Column(
     #                 partition_index=0,
@@ -441,17 +442,17 @@ class TestSchemaValidation:
         ],
     )
     def test_is_invalid_schema_when_has_not_accepted_dtypes(self, dtype: str):
-        
+
         message_pattern = "You are specifying one or more unaccepted data types"
         with pytest.raises(SchemaValidationError, match=message_pattern):
             Schema(
                 metadata=SchemaMetadata(
-                layer="raw",
-                domain="test_domain",
-                dataset="test_dataset",
-                sensitivity="PUBLIC",
-                owners=[Owner(name="owner", email="owner@email.com")],
-            ),
+                    layer="raw",
+                    domain="test_domain",
+                    dataset="test_dataset",
+                    sensitivity="PUBLIC",
+                    owners=[Owner(name="owner", email="owner@email.com")],
+                ),
                 columns={
                     "colname1": Column(
                         partition_index=None,
@@ -460,7 +461,7 @@ class TestSchemaValidation:
                     )
                 },
             )
-    
+
     # @pytest.mark.parametrize(
     #     "dtype",
     #     [
@@ -530,9 +531,13 @@ class TestSchemaValidation:
             ),
             columns={
                 "colname1": Column(
+
                     partition_index=None,
+
                     dtype="string",
+
                     nullable=True,
+
                 ),
             },
         )
@@ -569,9 +574,13 @@ class TestSchemaValidation:
             ),
             columns={
                 "colname1": Column(
+
                     partition_index=None,
+
                     dtype="string",
+
                     nullable=True,
+
                 ),
             },
         )
@@ -601,8 +610,11 @@ class TestSchemaValidation:
                 "colname1": Column(
 
                     partition_index=None,
+
                     dtype="string",
+
                     nullable=True,
+
                 ),
             },
         )
@@ -641,8 +653,11 @@ class TestSchemaValidation:
                 "colname1": Column(
 
                     partition_index=None,
+
                     dtype="string",
+
                     nullable=True,
+
                 ),
             },
         )
@@ -669,8 +684,11 @@ class TestSchemaValidation:
                 "colname1": Column(
 
                     partition_index=None,
+
                     dtype="string",
+
                     nullable=True,
+
                 ),
             },
         )
@@ -698,8 +716,11 @@ class TestSchemaValidation:
                 "colname1": Column(
 
                     partition_index=None,
+
                     dtype="string",
+
                     nullable=True,
+
                 ),
             },
         )
@@ -754,8 +775,11 @@ class TestSchemaValidation:
                 "colname1": Column(
 
                     partition_index=None,
+
                     dtype="string",
+
                     nullable=True,
+
                 ),
             },
         )
@@ -800,8 +824,11 @@ class TestSchemaValidation:
                 "colname1": Column(
 
                     partition_index=None,
+
                     dtype="string",
+
                     nullable=True,
+
                 ),
             },
         )
@@ -835,8 +862,11 @@ class TestSchemaValidation:
                 "colname1": Column(
 
                     partition_index=None,
+
                     dtype="string",
+
                     nullable=True,
+
                 ),
             },
         )
@@ -862,8 +892,11 @@ class TestSchemaValidation:
                 "colname1": Column(
 
                     partition_index=None,
+
                     dtype="string",
+
                     nullable=True,
+
                 ),
             },
         )
@@ -921,19 +954,16 @@ class TestSchemaValidation:
             ),
             columns={
                 "colname1": Column(
-
                     partition_index=0,
                     dtype="int",
                     nullable=False,
                 ),
-                "colname1": Column(
-
+                "colname2": Column(
                     partition_index=None,
                     dtype="string",
                     nullable=True,
                 ),
-                "colname1": Column(
-
+                "colname3": Column(
                     partition_index=None,
                     dtype="boolean",
                     nullable=False,
@@ -993,7 +1023,7 @@ class TestSchemaValidation:
     )
     def test_is_invalid_when_domain_has_incorrect_format(self, domain):
         invalid_upload_schema = Schema(
-             metadata=SchemaMetadata(
+            metadata=SchemaMetadata(
                 layer="raw",
                 domain=domain,
                 dataset="dataset",
@@ -1002,19 +1032,16 @@ class TestSchemaValidation:
             ),
             columns={
                 "colname1": Column(
-
                     partition_index=0,
                     dtype="int",
                     nullable=False,
                 ),
                 "colname2": Column(
-
                     partition_index=None,
                     dtype="string",
                     nullable=True,
                 ),
                 "colname3": Column(
-
                     partition_index=None,
                     dtype="boolean",
                     nullable=False,

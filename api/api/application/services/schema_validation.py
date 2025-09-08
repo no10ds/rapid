@@ -6,11 +6,10 @@ from api.common.config.aws import INFERRED_UNNAMED_COLUMN_PREFIX, MAX_TAG_COUNT
 from api.common.config.constants import (
     TAG_VALUES_REGEX,
     TAG_KEYS_REGEX,
-    DATE_FORMAT_REGEX,
     COLUMN_NAME_REGEX,
 )
 from api.common.custom_exceptions import SchemaValidationError, UnsupportedTypeError
-from api.domain.data_types import AthenaDataType, is_date_type, convert_pandera_column_to_athena
+from api.domain.data_types import AthenaDataType, convert_pandera_column_to_athena
 from api.domain.schema import Schema
 from api.domain.schema_metadata import UpdateBehaviour, Owner
 
@@ -127,6 +126,7 @@ def schema_has_valid_tag_set(schema: Schema):
                 "Tag values can only include alphanumeric characters, underscores and hyphens up to 256 characters"
             )
 
+
 def has_unique_partition_indexes(schema: Schema):
     __has_unique_value(
         schema.get_partition_indexes(), schema.get_partitions(), "partition indexes"
@@ -158,7 +158,7 @@ def has_only_accepted_data_types(schema: Schema):
     data_types = schema.get_data_types()
     try:
         for data_type in data_types:
-            data_type=convert_pandera_column_to_athena(data_type)
+            data_type = convert_pandera_column_to_athena(data_type)
             AthenaDataType(data_type)
     except (ValueError, UnsupportedTypeError):
         raise SchemaValidationError(

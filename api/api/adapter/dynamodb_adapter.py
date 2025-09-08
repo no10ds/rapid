@@ -173,7 +173,7 @@ class DynamoDBAdapter(DatabaseAdapter):
             AppLogger.info(
                 f"Storing schema for {schema.metadata.string_representation()}"
             )
-            
+
             metadata_dict = schema.metadata.dict()
 
             if 'layer' in metadata_dict:
@@ -182,7 +182,7 @@ class DynamoDBAdapter(DatabaseAdapter):
             for name, col in schema.columns.items():
                 col_dict = dict(col)
                 columns_dict[name] = col_dict
-            
+
             self.schema_table.put_item(
                 Item={
                     "PK": schema.metadata.dataset_identifier(with_version=False),

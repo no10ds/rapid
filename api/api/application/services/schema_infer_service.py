@@ -3,7 +3,6 @@ from pathlib import Path
 
 import pandas as pd
 import pandera.pandas as pandera
-from pandera.errors import SchemaError, SchemaInitError, ParserError
 
 from api.application.services.schema_validation import validate_schema
 from api.common.config.layers import Layer
@@ -14,12 +13,8 @@ from api.common.data_handlers import (
     get_dataframe_from_chunk_type,
 )
 from api.common.value_transformers import clean_column_name
-
-from api.domain.data_types import is_date_type
 from api.domain.schema import Column, Schema
-from api.domain.schema import Schema, Column
 from api.domain.schema_metadata import Owner, SchemaMetadata
-
 
 
 class SchemaInferService:
@@ -50,9 +45,8 @@ class SchemaInferService:
             # We need to delete the incoming file from the local file system
             # regardless of the schema validation was successful or not
             delete_incoming_raw_file(schema, file_path)
-            
-        return schema.dict(exclude={"metadata": {"version"}})
 
+        return schema.dict(exclude={"metadata": {"version"}})
 
     def _customize_inferred_columns(self, inferred_columns: Dict[str, pandera.Column]) -> Dict[str, Column]:
         customized = {}

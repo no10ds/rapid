@@ -70,11 +70,11 @@ class TestSchema:
         res = self.schema.get_partition_columns()
         expected = [
             ("colname2",
-            Column(
-                partition_index=0,
-                dtype="string",
-                nullable=False,
-            )),
+             Column(
+                 partition_index=0,
+                 dtype="string",
+                 nullable=False,
+             )),
             ("colname1", Column(
                 partition_index=1,
                 dtype="int",
@@ -128,6 +128,7 @@ class TestSchema:
             ]
         )
         assert res == expected
+
 
 class TestSchemaMetadata:
     def setup_method(self):

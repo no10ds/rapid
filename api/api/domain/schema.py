@@ -1,6 +1,6 @@
 from strenum import StrEnum
 from typing import List, Dict, Optional, Set, Any, Union
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 import awswrangler as wr
 import pyarrow as pa
@@ -9,11 +9,12 @@ from pandera.backends.pandas.container import DataFrameSchemaBackend
 from pandera.backends.pandas.components import ColumnBackend
 
 from api.domain.schema_metadata import Owner, SchemaMetadata, UpdateBehaviour
-from api.domain.data_types import convert_pandera_column_to_athena, PANDERA_ENGINE_TO_ATHENA_CONVERTER
+from api.domain.data_types import convert_pandera_column_to_athena
 from api.common.custom_exceptions import SchemaValidationError
 
 METADATA = "metadata"
 COLUMNS = "columns"
+
 
 class Column(BaseModel):
     partition_index: Optional[int]
@@ -21,7 +22,7 @@ class Column(BaseModel):
     nullable: bool
     unique: bool = False
     checks: List[Union[Dict[str, Any], pandera.Check]] = []
-    
+
     class Config:
         arbitrary_types_allowed = True
 
@@ -40,26 +41,26 @@ class Column(BaseModel):
                     continue
                 else:
                     raise ValueError(f"Invalid check type: {type(check)}")
-                            
+
             self._pandera_column = pandera.Column(
-                dtype=self.dtype, 
-                nullable=self.nullable, 
+                dtype=self.dtype,
+                nullable=self.nullable,
                 unique=self.unique,
                 checks=pandera_checks
             )
             if self._pandera_column.metadata is None:
                 self._pandera_column.metadata = {}
             self._pandera_column.metadata["partition_index"] = self.partition_index
-        except TypeError as e:
+        except TypeError:
             raise SchemaValidationError(
                 "You are specifying one or more unaccepted data types",
             )
-  
+
     @classmethod
     def get_backend(cls, check_obj=None, check_type=None):
         """Override to use the standard ColumnBackend"""
         return ColumnBackend()
-    
+
     def _dict_to_pandera_check(self, check_dict: Dict[str, Any]) -> pandera.Check:
         """Convert dictionary representation to Pandera check"""
         check_type = check_dict.get("check_type")
@@ -94,25 +95,24 @@ class Column(BaseModel):
         return dtype_str in dtype_values
 
 
-
 class Schema(BaseModel):
     metadata: SchemaMetadata
     columns: Dict[str, Column]
-    
+
     class Config:
         arbitrary_types_allowed = True
 
     def __init__(self, **data):
         super().__init__(**data)
-        
+
         metadata = self.metadata
-        
+
         if isinstance(metadata, SchemaMetadata):
             self._metadata = metadata
         else:
             self._metadata = SchemaMetadata(
                 layer=metadata.get("layer"),
-                domain=metadata.get("domain"), 
+                domain=metadata.get("domain"),
                 dataset=metadata.get("dataset"),
                 version=metadata.get("version"),
                 sensitivity=metadata.get("sensitivity", ""),
@@ -143,7 +143,7 @@ class Schema(BaseModel):
             pandera_columns[name] = column._pandera_column
 
         self._pandera_schema = pandera.DataFrameSchema(
-            columns=pandera_columns, 
+            columns=pandera_columns,
             metadata=pandera_metadata
         )
 
@@ -155,13 +155,13 @@ class Schema(BaseModel):
             check_obj_cls = check_type
         else:
             raise ValueError("Must pass in one of `check_obj` or `check_type`.")
-        
+
         cls.register_default_backends(check_obj_cls)
         return DataFrameSchemaBackend()
 
     def validate(self, df, **kwargs):
         return self._pandera_schema.validate(df, **kwargs)
-    
+
     @property
     def pandera_metadata(self):
         return self._pandera_schema.metadata
@@ -192,7 +192,7 @@ class Schema(BaseModel):
 
     def get_update_behaviour(self) -> str:
         return self.metadata.get_update_behaviour()
-    
+
     def has_overwrite_behaviour(self) -> bool:
         return self.get_update_behaviour() == UpdateBehaviour.OVERWRITE
 
@@ -235,7 +235,7 @@ class Schema(BaseModel):
         ]
 
     def convert_column_to_glue_format(self, name: str, column: Column):
-        
+
         athena_type = convert_pandera_column_to_athena(column.dtype)
         return {"Name": name, "Type": athena_type}
 

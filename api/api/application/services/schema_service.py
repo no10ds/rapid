@@ -56,7 +56,7 @@ class SchemaService:
 
         if only_metadata:
             return metadata
-        
+
         if COLUMNS in schema and isinstance(schema[COLUMNS], dict):
             cleaned_columns = {}
             for key, col in schema[COLUMNS].items():
@@ -64,12 +64,12 @@ class SchemaService:
                 if col_copy.get('checks') is None:
                     col_copy['checks'] = []
                 cleaned_columns[key] = col_copy
-            
+
             return Schema(
                 metadata=metadata,
                 columns={key: Column.model_validate(col) for key, col in cleaned_columns.items()},
             )
-        
+
         else:
             cleaned_columns = []
             for col in schema[COLUMNS]:
@@ -77,7 +77,7 @@ class SchemaService:
                 if col_copy.get('checks') is None:
                     col_copy['checks'] = []
                 cleaned_columns.append(col_copy)
-            
+
             return Schema(
                 metadata=metadata,
                 columns={col['name']: Column.model_validate(col) for col in cleaned_columns},
