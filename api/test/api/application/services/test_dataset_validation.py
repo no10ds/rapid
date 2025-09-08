@@ -18,7 +18,6 @@ from api.application.services.dataset_validation import (
 from api.common.custom_exceptions import (
     DatasetValidationError,
     UnprocessableDatasetError,
-    UserError,
 )
 from api.domain.schema import Schema, Column
 from api.domain.schema_metadata import Owner, SchemaMetadata

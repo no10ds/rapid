@@ -189,7 +189,6 @@ class DynamoDBAdapter(DatabaseAdapter):
                     "SK": schema.metadata.get_version(),
                     **metadata_dict,
                     COLUMNS: columns_dict,
-                    # COLUMNS: [{**dict(col), "name": name} for name, col in schema.columns.items()],
                 }
             )
         except ClientError as error:

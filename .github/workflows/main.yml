@@ -66,8 +66,8 @@ jobs:
       - name: API Static Analysis
         run: make api/lint
 
-      # - name: API Tests
-      #   run: make api/test
+      - name: API Tests
+        run: make api/test
 
       - name: API Tag and Upload
         run: make api/tag-and-upload
@@ -98,9 +98,9 @@ jobs:
           eval "$(aws configure export-credentials --format env)"
           make api/test-e2e
 
-      # - name: API Tag Image as Failure
-      #   if: always() && steps.await-running-app.conclusion == 'failure' || steps.e2e-tests.conclusion == 'failure'
-      #   run: make api/tag-prod-failure
+      - name: API Tag Image as Failure
+        if: always() && steps.await-running-app.conclusion == 'failure' || steps.e2e-tests.conclusion == 'failure'
+        run: make api/tag-prod-failure
 
   cleanup:
     needs:

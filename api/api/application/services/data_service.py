@@ -209,8 +209,7 @@ class DataService:
         self.s3_adapter.upload_partitioned_data(schema, filename, partitions)
 
     def load_partitions(self, schema: Schema):
-        partition_columns = schema.get_partition_columns()
-        if partition_columns:
+        if schema.get_partition_columns():
             query_id = self.athena_adapter.query_sql_async(
                 f"MSCK REPAIR TABLE `{schema.metadata.glue_table_name()}`;"
             )
