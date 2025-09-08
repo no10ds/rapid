@@ -46,7 +46,7 @@ class TestDatasetValidation:
                 "colname2": Column(
                     name="colname2",
                     partition_index=None,
-                    dtype="object", 
+                    dtype="object",
                     nullable=False,
                 ),
                 "colname3": Column(
@@ -170,7 +170,7 @@ class TestDatasetValidation:
             {"colname1": [2021, 2020], "colname2": ["01/02/2021", "01/02/2021"]}
         )
 
-        with pytest.raises(UnprocessableDatasetError):
+        with pytest.raises(DatasetValidationError):
             build_validated_dataframe(valid_schema, dataframe)
 
     def test_valid_when_date_partition_column_with_illegal_slash_character(self):
@@ -203,7 +203,7 @@ class TestDatasetValidation:
             }
         )
 
-        with pytest.raises(UnprocessableDatasetError):
+        with pytest.raises(DatasetValidationError):
             build_validated_dataframe(self.valid_schema, dataframe)
 
     def test_invalid_when_entire_column_is_different_to_expected_type(self):
@@ -213,7 +213,7 @@ class TestDatasetValidation:
 
         with pytest.raises(
             DatasetValidationError,
-            match=r"Column \[colname2\] has an incorrect data type. Expected string, received double",
+            match=r"expected series 'colname2' to have type object, got float64"
             # noqa: E501, W605
         ):
             build_validated_dataframe(self.valid_schema, dataframe)
@@ -283,7 +283,7 @@ class TestDatasetValidation:
                 "col3": Column(
                     name="col3",
                     partition_index=None,
-                    dtype="string",
+                    dtype="object",
                     nullable=True,
                 ),
             },
@@ -322,7 +322,7 @@ class TestDatasetValidation:
                 "col3": Column(
                     name="col3",
                     partition_index=None,
-                    dtype="string",
+                    dtype="object",
                     nullable=True,
                 ),
             },
@@ -361,7 +361,7 @@ class TestDatasetValidation:
                 "col3": Column(
                     name="col3",
                     partition_index=None,
-                    dtype="string",
+                    dtype="object",
                     nullable=True,
                 ),
             },
@@ -434,13 +434,13 @@ class TestDatasetValidation:
                 "col1": Column(
                     name="col1",
                     partition_index=None,
-                    dtype="string",
+                    dtype="object",
                     nullable=True,
                 ),
                 "col2": Column(
                     name="col2",
                     partition_index=None,
-                    dtype="string",
+                    dtype="object",
                     nullable=False,
                 ),
                 "col3": Column(

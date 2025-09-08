@@ -12,6 +12,7 @@ from api.common.value_transformers import clean_column_name
 from api.domain.data_types import (
     DateType,
     BooleanType,
+    NumericType,
 )
 from api.domain.schema import Schema
 from api.domain.validation_context import ValidationContext
@@ -29,7 +30,7 @@ def transform_and_validate(schema: Schema, data: pd.DataFrame) -> pd.DataFrame:
         .pipe(clean_column_headers)
         .pipe(dataset_has_correct_columns, schema)
         .pipe(convert_date_columns, schema)
-        .pipe(convert_boolean_columns, schema)
+        .pipe(convert_nullable_columns, schema)
         .pipe(validate_with_pandera, schema)
         .pipe(dataset_has_no_illegal_characters_in_partition_columns, schema)
     )
@@ -124,22 +125,32 @@ def convert_date_columns(
     return data_frame, error_list
 
 
-def convert_boolean_columns(
+def convert_nullable_columns(
     data_frame: pd.DataFrame, schema: Schema
 ) -> Tuple[pd.DataFrame, list[str]]:
     error_list = []
 
-    boolean_column_names = schema.get_column_names_by_type(BooleanType)
-    for column_name in boolean_column_names:
-        column = schema.columns[column_name]
+    # Process all columns that are nullable
+    for column_name, column in schema.columns.items():
         if column.nullable and column_name in data_frame.columns:
             try:
-                data_frame[column_name] = data_frame[column_name].astype(pd.BooleanDtype())
-                if column_name in schema._pandera_schema.columns:
-                    schema._pandera_schema.columns[column_name].dtype = pd.BooleanDtype()
+                # Handle different data types
+                if column.is_of_data_type(BooleanType):
+                    data_frame[column_name] = data_frame[column_name].astype(pd.BooleanDtype())
+                    if column_name in schema._pandera_schema.columns:
+                        schema._pandera_schema.columns[column_name].dtype = pd.BooleanDtype()
+                elif column.is_of_data_type(NumericType):
+                    if column.dtype in ["int", "int8", "int16", "int32", "int64", "integer", "tinyint", "smallint", "bigint"]:
+                        data_frame[column_name] = data_frame[column_name].astype(pd.Int64Dtype())
+                        if column_name in schema._pandera_schema.columns:
+                            schema._pandera_schema.columns[column_name].dtype = pd.Int64Dtype()
+                    elif column.dtype in ["float", "float16", "float32", "float64", "double", "decimal"]:
+                        data_frame[column_name] = data_frame[column_name].astype(pd.Float64Dtype())
+                        if column_name in schema._pandera_schema.columns:
+                            schema._pandera_schema.columns[column_name].dtype = pd.Float64Dtype()
             except (ValueError, TypeError) as e:
                 error_list.append(
-                    f"Column [{column_name}] could not be converted to boolean type: {str(e)}"
+                    f"Column [{column_name}] could not be converted to {column.dtype} type: {str(e)}"
                 )
 
     return data_frame, error_list
