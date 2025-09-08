@@ -72,12 +72,23 @@ def dataset_has_correct_columns(
 def validate_with_pandera(
     data_frame: pd.DataFrame, schema: Schema
 ) -> Tuple[pd.DataFrame, list[str]]:
+    # Check for null values in non-nullable columns directly
+    error_list = []
+    for col_name, column in schema.columns.items():
+        if not column.nullable and col_name in data_frame.columns:
+            if data_frame[col_name].isna().any():
+                error_list.append(f"Column [{col_name}] does not allow null values")
+    
+    # If we found null value errors, return them directly
+    if error_list:
+        return data_frame, error_list
+    
+    # Otherwise proceed with normal validation
     try:
         validated_df = schema.validate(data_frame)
         return validated_df, []
     except SchemaError as e:
         if hasattr(e, 'failure_cases') and hasattr(e.failure_cases, 'itertuples'):
-            error_list = []
             for failure in e.failure_cases.itertuples():
                 if hasattr(failure, 'column'):
                     column_name = failure.column
@@ -86,7 +97,9 @@ def validate_with_pandera(
                     failure_case = getattr(failure, 'failure_case', None)
 
                     if 'nullable' in check_type.lower():
-                        error_list.append(f"Column [{column_name}] does not allow null values")
+                        error_msg = f"Column [{column_name}] does not allow null values"
+                        if error_msg not in error_list:
+                            error_list.append(error_msg)
                     elif 'unique' in check_type.lower():
                         error_list.append(f"Column [{column_name}] must have unique values")
                     elif 'dtype' in check_type.lower():
@@ -97,10 +110,15 @@ def validate_with_pandera(
                         else:
                             error_list.append(f"Column [{column_name}] validation failed: {check_type}")
                 else:
-                    error_list.append(str(failure))
+                    # Only add non-column errors if they're not already covered by our custom checks
+                    if not error_list:
+                        error_list.append(str(failure))
             raise DatasetValidationError(error_list)
         else:
-            raise DatasetValidationError([str(e)])
+            # If there are no specific errors identified, use the full error message
+            if not error_list:
+                error_list = [str(e)]
+            raise DatasetValidationError(error_list)
 
 
 def convert_date_columns(
