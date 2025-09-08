@@ -2,7 +2,6 @@ from typing import Tuple
 
 import pandas as pd
 from pandas import Timestamp
-from pandera.errors import SchemaError
 
 from api.common.custom_exceptions import (
     DatasetValidationError,
@@ -72,65 +71,11 @@ def dataset_has_correct_columns(
 def validate_with_pandera(
     data_frame: pd.DataFrame, schema: Schema
 ) -> Tuple[pd.DataFrame, list[str]]:
-    error_list = []
-    
-    # First check for uniqueness violations
-    has_uniqueness_violations = False
-    for col_name, column in schema.columns.items():
-        if hasattr(column, 'unique') and column.unique and col_name in data_frame.columns:
-            # Count non-null values to check for duplicates
-            value_counts = data_frame[col_name].value_counts(dropna=True)
-            if any(count > 1 for count in value_counts):
-                error_list.append(f"Column [{col_name}] must have unique values")
-                has_uniqueness_violations = True
-    
-    # If we found uniqueness violations, return them without checking for null values
-    # This is to match the expected behavior in the test_return_error_message_when_not_accepted_unique_values test
-    if has_uniqueness_violations:
-        return data_frame, error_list
-    
-    # Otherwise check for null values in non-nullable columns
-    for col_name, column in schema.columns.items():
-        if not column.nullable and col_name in data_frame.columns:
-            if data_frame[col_name].isna().any():
-                error_list.append(f"Column [{col_name}] does not allow null values")
-    
-    # Otherwise proceed with normal validation
     try:
-        validated_df = schema.validate(data_frame)
+        validated_df = schema.validate(data_frame, lazy=True)
         return validated_df, []
-    except SchemaError as e:
-        if hasattr(e, 'failure_cases') and hasattr(e.failure_cases, 'itertuples'):
-            for failure in e.failure_cases.itertuples():
-                if hasattr(failure, 'column'):
-                    column_name = failure.column
-                    check_type = str(failure.check)
-                    check_name = getattr(failure, 'check_name', None)
-                    failure_case = getattr(failure, 'failure_case', None)
-
-                    if 'nullable' in check_type.lower():
-                        error_msg = f"Column [{column_name}] does not allow null values"
-                        if error_msg not in error_list:
-                            error_list.append(error_msg)
-                    elif 'unique' in check_type.lower():
-                        error_list.append(f"Column [{column_name}] must have unique values")
-                    elif 'dtype' in check_type.lower():
-                        error_list.append(f"Column [{column_name}] has an incorrect data type")
-                    else:
-                        if check_name:
-                            error_list.append(f"Column [{column_name}] failed check '{check_name}': {failure_case}")
-                        else:
-                            error_list.append(f"Column [{column_name}] validation failed: {check_type}")
-                else:
-                    # Only add non-column errors if they're not already covered by our custom checks
-                    if not error_list:
-                        error_list.append(str(failure))
-            raise DatasetValidationError(error_list)
-        else:
-            # If there are no specific errors identified, use the full error message
-            if not error_list:
-                error_list = [str(e)]
-            raise DatasetValidationError(error_list)
+    except Exception as e:
+        raise DatasetValidationError([str(e)])
 
 
 def convert_date_columns(

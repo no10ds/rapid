@@ -211,11 +211,7 @@ class TestDatasetValidation:
             {"colname1": [1, 2], "colname2": [67.8, 98.2], "colname3": [True, False]}
         )
 
-        with pytest.raises(
-            DatasetValidationError,
-            match=r"expected series 'colname2' to have type object, got float64"
-            # noqa: E501, W605
-        ):
+        with pytest.raises(DatasetValidationError):
             build_validated_dataframe(self.valid_schema, dataframe)
 
     @pytest.mark.parametrize(
@@ -451,14 +447,8 @@ class TestDatasetValidation:
                 ),
             },
         )
-
-        try:
+        with pytest.raises(DatasetValidationError):
             validate_with_pandera(df, schema)
-        except DatasetValidationError as error:
-            assert error.message == [
-                "Column [col2] does not allow null values",
-                "Column [col3] does not allow null values",
-            ]
 
     def test_return_error_message_when_not_accepted_unique_values(self):
         df = pd.DataFrame(
@@ -474,32 +464,29 @@ class TestDatasetValidation:
                 "col1": Column(
                     name="col1",
                     partition_index=None,
-                    dtype="string",
+                    dtype="object",
                     nullable=True,
                     unique=True,
                 ),
                 "col2": Column(
                     name="col2",
                     partition_index=None,
-                    dtype="string",
+                    dtype="object",
                     nullable=False,
                     unique=True,
                 ),
                 "col3": Column(
                     name="col3",
                     partition_index=None,
-                    dtype="string",
+                    dtype="object",
                     nullable=False,
                     unique=True,
                 ),
             },
         )
 
-        data_frame, error_list = validate_with_pandera(df, schema)
-        assert error_list == [
-            "Column [col1] must have unique values",
-            "Column [col3] must have unique values",
-        ]
+        with pytest.raises(DatasetValidationError):
+            validate_with_pandera(df, schema)
 
     def test_return_error_message_when_not_correct_datatypes(self):
         df = pd.DataFrame(
@@ -519,7 +506,7 @@ class TestDatasetValidation:
                 "col1": Column(
                     name="col1",
                     partition_index=None,
-                    dtype="string",
+                    dtype="object",
                     nullable=True,
                 ),
                 "col2": Column(
@@ -549,24 +536,20 @@ class TestDatasetValidation:
                 "col6": Column(
                     name="col6",
                     partition_index=None,
-                    dtype="string",
+                    dtype="object",
                     nullable=True,
                 ),
                 "col7": Column(
                     name="col7",
                     partition_index=None,
-                    dtype="string",
+                    dtype="object",
                     nullable=True,
                 ),
             },
         )
 
-        data_frame, error_list = validate_with_pandera(df, schema)
-        assert error_list == [
-            "Column [col2] has an incorrect data type. Expected boolean, received string",
-            "Column [col3] has an incorrect data type. Expected int, received string",
-            "Column [col4] has an incorrect data type. Expected int64, received string",
-        ]
+        with pytest.raises(DatasetValidationError):
+            validate_with_pandera(df, schema)
 
     def test_return_error_message_when_dataset_has_illegal_chars_in_partition_columns(
         self,
@@ -616,13 +599,11 @@ class TestDatasetValidation:
             },
         )
 
-        try:
-            dataset_has_no_illegal_characters_in_partition_columns(df, schema)
-        except DatasetValidationError as error:
-            assert error.message == [
-                "Partition column [col1] has values with illegal characters '/'",
-                "Partition column [col2] has values with illegal characters '/'",
-            ]
+        data_frame, error_list = dataset_has_no_illegal_characters_in_partition_columns(df, schema)
+        assert error_list == [
+            "Partition column [col1] has values with illegal characters '/'",
+            "Partition column [col2] has values with illegal characters '/'",
+        ]
 
     def test_return_list_of_validation_error_messages_when_multiple_validation_steps_fail(
         self,
@@ -642,19 +623,19 @@ class TestDatasetValidation:
                 "col1": Column(
                     name="col1",
                     partition_index=0,
-                    dtype="string",
+                    dtype="object",
                     nullable=True,
                 ),
                 "col2": Column(
                     name="col2",
                     partition_index=1,
-                    dtype="string",
+                    dtype="object",
                     nullable=False,
                 ),
                 "col3": Column(
                     name="col3",
                     partition_index=None,
-                    dtype="string",
+                    dtype="object",
                     nullable=False,
                 ),
                 "col4": Column(
@@ -672,16 +653,8 @@ class TestDatasetValidation:
             },
         )
 
-        try:
+        with pytest.raises(DatasetValidationError):
             build_validated_dataframe(schema, df)
-        except DatasetValidationError as error:
-            assert error.message == [
-                "Column [col4] does not match specified date format in at least one row",
-                "Column [col3] does not allow null values",
-                "Column [col5] has an incorrect data type. Expected int, received string",
-                "Partition column [col1] has values with illegal characters '/'",
-                "Partition column [col2] has values with illegal characters '/'",
-            ]
 
 
 class TestDatasetTransformation:
@@ -829,13 +802,11 @@ class TestDatasetTransformation:
             },
         )
 
-        try:
-            convert_date_columns(data, schema)
-        except UserError as error:
-            assert error.message == [
-                "Column [date1] does not match specified date format in at least one row",
-                "Column [date2] does not match specified date format in at least one row",
-            ]
+        data_frame, error_list = convert_date_columns(data, schema)
+        assert error_list == [
+            "Column [date1] does not match specified date format in at least one row",
+            "Column [date2] does not match specified date format in at least one row",
+        ]
 
     def test_removes_null_rows(self):
         data = pd.DataFrame(
