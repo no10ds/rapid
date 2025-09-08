@@ -46,7 +46,7 @@ class TestDatasetValidation:
                 "colname2": Column(
                     name="colname2",
                     partition_index=None,
-                    dtype="string",
+                    dtype="object", 
                     nullable=False,
                 ),
                 "colname3": Column(
@@ -71,13 +71,13 @@ class TestDatasetValidation:
                 "colname2": Column(
                     name="colname2",
                     partition_index=None,
-                    dtype="string[python]",
+                    dtype="object",
                     nullable=False,
                 ),
                 "colname3": Column(
                     name="colname3",
                     partition_index=None,
-                    dtype="boolean",
+                    dtype="bool",
                     nullable=True,
                 ),
                 "colname4": Column(
@@ -170,7 +170,7 @@ class TestDatasetValidation:
             {"colname1": [2021, 2020], "colname2": ["01/02/2021", "01/02/2021"]}
         )
 
-        with pytest.raises(DatasetValidationError):
+        with pytest.raises(UnprocessableDatasetError):
             build_validated_dataframe(valid_schema, dataframe)
 
     def test_valid_when_date_partition_column_with_illegal_slash_character(self):
@@ -203,7 +203,7 @@ class TestDatasetValidation:
             }
         )
 
-        with pytest.raises(DatasetValidationError):
+        with pytest.raises(UnprocessableDatasetError):
             build_validated_dataframe(self.valid_schema, dataframe)
 
     def test_invalid_when_entire_column_is_different_to_expected_type(self):

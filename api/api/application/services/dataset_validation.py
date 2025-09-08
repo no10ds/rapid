@@ -27,6 +27,7 @@ def transform_and_validate(schema: Schema, data: pd.DataFrame) -> pd.DataFrame:
         .pipe(remove_empty_rows)
         .pipe(clean_column_headers)
         .pipe(dataset_has_correct_columns, schema)
+        .pipe(convert_date_columns, schema) 
         .pipe(validate_with_pandera, schema)
         .pipe(dataset_has_no_illegal_characters_in_partition_columns, schema)
     )
