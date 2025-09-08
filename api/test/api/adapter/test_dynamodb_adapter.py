@@ -1050,6 +1050,7 @@ class TestDynamoDBAdapterSchemaTable:
                         "nullable": False,
                         "format": None,
                         "unique": False,
+                        "checks": []
                     },
                     "colname2": {
                         "partition_index": None,
@@ -1057,6 +1058,7 @@ class TestDynamoDBAdapterSchemaTable:
                         "nullable": True,
                         "format": None,
                         "unique": False,
+                        "checks": []
                     },
                 }
             }

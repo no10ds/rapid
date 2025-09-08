@@ -112,6 +112,8 @@ def convert_date_columns(
             data_frame[column_name] = pd.to_datetime(
                 data_frame[column_name], format=column.format
             )
+            if column_name in schema._pandera_schema.columns:
+                schema._pandera_schema.columns[column_name].dtype = "datetime64[ns]"
         except ValueError:
             error_list.append(
                 f"Column [{column_name}] does not match specified date format in at least one row"

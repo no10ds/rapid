@@ -953,17 +953,19 @@ class TestSchemaValidation:
         )
 
         result_dict = {
-            "layer": "raw",
-            "domain": "some",
-            "dataset": "other",
-            "sensitivity": "PUBLIC",
-            "version": 3,
-            "description": "",
-            "key_value_tags": {"tag1": "value-1", "Tag1": "val1", "tag2": "val2"},
-            "key_only_tags": ["tag4"],
-            "owners": [{"name": "owner", "email": "owner@email.com"}],
-            "update_behaviour": "APPEND",
-            "is_latest_version": True,
+            "metadata": {
+                "layer": "raw",
+                "domain": "some",
+                "dataset": "other",
+                "sensitivity": "PUBLIC",
+                "version": 3,
+                "description": "",
+                "key_value_tags": {"tag1": "value-1", "Tag1": "val1", "tag2": "val2"},
+                "key_only_tags": ["tag4"],
+                "owners": [{"name": "owner", "email": "owner@email.com"}],
+                "update_behaviour": "APPEND",
+                "is_latest_version": True,
+            }
         }
 
         schema_has_valid_tag_set(valid_schema)
