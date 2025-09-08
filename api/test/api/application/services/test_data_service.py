@@ -585,7 +585,6 @@ class TestDatasetInfoRetrieval:
                     partition_index=None,
                     dtype="date",
                     nullable=False,
-                    format="%d/%m/%Y",
                 ),
             },
         )
@@ -652,7 +651,6 @@ class TestDatasetInfoRetrieval:
                     partition_index=None,
                     dtype="date",
                     nullable=False,
-                    format="%d/%m/%Y",
                     statistics={"max": "2021-07-01", "min": "2014-01-01"},
                 ),
             }
@@ -700,13 +698,11 @@ class TestDatasetInfoRetrieval:
                     partition_index=None,
                     dtype="date",
                     nullable=False,
-                    format="%d/%m/%Y",
                 ),
                 "date2": Column(
                     partition_index=None,
                     dtype="date",
                     nullable=False,
-                    format="%d/%m/%Y",
                 ),
             },
         )
@@ -732,14 +728,12 @@ class TestDatasetInfoRetrieval:
                     partition_index=None,
                     dtype="date",
                     nullable=False,
-                    format="%d/%m/%Y",
                     statistics={"max": "2021-07-01", "min": "2014-01-01"},
                 ),
                 "date2": EnrichedColumn(
                     partition_index=None,
                     dtype="date",
                     nullable=False,
-                    format="%d/%m/%Y",
                     statistics={"max": "2020-07-01", "min": "2015-01-01"},
                 ),
             }

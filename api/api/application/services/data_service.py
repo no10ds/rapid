@@ -318,7 +318,6 @@ class DataService:
                 dtype=column.dtype,
                 nullable=column.nullable,
                 partition_index=column.partition_index,
-                format=column.format,
                 unique=getattr(column, 'unique', False),
                 statistics=statistics
             )

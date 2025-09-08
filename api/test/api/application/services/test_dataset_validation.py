@@ -71,20 +71,19 @@ class TestDatasetValidation:
                 "colname2": Column(
                     name="colname2",
                     partition_index=None,
-                    dtype="string[python]",
+                    dtype="object",
                     nullable=False,
                 ),
                 "colname3": Column(
                     name="colname3",
                     partition_index=None,
-                    dtype="boolean",
+                    dtype="object",
                     nullable=True,
                 ),
                 "colname4": Column(
                     name="colname4",
                     partition_index=None,
                     dtype="date",
-                    format="%d/%m/%Y",
                     nullable=True,
                 ),
             },
@@ -181,7 +180,6 @@ class TestDatasetValidation:
                     name="colname1",
                     partition_index=0,
                     dtype="date",
-                    format="%d/%m/%Y",
                     nullable=True,
                 ),
             },
@@ -310,7 +308,6 @@ class TestDatasetValidation:
                     name="col1",
                     partition_index=None,
                     dtype="date",
-                    format="%d/%m/%Y",
                     nullable=True,
                 ),
                 "col2": Column(
@@ -349,7 +346,6 @@ class TestDatasetValidation:
                     name="col1",
                     partition_index=None,
                     dtype="date",
-                    format="%d/%m/%Y",
                     nullable=True,
                 ),
                 "col2": Column(
@@ -695,30 +691,25 @@ class TestDatasetTransformation:
         )
 
     @pytest.mark.parametrize(
-        "date_format,date_column_data,expected_date_column_data",
+        "date_column_data,expected_date_column_data",
         [
             (
-                "%Y-%m-%d",  # noqa: E126
                 ["2008-01-30", "2008-01-31", "2008-02-01", "2008-02-02"],
                 ["2008-01-30", "2008-01-31", "2008-02-01", "2008-02-02"],
             ),
             (
-                "%d/%m/%Y",  # noqa: E126
                 ["30/01/2008", "31/01/2008", "01/02/2008", "02/02/2008"],
                 ["2008-01-30", "2008-01-31", "2008-02-01", "2008-02-02"],
             ),
             (
-                "%m-%d-%Y",  # noqa: E126
                 ["05-15-2008", "12-13-2008", "07-09-2008", "03-17-2008"],
                 ["2008-05-15", "2008-12-13", "2008-07-09", "2008-03-17"],
             ),
             (
-                "%Y/%d/%m",  # noqa: E126
                 ["2008/15/05", "2008/13/12", "2008/09/07", "2008/17/03"],
                 ["2008-05-15", "2008-12-13", "2008-07-09", "2008-03-17"],
             ),
             (
-                "%m-%Y",  # noqa: E126
                 ["05-2008", "12-2008", "07-2008", "03-2008"],
                 ["2008-05-01", "2008-12-01", "2008-07-01", "2008-03-01"],
             ),
@@ -726,7 +717,6 @@ class TestDatasetTransformation:
     )
     def test_convert_date_columns(
         self,
-        date_format: str,
         date_column_data: List[str],
         expected_date_column_data: List[str],
     ):
@@ -739,7 +729,6 @@ class TestDatasetTransformation:
                     name="date",
                     partition_index=None,
                     dtype="date",
-                    format=date_format,
                     nullable=False,
                 )
             },
@@ -769,14 +758,12 @@ class TestDatasetTransformation:
                     name="date1",
                     partition_index=None,
                     dtype="date",
-                    format="%d/%m/%Y",
                     nullable=False,
                 ),
                 "date2": Column(
                     name="date2",
                     partition_index=None,
                     dtype="date",
-                    format="%m-%d-%Y",
                     nullable=False,
                 ),
             },
@@ -810,14 +797,12 @@ class TestDatasetTransformation:
                     name="date1",
                     partition_index=None,
                     dtype="date",
-                    format="%Y-%m-%d",
                     nullable=False,
                 ),
                 "date2": Column(
                     name="date2",
                     partition_index=None,
                     dtype="date",
-                    format="%d-%m-%Y",
                     nullable=False,
                 ),
                 "value": Column(

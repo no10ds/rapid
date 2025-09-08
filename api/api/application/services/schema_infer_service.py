@@ -20,7 +20,6 @@ from api.domain.schema import Column, Schema
 from api.domain.schema import Schema, Column
 from api.domain.schema_metadata import Owner, SchemaMetadata
 
-DEFAULT_DATE_FORMAT = "%Y-%m-%d"
 
 
 class SchemaInferService:
@@ -65,7 +64,6 @@ class SchemaInferService:
                 dtype=str(pandera_column.dtype),
                 nullable=True,
                 unique=False,
-                format=DEFAULT_DATE_FORMAT if is_date_type(pandera_column.dtype) else None,
                 partition_index=None,
             )
 

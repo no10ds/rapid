@@ -74,13 +74,11 @@ class TestSchema:
                 partition_index=0,
                 dtype="string",
                 nullable=False,
-                format=None,
             )),
             ("colname1", Column(
                 partition_index=1,
                 dtype="int",
                 nullable=True,
-                format=None,
             )),
         ]
         assert res == expected

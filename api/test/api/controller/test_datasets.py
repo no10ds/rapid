@@ -699,13 +699,11 @@ class TestDatasetInfo(BaseClientTest):
                     dtype="string",
                     nullable=True,
                     partition_index=None,
-                    format=None,
                 ),
                 "colname2": Column(
                     dtype="int",
                     nullable=True,
                     partition_index=None,
-                    format=None,
                 ),
             }
         )
@@ -743,13 +741,11 @@ class TestDatasetInfo(BaseClientTest):
                     dtype="string",
                     nullable=True,
                     partition_index=None,
-                    format=None,
                 ),
                 "colname2": Column(
                     dtype="int",
                     nullable=True,
                     partition_index=None,
-                    format=None,
                 ),
             }
         )
