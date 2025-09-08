@@ -1,4 +1,5 @@
 import re
+from typing import List
 
 import numpy as np
 import pandas as pd
@@ -12,10 +13,12 @@ from api.application.services.dataset_validation import (
     dataset_has_no_illegal_characters_in_partition_columns,
     dataset_has_rows,
     validate_with_pandera,
+    convert_date_columns,
 )
 from api.common.custom_exceptions import (
     DatasetValidationError,
     UnprocessableDatasetError,
+    UserError,
 )
 from api.domain.schema import Schema, Column
 from api.domain.schema_metadata import Owner, SchemaMetadata
@@ -68,19 +71,20 @@ class TestDatasetValidation:
                 "colname2": Column(
                     name="colname2",
                     partition_index=None,
-                    dtype="object",
+                    dtype="string[python]",
                     nullable=False,
                 ),
                 "colname3": Column(
                     name="colname3",
                     partition_index=None,
-                    dtype="object",
+                    dtype="boolean",
                     nullable=True,
                 ),
                 "colname4": Column(
                     name="colname4",
                     partition_index=None,
                     dtype="date",
+                    format="%d/%m/%Y",
                     nullable=True,
                 ),
             },
@@ -177,6 +181,7 @@ class TestDatasetValidation:
                     name="colname1",
                     partition_index=0,
                     dtype="date",
+                    format="%d/%m/%Y",
                     nullable=True,
                 ),
             },
@@ -305,6 +310,7 @@ class TestDatasetValidation:
                     name="col1",
                     partition_index=None,
                     dtype="date",
+                    format="%d/%m/%Y",
                     nullable=True,
                 ),
                 "col2": Column(
@@ -343,6 +349,7 @@ class TestDatasetValidation:
                     name="col1",
                     partition_index=None,
                     dtype="date",
+                    format="%d/%m/%Y",
                     nullable=True,
                 ),
                 "col2": Column(
@@ -686,6 +693,149 @@ class TestDatasetTransformation:
             sensitivity="PUBLIC",
             owners=[Owner(name="owner", email="owner@email.com")],
         )
+
+    @pytest.mark.parametrize(
+        "date_format,date_column_data,expected_date_column_data",
+        [
+            (
+                "%Y-%m-%d",  # noqa: E126
+                ["2008-01-30", "2008-01-31", "2008-02-01", "2008-02-02"],
+                ["2008-01-30", "2008-01-31", "2008-02-01", "2008-02-02"],
+            ),
+            (
+                "%d/%m/%Y",  # noqa: E126
+                ["30/01/2008", "31/01/2008", "01/02/2008", "02/02/2008"],
+                ["2008-01-30", "2008-01-31", "2008-02-01", "2008-02-02"],
+            ),
+            (
+                "%m-%d-%Y",  # noqa: E126
+                ["05-15-2008", "12-13-2008", "07-09-2008", "03-17-2008"],
+                ["2008-05-15", "2008-12-13", "2008-07-09", "2008-03-17"],
+            ),
+            (
+                "%Y/%d/%m",  # noqa: E126
+                ["2008/15/05", "2008/13/12", "2008/09/07", "2008/17/03"],
+                ["2008-05-15", "2008-12-13", "2008-07-09", "2008-03-17"],
+            ),
+            (
+                "%m-%Y",  # noqa: E126
+                ["05-2008", "12-2008", "07-2008", "03-2008"],
+                ["2008-05-01", "2008-12-01", "2008-07-01", "2008-03-01"],
+            ),
+        ],
+    )
+    def test_convert_date_columns(
+        self,
+        date_format: str,
+        date_column_data: List[str],
+        expected_date_column_data: List[str],
+    ):
+        data = pd.DataFrame({"date": date_column_data, "value": [1, 5, 4, 8]})
+
+        schema = Schema(
+            metadata=self.schema_metadata,
+            columns={
+                "date": Column(
+                    name="date",
+                    partition_index=None,
+                    dtype="date",
+                    format=date_format,
+                    nullable=False,
+                )
+            },
+        )
+
+        transformed_df, _ = convert_date_columns(data, schema)
+
+        expected_date_column = pd.Series(
+            expected_date_column_data,
+            dtype="datetime64[ns]",
+        )
+
+        assert transformed_df["date"].equals(expected_date_column)
+
+    def test_converts_multiple_date_columns(self):
+        data = pd.DataFrame(
+            {
+                "date1": ["30/01/2008", "31/01/2008", "01/02/2008", "02/02/2008"],
+                "date2": ["05-15-2008", "12-13-2008", "07-09-2008", "03-17-2008"],
+                "value": [1, 5, 4, 8],
+            }
+        )
+        schema = Schema(
+            metadata=self.schema_metadata,
+            columns={
+                "date1": Column(
+                    name="date1",
+                    partition_index=None,
+                    dtype="date",
+                    format="%d/%m/%Y",
+                    nullable=False,
+                ),
+                "date2": Column(
+                    name="date2",
+                    partition_index=None,
+                    dtype="date",
+                    format="%m-%d-%Y",
+                    nullable=False,
+                ),
+            },
+        )
+        transformed_df, _ = convert_date_columns(data, schema)
+
+        expected_date_column_1 = pd.Series(
+            ["2008-01-30", "2008-01-31", "2008-02-01", "2008-02-02"],
+            dtype="datetime64[ns]",
+        )
+        expected_date_column_2 = pd.Series(
+            ["2008-05-15", "2008-12-13", "2008-07-09", "2008-03-17"],
+            dtype="datetime64[ns]",
+        )
+
+        assert transformed_df["date1"].equals(expected_date_column_1)
+        assert transformed_df["date2"].equals(expected_date_column_2)
+
+    def test_raises_error_if_provided_date_is_not_valid(self):
+        data = pd.DataFrame(
+            {
+                "date1": ["1545-73-98", "1545-73-99"],
+                "date2": ["16-05-1950", "bbbb"],
+                "value": [1, 5],
+            }
+        )
+        schema = Schema(
+            metadata=self.schema_metadata,
+            columns={
+                "date1": Column(
+                    name="date1",
+                    partition_index=None,
+                    dtype="date",
+                    format="%Y-%m-%d",
+                    nullable=False,
+                ),
+                "date2": Column(
+                    name="date2",
+                    partition_index=None,
+                    dtype="date",
+                    format="%d-%m-%Y",
+                    nullable=False,
+                ),
+                "value": Column(
+                    name="value",
+                    partition_index=None,
+                    dtype="int",
+                    nullable=False,
+                ),
+            },
+        )
+
+        try:
+            convert_date_columns(data, schema)
+        except UserError as error:
+            assert error.message == [
+                "Column [date1] does not match specified date format in at least one row",
+                "Column [date2] does not match specified date format in at least one row",
+            ]
 
     def test_removes_null_rows(self):
         data = pd.DataFrame(

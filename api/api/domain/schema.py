@@ -20,6 +20,7 @@ class Column(BaseModel):
     partition_index: Optional[int]
     dtype: str
     nullable: bool
+    format: Optional[str] = None
     unique: bool = False
     checks: List[Union[Dict[str, Any], pandera.Check]] = []
 
@@ -51,6 +52,7 @@ class Column(BaseModel):
             if self._pandera_column.metadata is None:
                 self._pandera_column.metadata = {}
             self._pandera_column.metadata["partition_index"] = self.partition_index
+            self._pandera_column.metadata["format"] = self.format
         except TypeError:
             raise SchemaValidationError(
                 "You are specifying one or more unaccepted data types",

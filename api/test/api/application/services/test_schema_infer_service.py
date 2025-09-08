@@ -32,21 +32,25 @@ class TestSchemaInfer:
                     partition_index=None,
                     dtype="object",
                     nullable=True,
+                    format=None,
                 ),
                 "colname2": Column(
                     partition_index=None,
                     dtype="int64",
                     nullable=True,
+                    format=None,
                 ),
                 "col_name_3": Column(
                     partition_index=None,
                     dtype="int64",
                     nullable=True,
+                    format=None,
                 ),
                 "colname_4": Column(
                     partition_index=None,
                     dtype="bool",
                     nullable=True,
+                    format=None,
                 ),
             },
         ).dict(exclude={"metadata": {"version"}})
@@ -76,11 +80,13 @@ class TestSchemaInfer:
                     partition_index=None,
                     dtype="object",
                     nullable=True,
+                    format=None,
                 ),
                 "colname2": Column(
                     partition_index=None,
                     dtype="datetime64[ns]",
                     nullable=True,
+                    format="%Y-%m-%d",
                 ),
             },
         ).dict(exclude={"metadata": {"version"}})

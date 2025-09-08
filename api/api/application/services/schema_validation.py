@@ -7,9 +7,10 @@ from api.common.config.constants import (
     TAG_VALUES_REGEX,
     TAG_KEYS_REGEX,
     COLUMN_NAME_REGEX,
+    DATE_FORMAT_REGEX,
 )
 from api.common.custom_exceptions import SchemaValidationError, UnsupportedTypeError
-from api.domain.data_types import AthenaDataType, convert_pandera_column_to_athena
+from api.domain.data_types import AthenaDataType, convert_pandera_column_to_athena, is_date_type
 from api.domain.schema import Schema
 from api.domain.schema_metadata import UpdateBehaviour, Owner
 
@@ -34,6 +35,7 @@ def schema_has_valid_column_definitions(schema: Schema):
     has_valid_partition_index_values(schema)
     has_allow_null_false_on_partitioned_columns(schema)
     has_only_accepted_data_types(schema)
+    has_valid_date_column_definition(schema)
     has_valid_allow_unique_columns(schema)
 
 
@@ -166,6 +168,12 @@ def has_only_accepted_data_types(schema: Schema):
         )
 
 
+def has_valid_date_column_definition(schema: Schema):
+    for column in schema.columns.values():
+        if is_date_type(convert_pandera_column_to_athena(column.dtype)) and __has_value_for(column.format):
+            __has_valid_date_format(column.format)
+
+
 def has_valid_sensitivity_level(schema: Schema):
     if schema.get_sensitivity() not in list(Sensitivity):
         raise SchemaValidationError(
@@ -214,6 +222,22 @@ def __has_value_for(value: Optional[Any]) -> bool:
     if not value:
         raise SchemaValidationError("You must specify all required fields")
     return True
+
+
+def __has_valid_date_format(date_format: str):
+    accepted_format = DATE_FORMAT_REGEX
+    accepted_date_format_codes = ["Y", "m", "d"]
+
+    matches_accepted_format = re.match(accepted_format, date_format)
+    duplicate_format_codes = any(
+        date_format.count(letter) > 1 for letter in accepted_date_format_codes
+    )
+    print(duplicate_format_codes)
+
+    if duplicate_format_codes or not matches_accepted_format:
+        raise SchemaValidationError(
+            f"You must specify a valid data format. [{date_format}] is not accepted"
+        )
 
 
 def __has_punctuation_or_only_one_type_of_character(col_name: str) -> bool:

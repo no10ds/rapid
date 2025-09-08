@@ -13,8 +13,11 @@ from api.common.data_handlers import (
     get_dataframe_from_chunk_type,
 )
 from api.common.value_transformers import clean_column_name
+from api.domain.data_types import is_date_type
 from api.domain.schema import Column, Schema
 from api.domain.schema_metadata import Owner, SchemaMetadata
+
+DEFAULT_DATE_FORMAT = "%Y-%m-%d"
 
 
 class SchemaInferService:
@@ -58,6 +61,7 @@ class SchemaInferService:
                 dtype=str(pandera_column.dtype),
                 nullable=True,
                 unique=False,
+                format=DEFAULT_DATE_FORMAT if is_date_type(pandera_column.dtype) else None,
                 partition_index=None,
             )
 

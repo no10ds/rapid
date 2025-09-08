@@ -23,36 +23,43 @@
       "partition_index": null,
       "dtype": "int",
       "nullable": true,
+      "format": null
     },
     "month": {
       "partition_index": null,
       "dtype": "double",
       "nullable": true,
+      "format": null
     },
     "destination": {
       "partition_index": null,
       "dtype": "string",
       "nullable": true,
+      "format": null
     },
     "arrival": {
       "partition_index": null,
       "dtype": "string",
       "nullable": true,
+      "format": null
     },
     "type": {
       "partition_index": null,
       "dtype": "string",
       "nullable": true,
+      "format": null
     },
     "status": {
       "partition_index": null,
       "dtype": "string",
       "nullable": true,
+      "format": null
     },
     "newcolumn": {
       "partition_index": null,
       "dtype": "int",
       "nullable": true,
+      "format": null
     }
   }
 }

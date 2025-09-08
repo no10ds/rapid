@@ -506,6 +506,7 @@ class TestSchemaValidation:
                     partition_index=None,
                     dtype="date",
                     nullable=True,
+                    format=None,
                 ),
             },
         )
@@ -513,6 +514,89 @@ class TestSchemaValidation:
         self._assert_validate_schema_raises_error(
             invalid_schema, "You must specify all required fields"
         )
+
+    @pytest.mark.parametrize(
+        "date_format",
+        [
+            "13 September",
+            "%Y/%Y/%Y",
+            "%m/%m",
+            "%d",
+            "%d/%m",
+            "%Y:%m:%d",
+            "%Y%m%d",
+            "something",
+            "else",
+        ],
+    )
+    def test_is_invalid_when_date_type_column_has_incorrectly_defined_format(
+        self, date_format: str
+    ):
+        invalid_schema = Schema(
+            metadata=SchemaMetadata(
+                layer="raw",
+                domain="some",
+                dataset="other",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
+            ),
+            columns={
+                "colname1": Column(
+                    partition_index=None,
+                    dtype="date",
+                    nullable=True,
+                    format=date_format,
+                ),
+            },
+        )
+
+        self._assert_validate_schema_raises_error(
+            invalid_schema,
+            rf"You must specify a valid data format. \[{date_format}\] is not accepted",
+        )
+
+    @pytest.mark.parametrize(
+        "date_format",
+        [
+            "%Y/%m/%d",
+            "%m/%Y",
+            "%Y/%m",
+            "%Y/%d/%m",
+            "%d/%m/%Y",
+            "%m/%d/%Y",
+            "%m-%Y",
+            "%Y-%m",
+            "%Y-%d-%m",
+            "%d-%m-%Y",
+            "%m-%d-%Y",
+            "%Y-%m-%d",
+        ],
+    )
+    def test_is_valid_when_date_type_column_has_correctly_defined_format(
+        self, date_format: str
+    ):
+        valid_schema = Schema(
+            metadata=SchemaMetadata(
+                layer="raw",
+                domain="some",
+                dataset="other",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
+            ),
+            columns={
+                "colname1": Column(
+                    partition_index=None,
+                    dtype="date",
+                    nullable=True,
+                    format=date_format,
+                ),
+            },
+        )
+
+        try:
+            validate_schema(valid_schema)
+        except SchemaValidationError:
+            pytest.fail("Unexpected SchemaValidationError was thrown")
 
     @pytest.mark.parametrize(
         "provided_sensitivity",

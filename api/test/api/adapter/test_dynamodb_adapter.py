@@ -1048,6 +1048,7 @@ class TestDynamoDBAdapterSchemaTable:
                         "partition_index": 0,
                         "dtype": "int",
                         "nullable": False,
+                        "format": None,
                         "unique": False,
                         "checks": []
                     },
@@ -1055,6 +1056,7 @@ class TestDynamoDBAdapterSchemaTable:
                         "partition_index": None,
                         "dtype": "string",
                         "nullable": True,
+                        "format": None,
                         "unique": False,
                         "checks": []
                     },

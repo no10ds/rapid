@@ -99,6 +99,28 @@ def validate_with_pandera(
             raise UnprocessableDatasetError([str(e)])
 
 
+def convert_date_columns(
+    data_frame: pd.DataFrame, schema: Schema
+) -> Tuple[pd.DataFrame, list[str]]:
+    error_list = []
+
+    date_column_names = schema.get_column_names_by_type(DateType)
+    for column_name in date_column_names:
+        column = schema.columns[column_name]
+        try:
+            data_frame[column_name] = pd.to_datetime(
+                data_frame[column_name], format=column.format
+            )
+            if column_name in schema._pandera_schema.columns:
+                schema._pandera_schema.columns[column_name].dtype = "datetime64[ns]"
+        except ValueError:
+            error_list.append(
+                f"Column [{column_name}] does not match specified date format in at least one row"
+            )
+
+    return data_frame, error_list
+
+
 def dataset_has_no_illegal_characters_in_partition_columns(
     data_frame: pd.DataFrame, schema: Schema
 ) -> Tuple[pd.DataFrame, list[str]]:

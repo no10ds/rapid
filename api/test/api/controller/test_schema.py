@@ -370,11 +370,13 @@ class TestSchemaGeneration(BaseClientTest):
                     partition_index=None,
                     dtype="string",
                     nullable=True,
+                    format=None,
                 ),
                 "colname2": Column(
                     partition_index=None,
                     dtype="int",
                     nullable=True,
+                    format=None,
                 ),
             },
         )
@@ -420,11 +422,13 @@ class TestSchemaGeneration(BaseClientTest):
                     partition_index=None,
                     dtype="object",
                     nullable=True,
+                    format=None,
                 ),
                 "colname2": Column(
                     partition_index=None,
                     dtype="Int64",
                     nullable=True,
+                    format=None,
                 ),
             },
         )
