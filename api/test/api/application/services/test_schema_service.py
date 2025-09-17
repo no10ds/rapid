@@ -39,12 +39,12 @@ class TestUploadSchema:
             columns={
                 "colname1": Column(
                     partition_index=0,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 ),
                 "colname2": Column(
                     partition_index=None,
-                    dtype="string",
+                    data_type="string",
                     nullable=True,
                 ),
             },
@@ -94,7 +94,7 @@ class TestUploadSchema:
             columns={
                 "colname1": Column(
                     partition_index=0,
-                    dtype="int",
+                    data_type="int",
                     nullable=True,
                 ),
             },
@@ -120,7 +120,7 @@ class TestUploadSchema:
             columns={
                 "colname1": Column(
                     partition_index=0,
-                    dtype="int",
+                    data_type="int",
                     nullable=True,
                 ),
             },
@@ -155,7 +155,7 @@ class TestUploadSchema:
             columns={
                 "colname1": Column(
                     partition_index=invalid_partition_index,
-                    dtype="int",
+                    data_type="int",
                     nullable=True,
                 )
             },
@@ -190,12 +190,12 @@ class TestUpdateSchema:
             columns={
                 "colname1": Column(
                     partition_index=0,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 ),
                 "colname2": Column(
                     partition_index=None,
-                    dtype="string",
+                    data_type="string",
                     nullable=True,
                 ),
             },
@@ -214,12 +214,12 @@ class TestUpdateSchema:
             columns={
                 "colname1": Column(
                     partition_index=0,
-                    dtype="float64",
+                    data_type="float",
                     nullable=False,
                 ),
                 "colname_new": Column(
                     partition_index=None,
-                    dtype="string",
+                    data_type="string",
                     nullable=True,
                 ),
             },
@@ -239,7 +239,7 @@ class TestUpdateSchema:
             columns={
                 "colname1": Column(
                     partition_index=invalid_partition_index,
-                    dtype="int",
+                    data_type="int",
                     nullable=True,
                 ),
             },
@@ -344,12 +344,12 @@ class TestGetSchema:
         self.columns = {
             "colname1": Column(
                 partition_index=0,
-                dtype="int",
+                data_type="int",
                 nullable=False,
             ),
             "colname2": Column(
                 partition_index=None,
-                dtype="string",
+                data_type="string",
                 nullable=True,
             ),
         }

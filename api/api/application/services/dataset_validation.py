@@ -2,6 +2,7 @@ from typing import Tuple
 
 import pandas as pd
 from pandas import Timestamp
+import pandera.pandas as pandera
 
 from api.common.custom_exceptions import (
     DatasetValidationError,
@@ -9,9 +10,10 @@ from api.common.custom_exceptions import (
 )
 from api.common.value_transformers import clean_column_name
 from api.domain.data_types import (
+    extract_athena_types,
+    AthenaDataType,
+    StringType,
     DateType,
-    BooleanType,
-    NumericType,
 )
 from api.domain.schema import Schema
 from api.domain.validation_context import ValidationContext
@@ -30,6 +32,7 @@ def transform_and_validate(schema: Schema, data: pd.DataFrame) -> pd.DataFrame:
         .pipe(dataset_has_correct_columns, schema)
         .pipe(convert_date_columns, schema)
         .pipe(validate_with_pandera, schema)
+        .pipe(dataset_has_correct_data_types, schema)
         .pipe(dataset_has_no_illegal_characters_in_partition_columns, schema)
     )
 
@@ -74,8 +77,8 @@ def validate_with_pandera(
         validated_df = schema.validate(data_frame, lazy=True)
         return validated_df, []
     except Exception as e:
-        raise DatasetValidationError([str(e)])
-
+        error_str = str(e)
+        raise DatasetValidationError([error_str])
 
 def convert_date_columns(
     data_frame: pd.DataFrame, schema: Schema
@@ -94,6 +97,29 @@ def convert_date_columns(
                 f"Column [{column_name}] does not match specified date format in at least one row"
             )
 
+    return data_frame, error_list
+
+def dataset_has_correct_data_types(
+    data_frame: pd.DataFrame, schema: Schema
+) -> Tuple[pd.DataFrame, list[str]]:
+    error_list = []
+    column_types = extract_athena_types(
+        data_frame,
+    )
+    for column_name, column in schema.columns.items():
+        if column_name not in column_types:
+            continue
+        actual_type = column_types[column_name]
+        expected_type = column.data_type
+
+        types_match = isinstance(AthenaDataType(expected_type).value, type(actual_type))
+
+        if not types_match and not is_valid_custom_dtype(actual_type, expected_type):
+            error_list.append(
+                f"Column [{column_name}] has an incorrect data type. Expected {expected_type}, received {AthenaDataType(actual_type).value}"
+                # noqa: E501
+            )
+    
     return data_frame, error_list
 
 
@@ -148,3 +174,11 @@ def convert_date_column_to_ymd(
 
 def format_timestamp_as_ymd(timestamp: Timestamp) -> str:
     return f"{timestamp.year}-{str(timestamp.month).zfill(2)}-{str(timestamp.day).zfill(2)}"
+
+
+def is_valid_custom_dtype(actual_type: str, expected_type: str) -> bool:
+    """
+    Custom data types should be validated separately, rather than by column type comparisons
+    """
+    is_custom_dtype = expected_type in list(DateType)
+    return is_custom_dtype and actual_type in list(StringType)

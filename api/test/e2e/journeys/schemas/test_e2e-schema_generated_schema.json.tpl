@@ -19,42 +19,42 @@
   "columns": {
     "year": {
       "partition_index": null,
-      "dtype": "int64",
+      "data_type": "int",
       "nullable": true,
       "format": null,
       "unique": false
     },
     "month": {
       "partition_index": null,
-      "dtype": "int64",
+      "data_type": "int",
       "nullable": true,
       "format": null,
       "unique": false
     },
     "destination": {
       "partition_index": null,
-      "dtype": "object",
+      "data_type": "string",
       "nullable": true,
       "format": null,
       "unique": false
     },
     "arrival": {
       "partition_index": null,
-      "dtype": "object",
+      "data_type": "string",
       "nullable": true,
       "format": null,
       "unique": false
     },
     "type": {
       "partition_index": null,
-      "dtype": "object",
+      "data_type": "string",
       "nullable": true,
       "format": null,
       "unique": false
     },
     "status": {
       "partition_index": null,
-      "dtype": "object",
+      "data_type": "string",
       "nullable": true,
       "format": null,
       "unique": false

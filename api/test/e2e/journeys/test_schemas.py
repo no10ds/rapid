@@ -85,7 +85,7 @@ class TestSchemaJourney(BaseAuthenticatedJourneyTest):
     @pytest.mark.parametrize(
         "column_key, column_value",
         [
-            ("dtype", "INVALID"),
+            ("data_type", "INVALID"),
             ("nullable", "pretend_boolean"),
         ],
     )

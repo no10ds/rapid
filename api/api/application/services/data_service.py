@@ -314,7 +314,7 @@ class DataService:
                 }
 
             enriched_columns[name] = EnrichedColumn(
-                dtype=column.dtype,
+                data_type=column.data_type,
                 nullable=column.nullable,
                 partition_index=column.partition_index,
                 format=column.format,

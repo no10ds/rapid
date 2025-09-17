@@ -6,11 +6,11 @@ from api.common.config.aws import INFERRED_UNNAMED_COLUMN_PREFIX, MAX_TAG_COUNT
 from api.common.config.constants import (
     TAG_VALUES_REGEX,
     TAG_KEYS_REGEX,
-    COLUMN_NAME_REGEX,
     DATE_FORMAT_REGEX,
+    COLUMN_NAME_REGEX,
 )
 from api.common.custom_exceptions import SchemaValidationError, UnsupportedTypeError
-from api.domain.data_types import AthenaDataType, convert_pandera_column_to_athena, is_date_type
+from api.domain.data_types import AthenaDataType, is_date_type
 from api.domain.schema import Schema
 from api.domain.schema_metadata import UpdateBehaviour, Owner
 
@@ -160,7 +160,6 @@ def has_only_accepted_data_types(schema: Schema):
     data_types = schema.get_data_types()
     try:
         for data_type in data_types:
-            data_type = convert_pandera_column_to_athena(data_type)
             AthenaDataType(data_type)
     except (ValueError, UnsupportedTypeError):
         raise SchemaValidationError(
@@ -170,7 +169,7 @@ def has_only_accepted_data_types(schema: Schema):
 
 def has_valid_date_column_definition(schema: Schema):
     for column in schema.columns.values():
-        if is_date_type(convert_pandera_column_to_athena(column.dtype)) and __has_value_for(column.format):
+        if is_date_type(column.data_type) and __has_value_for(column.format):
             __has_valid_date_format(column.format)
 
 

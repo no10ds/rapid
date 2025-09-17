@@ -696,13 +696,13 @@ class TestDatasetInfo(BaseClientTest):
 
             columns={
                 "colname1": Column(
-                    dtype="string",
+                    data_type="string",
                     nullable=True,
                     partition_index=None,
                     format=None,
                 ),
                 "colname2": Column(
-                    dtype="int",
+                    data_type="int",
                     nullable=True,
                     partition_index=None,
                     format=None,
@@ -740,13 +740,13 @@ class TestDatasetInfo(BaseClientTest):
             ),
             columns={
                 "colname1": Column(
-                    dtype="string",
+                    data_type="string",
                     nullable=True,
                     partition_index=None,
                     format=None,
                 ),
                 "colname2": Column(
-                    dtype="int",
+                    data_type="int",
                     nullable=True,
                     partition_index=None,
                     format=None,

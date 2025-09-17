@@ -46,13 +46,13 @@ class TestCustomChecksJourney(BaseAuthenticatedJourneyTest):
             "columns": {
                 "id": {
                     "partition_index": None,
-                    "dtype": "int",
+                    "data_type": "int",
                     "nullable": False,
                     "unique": True
                 },
                 "value": {
                     "partition_index": None,
-                    "dtype": "float",
+                    "data_type": "float",
                     "nullable": True,
                     "checks": [
                         {
@@ -71,7 +71,7 @@ class TestCustomChecksJourney(BaseAuthenticatedJourneyTest):
                 },
                 "category": {
                     "partition_index": None,
-                    "dtype": "string",
+                    "data_type": "string",
                     "nullable": False,
                     "checks": [
                         {

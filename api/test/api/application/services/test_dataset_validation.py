@@ -10,6 +10,7 @@ from api.application.services.dataset_validation import (
     remove_empty_rows,
     clean_column_headers,
     dataset_has_correct_columns,
+    dataset_has_correct_data_types,
     dataset_has_no_illegal_characters_in_partition_columns,
     dataset_has_rows,
     validate_with_pandera,
@@ -17,6 +18,7 @@ from api.application.services.dataset_validation import (
 )
 from api.common.custom_exceptions import (
     DatasetValidationError,
+    UserError,
     UnprocessableDatasetError,
 )
 from api.domain.schema import Schema, Column
@@ -39,19 +41,19 @@ class TestDatasetValidation:
                 "colname1": Column(
                     name="colname1",
                     partition_index=0,
-                    dtype="int",
+                    data_type="int",
                     nullable=True,
                 ),
                 "colname2": Column(
                     name="colname2",
                     partition_index=None,
-                    dtype="object",
+                    data_type="string",
                     nullable=False,
                 ),
                 "colname3": Column(
                     name="colname3",
                     partition_index=None,
-                    dtype="boolean",
+                    data_type="boolean",
                     nullable=True,
                 ),
             },
@@ -64,25 +66,25 @@ class TestDatasetValidation:
                 "colname1": Column(
                     name="colname1",
                     partition_index=0,
-                    dtype="int64",
+                    data_type="bigint",
                     nullable=True,
                 ),
                 "colname2": Column(
                     name="colname2",
                     partition_index=None,
-                    dtype="object",
+                    data_type="string",
                     nullable=False,
                 ),
                 "colname3": Column(
                     name="colname3",
                     partition_index=None,
-                    dtype="bool",
+                    data_type="boolean",
                     nullable=True,
                 ),
                 "colname4": Column(
                     name="colname4",
                     partition_index=None,
-                    dtype="datetime64[ns]",
+                    data_type="date",
                     format="%d/%m/%Y",
                     nullable=True,
                 ),
@@ -153,13 +155,13 @@ class TestDatasetValidation:
                 "colname1": Column(
                     name="colname1",
                     partition_index=0,
-                    dtype="string",
+                    data_type="int",
                     nullable=True,
                 ),
                 "colname2": Column(
                     name="colname2",
                     partition_index=1,
-                    dtype="string",
+                    data_type="string",
                     nullable=False,
                 ),
             },
@@ -179,7 +181,7 @@ class TestDatasetValidation:
                 "colname1": Column(
                     name="colname1",
                     partition_index=0,
-                    dtype="datetime64[ns]",
+                    data_type="date",
                     format="%d/%m/%Y",
                     nullable=True,
                 ),
@@ -210,7 +212,11 @@ class TestDatasetValidation:
             {"colname1": [1, 2], "colname2": [67.8, 98.2], "colname3": [True, False]}
         )
 
-        with pytest.raises(DatasetValidationError):
+        with pytest.raises(
+            DatasetValidationError,
+            match=r"Column \[colname2\] has an incorrect data type. Expected string, received double",
+            # noqa: E501, W605
+        ):
             build_validated_dataframe(self.valid_schema, dataframe)
 
     @pytest.mark.parametrize(
@@ -234,19 +240,19 @@ class TestDatasetValidation:
                 "col1": Column(
                     name="col1",
                     partition_index=None,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 ),
                 "col2": Column(
                     name="col2",
                     partition_index=None,
-                    dtype="double",
+                    data_type="double",
                     nullable=False,
                 ),
                 "col3": Column(
                     name="col3",
                     partition_index=None,
-                    dtype="string",
+                    data_type="string",
                     nullable=False,
                 ),
             },
@@ -266,19 +272,19 @@ class TestDatasetValidation:
                 "col1": Column(
                     name="col1",
                     partition_index=None,
-                    dtype="int",
+                    data_type="bigint",
                     nullable=True,
                 ),
                 "col2": Column(
                     name="col2",
                     partition_index=None,
-                    dtype="double",
+                    data_type="double",
                     nullable=True,
                 ),
                 "col3": Column(
                     name="col3",
                     partition_index=None,
-                    dtype="object",
+                    data_type="string",
                     nullable=True,
                 ),
             },
@@ -304,20 +310,20 @@ class TestDatasetValidation:
                 "col1": Column(
                     name="col1",
                     partition_index=None,
-                    dtype="datetime64[ns]",
+                    data_type="date",
                     format="%d/%m/%Y",
                     nullable=True,
                 ),
                 "col2": Column(
                     name="col2",
                     partition_index=None,
-                    dtype="double",
+                    data_type="double",
                     nullable=True,
                 ),
                 "col3": Column(
                     name="col3",
                     partition_index=None,
-                    dtype="object",
+                    data_type="string",
                     nullable=True,
                 ),
             },
@@ -343,20 +349,20 @@ class TestDatasetValidation:
                 "col1": Column(
                     name="col1",
                     partition_index=None,
-                    dtype="datetime64[ns]",
+                    data_type="date",
                     format="%d/%m/%Y",
                     nullable=True,
                 ),
                 "col2": Column(
                     name="col2",
                     partition_index=None,
-                    dtype="double",
+                    data_type="double",
                     nullable=True,
                 ),
                 "col3": Column(
                     name="col3",
                     partition_index=None,
-                    dtype="object",
+                    data_type="string",
                     nullable=True,
                 ),
             },
@@ -391,7 +397,7 @@ class TestDatasetValidation:
             schema_column: Column(
                 name=schema_column,
                 partition_index=None,
-                dtype="string",
+                data_type="string",
                 nullable=True,
             )
             for schema_column in schema_columns
@@ -429,19 +435,19 @@ class TestDatasetValidation:
                 "col1": Column(
                     name="col1",
                     partition_index=None,
-                    dtype="object",
+                    data_type="string",
                     nullable=True,
                 ),
                 "col2": Column(
                     name="col2",
                     partition_index=None,
-                    dtype="object",
+                    data_type="string",
                     nullable=False,
                 ),
                 "col3": Column(
                     name="col3",
                     partition_index=None,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 ),
             },
@@ -463,21 +469,21 @@ class TestDatasetValidation:
                 "col1": Column(
                     name="col1",
                     partition_index=None,
-                    dtype="object",
+                    data_type="string",
                     nullable=True,
                     unique=True,
                 ),
                 "col2": Column(
                     name="col2",
                     partition_index=None,
-                    dtype="object",
+                    data_type="string",
                     nullable=False,
                     unique=True,
                 ),
                 "col3": Column(
                     name="col3",
                     partition_index=None,
-                    dtype="object",
+                    data_type="string",
                     nullable=False,
                     unique=True,
                 ),
@@ -505,50 +511,54 @@ class TestDatasetValidation:
                 "col1": Column(
                     name="col1",
                     partition_index=None,
-                    dtype="object",
+                    data_type="string",
                     nullable=True,
                 ),
                 "col2": Column(
                     name="col2",
                     partition_index=None,
-                    dtype="boolean",
+                    data_type="boolean",
                     nullable=False,
                 ),
                 "col3": Column(
                     name="col3",
                     partition_index=None,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 ),
                 "col4": Column(
                     name="col4",
                     partition_index=None,
-                    dtype="int64",
+                    data_type="bigint",
                     nullable=False,
                 ),
                 "col5": Column(
                     name="col5",
                     partition_index=None,
-                    dtype="datetime64[ns]",
+                    data_type="date",
                     nullable=False,
                 ),
                 "col6": Column(
                     name="col6",
                     partition_index=None,
-                    dtype="object",
+                    data_type="string",
                     nullable=True,
                 ),
                 "col7": Column(
                     name="col7",
                     partition_index=None,
-                    dtype="object",
+                    data_type="string",
                     nullable=True,
                 ),
             },
         )
 
-        with pytest.raises(DatasetValidationError):
-            validate_with_pandera(df, schema)
+        data_frame, error_list = dataset_has_correct_data_types(df, schema)
+        assert error_list == [
+            "Column [col2] has an incorrect data type. Expected boolean, received string",
+            "Column [col3] has an incorrect data type. Expected int, received string",
+            "Column [col4] has an incorrect data type. Expected bigint, received string",
+        ]
 
     def test_return_error_message_when_dataset_has_illegal_chars_in_partition_columns(
         self,
@@ -568,31 +578,31 @@ class TestDatasetValidation:
                 "col1": Column(
                     name="col1",
                     partition_index=0,
-                    dtype="string",
+                    data_type="string",
                     nullable=True,
                 ),
                 "col2": Column(
                     name="col2",
                     partition_index=1,
-                    dtype="string",
+                    data_type="string",
                     nullable=False,
                 ),
                 "col3": Column(
                     name="col3",
                     partition_index=2,
-                    dtype="string",
+                    data_type="string",
                     nullable=False,
                 ),
                 "col4": Column(
                     name="col4",
                     partition_index=3,
-                    dtype="datetime64[ns]",
+                    data_type="date",
                     nullable=False,
                 ),
                 "col5": Column(
                     name="col5",
                     partition_index=4,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 ),
             },
@@ -622,38 +632,52 @@ class TestDatasetValidation:
                 "col1": Column(
                     name="col1",
                     partition_index=0,
-                    dtype="object",
+                    data_type="string",
                     nullable=True,
                 ),
                 "col2": Column(
                     name="col2",
                     partition_index=1,
-                    dtype="object",
+                    data_type="string",
                     nullable=False,
                 ),
                 "col3": Column(
                     name="col3",
                     partition_index=None,
-                    dtype="object",
+                    data_type="string",
                     nullable=False,
                 ),
                 "col4": Column(
                     name="col4",
                     partition_index=None,
-                    dtype="datetime64[ns]",
+                    data_type="date",
                     nullable=False,
                 ),
                 "col5": Column(
                     name="col5",
                     partition_index=None,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 ),
             },
         )
 
-        with pytest.raises(DatasetValidationError):
+        try:
             build_validated_dataframe(schema, df)
+        except DatasetValidationError as error:
+            expected_message = """{
+    "SCHEMA": {
+        "SERIES_CONTAINS_NULLS": [
+            {
+                "schema": null,
+                "column": "col3",
+                "check": "not_nullable",
+                "error": "non-nullable series 'col3' contains null values:2    NoneName: col3, dtype: object"
+            }
+        ]
+    }
+}"""
+            assert error.message == [expected_message]
 
 
 class TestDatasetTransformation:
@@ -710,7 +734,7 @@ class TestDatasetTransformation:
                 "date": Column(
                     name="date",
                     partition_index=None,
-                    dtype="datetime64[ns]",
+                    data_type="date",
                     format=date_format,
                     nullable=False,
                 )
@@ -740,14 +764,14 @@ class TestDatasetTransformation:
                 "date1": Column(
                     name="date1",
                     partition_index=None,
-                    dtype="datetime64[ns]",
+                    data_type="date",
                     format="%d/%m/%Y",
                     nullable=False,
                 ),
                 "date2": Column(
                     name="date2",
                     partition_index=None,
-                    dtype="datetime64[ns]",
+                    data_type="date",
                     format="%m-%d-%Y",
                     nullable=False,
                 ),
@@ -781,31 +805,34 @@ class TestDatasetTransformation:
                 "date1": Column(
                     name="date1",
                     partition_index=None,
-                    dtype="datetime64[ns]",
+                    data_type="date",
                     format="%Y-%m-%d",
                     nullable=False,
                 ),
                 "date2": Column(
                     name="date2",
                     partition_index=None,
-                    dtype="datetime64[ns]",
+                    data_type="date",
                     format="%d-%m-%Y",
                     nullable=False,
                 ),
                 "value": Column(
                     name="value",
                     partition_index=None,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 ),
             },
         )
 
         data_frame, error_list = convert_date_columns(data, schema)
-        assert error_list == [
-            "Column [date1] does not match specified date format in at least one row",
-            "Column [date2] does not match specified date format in at least one row",
-        ]
+        try:
+            convert_date_columns(data, schema)
+        except UserError as error:
+            assert error.message == [
+                "Column [date1] does not match specified date format in at least one row",
+                "Column [date2] does not match specified date format in at least one row",
+            ]
 
     def test_removes_null_rows(self):
         data = pd.DataFrame(

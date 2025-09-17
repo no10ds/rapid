@@ -46,7 +46,7 @@ class TestSchemaUpload(BaseClientTest):
             "columns": {
                 "colname1": {
                     "partition_index": None,
-                    "dtype": "int",
+                    "data_type": "int",
                     "nullable": True,
                 }
             }
@@ -127,12 +127,12 @@ class TestSchemaUpload(BaseClientTest):
             "columns": {
                 "colname1": {
                     "partition_index": None,
-                    "dtype": "int",
+                    "data_type": "int",
                     "nullable": True,
                 },
                 "colname2": {
                     "partition_index": 0,
-                    "dtype": "str",
+                    "data_type": "str",
                     "nullable": False,
                 },
             },
@@ -151,12 +151,12 @@ class TestSchemaUpload(BaseClientTest):
             columns={
                 "colname1": Column(
                     partition_index=None,
-                    dtype="int",
+                    data_type="int",
                     nullable=True,
                 ),
                 "colname2": Column(
                     partition_index=0,
-                    dtype="str",
+                    data_type="str",
                     nullable=False,
                 ),
             },
@@ -212,7 +212,7 @@ class TestSchemaUpdate(BaseClientTest):
             "columns": {
                 "colname1": {
                     "partition_index": None,
-                    "dtype": "int",
+                    "data_type": "int",
                     "nullable": True,
                 }
             }
@@ -293,12 +293,12 @@ class TestSchemaUpdate(BaseClientTest):
             "columns": {
                 "colname1": {
                     "partition_index": None,
-                    "dtype": "int",
+                    "data_type": "int",
                     "nullable": True,
                 },
                 "colname2": {
                     "partition_index": 0,
-                    "dtype": "str",
+                    "data_type": "str",
                     "nullable": False,
                 },
             },
@@ -316,12 +316,12 @@ class TestSchemaUpdate(BaseClientTest):
             columns={
                 "colname1": Column(
                     partition_index=None,
-                    dtype="int",
+                    data_type="int",
                     nullable=True,
                 ),
                 "colname2": Column(
                     partition_index=0,
-                    dtype="str",
+                    data_type="str",
                     nullable=False,
                 ),
             },
@@ -368,13 +368,13 @@ class TestSchemaGeneration(BaseClientTest):
             columns={
                 "colname1": Column(
                     partition_index=None,
-                    dtype="string",
+                    data_type="string",
                     nullable=True,
                     format=None,
                 ),
                 "colname2": Column(
                     partition_index=None,
-                    dtype="int",
+                    data_type="int",
                     nullable=True,
                     format=None,
                 ),
@@ -420,13 +420,13 @@ class TestSchemaGeneration(BaseClientTest):
             columns={
                 "colname1": Column(
                     partition_index=None,
-                    dtype="object",
+                    data_type="object",
                     nullable=True,
                     format=None,
                 ),
                 "colname2": Column(
                     partition_index=None,
-                    dtype="Int64",
+                    data_type="Int64",
                     nullable=True,
                     format=None,
                 ),

@@ -107,7 +107,7 @@ class TestS3AdapterUpload:
             columns={
                 "colname2": Column(
                     partition_index=None,
-                    dtype="string",
+                    data_type="string",
                     nullable=True,
                 ),
             },

@@ -56,17 +56,17 @@ class TestPartitioning:
             columns={
                 "col1": Column(
                     partition_index=0,
-                    dtype=column_dtype,
+                    data_type=column_dtype,
                     nullable=False,
                 ),
                 "col2": Column(
                     partition_index=None,
-                    dtype=column_dtype,
+                    data_type=column_dtype,
                     nullable=True,
                 ),
                 "col3": Column(
                     partition_index=1,
-                    dtype=column_dtype,
+                    data_type=column_dtype,
                     nullable=False,
                 ),
             },
@@ -122,12 +122,12 @@ class TestPartitioning:
             columns={
                 "col1": Column(
                     partition_index=0,
-                    dtype=column_dtype,
+                    data_type=column_dtype,
                     nullable=False,
                 ),
                 "col2": Column(
                     partition_index=None,
-                    dtype=column_dtype,
+                    data_type=column_dtype,
                     nullable=True,
                 ),
             },
@@ -161,12 +161,12 @@ class TestPartitioning:
             columns={
                 "col1": Column(
                     partition_index=None,
-                    dtype=column_dtype,
+                    data_type=column_dtype,
                     nullable=False,
                 ),
                 "col2": Column(
                     partition_index=None,
-                    dtype=column_dtype,
+                    data_type=column_dtype,
                     nullable=True,
                 ),
             },

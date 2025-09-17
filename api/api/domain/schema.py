@@ -9,7 +9,6 @@ from pandera.backends.pandas.container import DataFrameSchemaBackend
 from pandera.backends.pandas.components import ColumnBackend
 
 from api.domain.schema_metadata import Owner, SchemaMetadata, UpdateBehaviour
-from api.domain.data_types import convert_pandera_column_to_athena
 from api.common.custom_exceptions import SchemaValidationError
 
 METADATA = "metadata"
@@ -18,7 +17,7 @@ COLUMNS = "columns"
 
 class Column(BaseModel):
     partition_index: Optional[int]
-    dtype: str
+    data_type: str
     nullable: bool
     format: Optional[str] = None
     unique: bool = False
@@ -44,7 +43,6 @@ class Column(BaseModel):
                     raise ValueError(f"Invalid check type: {type(check)}")
 
             self._pandera_column = pandera.Column(
-                dtype=self.dtype,
                 nullable=self.nullable,
                 unique=self.unique,
                 checks=pandera_checks
@@ -53,6 +51,7 @@ class Column(BaseModel):
                 self._pandera_column.metadata = {}
             self._pandera_column.metadata["partition_index"] = self.partition_index
             self._pandera_column.metadata["format"] = self.format
+            self._pandera_column.metadata["data_type"] = self.data_type
         except TypeError:
             raise SchemaValidationError(
                 "You are specifying one or more unaccepted data types",
@@ -93,7 +92,7 @@ class Column(BaseModel):
 
     def is_of_data_type(self, d_type: StrEnum) -> bool:
         dtype_values = [item.value for item in d_type]
-        dtype_str = str(self.dtype)
+        dtype_str = str(self.data_type)
         return dtype_str in dtype_values
 
 
@@ -210,13 +209,13 @@ class Schema(BaseModel):
         return [column.partition_index for name, column in sorted_cols]
 
     def get_data_types(self) -> Set[str]:
-        return {column.dtype for column in self.columns.values()}
+        return {column.data_type for column in self.columns.values()}
 
     def get_columns_by_type(self, d_type: StrEnum) -> List[str]:
         dtype_values = [item.value for item in d_type]
         return [
             name for name, col_def in self.columns.items()
-            if col_def.dtype in dtype_values
+            if col_def.data_type in dtype_values
         ]
 
     def get_column_names_by_type(self, d_type: StrEnum) -> List[str]:
@@ -237,9 +236,7 @@ class Schema(BaseModel):
         ]
 
     def convert_column_to_glue_format(self, name: str, column: Column):
-
-        athena_type = convert_pandera_column_to_athena(column.dtype)
-        return {"Name": name, "Type": athena_type}
+        return {"Name": name, "Type": column.data_type}
 
     def get_partition_columns(self) -> List[tuple[str, Column]]:
         partition_cols = [
@@ -251,7 +248,7 @@ class Schema(BaseModel):
     def generate_storage_schema(self) -> pa.schema:
         return pa.schema(
             [
-                pa.field(name, wr._data_types.athena2pyarrow(convert_pandera_column_to_athena(column.dtype)))
+                pa.field(name, wr._data_types.athena2pyarrow(column.data_type))
                 for name, column in self.columns.items()
             ]
         )

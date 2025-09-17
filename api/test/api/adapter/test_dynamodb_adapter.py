@@ -1014,12 +1014,12 @@ class TestDynamoDBAdapterSchemaTable:
             columns={
                 "colname1": Column(
                     partition_index=0,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 ),
                 "colname2": Column(
                     partition_index=None,
-                    dtype="string",
+                    data_type="string",
                     nullable=True,
                 ),
             },
@@ -1046,7 +1046,7 @@ class TestDynamoDBAdapterSchemaTable:
                 "columns": {
                     "colname1": {
                         "partition_index": 0,
-                        "dtype": "int",
+                        "data_type": "int",
                         "nullable": False,
                         "format": None,
                         "unique": False,
@@ -1054,7 +1054,7 @@ class TestDynamoDBAdapterSchemaTable:
                     },
                     "colname2": {
                         "partition_index": None,
-                        "dtype": "string",
+                        "data_type": "string",
                         "nullable": True,
                         "format": None,
                         "unique": False,

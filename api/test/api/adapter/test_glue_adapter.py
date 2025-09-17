@@ -40,12 +40,12 @@ class TestGlueAdapterTableMethods:
             columns={
                 "colname1": Column(
                     partition_index=0,
-                    dtype="int",
+                    data_type="int",
                     nullable=True,
                 ),
                 "colname2": Column(
                     partition_index=None,
-                    dtype="string",
+                    data_type="string",
                     nullable=False,
                 ),
             },

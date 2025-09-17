@@ -54,12 +54,12 @@ class TestUploadDataset:
             columns={
                 "colname1": Column(
                     partition_index=0,
-                    dtype="int",
+                    data_type="int",
                     nullable=True,
                 ),
                 "colname2": Column(
                     partition_index=None,
-                    dtype="string",
+                    data_type="string",
                     nullable=False,
                 ),
             },
@@ -398,12 +398,12 @@ class TestUploadDataset:
             columns={
                 "colname1": Column(
                     partition_index=0,
-                    dtype="int",
+                    data_type="int",
                     nullable=True,
                 ),
                 "colname2": Column(
                     partition_index=None,
-                    dtype="string",
+                    data_type="string",
                     nullable=False,
                 ),
             },
@@ -572,18 +572,18 @@ class TestDatasetInfoRetrieval:
             columns={
                 "colname1": Column(
                     partition_index=0,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 ),
                 "colname2": Column(
                     partition_index=None,
-                    dtype="string",
+                    data_type="string",
                     nullable=True,
                 ),
                 "date": Column(
                     name="date",
                     partition_index=None,
-                    dtype="datetime64[ns]",
+                    data_type="date",
                     nullable=False,
                     format="%d/%m/%Y",
                 ),
@@ -638,19 +638,19 @@ class TestDatasetInfoRetrieval:
                 "colname1": EnrichedColumn(
                     name="colname1",
                     partition_index=0,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 ),
                 "colname2": EnrichedColumn(
                     name="colname2",
                     partition_index=None,
-                    dtype="string",
+                    data_type="string",
                     nullable=True,
                 ),
                 "date": EnrichedColumn(
                     name="date",
                     partition_index=None,
-                    dtype="datetime64[ns]",
+                    data_type="date",
                     nullable=False,
                     format="%d/%m/%Y",
                     statistics={"max": "2021-07-01", "min": "2014-01-01"},
@@ -693,18 +693,18 @@ class TestDatasetInfoRetrieval:
             columns={
                 "colname1": Column(
                     partition_index=0,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 ),
                 "date": Column(
                     partition_index=None,
-                    dtype="datetime64[ns]",
+                    data_type="date",
                     nullable=False,
                     format="%d/%m/%Y",
                 ),
                 "date2": Column(
                     partition_index=None,
-                    dtype="datetime64[ns]",
+                    data_type="date",
                     nullable=False,
                     format="%d/%m/%Y",
                 ),
@@ -725,19 +725,19 @@ class TestDatasetInfoRetrieval:
             columns={
                 "colname1": EnrichedColumn(
                     partition_index=0,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 ),
                 "date": EnrichedColumn(
                     partition_index=None,
-                    dtype="datetime64[ns]",
+                    data_type="date",
                     nullable=False,
                     format="%d/%m/%Y",
                     statistics={"max": "2021-07-01", "min": "2014-01-01"},
                 ),
                 "date2": EnrichedColumn(
                     partition_index=None,
-                    dtype="datetime64[ns]",
+                    data_type="date",
                     nullable=False,
                     format="%d/%m/%Y",
                     statistics={"max": "2020-07-01", "min": "2015-01-01"},
@@ -788,7 +788,7 @@ class TestDatasetInfoRetrieval:
             columns={
                 "colname1": Column(
                     partition_index=0,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 ),
             },
@@ -808,7 +808,7 @@ class TestDatasetInfoRetrieval:
             columns={
                 "colname1": EnrichedColumn(
                     partition_index=0,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 ),
             },

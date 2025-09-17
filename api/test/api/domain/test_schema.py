@@ -22,17 +22,17 @@ class TestSchema:
             columns={
                 "colname1": Column(
                     partition_index=1,
-                    dtype="int",
+                    data_type="int",
                     nullable=True,
                 ),
                 "colname2": Column(
                     partition_index=0,
-                    dtype="string",
+                    data_type="string",
                     nullable=False,
                 ),
                 "colname3": Column(
                     partition_index=None,
-                    dtype="boolean",
+                    data_type="boolean",
                     nullable=False,
                 ),
             },
@@ -72,13 +72,13 @@ class TestSchema:
             ("colname2",
              Column(
                  partition_index=0,
-                 dtype="string",
+                 data_type="string",
                  nullable=False,
                  format=None,
              )),
             ("colname1", Column(
                 partition_index=1,
-                dtype="int",
+                data_type="int",
                 nullable=True,
                 format=None,
             )),

@@ -28,17 +28,17 @@ class TestSchemaValidation:
             columns={
                 "colname1": Column(
                     partition_index=0,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 ),
                 "colname2": Column(
                     partition_index=None,
-                    dtype="string",
+                    data_type="string",
                     nullable=False,
                 ),
                 "colname3": Column(
                     partition_index=None,
-                    dtype="boolean",
+                    data_type="boolean",
                     nullable=False,
                 ),
             },
@@ -85,7 +85,7 @@ class TestSchemaValidation:
             columns={
                 "colname1": Column(
                     partition_index=None,
-                    dtype="int",
+                    data_type="int",
                     nullable=True,
                 )
             },
@@ -107,7 +107,7 @@ class TestSchemaValidation:
             columns={
                 "colname1": Column(
                     partition_index=None,
-                    dtype="int",
+                    data_type="int",
                     nullable=True,
                 )
             },
@@ -129,7 +129,7 @@ class TestSchemaValidation:
             columns={
                 "": Column(
                     partition_index=None,
-                    dtype="string",
+                    data_type="string",
                     nullable=False,
                 )
             },
@@ -150,7 +150,7 @@ class TestSchemaValidation:
             columns={
                 "unnamed_1": Column(
                     partition_index=None,
-                    dtype="string",
+                    data_type="string",
                     nullable=False,
                 )
             },
@@ -172,12 +172,12 @@ class TestSchemaValidation:
     #         columns={
     #             "colname1": Column(
     #                 partition_index=0,
-    #                 dtype="int",
+    #                 data_type="int",
     #                 nullable=False,
     #             ),
     #             "colname1": Column(
     #                 partition_index=None,
-    #                 dtype="string",
+    #                 data_type="string",
     #                 nullable=True,
     #             ),
     #         },
@@ -199,12 +199,12 @@ class TestSchemaValidation:
                 columns={
                     "colname1": Column(
                         partition_index=0,
-                        dtype="int",
+                        data_type="int",
                         nullable=False,
                     ),
                     "colname2": Column(
                         partition_index=None,
-                        dtype="string",
+                        data_type="string",
                         nullable=True,
                     ),
                 },
@@ -222,12 +222,12 @@ class TestSchemaValidation:
                 columns={
                     "colname1": Column(
                         partition_index=0,
-                        dtype="int",
+                        data_type="int",
                         nullable=False,
                     ),
                     "colname2": Column(
                         partition_index=None,
-                        dtype="string",
+                        data_type="string",
                         nullable=True,
                     ),
                 },
@@ -245,7 +245,7 @@ class TestSchemaValidation:
             columns={
                 "colname1": Column(
                     partition_index=None,
-                    dtype="string",
+                    data_type="string",
                     nullable=True,
                 )
             },
@@ -281,7 +281,7 @@ class TestSchemaValidation:
             columns={
                 col_name: Column(
                     partition_index=0,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 )
             },
@@ -302,12 +302,12 @@ class TestSchemaValidation:
             columns={
                 "colname1": Column(
                     partition_index=0,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 ),
                 "colname2": Column(
                     partition_index=0,
-                    dtype="string",
+                    data_type="string",
                     nullable=False,
                 ),
             },
@@ -328,12 +328,12 @@ class TestSchemaValidation:
             columns={
                 "colname1": Column(
                     partition_index=-1,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 ),
                 "colname2": Column(
                     partition_index=0,
-                    dtype="string",
+                    data_type="string",
                     nullable=False,
                 ),
             },
@@ -356,17 +356,17 @@ class TestSchemaValidation:
             columns={
                 "colname1": Column(
                     partition_index=2,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 ),
                 "colname2": Column(
                     partition_index=0,
-                    dtype="string",
+                    data_type="string",
                     nullable=False,
                 ),
                 "colname3": Column(
                     partition_index=None,
-                    dtype="string",
+                    data_type="string",
                     nullable=True,
                 ),
             },
@@ -388,12 +388,12 @@ class TestSchemaValidation:
             columns={
                 "colname1": Column(
                     partition_index=1,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 ),
                 "colname2": Column(
                     partition_index=0,
-                    dtype="string",
+                    data_type="string",
                     nullable=False,
                 ),
             },
@@ -414,17 +414,17 @@ class TestSchemaValidation:
             columns={
                 "colname1": Column(
                     partition_index=1,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 ),
                 "colname2": Column(
                     partition_index=0,
-                    dtype="string",
+                    data_type="string",
                     nullable=True,
                 ),
                 "colname3": Column(
                     partition_index=None,
-                    dtype="string",
+                    data_type="string",
                     nullable=True,
                 ),
             },
@@ -434,18 +434,15 @@ class TestSchemaValidation:
         )
 
     @pytest.mark.parametrize(
-        "dtype",
+        "data_type",
         [
             "number",
             "something",
             "else",
         ],
     )
-    def test_is_invalid_schema_when_has_not_accepted_dtypes(self, dtype: str):
-
-        message_pattern = "You are specifying one or more unaccepted data types"
-        with pytest.raises(SchemaValidationError, match=message_pattern):
-            Schema(
+    def test_is_invalid_schema_when_has_not_accepted_data_types(self, data_type: str):
+        invalid_schema=Schema(
                 metadata=SchemaMetadata(
                     layer="raw",
                     domain="test_domain",
@@ -456,21 +453,24 @@ class TestSchemaValidation:
                 columns={
                     "colname1": Column(
                         partition_index=None,
-                        dtype=dtype,
+                        data_type=data_type,
                         nullable=False,
                     )
                 },
             )
+        self._assert_validate_schema_raises_error(
+            invalid_schema, "You are specifying one or more unaccepted data types"
+        )
 
     # @pytest.mark.parametrize(
-    #     "dtype",
+    #     "data_type",
     #     [
-    #         "object",
+    #         "string",
     #         # TODO Pandera: This is supported now?
     #         # "datetime",
     #     ],
     # )
-    # def test_is_invalid_schema_when_has_not_accepted_athena_dtypes(self, dtype: str):
+    # def test_is_invalid_schema_when_has_not_accepted_athena_dtypes(self, data_type: str):
     #     invalid_schema = Schema(
     #         dataset_metadata=DatasetMetadata(
     #             layer="raw",
@@ -482,7 +482,7 @@ class TestSchemaValidation:
     #         columns={
     #             "colname1": Column(
     #                 partition_index=None,
-    #                 dtype=dtype,
+    #                 data_type=data_type,
     #                 nullable=False,
     #             )
     #         },
@@ -504,7 +504,7 @@ class TestSchemaValidation:
             columns={
                 "colname1": Column(
                     partition_index=None,
-                    dtype="datetime64[ns]",
+                    data_type="date",
                     nullable=True,
                     format=None,
                 ),
@@ -543,7 +543,7 @@ class TestSchemaValidation:
             columns={
                 "colname1": Column(
                     partition_index=None,
-                    dtype="datetime64[ns]",
+                    data_type="date",
                     nullable=True,
                     format=date_format,
                 ),
@@ -586,7 +586,7 @@ class TestSchemaValidation:
             columns={
                 "colname1": Column(
                     partition_index=None,
-                    dtype="datetime64[ns]",
+                    data_type="date",
                     nullable=True,
                     format=date_format,
                 ),
@@ -618,7 +618,7 @@ class TestSchemaValidation:
 
                     partition_index=None,
 
-                    dtype="string",
+                    data_type="string",
 
                     nullable=True,
 
@@ -661,7 +661,7 @@ class TestSchemaValidation:
 
                     partition_index=None,
 
-                    dtype="string",
+                    data_type="string",
 
                     nullable=True,
 
@@ -695,7 +695,7 @@ class TestSchemaValidation:
 
                     partition_index=None,
 
-                    dtype="string",
+                    data_type="string",
 
                     nullable=True,
 
@@ -738,7 +738,7 @@ class TestSchemaValidation:
 
                     partition_index=None,
 
-                    dtype="string",
+                    data_type="string",
 
                     nullable=True,
 
@@ -769,7 +769,7 @@ class TestSchemaValidation:
 
                     partition_index=None,
 
-                    dtype="string",
+                    data_type="string",
 
                     nullable=True,
 
@@ -801,7 +801,7 @@ class TestSchemaValidation:
 
                     partition_index=None,
 
-                    dtype="string",
+                    data_type="string",
 
                     nullable=True,
 
@@ -860,7 +860,7 @@ class TestSchemaValidation:
 
                     partition_index=None,
 
-                    dtype="string",
+                    data_type="string",
 
                     nullable=True,
 
@@ -909,7 +909,7 @@ class TestSchemaValidation:
 
                     partition_index=None,
 
-                    dtype="string",
+                    data_type="string",
 
                     nullable=True,
 
@@ -947,7 +947,7 @@ class TestSchemaValidation:
 
                     partition_index=None,
 
-                    dtype="string",
+                    data_type="string",
 
                     nullable=True,
 
@@ -977,7 +977,7 @@ class TestSchemaValidation:
 
                     partition_index=None,
 
-                    dtype="string",
+                    data_type="string",
 
                     nullable=True,
 
@@ -1039,17 +1039,17 @@ class TestSchemaValidation:
             columns={
                 "colname1": Column(
                     partition_index=0,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 ),
                 "colname2": Column(
                     partition_index=None,
-                    dtype="string",
+                    data_type="string",
                     nullable=True,
                 ),
                 "colname3": Column(
                     partition_index=None,
-                    dtype="boolean",
+                    data_type="boolean",
                     nullable=False,
                 ),
             },
@@ -1075,19 +1075,19 @@ class TestSchemaValidation:
                 "colname1": Column(
 
                     partition_index=0,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 ),
                 "colname2": Column(
 
                     partition_index=None,
-                    dtype="string",
+                    data_type="string",
                     nullable=True,
                 ),
                 "colname3": Column(
 
                     partition_index=None,
-                    dtype="boolean",
+                    data_type="boolean",
                     nullable=False,
                 ),
             },
@@ -1117,17 +1117,17 @@ class TestSchemaValidation:
             columns={
                 "colname1": Column(
                     partition_index=0,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 ),
                 "colname2": Column(
                     partition_index=None,
-                    dtype="string",
+                    data_type="string",
                     nullable=True,
                 ),
                 "colname3": Column(
                     partition_index=None,
-                    dtype="boolean",
+                    data_type="boolean",
                     nullable=False,
                 ),
             },
@@ -1160,19 +1160,19 @@ class TestSchemaValidation:
                 "colname1": Column(
 
                     partition_index=0,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                 ),
                 "colname2": Column(
 
                     partition_index=None,
-                    dtype="string",
+                    data_type="string",
                     nullable=False,
                 ),
                 "colname3": Column(
 
                     partition_index=None,
-                    dtype="boolean",
+                    data_type="boolean",
                     nullable=False,
                 ),
             },
@@ -1195,14 +1195,14 @@ class TestSchemaValidation:
                 "colname1": Column(
 
                     partition_index=0,
-                    dtype="int",
+                    data_type="int",
                     nullable=False,
                     unique=True,
                 ),
                 "colname2": Column(
 
                     partition_index=None,
-                    dtype="string",
+                    data_type="string",
                     nullable=False,
                     unique=False,
                 ),

@@ -2,7 +2,6 @@ from typing import Any, Dict
 from pathlib import Path
 
 import pandas as pd
-import pandera.pandas as pandera
 
 from api.application.services.schema_validation import validate_schema
 from api.common.config.layers import Layer
@@ -13,7 +12,8 @@ from api.common.data_handlers import (
     get_dataframe_from_chunk_type,
 )
 from api.common.value_transformers import clean_column_name
-from api.domain.data_types import is_date_type
+
+from api.domain.data_types import extract_athena_types, is_date_type
 from api.domain.schema import Column, Schema
 from api.domain.schema_metadata import Owner, SchemaMetadata
 
@@ -30,8 +30,7 @@ class SchemaInferService:
         file_path: Path,
     ) -> dict[str, Any]:
         dataframe = self._construct_single_chunk_dataframe(file_path)
-        pandera_schema = pandera.infer_schema(dataframe)
-        customized_columns = self._customize_inferred_columns(pandera_schema.columns)
+        columns = self._infer_columns(dataframe)
         schema = Schema(
             metadata=SchemaMetadata(
                 layer=layer,
@@ -40,7 +39,7 @@ class SchemaInferService:
                 sensitivity=sensitivity,
                 owners=[Owner(name="change_me", email="change_me@email.com")],
             ),
-            columns=customized_columns,
+            columns=columns,
         )
         try:
             validate_schema(schema)
@@ -51,17 +50,15 @@ class SchemaInferService:
 
         return schema.dict(exclude={"metadata": {"version"}})
 
-    def _customize_inferred_columns(self, inferred_columns: Dict[str, pandera.Column]) -> Dict[str, Column]:
+    def _infer_columns(self, dataframe) -> Dict[str, Column]:
         customized = {}
 
-        for name, pandera_column in inferred_columns.items():
-            clean_name = clean_column_name(name)
-
-            customized[clean_name] = Column(
-                dtype=str(pandera_column.dtype),
+        for name, _type in extract_athena_types(dataframe).items():
+            customized[clean_column_name(name)] = Column(
+                data_type=_type,
                 nullable=True,
                 unique=False,
-                format=DEFAULT_DATE_FORMAT if is_date_type(pandera_column.dtype) else None,
+                format=DEFAULT_DATE_FORMAT if is_date_type(_type) else None,
                 partition_index=None,
             )
 
