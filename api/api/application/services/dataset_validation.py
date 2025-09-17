@@ -29,7 +29,6 @@ def transform_and_validate(schema: Schema, data: pd.DataFrame) -> pd.DataFrame:
         .pipe(clean_column_headers)
         .pipe(dataset_has_correct_columns, schema)
         .pipe(convert_date_columns, schema)
-        .pipe(convert_nullable_columns, schema)
         .pipe(validate_with_pandera, schema)
         .pipe(dataset_has_no_illegal_characters_in_partition_columns, schema)
     )
@@ -90,43 +89,10 @@ def convert_date_columns(
             data_frame[column_name] = pd.to_datetime(
                 data_frame[column_name], format=column.format
             )
-            if column_name in schema._pandera_schema.columns:
-                schema._pandera_schema.columns[column_name].dtype = "datetime64[ns]"
         except ValueError:
             error_list.append(
                 f"Column [{column_name}] does not match specified date format in at least one row"
             )
-
-    return data_frame, error_list
-
-
-def convert_nullable_columns(
-    data_frame: pd.DataFrame, schema: Schema
-) -> Tuple[pd.DataFrame, list[str]]:
-    error_list = []
-
-    # Process all columns that are nullable
-    for column_name, column in schema.columns.items():
-        if column.nullable and column_name in data_frame.columns:
-            try:
-                # Handle different data types
-                if column.is_of_data_type(BooleanType):
-                    data_frame[column_name] = data_frame[column_name].astype(pd.BooleanDtype())
-                    if column_name in schema._pandera_schema.columns:
-                        schema._pandera_schema.columns[column_name].dtype = pd.BooleanDtype()
-                elif column.is_of_data_type(NumericType):
-                    if column.dtype in ["int", "int8", "int16", "int32", "int64", "integer", "tinyint", "smallint", "bigint"]:
-                        data_frame[column_name] = data_frame[column_name].astype(pd.Int64Dtype())
-                        if column_name in schema._pandera_schema.columns:
-                            schema._pandera_schema.columns[column_name].dtype = pd.Int64Dtype()
-                    elif column.dtype in ["float", "float16", "float32", "float64", "double", "decimal"]:
-                        data_frame[column_name] = data_frame[column_name].astype(pd.Float64Dtype())
-                        if column_name in schema._pandera_schema.columns:
-                            schema._pandera_schema.columns[column_name].dtype = pd.Float64Dtype()
-            except (ValueError, TypeError) as e:
-                error_list.append(
-                    f"Column [{column_name}] could not be converted to {column.dtype} type: {str(e)}"
-                )
 
     return data_frame, error_list
 

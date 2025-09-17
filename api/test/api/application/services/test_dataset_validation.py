@@ -82,7 +82,7 @@ class TestDatasetValidation:
                 "colname4": Column(
                     name="colname4",
                     partition_index=None,
-                    dtype="date",
+                    dtype="datetime64[ns]",
                     format="%d/%m/%Y",
                     nullable=True,
                 ),
@@ -179,7 +179,7 @@ class TestDatasetValidation:
                 "colname1": Column(
                     name="colname1",
                     partition_index=0,
-                    dtype="date",
+                    dtype="datetime64[ns]",
                     format="%d/%m/%Y",
                     nullable=True,
                 ),
@@ -304,7 +304,7 @@ class TestDatasetValidation:
                 "col1": Column(
                     name="col1",
                     partition_index=None,
-                    dtype="date",
+                    dtype="datetime64[ns]",
                     format="%d/%m/%Y",
                     nullable=True,
                 ),
@@ -343,7 +343,7 @@ class TestDatasetValidation:
                 "col1": Column(
                     name="col1",
                     partition_index=None,
-                    dtype="date",
+                    dtype="datetime64[ns]",
                     format="%d/%m/%Y",
                     nullable=True,
                 ),
@@ -529,7 +529,7 @@ class TestDatasetValidation:
                 "col5": Column(
                     name="col5",
                     partition_index=None,
-                    dtype="date",
+                    dtype="datetime64[ns]",
                     nullable=False,
                 ),
                 "col6": Column(
@@ -586,7 +586,7 @@ class TestDatasetValidation:
                 "col4": Column(
                     name="col4",
                     partition_index=3,
-                    dtype="date",
+                    dtype="datetime64[ns]",
                     nullable=False,
                 ),
                 "col5": Column(
@@ -640,7 +640,7 @@ class TestDatasetValidation:
                 "col4": Column(
                     name="col4",
                     partition_index=None,
-                    dtype="date",
+                    dtype="datetime64[ns]",
                     nullable=False,
                 ),
                 "col5": Column(
@@ -710,7 +710,7 @@ class TestDatasetTransformation:
                 "date": Column(
                     name="date",
                     partition_index=None,
-                    dtype="date",
+                    dtype="datetime64[ns]",
                     format=date_format,
                     nullable=False,
                 )
@@ -740,14 +740,14 @@ class TestDatasetTransformation:
                 "date1": Column(
                     name="date1",
                     partition_index=None,
-                    dtype="date",
+                    dtype="datetime64[ns]",
                     format="%d/%m/%Y",
                     nullable=False,
                 ),
                 "date2": Column(
                     name="date2",
                     partition_index=None,
-                    dtype="date",
+                    dtype="datetime64[ns]",
                     format="%m-%d-%Y",
                     nullable=False,
                 ),
@@ -781,14 +781,14 @@ class TestDatasetTransformation:
                 "date1": Column(
                     name="date1",
                     partition_index=None,
-                    dtype="date",
+                    dtype="datetime64[ns]",
                     format="%Y-%m-%d",
                     nullable=False,
                 ),
                 "date2": Column(
                     name="date2",
                     partition_index=None,
-                    dtype="date",
+                    dtype="datetime64[ns]",
                     format="%d-%m-%Y",
                     nullable=False,
                 ),

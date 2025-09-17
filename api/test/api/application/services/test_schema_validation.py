@@ -504,7 +504,7 @@ class TestSchemaValidation:
             columns={
                 "colname1": Column(
                     partition_index=None,
-                    dtype="date",
+                    dtype="datetime64[ns]",
                     nullable=True,
                     format=None,
                 ),
@@ -543,7 +543,7 @@ class TestSchemaValidation:
             columns={
                 "colname1": Column(
                     partition_index=None,
-                    dtype="date",
+                    dtype="datetime64[ns]",
                     nullable=True,
                     format=date_format,
                 ),
@@ -586,7 +586,7 @@ class TestSchemaValidation:
             columns={
                 "colname1": Column(
                     partition_index=None,
-                    dtype="date",
+                    dtype="datetime64[ns]",
                     nullable=True,
                     format=date_format,
                 ),

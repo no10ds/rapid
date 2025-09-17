@@ -176,8 +176,6 @@ class DynamoDBAdapter(DatabaseAdapter):
 
             metadata_dict = schema.metadata.dict()
 
-            if 'layer' in metadata_dict:
-                metadata_dict['layer'] = metadata_dict['layer'].value
             columns_dict = {}
             for name, col in schema.columns.items():
                 col_dict = dict(col)
