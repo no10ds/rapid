@@ -4,9 +4,8 @@ from pydantic import BaseModel
 
 import awswrangler as wr
 import pyarrow as pa
-import pandera.pandas as pandera
-from pandera.backends.pandas.container import DataFrameSchemaBackend
-from pandera.backends.pandas.components import ColumnBackend
+import pandera as pandera
+
 
 from api.domain.schema_metadata import Owner, SchemaMetadata, UpdateBehaviour
 from api.common.custom_exceptions import SchemaValidationError
@@ -15,10 +14,11 @@ METADATA = "metadata"
 COLUMNS = "columns"
 
 
-class Column(BaseModel):
+class Column(BaseModel, pandera.Column):
     partition_index: Optional[int]
     data_type: str
     nullable: bool
+    name: Optional[str] = None
     format: Optional[str] = None
     unique: bool = False
     checks: List[Union[Dict[str, Any], pandera.Check]] = []
@@ -28,39 +28,28 @@ class Column(BaseModel):
 
     def __init__(self, **data):
         super().__init__(**data)
-        try:
-            pandera_checks = []
+        
+        pandera_checks = []
+        for check in self.checks:
+            if isinstance(check, dict):
+                pandera_check = self._dict_to_pandera_check(check)
+                pandera_checks.append(pandera_check)
+            elif isinstance(check, pandera.Check):
+                pandera_checks.append(check)
+            elif check is not None:
+                raise ValueError(f"Invalid check type: {type(check)}")
+        
+        pandera.Column.__init__(
+            self,
+            name=self.name,
+            nullable=self.nullable,
+            unique=self.unique,
+            checks=pandera_checks,
+        )
 
-            for i, check in enumerate(self.checks):
-                if isinstance(check, dict):
-                    pandera_check = self._dict_to_pandera_check(check)
-                    pandera_checks.append(pandera_check)
-                elif isinstance(check, pandera.Check):
-                    pandera_checks.append(check)
-                elif check is None:
-                    continue
-                else:
-                    raise ValueError(f"Invalid check type: {type(check)}")
-
-            self._pandera_column = pandera.Column(
-                nullable=self.nullable,
-                unique=self.unique,
-                checks=pandera_checks
-            )
-            if self._pandera_column.metadata is None:
-                self._pandera_column.metadata = {}
-            self._pandera_column.metadata["partition_index"] = self.partition_index
-            self._pandera_column.metadata["format"] = self.format
-            self._pandera_column.metadata["data_type"] = self.data_type
-        except TypeError:
-            raise SchemaValidationError(
-                "You are specifying one or more unaccepted data types",
-            )
-
-    @classmethod
-    def get_backend(cls, check_obj=None, check_type=None):
-        """Override to use the standard ColumnBackend"""
-        return ColumnBackend()
+        self.metadata["partition_index"] = self.partition_index
+        self.metadata["format"] = self.format
+        self.metadata["data_type"] = self.data_type  
 
     def _dict_to_pandera_check(self, check_dict: Dict[str, Any]) -> pandera.Check:
         """Convert dictionary representation to Pandera check"""
@@ -96,77 +85,23 @@ class Column(BaseModel):
         return dtype_str in dtype_values
 
 
-class Schema(BaseModel):
+class Schema(BaseModel, pandera.DataFrameSchema):
     metadata: SchemaMetadata
     columns: Dict[str, Column]
 
     class Config:
         arbitrary_types_allowed = True
 
-    def __init__(self, **data):
-        super().__init__(**data)
-
-        metadata = self.metadata
-
-        if isinstance(metadata, SchemaMetadata):
-            self._metadata = metadata
-        else:
-            self._metadata = SchemaMetadata(
-                layer=metadata.get("layer"),
-                domain=metadata.get("domain"),
-                dataset=metadata.get("dataset"),
-                version=metadata.get("version"),
-                sensitivity=metadata.get("sensitivity", ""),
-                description=metadata.get("description", ""),
-                key_value_tags=metadata.get("key_value_tags", {}),
-                key_only_tags=metadata.get("key_only_tags", []),
-                owners=[Owner(**owner) for owner in metadata.get("owners", [])] if metadata.get("owners") else None,
-                update_behaviour=metadata.get("update_behaviour", UpdateBehaviour.APPEND),
-                is_latest_version=metadata.get("is_latest_version", True),
-            )
-
-        pandera_metadata = {
-            "layer": self._metadata.layer,
-            "domain": self._metadata.domain,
-            "dataset": self._metadata.dataset,
-            "version": self._metadata.version,
-            "sensitivity": self._metadata.sensitivity,
-            "description": self._metadata.description,
-            "key_value_tags": self._metadata.key_value_tags,
-            "key_only_tags": self._metadata.key_only_tags,
-            "owners": self._metadata.owners,
-            "update_behaviour": self._metadata.update_behaviour,
-            "is_latest_version": self._metadata.is_latest_version,
-        }
-
-        pandera_columns = {}
-        for name, column in self.columns.items():
-            pandera_columns[name] = column._pandera_column
-
-        self._pandera_schema = pandera.DataFrameSchema(
-            columns=pandera_columns,
-            metadata=pandera_metadata
-        )
-
-    @classmethod
-    def get_backend(cls, check_obj=None, check_type=None):
-        if check_obj is not None:
-            check_obj_cls = type(check_obj)
-        elif check_type is not None:
-            check_obj_cls = check_type
-        else:
-            raise ValueError("Must pass in one of `check_obj` or `check_type`.")
-
-        cls.register_default_backends(check_obj_cls)
-        return DataFrameSchemaBackend()
-
-    def validate(self, df, **kwargs):
-        return self._pandera_schema.validate(df, **kwargs)
-
-    @property
-    def pandera_metadata(self):
-        return self._pandera_schema.metadata
-
+    
+    def pandera_validate(self, df, **kwargs):
+        pandera_schema = pandera.DataFrameSchema(metadata=self.metadata, columns=self.columns)
+        return pandera_schema.validate(df, **kwargs)
+    
+    def model_dump(self, **kwargs):
+        data = super().model_dump(**kwargs)
+        data.pop('BACKEND_REGISTRY', None)  # Remove password from all dumps
+        return data
+    
     def get_layer(self) -> str:
         return self.metadata.get_layer()
 

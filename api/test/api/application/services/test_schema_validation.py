@@ -1003,7 +1003,7 @@ class TestSchemaValidation:
 
         schema_has_valid_tag_set(valid_schema)
 
-        assert valid_schema.dict(exclude="columns") == result_dict
+        assert valid_schema.model_dump(exclude="columns") == result_dict
 
     def test_is_valid_when_schema_for_upload_has_valid_owners_email_address(self):
         try:

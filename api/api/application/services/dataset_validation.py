@@ -74,7 +74,7 @@ def validate_with_pandera(
     data_frame: pd.DataFrame, schema: Schema
 ) -> Tuple[pd.DataFrame, list[str]]:
     try:
-        validated_df = schema.validate(data_frame, lazy=True)
+        validated_df = schema.pandera_validate(data_frame, lazy=True)
         return validated_df, []
     except Exception as e:
         error_str = str(e)
