@@ -8,13 +8,13 @@ import pandera as pandera
 
 
 from api.domain.schema_metadata import Owner, SchemaMetadata, UpdateBehaviour
-from api.common.custom_exceptions import SchemaValidationError
+
 
 METADATA = "metadata"
 COLUMNS = "columns"
 
 
-class Column(BaseModel, pandera.Column):
+class Column(BaseModel):
     partition_index: Optional[int]
     data_type: str
     nullable: bool
@@ -23,33 +23,19 @@ class Column(BaseModel, pandera.Column):
     unique: bool = False
     checks: List[Union[Dict[str, Any], pandera.Check]] = []
 
+
+
     class Config:
         arbitrary_types_allowed = True
 
-    # def __init__(self, **data):
-        # super().__init__(**data)
-        
-        # pandera_checks = []
-        # for check in self.checks:
-        #     if isinstance(check, dict):
-        #         pandera_check = self._dict_to_pandera_check(check)
-        #         pandera_checks.append(pandera_check)
-        #     elif isinstance(check, pandera.Check):
-        #         pandera_checks.append(check)
-        #     elif check is not None:
-        #         raise ValueError(f"Invalid check type: {type(check)}")
-        
-        # pandera.Column.__init__(
-        #     self,
-        #     name=self.name,
-        #     nullable=self.nullable,
-        #     unique=self.unique,
-        #     checks=pandera_checks,
-        # )
-
-        # self.metadata["partition_index"] = self.partition_index
-        # self.metadata["format"] = self.format
-        # self.metadata["data_type"] = self.data_type  
+    def to_pandera_column(self) -> pandera.Column:
+        # TODO: I think this is missing some args
+        return pandera.Column(
+            name=self.name,
+            nullable=self.nullable,
+            unique=self.unique,
+            checks=self.checks,
+        )
 
     def _dict_to_pandera_check(self, check_dict: Dict[str, Any]) -> pandera.Check:
         """Convert dictionary representation to Pandera check"""
@@ -85,16 +71,19 @@ class Column(BaseModel, pandera.Column):
         return dtype_str in dtype_values
 
 
-class Schema(BaseModel, pandera.DataFrameSchema):
+class Schema(BaseModel):
     metadata: SchemaMetadata
     columns: Dict[str, Column]
 
     class Config:
         arbitrary_types_allowed = True
-
     
     def pandera_validate(self, df, **kwargs):
-        pandera_schema = pandera.DataFrameSchema(metadata=self.metadata, columns=self.columns)
+        pandera_columns = {
+            name: col.to_pandera_column() 
+            for name, col in self.columns.items()
+        }
+        pandera_schema = pandera.DataFrameSchema(metadata=self.metadata, columns=pandera_columns)
         return pandera_schema.validate(df, **kwargs)
     
     def model_dump(self, **kwargs):

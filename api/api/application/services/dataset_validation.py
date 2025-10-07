@@ -2,7 +2,6 @@ from typing import Tuple
 
 import pandas as pd
 from pandas import Timestamp
-import pandera.pandas as pandera
 
 from api.common.custom_exceptions import (
     DatasetValidationError,
