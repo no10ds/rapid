@@ -49,7 +49,7 @@ class SchemaService:
         return self._parse_schema(schema_dict)
 
     def _parse_schema(self, schema: dict, only_metadata: bool = False):
-        metadata = SchemaMetadata.model_validate(schema)
+        metadata = SchemaMetadata.parse_obj(schema)
 
         if only_metadata:
             return metadata

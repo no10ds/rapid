@@ -48,7 +48,7 @@ class SchemaInferService:
             # regardless of the schema validation was successful or not
             delete_incoming_raw_file(schema, file_path)
 
-        return schema.dict(exclude={"metadata": {"version"}})
+        return schema.model_dump(exclude={"metadata": {"version"}})
 
     def _infer_columns(self, dataframe) -> Dict[str, Column]:
         customized = {}

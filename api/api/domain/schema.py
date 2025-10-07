@@ -26,30 +26,30 @@ class Column(BaseModel, pandera.Column):
     class Config:
         arbitrary_types_allowed = True
 
-    def __init__(self, **data):
-        super().__init__(**data)
+    # def __init__(self, **data):
+        # super().__init__(**data)
         
-        pandera_checks = []
-        for check in self.checks:
-            if isinstance(check, dict):
-                pandera_check = self._dict_to_pandera_check(check)
-                pandera_checks.append(pandera_check)
-            elif isinstance(check, pandera.Check):
-                pandera_checks.append(check)
-            elif check is not None:
-                raise ValueError(f"Invalid check type: {type(check)}")
+        # pandera_checks = []
+        # for check in self.checks:
+        #     if isinstance(check, dict):
+        #         pandera_check = self._dict_to_pandera_check(check)
+        #         pandera_checks.append(pandera_check)
+        #     elif isinstance(check, pandera.Check):
+        #         pandera_checks.append(check)
+        #     elif check is not None:
+        #         raise ValueError(f"Invalid check type: {type(check)}")
         
-        pandera.Column.__init__(
-            self,
-            name=self.name,
-            nullable=self.nullable,
-            unique=self.unique,
-            checks=pandera_checks,
-        )
+        # pandera.Column.__init__(
+        #     self,
+        #     name=self.name,
+        #     nullable=self.nullable,
+        #     unique=self.unique,
+        #     checks=pandera_checks,
+        # )
 
-        self.metadata["partition_index"] = self.partition_index
-        self.metadata["format"] = self.format
-        self.metadata["data_type"] = self.data_type  
+        # self.metadata["partition_index"] = self.partition_index
+        # self.metadata["format"] = self.format
+        # self.metadata["data_type"] = self.data_type  
 
     def _dict_to_pandera_check(self, check_dict: Dict[str, Any]) -> pandera.Check:
         """Convert dictionary representation to Pandera check"""
@@ -99,7 +99,13 @@ class Schema(BaseModel, pandera.DataFrameSchema):
     
     def model_dump(self, **kwargs):
         data = super().model_dump(**kwargs)
-        data.pop('BACKEND_REGISTRY', None)  # Remove password from all dumps
+        data.pop('BACKEND_REGISTRY', None)
+        
+        if 'columns' in data:
+            for column_name, column_data in data['columns'].items():
+                if isinstance(column_data, dict):
+                    column_data.pop('BACKEND_REGISTRY', None)
+        
         return data
     
     def get_layer(self) -> str:
