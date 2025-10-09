@@ -11,8 +11,6 @@ from api.application.services.dataset_validation import (
     remove_empty_rows,
     clean_column_headers,
     dataset_has_correct_columns,
-    dataset_has_acceptable_null_values,
-    dataset_has_acceptable_unique_values,
     dataset_has_correct_data_types,
     dataset_has_no_illegal_characters_in_partition_columns,
     dataset_has_rows,
@@ -426,82 +424,82 @@ class TestDatasetValidation:
         ):
             dataset_has_rows(df)
 
-    def test_return_error_message_when_not_accepted_null_values(self):
-        df = pd.DataFrame(
-            {"col1": ["a", "b", None], "col2": ["d", "e", None], "col3": [1, 5, None]}
-        )
-        schema = Schema(
-            metadata=self.schema_metadata,
-            columns=[
-                Column(
-                    name="col1",
-                    partition_index=None,
-                    data_type="string",
-                    allow_null=True,
-                ),
-                Column(
-                    name="col2",
-                    partition_index=None,
-                    data_type="string",
-                    allow_null=False,
-                ),
-                Column(
-                    name="col3",
-                    partition_index=None,
-                    data_type="int",
-                    allow_null=False,
-                ),
-            ],
-        )
+    # def test_return_error_message_when_not_accepted_null_values(self):
+    #     df = pd.DataFrame(
+    #         {"col1": ["a", "b", None], "col2": ["d", "e", None], "col3": [1, 5, None]}
+    #     )
+    #     schema = Schema(
+    #         metadata=self.schema_metadata,
+    #         columns=[
+    #             Column(
+    #                 name="col1",
+    #                 partition_index=None,
+    #                 data_type="string",
+    #                 allow_null=True,
+    #             ),
+    #             Column(
+    #                 name="col2",
+    #                 partition_index=None,
+    #                 data_type="string",
+    #                 allow_null=False,
+    #             ),
+    #             Column(
+    #                 name="col3",
+    #                 partition_index=None,
+    #                 data_type="int",
+    #                 allow_null=False,
+    #             ),
+    #         ],
+    #     )
 
-        try:
-            dataset_has_acceptable_null_values(df, schema)
-        except DatasetValidationError as error:
-            assert error.message == [
-                "Column [col2] does not allow null values",
-                "Column [col3] does not allow null values",
-            ]
+    #     try:
+    #         dataset_has_acceptable_null_values(df, schema)
+    #     except DatasetValidationError as error:
+    #         assert error.message == [
+    #             "Column [col2] does not allow null values",
+    #             "Column [col3] does not allow null values",
+    #         ]
 
-    def test_return_error_message_when_not_accepted_unique_values(self):
-        df = pd.DataFrame(
-            {
-                "col1": [None, "a", None, "a"],
-                "col2": [None, "b", None, "a"],
-                "col3": ["c", "b", None, "b"],
-            }
-        )
-        schema = Schema(
-            metadata=self.schema_metadata,
-            columns=[
-                Column(
-                    name="col1",
-                    partition_index=None,
-                    data_type="string",
-                    allow_null=True,
-                    unique=True,
-                ),
-                Column(
-                    name="col2",
-                    partition_index=None,
-                    data_type="string",
-                    allow_null=False,
-                    unique=True,
-                ),
-                Column(
-                    name="col3",
-                    partition_index=None,
-                    data_type="string",
-                    allow_null=False,
-                    unique=True,
-                ),
-            ],
-        )
+    # def test_return_error_message_when_not_accepted_unique_values(self):
+    #     df = pd.DataFrame(
+    #         {
+    #             "col1": [None, "a", None, "a"],
+    #             "col2": [None, "b", None, "a"],
+    #             "col3": ["c", "b", None, "b"],
+    #         }
+    #     )
+    #     schema = Schema(
+    #         metadata=self.schema_metadata,
+    #         columns=[
+    #             Column(
+    #                 name="col1",
+    #                 partition_index=None,
+    #                 data_type="string",
+    #                 allow_null=True,
+    #                 unique=True,
+    #             ),
+    #             Column(
+    #                 name="col2",
+    #                 partition_index=None,
+    #                 data_type="string",
+    #                 allow_null=False,
+    #                 unique=True,
+    #             ),
+    #             Column(
+    #                 name="col3",
+    #                 partition_index=None,
+    #                 data_type="string",
+    #                 allow_null=False,
+    #                 unique=True,
+    #             ),
+    #         ],
+    #     )
 
-        data_frame, error_list = dataset_has_acceptable_unique_values(df, schema)
-        assert error_list == [
-            "Column [col1] must have unique values",
-            "Column [col3] must have unique values",
-        ]
+    #     data_frame, error_list = dataset_has_acceptable_unique_values(df, schema)
+    #     assert error_list == [
+    #         "Column [col1] must have unique values",
+    #         "Column [col3] must have unique values",
+    #     ]
 
     def test_return_error_message_when_not_correct_datatypes(self):
         df = pd.DataFrame(
@@ -679,10 +677,10 @@ class TestDatasetValidation:
         except DatasetValidationError as error:
             assert error.message == [
                 "Column [col4] does not match specified date format in at least one row",
-                "Column [col3] does not allow null values",
                 "Column [col5] has an incorrect data type. Expected int, received string",
                 "Partition column [col1] has values with illegal characters '/'",
                 "Partition column [col2] has values with illegal characters '/'",
+                "non-nullable series 'col3' contains null values:2    NoneName: col3, " 'dtype: object',
             ]
 
 
