@@ -174,7 +174,7 @@ class DynamoDBAdapter(DatabaseAdapter):
                 f"Storing schema for {schema.metadata.string_representation()}"
             )
 
-            metadata_dict = schema.metadata.dict()
+            metadata_dict = schema.metadata.model_dump()
 
             columns_dict = {}
             for name, col in schema.columns.items():

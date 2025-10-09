@@ -29,12 +29,25 @@ class Column(BaseModel):
         arbitrary_types_allowed = True
 
     def to_pandera_column(self) -> pandera.Column:
-        # TODO: I think this is missing some args
+        """
+        Convert Column to Pandera Column for Pandera data validation.
+
+        Note: The 'data_type' attribute should not be used in Pandera Column as we
+        have our own custom data type validation.
+        """
+
+        pandera_checks = []
+        for check in self.checks:
+            if isinstance(check, dict):
+                pandera_checks.append(self._dict_to_pandera_check(check))
+            else:
+                pandera_checks.append(check)
+        
         return pandera.Column(
             name=self.name,
             nullable=self.nullable,
             unique=self.unique,
-            checks=self.checks,
+            checks=pandera_checks,
         )
 
     def _dict_to_pandera_check(self, check_dict: Dict[str, Any]) -> pandera.Check:
@@ -85,17 +98,6 @@ class Schema(BaseModel):
         }
         pandera_schema = pandera.DataFrameSchema(metadata=self.metadata, columns=pandera_columns)
         return pandera_schema.validate(df, **kwargs)
-    
-    def model_dump(self, **kwargs):
-        data = super().model_dump(**kwargs)
-        data.pop('BACKEND_REGISTRY', None)
-        
-        if 'columns' in data:
-            for column_name, column_data in data['columns'].items():
-                if isinstance(column_data, dict):
-                    column_data.pop('BACKEND_REGISTRY', None)
-        
-        return data
     
     def get_layer(self) -> str:
         return self.metadata.get_layer()

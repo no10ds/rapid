@@ -1045,6 +1045,7 @@ class TestDynamoDBAdapterSchemaTable:
                 "is_latest_version": True,
                 "columns": {
                     "colname1": {
+                        "name": "colname1",
                         "partition_index": 0,
                         "data_type": "int",
                         "nullable": False,
@@ -1053,6 +1054,7 @@ class TestDynamoDBAdapterSchemaTable:
                         "checks": []
                     },
                     "colname2": {
+                        "name": "colname2",
                         "partition_index": None,
                         "data_type": "string",
                         "nullable": True,

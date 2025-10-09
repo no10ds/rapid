@@ -636,19 +636,16 @@ class TestDatasetInfoRetrieval:
             ),
             columns={
                 "colname1": EnrichedColumn(
-                    name="colname1",
                     partition_index=0,
                     data_type="int",
                     nullable=False,
                 ),
                 "colname2": EnrichedColumn(
-                    name="colname2",
                     partition_index=None,
                     data_type="string",
                     nullable=True,
                 ),
                 "date": EnrichedColumn(
-                    name="date",
                     partition_index=None,
                     data_type="date",
                     nullable=False,
