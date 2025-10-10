@@ -50,8 +50,6 @@ class Column(BaseModel):
         check_type = check_dict.get("check_type")
         params = check_dict.get("parameters", {})
 
-        print("here")
-
         if check_type == "in_range":
             min_val = params.get("min_value")
             max_val = params.get("max_value")
