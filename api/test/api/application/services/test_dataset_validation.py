@@ -425,7 +425,6 @@ class TestDatasetValidation:
         ):
             dataset_has_rows(df)
 
-
     def test_return_error_message_when_not_validated_with_pandera(self):
         df = pd.DataFrame(
             {

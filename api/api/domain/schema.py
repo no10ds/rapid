@@ -23,7 +23,7 @@ class Column(BaseModel):
 
     def is_of_data_type(self, d_type: StrEnum) -> bool:
         return self.data_type in list(d_type)
-    
+
     def to_pandera_column(self) -> pandera.Column:
         """
         Convert Column to Pandera Column for Pandera data validation.
@@ -161,10 +161,10 @@ class Schema(BaseModel):
                 for column in self.columns
             ]
         )
-    
+
     def pandera_validate(self, df, **kwargs):
         pandera_columns = {
-            col.name: col.to_pandera_column() 
+            col.name: col.to_pandera_column()
             for col in self.columns
         }
         pandera_schema = pandera.DataFrameSchema(metadata=self.metadata, columns=pandera_columns)

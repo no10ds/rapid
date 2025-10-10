@@ -182,4 +182,3 @@ def validate_with_pandera(
     except pandera.errors.SchemaErrors as exc:
         error_list.append(str(exc))
         return data_frame, error_list
-    
