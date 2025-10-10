@@ -32,7 +32,7 @@ class Column(BaseModel):
         """
 
         pandera_checks = []
-        for check in self.checks:
+        for check in self.checks.values():
             if isinstance(check, dict):
                 pandera_checks.append(self._dict_to_pandera_check(check))
             else:

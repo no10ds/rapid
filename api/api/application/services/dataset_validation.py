@@ -175,10 +175,11 @@ def is_valid_custom_dtype(actual_type: str, expected_type: str) -> bool:
 def validate_with_pandera(
     data_frame: pd.DataFrame, schema: Schema
 ) -> Tuple[pd.DataFrame, list[str]]:
+    error_list = []
     try:
         validated_df = schema.pandera_validate(data_frame, lazy=True)
         return validated_df, []
     except pandera.errors.SchemaErrors as exc:
-        return data_frame, [str(exc)]
-        raise DatasetValidationError(str(exc))
+        error_list.append(str(exc))
+        return data_frame, error_list
     

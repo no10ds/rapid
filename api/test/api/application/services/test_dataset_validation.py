@@ -14,6 +14,7 @@ from api.application.services.dataset_validation import (
     dataset_has_correct_data_types,
     dataset_has_no_illegal_characters_in_partition_columns,
     dataset_has_rows,
+    validate_with_pandera
 )
 from api.common.custom_exceptions import (
     DatasetValidationError,
@@ -424,82 +425,90 @@ class TestDatasetValidation:
         ):
             dataset_has_rows(df)
 
-    # def test_return_error_message_when_not_accepted_null_values(self):
-    #     df = pd.DataFrame(
-    #         {"col1": ["a", "b", None], "col2": ["d", "e", None], "col3": [1, 5, None]}
-    #     )
-    #     schema = Schema(
-    #         metadata=self.schema_metadata,
-    #         columns=[
-    #             Column(
-    #                 name="col1",
-    #                 partition_index=None,
-    #                 data_type="string",
-    #                 allow_null=True,
-    #             ),
-    #             Column(
-    #                 name="col2",
-    #                 partition_index=None,
-    #                 data_type="string",
-    #                 allow_null=False,
-    #             ),
-    #             Column(
-    #                 name="col3",
-    #                 partition_index=None,
-    #                 data_type="int",
-    #                 allow_null=False,
-    #             ),
-    #         ],
-    #     )
 
-    #     try:
-    #         dataset_has_acceptable_null_values(df, schema)
-    #     except DatasetValidationError as error:
-    #         assert error.message == [
-    #             "Column [col2] does not allow null values",
-    #             "Column [col3] does not allow null values",
-    #         ]
+    def test_return_error_message_when_not_validated_with_pandera(self):
+        df = pd.DataFrame(
+            {
+                "col1": [None, "a", None, "a"],
+                "col2": [None, "b", None, "a"],
+                "col3": ["c", "b", None, "b"],
+            }
+        )
+        schema = Schema(
+            metadata=self.schema_metadata,
+            columns=[
+                Column(
+                    name="col1",
+                    partition_index=None,
+                    data_type="string",
+                    allow_null=True,
+                    unique=True,
+                ),
+                Column(
+                    name="col2",
+                    partition_index=None,
+                    data_type="string",
+                    allow_null=False,
+                    unique=True,
+                ),
+                Column(
+                    name="col3",
+                    partition_index=None,
+                    data_type="string",
+                    allow_null=False,
+                    unique=True,
+                ),
+            ],
+        )
 
-    # def test_return_error_message_when_not_accepted_unique_values(self):
-    #     df = pd.DataFrame(
-    #         {
-    #             "col1": [None, "a", None, "a"],
-    #             "col2": [None, "b", None, "a"],
-    #             "col3": ["c", "b", None, "b"],
-    #         }
-    #     )
-    #     schema = Schema(
-    #         metadata=self.schema_metadata,
-    #         columns=[
-    #             Column(
-    #                 name="col1",
-    #                 partition_index=None,
-    #                 data_type="string",
-    #                 allow_null=True,
-    #                 unique=True,
-    #             ),
-    #             Column(
-    #                 name="col2",
-    #                 partition_index=None,
-    #                 data_type="string",
-    #                 allow_null=False,
-    #                 unique=True,
-    #             ),
-    #             Column(
-    #                 name="col3",
-    #                 partition_index=None,
-    #                 data_type="string",
-    #                 allow_null=False,
-    #                 unique=True,
-    #             ),
-    #         ],
-    #     )
-
-    #     data_frame, error_list = dataset_has_acceptable_unique_values(df, schema)
-    #     assert error_list == [
-    #         "Column [col1] must have unique values",
-    #         "Column [col3] must have unique values",
-    #     ]
+        data_frame, error_list = validate_with_pandera(df, schema)
+        assert error_list == [
+            '{\n'
+            '    "DATA": {\n'
+            '        "SERIES_CONTAINS_DUPLICATES": [\n'
+            '            {\n'
+            '                "schema": null,\n'
+            '                "column": "col1",\n'
+            '                "check": "field_uniqueness",\n'
+            '                "error": "series \'col1\' contains duplicate values:0    '
+            'None1       a2    None3       aName: col1, dtype: object"\n'
+            '            },\n'
+            '            {\n'
+            '                "schema": null,\n'
+            '                "column": "col2",\n'
+            '                "check": "field_uniqueness",\n'
+            '                "error": "series \'col2\' contains duplicate values:0    '
+            'None2    NoneName: col2, dtype: object"\n'
+            '            },\n'
+            '            {\n'
+            '                "schema": null,\n'
+            '                "column": "col3",\n'
+            '                "check": "field_uniqueness",\n'
+            '                "error": "series \'col3\' contains duplicate values:1    '
+            'b3    bName: col3, dtype: object"\n'
+            '            }\n'
+            '        ]\n'
+            '    },\n'
+            '    "SCHEMA": {\n'
+            '        "SERIES_CONTAINS_NULLS": [\n'
+            '            {\n'
+            '                "schema": null,\n'
+            '                "column": "col2",\n'
+            '                "check": "not_nullable",\n'
+            '                "error": "non-nullable series \'col2\' contains null '
+            'values:0    None2    NoneName: col2, dtype: object"\n'
+            '            },\n'
+            '            {\n'
+            '                "schema": null,\n'
+            '                "column": "col3",\n'
+            '                "check": "not_nullable",\n'
+            '                "error": "non-nullable series \'col3\' contains null '
+            'values:2    NoneName: col3, dtype: object"\n'
+            '            }\n'
+            '        ]\n'
+            '    }\n'
+            '}',
+        ]
 
     def test_return_error_message_when_not_correct_datatypes(self):
         df = pd.DataFrame(
@@ -680,7 +689,19 @@ class TestDatasetValidation:
                 "Column [col5] has an incorrect data type. Expected int, received string",
                 "Partition column [col1] has values with illegal characters '/'",
                 "Partition column [col2] has values with illegal characters '/'",
-                "non-nullable series 'col3' contains null values:2    NoneName: col3, " 'dtype: object',
+                '{\n'
+                '    "SCHEMA": {\n'
+                '        "SERIES_CONTAINS_NULLS": [\n'
+                '            {\n'
+                '                "schema": null,\n'
+                '                "column": "col3",\n'
+                '                "check": "not_nullable",\n'
+                '                "error": "non-nullable series \'col3\' contains null '
+                'values:2    NoneName: col3, dtype: object"\n'
+                '            }\n'
+                '        ]\n'
+                '    }\n'
+                '}',
             ]
 
 
