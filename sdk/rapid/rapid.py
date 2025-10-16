@@ -49,7 +49,7 @@ class Rapid:
     def generate_headers(self, is_file: bool = False) -> Dict:
         return {
             "Authorization": f"Bearer {self.auth.fetch_token()}",
-            **({} if is_file else {"Content-Type": "application/json"})
+            **({} if is_file else {"Content-Type": "application/json"}),
         }
 
     def list_datasets(self):

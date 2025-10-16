@@ -26,6 +26,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "rapid_athena_query_results_buc
   rule {
     id = "expiry_config"
 
+    filter {
+      prefix = ""
+    }
+
     expiration {
       days = 30
     }
