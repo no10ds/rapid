@@ -115,6 +115,12 @@ variable "cognito_ses_authentication" {
   default     = false
 }
 
+variable "ses_domain_identity_arn" {
+  type        = string
+  description = "The ARN of the SES domain identity to use for Cognito email sending"
+  default     = ""
+} 
+
 variable "ses_email_notifications" {
   type        = list(string)
   description = "List of email addresses that will receive SES notifications when an email results in a bounce or complaint response from the server"
