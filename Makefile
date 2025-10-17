@@ -202,8 +202,8 @@ sdk/test:			## Run sdk unit tests
 sdk/clean:		## Clean the environment, removing the previous build
 	@cd sdk/; rm -rf ./dist
 
-sdk/build:	sdk/clean		## Re-builds the sdk package
-	@cd sdk/; .venv/bin/activate; python setup.py sdist
+sdk/build:	sdk/setup sdk/clean		## Re-builds the sdk package
+	@cd sdk/; . .venv/bin/activate; python setup.py sdist
 
 sdk/release-test:	sdk/build	## Build and release sdk to testpypi
 	@cd sdk/; . .venv/bin/activate; twine upload --repository testpypi dist/*

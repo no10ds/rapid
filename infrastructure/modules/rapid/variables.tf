@@ -109,6 +109,30 @@ variable "password_policy" {
   }
 }
 
+variable "cognito_ses_authentication" {
+  type        = bool
+  description = "Configure Cognito user pool to send emails with SES instead of SNS. If you choose SNS make sure you moved it from sandbox to production environment."
+  default     = false
+}
+
+variable "ses_domain_identity_arn" {
+  type        = string
+  description = "The ARN of the SES domain identity to use for Cognito email sending"
+  default     = ""
+} 
+
+variable "ses_email_notifications" {
+  type        = list(string)
+  description = "List of email addresses that will receive SES notifications when an email results in a bounce or complaint response from the server"
+  default     = null
+}
+
+variable "ses_allowed_from_emails" {
+  type        = list(string)
+  description = "List of email domains that SES can use to issue emails in AWS account"
+  default     = null
+}
+
 variable "public_subnet_ids_list" {
   type        = list(string)
   description = "A list of public subnets from the VPC config"
