@@ -118,9 +118,10 @@ variable "ses_domain_identity_arn" {
   type        = string
   description = "The ARN of the SES domain identity to use for sending emails from Cognito"
   default     = ""
+}
 
-  validation {
-    condition     = var.cognito_ses_authentication == false
-    error_message = "When you enable SES with cognito you need to provide a valid SES domain identity ARN"
-  }
+variable "ses_email_domain" {
+  type        = string
+  description = "The domain to use for the SES email 'from' address (e.g., no-reply@<domain>). Defaults to domain_name if not specified."
+  default     = ""
 }
