@@ -5,6 +5,7 @@ pytest
 python-dotenv
 requests
 requests-mock
+setuptools
 twine
 pydantic
 pyarrow
