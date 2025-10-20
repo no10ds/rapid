@@ -1,4 +1,5 @@
 from typing import List
+import logging
 
 from pandas import DataFrame
 
@@ -8,6 +9,8 @@ from api.domain.search_metadata import SearchMetadata, MatchField
 from api.domain.dataset_metadata import DatasetMetadata, LAYER, DOMAIN, DATASET, VERSION
 from api.domain.schema_metadata import DESCRIPTION
 from api.domain.schema import COLUMNS
+
+logger = logging.getLogger()
 
 MATCHING_DATA = "matching_data"
 MATCHING_FIELD = "matching_field"
@@ -88,12 +91,19 @@ class SearchService:
 
         # Transforms
         df[index_col] = df.index
+
+        # Debug: Check what data type we're getting in Columns
+        exploded_df = df.explode(MatchField.Columns)
+        if not exploded_df.empty:
+            sample_col = exploded_df[MatchField.Columns].iloc[0]
+            logger.info(f"Column data type: {type(sample_col)}, sample value: {sample_col}")
+
         transformed_df = (
-            df.explode(MatchField.Columns)
+            exploded_df
             .assign(
                 **{
                     column_names: lambda x: x[MatchField.Columns].apply(
-                        lambda col: col["name"]
+                        lambda col: col["name"] if isinstance(col, dict) else col
                     ),
                     is_matching: lambda x: x[column_names].str.contains(
                         search_term, case=False
@@ -106,6 +116,8 @@ class SearchService:
             .reset_index(name=MATCHING_DATA)
             .assign(**{MATCHING_FIELD: MatchField.Columns})
         )
+
+        logger.info(f"Found {len(transformed_df)} column matches for search term '{search_term}'")
         return df.merge(transformed_df, how="inner", on=index_col)[self.output_columns]
 
     def convert_dataframe_to_search_metadata(
