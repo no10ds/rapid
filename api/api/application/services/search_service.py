@@ -1,5 +1,4 @@
 from typing import List
-import logging
 
 from pandas import DataFrame
 
@@ -9,8 +8,6 @@ from api.domain.search_metadata import SearchMetadata, MatchField
 from api.domain.dataset_metadata import DatasetMetadata, LAYER, DOMAIN, DATASET, VERSION
 from api.domain.schema_metadata import DESCRIPTION
 from api.domain.schema import COLUMNS
-
-logger = logging.getLogger()
 
 MATCHING_DATA = "matching_data"
 MATCHING_FIELD = "matching_field"
@@ -91,44 +88,12 @@ class SearchService:
 
         # Transforms
         df[index_col] = df.index
-
-        # Debug: Log the raw Columns data before explode
-        logger.info(f"=== DEBUG: Analyzing Columns data for search term '{search_term}' ===")
-        if not df.empty:
-            logger.info(f"DataFrame has {len(df)} rows before explode")
-            for idx, row in df.head(3).iterrows():
-                col_data = row.get(MatchField.Columns)
-                logger.info(f"Row {idx} - Columns type: {type(col_data)}, length: {len(col_data) if col_data else 0}")
-                logger.info(f"Row {idx} - Columns value: {col_data}")
-
-        # Debug: Check what data type we're getting in Columns after explode
-        exploded_df = df.explode(MatchField.Columns)
-        logger.info(f"DataFrame has {len(exploded_df)} rows after explode")
-
-        if not exploded_df.empty:
-            # Sample multiple rows to see variety
-            sample_size = min(5, len(exploded_df))
-            logger.info(f"Examining {sample_size} sample rows after explode:")
-
-            for i in range(sample_size):
-                sample_col = exploded_df[MatchField.Columns].iloc[i]
-                logger.info(f"Sample {i + 1} - Type: {type(sample_col).__name__}")
-                logger.info(f"Sample {i + 1} - Value: {sample_col}")
-
-                if isinstance(sample_col, dict):
-                    logger.info(f"Sample {i + 1} - Dict keys: {list(sample_col.keys())}")
-                    logger.info(f"Sample {i + 1} - Dict full content: {sample_col}")
-                elif isinstance(sample_col, str):
-                    logger.info(f"Sample {i + 1} - String length: {len(sample_col)}")
-                else:
-                    logger.info(f"Sample {i + 1} - Unexpected type, repr: {repr(sample_col)}")
-
         transformed_df = (
-            exploded_df
+            df.explode(MatchField.Columns)
             .assign(
                 **{
                     column_names: lambda x: x[MatchField.Columns].apply(
-                        lambda col: col["name"] if isinstance(col, dict) else col
+                        lambda col: col["name"]
                     ),
                     is_matching: lambda x: x[column_names].str.contains(
                         search_term, case=False
@@ -141,9 +106,6 @@ class SearchService:
             .reset_index(name=MATCHING_DATA)
             .assign(**{MATCHING_FIELD: MatchField.Columns})
         )
-
-        logger.info(f"Found {len(transformed_df)} column matches for search term '{search_term}'")
-        logger.info("=== END DEBUG ===")
         return df.merge(transformed_df, how="inner", on=index_col)[self.output_columns]
 
     def convert_dataframe_to_search_metadata(
