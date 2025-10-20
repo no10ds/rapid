@@ -112,16 +112,16 @@ class SearchService:
 
             for i in range(sample_size):
                 sample_col = exploded_df[MatchField.Columns].iloc[i]
-                logger.info(f"Sample {i+1} - Type: {type(sample_col).__name__}")
-                logger.info(f"Sample {i+1} - Value: {sample_col}")
+                logger.info(f"Sample {i + 1} - Type: {type(sample_col).__name__}")
+                logger.info(f"Sample {i + 1} - Value: {sample_col}")
 
                 if isinstance(sample_col, dict):
-                    logger.info(f"Sample {i+1} - Dict keys: {list(sample_col.keys())}")
-                    logger.info(f"Sample {i+1} - Dict full content: {sample_col}")
+                    logger.info(f"Sample {i + 1} - Dict keys: {list(sample_col.keys())}")
+                    logger.info(f"Sample {i + 1} - Dict full content: {sample_col}")
                 elif isinstance(sample_col, str):
-                    logger.info(f"Sample {i+1} - String length: {len(sample_col)}")
+                    logger.info(f"Sample {i + 1} - String length: {len(sample_col)}")
                 else:
-                    logger.info(f"Sample {i+1} - Unexpected type, repr: {repr(sample_col)}")
+                    logger.info(f"Sample {i + 1} - Unexpected type, repr: {repr(sample_col)}")
 
         transformed_df = (
             exploded_df
@@ -143,7 +143,7 @@ class SearchService:
         )
 
         logger.info(f"Found {len(transformed_df)} column matches for search term '{search_term}'")
-        logger.info(f"=== END DEBUG ===")
+        logger.info("=== END DEBUG ===")
         return df.merge(transformed_df, how="inner", on=index_col)[self.output_columns]
 
     def convert_dataframe_to_search_metadata(
