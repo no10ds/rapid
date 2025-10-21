@@ -6,10 +6,19 @@ import { makeAPIRequest, generateRapidAuthToken, domain } from './utils'
 const user = `${process.env.E2E_RESOURCE_PREFIX}_ui_test_user`
 
 test('test', async ({ page }) => {
+  console.log('[TEST] Starting test')
+  console.log('[TEST] About to navigate to:', domain)
+
+  // Check cookies at start of test
+  const cookies = await page.context().cookies()
+  console.log('[TEST] Number of cookies loaded:', cookies.length)
+  console.log('[TEST] Cookie domains:', [...new Set(cookies.map(c => c.domain))])
+
   await page.goto(domain)
+  console.log('[TEST] Navigated to domain, current URL:', page.url())
 
   // Modify user to have data admin permissions
-  https: await page.locator('div[role="button"]:has-text("Modify User")').click()
+  await page.locator('div[role="button"]:has-text("Modify User")').click()
   await expect(page).toHaveURL(`${domain}/subject/modify`)
   await page.locator('[data-testid="field-user"]').selectOption({ label: user })
   await page.locator('[data-testid="submit-button"]').click()
