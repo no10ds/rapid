@@ -33,7 +33,10 @@ jobs:
           npx playwright install
 
       - name: Run playwright tests
-        run: make ui/test-e2e
+        run: |
+          # Export AWS credentials to env for e2e tests
+          eval "$(aws configure export-credentials --format env)"
+          make ui/test-e2e
         env:
           E2E_DOMAIN_NAME: ${{ secrets.E2E_DOMAIN_NAME }}
           E2E_RESOURCE_PREFIX: ${{ secrets.E2E_RESOURCE_PREFIX }}
