@@ -1,7 +1,8 @@
 import { test as setup, expect } from '@playwright/test'
 import { domain, getSecretValue } from './utils'
+import path from 'path'
 
-const authFile = 'playwright/.auth/user.json'
+const authFile = path.join(__dirname, '.auth/user.json')
 const secretName = `${process.env.E2E_RESOURCE_PREFIX}_UI_TEST_USER`
 
 setup('authenticate', async ({ page }) => {
