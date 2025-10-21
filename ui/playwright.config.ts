@@ -4,6 +4,8 @@ import path from 'path'
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') })
 
+const authFile = path.join(__dirname, 'playwright/.auth/user.json')
+
 export default defineConfig({
   projects: [
     // Setup project
@@ -13,7 +15,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         // Use prepared auth state.
-        storageState: 'playwright/.auth/user.json'
+        storageState: authFile
       },
       dependencies: ['setup']
     }
