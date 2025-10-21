@@ -4,14 +4,6 @@ import path from 'path'
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') })
 
-const authFile = 'playwright/.auth/user.json'
-const resolvedAuthPath = path.resolve(authFile)
-
-console.log('[PLAYWRIGHT CONFIG] Auth file path:', authFile)
-console.log('[PLAYWRIGHT CONFIG] Resolved path:', resolvedAuthPath)
-console.log('[PLAYWRIGHT CONFIG] Current working directory:', process.cwd())
-console.log('[PLAYWRIGHT CONFIG] Config file location:', __dirname)
-
 export default defineConfig({
   projects: [
     // Setup project
@@ -21,7 +13,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         // Use prepared auth state.
-        storageState: authFile
+        storageState: 'playwright/.auth/user.json'
       },
       dependencies: ['setup']
     }
