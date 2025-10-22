@@ -1,5 +1,19 @@
 # API Changelog
 
+## v7.13.0 - _2025-10-17_
+
+See [v7.13.0] changes
+
+### Features
+
+- Added optional SES (Simple Email Service) configuration for Cognito user pools, allowing custom email addresses for authentication emails instead of using the default Cognito email system
+- New infrastructure variables to configure SES with Cognito:
+  - `cognito_ses_authentication`: Enable/disable SES for Cognito emails (default: false)
+  - `ses_domain_identity_arn`: ARN of the SES domain identity to use
+  - `ses_email_domain`: Domain for the SES email 'from' address
+  - `ses_email_notifications`: Email addresses for bounce/complaint notifications
+  - `ses_allowed_from_emails`: List of allowed email domains for SES
+
 ## v7.12.0 - _2025-05-19_
 
 - Enhancement of E2E tests in rAPId. Should cover most endpoints now.
