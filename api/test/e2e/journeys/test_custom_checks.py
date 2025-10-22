@@ -1,7 +1,6 @@
 from http import HTTPStatus
 
 import requests
-import pytest
 from test.e2e.journeys.base_journey import (
     BaseAuthenticatedJourneyTest,
 )
@@ -9,7 +8,7 @@ from test.e2e.journeys.base_journey import (
 
 class TestCustomChecksJourney(BaseAuthenticatedJourneyTest):
     dataset = None
-    
+
     # CSV file names for custom checks testing
     valid_csv_filename = "test_journey_file_custom_checks_valid.csv"
     invalid_csv_filename = "test_journey_file_custom_checks_invalid.csv"
@@ -90,7 +89,7 @@ class TestCustomChecksJourney(BaseAuthenticatedJourneyTest):
         )
 
         assert query_response.status_code == HTTPStatus.OK
-        
+
         # Verify the data structure
         data = query_response.json()
         assert len(data) == 2  # We uploaded 2 rows
@@ -111,10 +110,10 @@ class TestCustomChecksJourney(BaseAuthenticatedJourneyTest):
         )
 
         assert response.status_code == HTTPStatus.OK
-        
+
         info = response.json()
         assert "columns" in info
-        
+
         # Check that custom checks are present in the schema
         year_column = next((col for col in info["columns"] if col["name"] == "year"), None)
         assert year_column is not None
