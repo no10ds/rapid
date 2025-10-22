@@ -9,7 +9,7 @@ test('test', async ({ page }) => {
   await page.goto(domain)
 
   // Modify user to have data admin permissions
-  https: await page.locator('div[role="button"]:has-text("Modify User")').click()
+  await page.locator('div[role="button"]:has-text("Modify User")').click()
   await expect(page).toHaveURL(`${domain}/subject/modify`)
   await page.locator('[data-testid="field-user"]').selectOption({ label: user })
   await page.locator('[data-testid="submit-button"]').click()
