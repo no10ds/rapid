@@ -1,3 +1,4 @@
+import re
 from typing import Tuple
 
 import pandas as pd
@@ -173,6 +174,45 @@ def is_valid_custom_dtype(actual_type: str, expected_type: str) -> bool:
     return is_custom_dtype and actual_type in list(StringType)
 
 
+def parse_pandera_errors(exc: pandera.errors.SchemaErrors) -> list[str]:
+    """
+    Parse Pandera SchemaErrors exception to extract the 'error' field from error messages.
+
+    """
+    error_messages = []
+
+    error_str = str(exc)
+
+    # Creating a list of singular (json like) entries from the pandera error string
+    # For example: {'check': 'pandera_check', 'error': 'error message', ...}
+    failure_object_pattern = r'\{\s*(?:[^{}]*?)\}'
+    failure_objects = re.findall(failure_object_pattern, error_str)
+
+    # Extracting and cleaning each error statement 
+    for obj in failure_objects:
+        
+        error_match = re.search(r'"error":\s*"((?:[^"\\]|\\.)*)"', obj)
+        
+        if not error_match:
+            continue
+
+        error_msg = error_match.group(1)
+        error_msg = error_msg.replace(r"\'", "'").replace(r'\"', '"')
+
+        check_match = re.search(r'"check":\s*"([^"]*)"', obj)
+        check_name = check_match.group(1) if check_match else None
+
+        if ':' in error_msg and ('Name:' in error_msg or 'dtype:' in error_msg):
+            error_msg = error_msg.split(':')[0]
+
+        if check_name and check_name not in ['not_nullable', 'field_uniqueness']:
+            error_msg = f"[{check_name}] {error_msg}"
+
+        error_messages.append(error_msg)
+
+    return error_messages if error_messages else [str(exc)]
+
+
 def validate_with_pandera(
     data_frame: pd.DataFrame, schema: Schema
 ) -> Tuple[pd.DataFrame, list[str]]:
@@ -181,5 +221,5 @@ def validate_with_pandera(
         validated_df = schema.pandera_validate(data_frame, lazy=True)
         return validated_df, []
     except pandera.errors.SchemaErrors as exc:
-        error_list.append(str(exc))
+        error_list = parse_pandera_errors(exc)
         return data_frame, error_list

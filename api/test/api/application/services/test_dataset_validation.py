@@ -462,51 +462,11 @@ class TestDatasetValidation:
 
         data_frame, error_list = validate_with_pandera(df, schema)
         assert error_list == [
-            '{\n'
-            '    "DATA": {\n'
-            '        "SERIES_CONTAINS_DUPLICATES": [\n'
-            '            {\n'
-            '                "schema": null,\n'
-            '                "column": "col1",\n'
-            '                "check": "field_uniqueness",\n'
-            '                "error": "series \'col1\' contains duplicate values:0    '
-            'None1       a2    None3       aName: col1, dtype: object"\n'
-            '            },\n'
-            '            {\n'
-            '                "schema": null,\n'
-            '                "column": "col2",\n'
-            '                "check": "field_uniqueness",\n'
-            '                "error": "series \'col2\' contains duplicate values:0    '
-            'None2    NoneName: col2, dtype: object"\n'
-            '            },\n'
-            '            {\n'
-            '                "schema": null,\n'
-            '                "column": "col3",\n'
-            '                "check": "field_uniqueness",\n'
-            '                "error": "series \'col3\' contains duplicate values:1    '
-            'b3    bName: col3, dtype: object"\n'
-            '            }\n'
-            '        ]\n'
-            '    },\n'
-            '    "SCHEMA": {\n'
-            '        "SERIES_CONTAINS_NULLS": [\n'
-            '            {\n'
-            '                "schema": null,\n'
-            '                "column": "col2",\n'
-            '                "check": "not_nullable",\n'
-            '                "error": "non-nullable series \'col2\' contains null '
-            'values:0    None2    NoneName: col2, dtype: object"\n'
-            '            },\n'
-            '            {\n'
-            '                "schema": null,\n'
-            '                "column": "col3",\n'
-            '                "check": "not_nullable",\n'
-            '                "error": "non-nullable series \'col3\' contains null '
-            'values:2    NoneName: col3, dtype: object"\n'
-            '            }\n'
-            '        ]\n'
-            '    }\n'
-            '}',
+            "series 'col1' contains duplicate values",
+            "series 'col2' contains duplicate values",
+            "series 'col3' contains duplicate values",
+            "non-nullable series 'col2' contains null values",
+            "non-nullable series 'col3' contains null values",
         ]
 
     def test_return_error_message_when_not_correct_datatypes(self):
@@ -688,19 +648,7 @@ class TestDatasetValidation:
                 "Column [col5] has an incorrect data type. Expected int, received string",
                 "Partition column [col1] has values with illegal characters '/'",
                 "Partition column [col2] has values with illegal characters '/'",
-                '{\n'
-                '    "SCHEMA": {\n'
-                '        "SERIES_CONTAINS_NULLS": [\n'
-                '            {\n'
-                '                "schema": null,\n'
-                '                "column": "col3",\n'
-                '                "check": "not_nullable",\n'
-                '                "error": "non-nullable series \'col3\' contains null '
-                'values:2    NoneName: col3, dtype: object"\n'
-                '            }\n'
-                '        ]\n'
-                '    }\n'
-                '}',
+                "non-nullable series 'col3' contains null values",
             ]
 
 
@@ -887,3 +835,212 @@ class TestDatasetTransformation:
         transformed_df, _ = clean_column_headers(data)
 
         assert transformed_df.columns[0] == expected_column_name
+
+    def test_validate_with_pandera_in_range_check_valid(self):
+        df = pd.DataFrame({"colname1": [2000, 2015, 2030]})
+        schema = Schema(
+            metadata=self.schema_metadata,
+            columns=[
+                Column(
+                    name="colname1",
+                    partition_index=None,
+                    data_type="int",
+                    allow_null=False,
+                    checks={
+                        "year_range": {
+                            "check_type": "in_range",
+                            "parameters": {"min_value": 2000, "max_value": 2030},
+                            "error": "Year must be between 2000 and 2030"
+                        }
+                    },
+                ),
+            ],
+        )
+
+        data_frame, error_list = validate_with_pandera(df, schema)
+        assert error_list == []
+
+    def test_validate_with_pandera_in_range_check_invalid(self):
+        df = pd.DataFrame({"colname1": [1999, 2015, 2031]})
+        schema = Schema(
+            metadata=self.schema_metadata,
+            columns=[
+                Column(
+                    name="colname1",
+                    partition_index=None,
+                    data_type="int",
+                    allow_null=False,
+                    checks={
+                        "year_range": {
+                            "check_type": "in_range",
+                            "parameters": {"min_value": 2000, "max_value": 2030},
+                            "error": "Year must be between 2000 and 2030"
+                        }
+                    },
+                ),
+            ],
+        )
+
+        data_frame, error_list = validate_with_pandera(df, schema)
+        assert error_list == [
+            "[in_range(2000, 2030)] Column 'colname1' failed element-wise validator number 0: in_range(2000, 2030) failure cases: 1999, 2031"
+        ]
+
+    def test_validate_with_pandera_isin_check_valid(self):
+        df = pd.DataFrame({"colname1": ["Carlos", "Ada"]})
+        schema = Schema(
+            metadata=self.schema_metadata,
+            columns=[
+                Column(
+                    name="colname1",
+                    partition_index=None,
+                    data_type="string",
+                    allow_null=False,
+                    checks={
+                        "status_check": {
+                            "check_type": "isin",
+                            "parameters": {"allowed_values": ["Carlos", "Ada"]},
+                            "error": "colname1 must be one of: Carlos, Ada"
+                        }
+                    },
+                ),
+            ],
+        )
+
+        data_frame, error_list = validate_with_pandera(df, schema)
+        assert error_list == []
+
+    def test_validate_with_pandera_isin_check_invalid(self):
+        df = pd.DataFrame({"colname1": ["Carlos", "Ada", "invalid"]})
+        schema = Schema(
+            metadata=self.schema_metadata,
+            columns=[
+                Column(
+                    name="colname1",
+                    partition_index=None,
+                    data_type="string",
+                    allow_null=False,
+                    checks={
+                        "status_check": {
+                            "check_type": "isin",
+                            "parameters": {"allowed_values": ["Carlos", "Ada"]},
+                            "error": "colname1 must be one of: Carlos, Ada"
+                        }
+                    },
+                ),
+            ],
+        )
+
+        data_frame, error_list = validate_with_pandera(df, schema)
+        assert error_list == [
+            "[isin(['Carlos', 'Ada'])] Column 'colname1' failed element-wise validator number 0: isin(['Carlos', 'Ada']) failure cases: invalid"
+        ]
+
+    def test_validate_with_pandera_multiple_checks_on_column(self):
+        df = pd.DataFrame(
+            {
+                "colname1": ["ada123", "bob456", "carlos789"],  # Test str checks
+                "colname2": [25, 30, 35],  # Test int checks
+            }
+        )
+        schema = Schema(
+            metadata=self.schema_metadata,
+            columns=[
+                Column(
+                    name="colname1",
+                    partition_index=None,
+                    data_type="string",
+                    allow_null=False,
+                    checks={
+                        "username_length": {
+                            "check_type": "str_length",
+                            "parameters": {"min_value": 5, "max_value": 20},
+                            "error": "Username must be between 5 and 20 characters"
+                        },
+                        "username_pattern": {
+                            "check_type": "str_matches",
+                            "parameters": {"pattern": r"^[a-z]+\d+$"},
+                            "error": "Username must be lowercase letters followed by numbers"
+                        }
+                    },
+                ),
+                Column(
+                    name="colname2",
+                    partition_index=None,
+                    data_type="int",
+                    allow_null=False,
+                    checks={
+                        "age_minimum": {
+                            "check_type": "greater_than",
+                            "parameters": {"min_value": 18},
+                            "error": "Age must be greater than 18"
+                        },
+                        "age_maximum": {
+                            "check_type": "less_than",
+                            "parameters": {"max_value": 100},
+                            "error": "Age must be less than 100"
+                        }
+                    },
+                ),
+            ],
+        )
+
+        data_frame, error_list = validate_with_pandera(df, schema)
+        assert error_list == []
+
+    def test_validate_with_pandera_multiple_checks_on_column_invalid(self):
+        df = pd.DataFrame(
+            {
+                "colname1": ["ab", "BOB456", "carlosabcdefghijklmnop"],  # Fails str_length and str_matches
+                "colname2": [15, 30, 105],  # Fails greater_than and less_than
+            }
+        )
+        schema = Schema(
+            metadata=self.schema_metadata,
+            columns=[
+                Column(
+                    name="colname1",
+                    partition_index=None,
+                    data_type="string",
+                    allow_null=False,
+                    checks={
+                        "username_length": {
+                            "check_type": "str_length",
+                            "parameters": {"min_value": 5, "max_value": 20},
+                            "error": "Username must be between 5 and 20 characters"
+                        },
+                        "username_pattern": {
+                            "check_type": "str_matches",
+                            "parameters": {"pattern": r"^[a-z]+\d+$"},
+                            "error": "Username must be lowercase letters followed by numbers"
+                        }
+                    },
+                ),
+                Column(
+                    name="colname2",
+                    partition_index=None,
+                    data_type="int",
+                    allow_null=False,
+                    checks={
+                        "age_minimum": {
+                            "check_type": "greater_than",
+                            "parameters": {"min_value": 18},
+                            "error": "Age must be greater than 18"
+                        },
+                        "age_maximum": {
+                            "check_type": "less_than",
+                            "parameters": {"max_value": 100},
+                            "error": "Age must be less than 100"
+                        }
+                    },
+                ),
+            ],
+        )
+
+        data_frame, error_list = validate_with_pandera(df, schema)
+        assert error_list == [
+            "[str_length(5, 20)] Column 'colname1' failed element-wise validator number 0: str_length(5, 20) failure cases: ab, carlosabcdefghijklmnop",
+            "[str_matches('^[a-z]+\\\\d+$')] Column 'colname1' failed element-wise validator number 1: str_matches('^[a-z]+\\\\d+$') failure cases: ab, BOB456, carlosabcdefghijklmnop",
+            "[greater_than(18)] Column 'colname2' failed element-wise validator number 0: greater_than(18) failure cases: 15",
+            "[less_than(100)] Column 'colname2' failed element-wise validator number 1: less_than(100) failure cases: 105",
+        ]

@@ -71,7 +71,8 @@ class Column(BaseModel):
             pattern = params.get("pattern")
             return pandera.Check.str_matches(pattern)
         else:
-            raise ValueError(f"Unsupported check type: {check_type}")
+            raise ValueError(f"Unsupported check type: {check_type}. Valid types are: "
+                             "in_range, isin, str_length, greater_than, less_than, str_matches.")
 
 
 class Schema(BaseModel):

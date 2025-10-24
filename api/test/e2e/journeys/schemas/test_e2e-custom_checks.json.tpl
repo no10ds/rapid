@@ -26,14 +26,9 @@
       "format": null,
       "checks": {
         "year_range_check": {
-          "check_fn": "greater_than_or_equal_to",
-          "check_kwargs": {"min_value": 2000},
-          "error": "Year must be 2000 or later"
-        },
-        "year_max_check": {
-          "check_fn": "less_than_or_equal_to",
-          "check_kwargs": {"max_value": 2030},
-          "error": "Year must be 2030 or earlier"
+          "check_type": "in_range",
+          "parameters": {"min_value": 2000, "max_value": 2030},
+          "error": "Year must be between 2000 and 2030"
         }
       }
     },
@@ -43,14 +38,13 @@
       "data_type": "int",
       "allow_null": false,
       "format": null,
-      "checks": [
-        {
-          "name": "month_range_check",
-          "check_fn": "isin",
-          "check_kwargs": {"allowed_values": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]},
+      "checks": {
+        "month_range_check": {
+          "check_type": "isin",
+          "parameters": {"allowed_values": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]},
           "error": "Month must be between 1 and 12"
         }
-      ]
+      }
     },
     {
       "name": "destination",
@@ -72,14 +66,13 @@
       "data_type": "string",
       "allow_null": false,
       "format": null,
-      "checks": [
-        {
-          "name": "type_check",
-          "check_fn": "isin",
-          "check_kwargs": {"allowed_values": ["regular", "express", "priority"]},
+      "checks": {
+        "type_check": {
+          "check_type": "isin",
+          "parameters": {"allowed_values": ["regular", "express", "priority"]},
           "error": "Type must be one of: regular, express, priority"
         }
-      ]
+      }
     },
     {
       "name": "status",
@@ -87,14 +80,13 @@
       "data_type": "string",
       "allow_null": false,
       "format": null,
-      "checks": [
-        {
-          "name": "status_check",
-          "check_fn": "isin",
-          "check_kwargs": {"allowed_values": ["completed", "pending", "cancelled"]},
+      "checks": {
+        "status_check": {
+          "check_type": "isin",
+          "parameters": {"allowed_values": ["completed", "pending", "cancelled"]},
           "error": "Status must be one of: completed, pending, cancelled"
         }
-      ]
+      }
     }
   ]
 }
