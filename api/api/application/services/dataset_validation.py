@@ -188,11 +188,11 @@ def parse_pandera_errors(exc: pandera.errors.SchemaErrors) -> list[str]:
     failure_object_pattern = r'\{\s*(?:[^{}]*?)\}'
     failure_objects = re.findall(failure_object_pattern, error_str)
 
-    # Extracting and cleaning each error statement 
+    # Extracting and cleaning each error statement
     for obj in failure_objects:
-        
+
         error_match = re.search(r'"error":\s*"((?:[^"\\]|\\.)*)"', obj)
-        
+
         if not error_match:
             continue
 
