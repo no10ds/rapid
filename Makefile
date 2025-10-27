@@ -15,10 +15,10 @@ API_ACCOUNT_ECR_URI=$(AWS_ACCOUNT).dkr.ecr.$(AWS_REGION).amazonaws.com
 API_PUBLIC_URI=public.ecr.aws
 API_PUBLIC_IMAGE=no10-rapid/api
 
-# UI Build variables
-UI_ZIP_PATH=$(UI_IMAGE_NAME)-$(GITHUB_SHORT_SHA)
+# Frontend Build variables
+FRONTEND_ZIP_PATH=$(FRONTEND_IMAGE_NAME)-$(GITHUB_SHORT_SHA)
 ifeq ($(RELEASE_TAG), null)
-	TAG_NAME="$(UI_IMAGE_NAME)-$(GITHUB_SHORT_SHA)"
+	TAG_NAME="$(FRONTEND_IMAGE_NAME)-$(GITHUB_SHORT_SHA)"
 else
 	TAG_NAME="$(RELEASE_TAG)-dev-$(GITHUB_SHORT_SHA)"
 endif
@@ -50,7 +50,7 @@ python-setup:			## Setup python to run the sdk and api
 	pyenv install --skip-existing $(PYTHON_VERSION)
 	pyenv local $(PYTHON_VERSION)
 
-node-setup:				## Setup node to run the UI
+node-setup:				## Setup node to run the Frontend
 	. ${HOME}/.nvm/nvm.sh && nvm install $(NODE_VERSION)
 	. ${HOME}/.nvm/nvm.sh && nvm use $(NODE_VERSION)
 
@@ -212,44 +212,44 @@ sdk/release:	sdk/build		## Build and release sdk to pypi
 	@cd sdk/; . .venv/bin/activate; twine upload dist/*
 
 ##
-##----- UI -----
+##----- FRONTEND -----
 ##
-ui/setup:			## Setup npm required for the sdk
-	@cd ui/; npm i -g next; npm ci
+frontend/setup:			## Setup npm required for the sdk
+	@cd frontend/; npm i -g next; npm ci
 
-ui/run:			## Run the ui application with hot reload
-	@cd ui/; npm run dev
+frontend/run:			## Run the frontend application with hot reload
+	@cd frontend/; npm run dev
 
-# UI Testing --------------------
+# Frontend Testing --------------------
 ##
-ui/test:			## Test ui site
-	@cd ui/; npm run test:all
+frontend/test:			## Test frontend site
+	@cd frontend/; npm run test:all
 
-ui/test-e2e:
-	@cd ui/; npx playwright test ui/playwright
+frontend/test-e2e:
+	@cd frontend/; npx playwright test frontend/playwright
 
-ui/test-e2e-headed:
-	@cd ui/; npx playwright test ui/playwright --ui
+frontend/test-e2e-headed:
+	@cd frontend/; npx playwright test frontend/playwright --frontend
 
-# UI Release --------------------
+# Frontend Release --------------------
 ##
-ui/create-static-out:
-	@cd ui/; npm run build:static
+frontend/create-static-out:
+	@cd frontend/; npm run build:static
 
-ui/zip-contents:		## Zip contents of the built static html files
+frontend/zip-contents:		## Zip contents of the built static html files
 ifdef tag
-	@cd ui/; zip -r "${tag}.zip" ./out
-	@cd ui/; zip -r "${tag}-router-lambda.zip" ./lambda/lambda.js
+	@cd frontend/; zip -r "${tag}.zip" ./out
+	@cd frontend/; zip -r "${tag}-router-lambda.zip" ./lambda/lambda.js
 else
-	@cd ui/; zip -r "$(UI_ZIP_PATH).zip" ./out
-	@cd ui/; zip -r "$(UI_ZIP_PATH)-router-lambda.zip" ./lambda/lambda.js
+	@cd frontend/; zip -r "$(FRONTEND_ZIP_PATH).zip" ./out
+	@cd frontend/; zip -r "$(FRONTEND_ZIP_PATH)-router-lambda.zip" ./lambda/lambda.js
 endif
 
-ui/release:		## Upload the zipped built static files to a production Github release
-	@gh release upload ${tag} "./ui/${tag}.zip" --clobber
-	@gh release upload ${tag} "./ui/${tag}-router-lambda.zip" --clobber
+frontend/release:		## Upload the zipped built static files to a production Github release
+	@gh release upload ${tag} "./frontend/${tag}.zip" --clobber
+	@gh release upload ${tag} "./frontend/${tag}-router-lambda.zip" --clobber
 
-ui/zip-and-release: ui/zip-contents ui/release ## Zip and release prod static ui site
+frontend/zip-and-release: frontend/zip-contents frontend/release ## Zip and release prod static frontend site
 
 
 RELEASE_TYPE_UC=$(shell echo ${type} | tr  '[:lower:]' '[:upper:]')
