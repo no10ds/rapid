@@ -49,6 +49,6 @@ async def get_subject_permissions(subject_id: str):
     ### Click  `Try it out` to use the endpoint
     """
     return [
-        permission.dict()
+        permission.model_dump()
         for permission in permissions_service.get_subject_permissions(subject_id)
     ]

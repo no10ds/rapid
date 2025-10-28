@@ -65,7 +65,7 @@ class TestUploadSchema:
     def test_upload_schema_uppercase_domain(self):
         self.schema_service.get_schema = Mock(return_value=None)
 
-        schema = self.valid_schema.copy()
+        schema = self.valid_schema.model_copy()
         schema.metadata.domain = schema.metadata.domain.upper()
         result = self.schema_service.upload_schema(schema)
 
@@ -261,9 +261,9 @@ class TestUpdateSchema:
             self.schema_service.update_schema(invalid_schema)
 
     def test_update_schema_for_protected_domain_failure(self):
-        original_schema = self.valid_schema.copy(deep=True)
+        original_schema = self.valid_schema.model_copy(deep=True)
         original_schema.metadata.sensitivity = Sensitivity.PROTECTED
-        new_schema = self.valid_updated_schema.copy(deep=True)
+        new_schema = self.valid_updated_schema.model_copy(deep=True)
         new_schema.metadata.sensitivity = Sensitivity.PROTECTED
 
         self.schema_service.get_schema = Mock(return_value=original_schema)
@@ -281,7 +281,7 @@ class TestUpdateSchema:
         original_schema = self.valid_schema
         original_schema.metadata.version = 2
         new_schema = self.valid_updated_schema
-        expected_schema = self.valid_updated_schema.copy(deep=True)
+        expected_schema = self.valid_updated_schema.model_copy(deep=True)
         expected_schema.metadata.version = 3
 
         self.schema_service.get_schema = Mock(return_value=original_schema)
@@ -297,7 +297,7 @@ class TestUpdateSchema:
 
     def test_update_schema_enforces_sensitivity_consistency(self):
         original_schema = self.valid_schema
-        new_schema = self.valid_updated_schema.copy(deep=True)
+        new_schema = self.valid_updated_schema.model_copy(deep=True)
         new_schema.metadata.sensitivity = Sensitivity.PRIVATE
 
         self.schema_service.get_schema = Mock(return_value=original_schema)
@@ -310,11 +310,11 @@ class TestUpdateSchema:
             self.schema_service.update_schema(new_schema)
 
     def test_update_schema_for_protected_domain_success(self):
-        original_schema = self.valid_schema.copy(deep=True)
+        original_schema = self.valid_schema.model_copy(deep=True)
         original_schema.metadata.sensitivity = Sensitivity.PROTECTED
-        new_schema = self.valid_updated_schema.copy(deep=True)
+        new_schema = self.valid_updated_schema.model_copy(deep=True)
         new_schema.metadata.sensitivity = Sensitivity.PROTECTED
-        expected_schema = self.valid_updated_schema.copy(deep=True)
+        expected_schema = self.valid_updated_schema.model_copy(deep=True)
         expected_schema.metadata.version = 2
         expected_schema.metadata.sensitivity = Sensitivity.PROTECTED
 

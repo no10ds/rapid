@@ -140,7 +140,7 @@ class Rapid:
         response = requests.post(
             url,
             headers=self.generate_headers(),
-            data=json.dumps(query.dict(exclude_none=True)),
+            data=json.dumps(query.model_dump(exclude_none=True)),
             timeout=TIMEOUT_PERIOD,
         )
         if response.status_code == 200:
@@ -305,7 +305,7 @@ class Rapid:
             rapid.exceptions.SchemaAlreadyExistsException: If you try to create a schema that already exists in rAPId.
             rapid.exceptions.SchemaCreateFailedException: If an error occurs while trying to update the schema.
         """
-        schema_dict = schema.dict()
+        schema_dict = schema.model_dump()
         url = f"{self.auth.url}/schema"
         response = requests.post(
             url,
@@ -331,7 +331,7 @@ class Rapid:
         Raises:
             rapid.exceptions.SchemaUpdateFailedException: If an error occurs while trying to update the schema.
         """
-        schema_dict = schema.dict()
+        schema_dict = schema.model_dump()
         url = f"{self.auth.url}/schema"
         response = requests.put(
             url,

@@ -412,7 +412,7 @@ class TestSchemaGeneration(BaseClientTest):
         )
 
         assert response.status_code == 200
-        assert response.json() == expected_response.dict()
+        assert response.json() == expected_response.model_dump()
 
     @patch.object(SchemaInferService, "infer_schema")
     @patch("api.controller.schema.store_file_to_disk")
@@ -466,7 +466,7 @@ class TestSchemaGeneration(BaseClientTest):
         )
 
         assert response.status_code == 200
-        assert response.json() == expected_response.dict()
+        assert response.json() == expected_response.model_dump()
 
     def test_bad_request_when_filetype_is_invalid(self):
         file_content = b"some content"

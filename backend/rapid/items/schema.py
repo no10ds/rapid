@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import Dict, List, Optional, Union
-from pydantic.main import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class SensitivityLevel(Enum):
@@ -20,6 +20,8 @@ class Owner(BaseModel):
 
 
 class SchemaMetadata(BaseModel):
+    model_config = ConfigDict(use_enum_values=True)
+
     layer: str
     domain: str
     dataset: str
@@ -31,9 +33,6 @@ class SchemaMetadata(BaseModel):
     description: Optional[str] = ""
     update_behaviour: Optional[str] = "APPEND"
     is_latest_version: Optional[bool] = True
-
-    class Config:
-        use_enum_values = True
 
 
 class Column(BaseModel):

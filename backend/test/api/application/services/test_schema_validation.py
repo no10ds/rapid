@@ -975,7 +975,7 @@ class TestSchemaValidation:
 
         schema_has_valid_tag_set(valid_schema)
 
-        assert valid_schema.metadata.dict() == result_dict
+        assert valid_schema.metadata.model_dump() == result_dict
 
     def test_is_valid_when_schema_for_upload_has_valid_owners_email_address(self):
         try:

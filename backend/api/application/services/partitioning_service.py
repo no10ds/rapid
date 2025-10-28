@@ -1,18 +1,17 @@
 from typing import List, Tuple, Hashable, Optional
 
 import pandas as pd
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from api.domain.schema import Schema
 
 
 class Partition(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     keys: Optional[list] = [""]
     path: Optional[str] = ""
     df: pd.DataFrame
-
-    class Config:
-        arbitrary_types_allowed = True
 
 
 def generate_path(group_partitions: List[str], group_info: Tuple[Hashable, ...]) -> str:

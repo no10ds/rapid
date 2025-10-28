@@ -1,6 +1,6 @@
 from strenum import StrEnum
 from typing import Optional, List
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel, ConfigDict
 
 from api.common.logger import AppLogger
 
@@ -40,15 +40,14 @@ class Query(BaseModel):
 
     """
 
+    model_config = ConfigDict(extra='forbid')
+
     select_columns: Optional[List[str]] = None
     filter: Optional[str] = None
     group_by_columns: Optional[List[str]] = None
     aggregation_conditions: Optional[str] = None
     order_by_columns: Optional[List[QueryOrderBy]] = None
     limit: Optional[int] = None
-
-    class Config:
-        extra = Extra.forbid
 
     def to_sql(self, table_name: str) -> str:
         select = (
