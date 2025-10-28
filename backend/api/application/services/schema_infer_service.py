@@ -14,8 +14,9 @@ from api.common.data_handlers import (
 from api.common.value_transformers import clean_column_name
 
 from api.domain.data_types import extract_athena_types, is_date_type
-from api.domain.schema import Schema, Column
-from api.domain.schema_metadata import Owner, SchemaMetadata
+from api.domain.schema import Schema
+from api.domain.schema_metadata import SchemaMetadata
+from rapid.items.schema import Column, Owner
 
 DEFAULT_DATE_FORMAT = "%Y-%m-%d"
 

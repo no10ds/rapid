@@ -1,8 +1,7 @@
 from typing import Dict, List, Optional
-from pydantic import BaseModel, EmailStr
-from strenum import StrEnum
 
 from api.domain.dataset_metadata import DatasetMetadata
+from rapid.items.schema import UpdateBehaviour, Owner
 
 SENSITIVITY = "sensitivity"
 DESCRIPTION = "description"
@@ -11,16 +10,6 @@ KEY_ONLY_TAGS = "key_only_tags"
 OWNERS = "owners"
 UPDATE_BEHAVIOUR = "update_behaviour"
 IS_LATEST_VERSION = "is_latest_version"
-
-
-class Owner(BaseModel):
-    name: str
-    email: EmailStr
-
-
-class UpdateBehaviour(StrEnum):
-    APPEND = "APPEND"
-    OVERWRITE = "OVERWRITE"
 
 
 class SchemaMetadata(DatasetMetadata):

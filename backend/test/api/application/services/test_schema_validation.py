@@ -11,8 +11,9 @@ from api.application.services.schema_validation import (
 from api.common.config.auth import Sensitivity
 from api.common.config.aws import MAX_TAG_COUNT
 from api.common.custom_exceptions import SchemaValidationError
-from api.domain.schema import Schema, Column
-from api.domain.schema_metadata import Owner, UpdateBehaviour, SchemaMetadata
+from api.domain.schema import Schema
+from api.domain.schema_metadata import SchemaMetadata
+from rapid.items.schema import UpdateBehaviour, Owner, Column
 
 
 class TestSchemaValidation:

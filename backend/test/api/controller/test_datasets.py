@@ -20,8 +20,9 @@ from api.common.config.auth import Action
 from api.common.config.constants import BASE_API_PATH
 from api.domain.dataset_filters import DatasetFilters
 from api.domain.dataset_metadata import DatasetMetadata
-from api.domain.schema import Schema, Column
-from api.domain.schema_metadata import Owner, SchemaMetadata
+from api.domain.schema import Schema
+from rapid.items.schema import Column, Owner
+from api.domain.schema_metadata import SchemaMetadata
 from api.domain.search_metadata import SearchMetadata, MatchField
 from rapid.items.query import Query
 from test.api.common.controller_test_utils import BaseClientTest

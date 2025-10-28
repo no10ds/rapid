@@ -12,8 +12,9 @@ from api.common.custom_exceptions import (
     SchemaNotFoundError,
     AWSServiceError,
 )
-from api.domain.schema import Schema, Column
-from api.domain.schema_metadata import Owner, SchemaMetadata
+from api.domain.schema import Schema
+from rapid.items.schema import Column, Owner
+from api.domain.schema_metadata import SchemaMetadata
 from api.common.config.constants import BASE_API_PATH
 from test.api.common.controller_test_utils import BaseClientTest
 

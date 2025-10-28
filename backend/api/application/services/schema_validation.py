@@ -12,7 +12,7 @@ from api.common.config.constants import (
 from api.common.custom_exceptions import SchemaValidationError
 from api.domain.data_types import AthenaDataType, is_date_type
 from api.domain.schema import Schema
-from api.domain.schema_metadata import UpdateBehaviour, Owner
+from rapid.items.schema import UpdateBehaviour, Owner
 
 
 def validate_schema_for_upload(schema: Schema):

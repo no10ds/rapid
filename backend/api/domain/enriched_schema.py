@@ -2,7 +2,7 @@ from typing import List, Dict, Optional
 
 from pydantic import BaseModel
 
-from api.domain.schema import Column
+from rapid.items.schema import Column
 from api.domain.schema_metadata import SchemaMetadata
 
 

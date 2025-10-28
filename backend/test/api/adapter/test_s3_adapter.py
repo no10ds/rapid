@@ -15,7 +15,8 @@ from api.common.custom_exceptions import (
 )
 from api.domain.dataset_metadata import DatasetMetadata
 from api.domain.schema_metadata import SchemaMetadata
-from api.domain.schema import Schema, Column
+from api.domain.schema import Schema
+from rapid.items.schema import Column
 from test.test_utils import (
     mock_list_schemas_response,
 )

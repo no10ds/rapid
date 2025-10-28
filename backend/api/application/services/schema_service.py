@@ -14,7 +14,8 @@ from api.common.custom_exceptions import (
     UserError,
 )
 from api.common.logger import AppLogger
-from api.domain.schema import Schema, Column, COLUMNS
+from api.domain.schema import Schema, COLUMNS
+from rapid.items.schema import Column
 from api.domain.schema_metadata import SchemaMetadata
 from api.domain.dataset_metadata import DatasetMetadata
 
