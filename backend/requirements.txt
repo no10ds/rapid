@@ -16,4 +16,10 @@ uvicorn
 requests
 strenum
 pytest-order
+deepdiff
+mock
+pytest
+requests-mock
+setuptools
+twine
 

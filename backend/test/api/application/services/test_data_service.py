@@ -26,7 +26,7 @@ from api.domain.enriched_schema import (
 )
 from api.domain.schema import Schema, Column
 from api.domain.schema_metadata import Owner, SchemaMetadata
-from api.domain.sql_query import SQLQuery
+from rapid.items.query import Query
 
 
 class TestUploadDataset:
@@ -676,7 +676,7 @@ class TestDatasetInfoRetrieval:
 
         self.athena_adapter.query.assert_called_once_with(
             dataset_metadata,
-            SQLQuery(
+            Query(
                 select_columns=[
                     "count(*) as data_size",
                     "cast(max(date) as date) as max_date",
@@ -775,7 +775,7 @@ class TestDatasetInfoRetrieval:
         expected_dataset_metadata = DatasetMetadata("raw", "some", "other", 1)
         self.athena_adapter.query.assert_called_once_with(
             expected_dataset_metadata,
-            SQLQuery(
+            Query(
                 select_columns=[
                     "count(*) as data_size",
                     "cast(max(date) as date) as max_date",
@@ -837,7 +837,7 @@ class TestDatasetInfoRetrieval:
 
         self.athena_adapter.query.assert_called_once_with(
             DatasetMetadata("raw", "some", "other", 3),
-            SQLQuery(select_columns=["count(*) as data_size"]),
+            Query(select_columns=["count(*) as data_size"]),
         )
 
         assert actual_schema == expected_schema
@@ -862,7 +862,7 @@ class TestQueryDataset:
         )
 
     def test_is_query_too_large_with_limit_under(self):
-        query = SQLQuery(limit=100)
+        query = Query(limit=100)
 
         response = self.data_service.is_query_too_large(
             DatasetMetadata("raw", "domain1", "dataset1", 2), query
@@ -870,7 +870,7 @@ class TestQueryDataset:
         assert response is False
 
     def test_is_query_too_large_with_dataset_size_under(self):
-        query = SQLQuery()
+        query = Query()
         self.s3_adapter.get_folder_size.return_value = 100
 
         dataset = DatasetMetadata("raw", "domain1", "dataset1", 2)
@@ -881,7 +881,7 @@ class TestQueryDataset:
         )
 
     def test_is_query_too_large_with_dataset_size_over(self):
-        query = SQLQuery()
+        query = Query()
         self.s3_adapter.get_folder_size.return_value = 1_000_000_000
 
         dataset = DatasetMetadata("raw", "domain1", "dataset1", 2)
@@ -892,7 +892,7 @@ class TestQueryDataset:
         )
 
     def test_query_data_success(self):
-        query = SQLQuery()
+        query = Query()
         expected_response = pd.DataFrame().empty
         self.data_service.is_query_too_large = Mock(return_value=False)
         self.athena_adapter.query.return_value = expected_response
@@ -907,7 +907,7 @@ class TestQueryDataset:
         )
 
     def test_query_data_for_query_too_large(self):
-        query = SQLQuery()
+        query = Query()
         self.data_service.is_query_too_large = Mock(return_value=True)
         dataset_metadata = DatasetMetadata("raw", "domain1", "dataset1", 1)
 
@@ -937,7 +937,7 @@ class TestQueryLargeDataset:
     def test_query_large_creates_query_job_and_triggers_async_query(self, mock_thread):
         subject_id = "subject-123"
         dataset_metadata = DatasetMetadata("raw", "domain1", "dataset1", 4)
-        query = SQLQuery()
+        query = Query()
         query_job = Mock()
         query_job.job_id = "12838"
         self.job_service.create_query_job.return_value = query_job

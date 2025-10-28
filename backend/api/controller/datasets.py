@@ -45,7 +45,7 @@ from api.domain.dataset_filters import DatasetFilters
 from api.domain.dataset_metadata import DatasetMetadata
 from api.domain.schema_metadata import SchemaMetadata
 from api.domain.mime_type import MimeType
-from api.domain.sql_query import SQLQuery
+from rapid.items.query import Query
 from api.domain.Jobs.Job import generate_uuid
 
 
@@ -490,7 +490,7 @@ async def query_dataset(
         ..., pattern=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
     ),
     version: Optional[int] = None,
-    query: Optional[SQLQuery] = SQLQuery(),
+    query: Optional[Query] = Query(),
 ):
     """
     ## Query dataset
@@ -596,7 +596,7 @@ async def query_large_dataset(
         ..., pattern=LOWERCASE_REGEX, description=LOWERCASE_ROUTE_DESCRIPTION
     ),
     version: Optional[int] = None,
-    query: Optional[SQLQuery] = SQLQuery(),
+    query: Optional[Query] = Query(),
 ):
     """
     ## Query large dataset
