@@ -30,7 +30,7 @@ repos:
     rev: 7.0.0
     hooks:
       - id: flake8
-        args: ['--config', 'api/.flake8']
+        args: ['--config', 'backend/.flake8']
         exclude: (docs/|get_latest_release_changelog.py)
   - repo: https://github.com/antonbabenko/pre-commit-terraform
     rev: v1.83.2
