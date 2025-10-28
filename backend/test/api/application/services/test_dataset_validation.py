@@ -22,8 +22,9 @@ from api.common.custom_exceptions import (
     UserError,
     UnprocessableDatasetError,
 )
-from api.domain.schema import Schema, Column
-from api.domain.schema_metadata import Owner, SchemaMetadata
+from api.domain.schema import Schema
+from rapid.items.schema import Column, Owner
+from api.domain.schema_metadata import SchemaMetadata
 
 
 class TestDatasetValidation:

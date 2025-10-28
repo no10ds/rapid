@@ -10,8 +10,9 @@ import pytest
 
 from api.application.services.schema_infer_service import SchemaInferService
 from api.common.custom_exceptions import UserError
-from api.domain.schema import Schema, Column
-from api.domain.schema_metadata import Owner, SchemaMetadata
+from api.domain.schema import Schema
+from rapid.items.schema import Column, Owner
+from api.domain.schema_metadata import SchemaMetadata
 
 
 class TestSchemaInfer:

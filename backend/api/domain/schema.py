@@ -5,22 +5,11 @@ import awswrangler as wr
 from pydantic.main import BaseModel
 import pyarrow as pa
 
-from api.domain.schema_metadata import Owner, SchemaMetadata, UpdateBehaviour
+from api.domain.schema_metadata import Owner, SchemaMetadata
+from rapid.items.schema import Column, UpdateBehaviour
 
 METADATA = "metadata"
 COLUMNS = "columns"
-
-
-class Column(BaseModel):
-    name: str
-    partition_index: Optional[int]
-    data_type: str
-    allow_null: bool
-    format: Optional[str] = None
-    unique: bool = False
-
-    def is_of_data_type(self, d_type: StrEnum) -> bool:
-        return self.data_type in list(d_type)
 
 
 class Schema(BaseModel):

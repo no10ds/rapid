@@ -1,15 +1,16 @@
-from enum import Enum
+# Note: This class is replicated in the api code, they should be de-duplicated once the external dependencies are removed from the API
+from strenum import StrEnum
 from typing import Dict, List, Optional, Union
 from pydantic import BaseModel, ConfigDict
 
 
-class SensitivityLevel(Enum):
+class SensitivityLevel(StrEnum):
     PUBLIC = "PUBLIC"
     PRIVATE = "PRIVATE"
     PROTECTED = "PROTECTED"
 
 
-class UpdateBehaviour(Enum):
+class UpdateBehaviour(StrEnum):
     APPEND = "APPEND"
     OVERWRITE = "OVERWRITE"
 
@@ -37,11 +38,14 @@ class SchemaMetadata(BaseModel):
 
 class Column(BaseModel):
     name: str
+    partition_index: Optional[int]
     data_type: str
-    partition_index: Optional[int] = None
-    allow_null: bool = True
+    allow_null: bool
     format: Optional[str] = None
     unique: bool = False
+
+    def is_of_data_type(self, d_type: StrEnum) -> bool:
+        return self.data_type in list(d_type)
 
 
 class Schema(BaseModel):

@@ -8,7 +8,8 @@ from api.application.services.partitioning_service import (
     drop_columns,
     generate_partitioned_data,
 )
-from api.domain.schema import Column, Schema
+from api.domain.schema import Schema
+from rapid.items.schema import Column
 from api.domain.schema_metadata import Owner, SchemaMetadata
 
 

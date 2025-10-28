@@ -4,8 +4,9 @@ import pyarrow as pa
 import pytest
 
 from api.adapter.s3_adapter import S3Adapter
-from api.domain.schema import Schema, Column
-from api.domain.schema_metadata import Owner, SchemaMetadata
+from api.domain.schema import Schema
+from rapid.items.schema import Column, Owner
+from api.domain.schema_metadata import SchemaMetadata
 from api.domain.data_types import BooleanType, NumericType, StringType
 
 

@@ -15,7 +15,8 @@ from api.common.custom_exceptions import (
     TableCreationError,
 )
 from api.domain.dataset_metadata import DatasetMetadata
-from api.domain.schema import Schema, Column
+from api.domain.schema import Schema
+from rapid.items.schema import Column
 from api.domain.schema_metadata import SchemaMetadata
 
 
