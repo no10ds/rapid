@@ -17,7 +17,7 @@ from api.common.config.aws import (
 from api.common.custom_exceptions import AWSServiceError, QueryExecutionError, UserError
 from api.common.logger import AppLogger
 from api.domain.dataset_metadata import DatasetMetadata
-from api.domain.sql_query import SQLQuery
+from rapid.items.query import Query
 
 
 class AthenaAdapter:
@@ -40,7 +40,7 @@ class AthenaAdapter:
     def query(
         self,
         dataset: DatasetMetadata,
-        query: SQLQuery,
+        query: Query,
     ) -> DataFrame:
         table_name = dataset.glue_table_name()
         return self.query_sql(query.to_sql(table_name))
@@ -59,7 +59,7 @@ class AthenaAdapter:
         except ClientError as error:
             self._handle_client_error(error)
 
-    def query_async(self, dataset: DatasetMetadata, query: SQLQuery) -> Dict[str, str]:
+    def query_async(self, dataset: DatasetMetadata, query: Query) -> Dict[str, str]:
         """
         :return: QueryExecutionId from Athena
         """

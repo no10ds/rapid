@@ -1,39 +1,39 @@
 import pytest
 
-from api.domain.sql_query import SQLQuery, SQLQueryOrderBy
+from rapid.items.query import Query, QueryOrderBy
 
 
-class TestSQLQuery:
+class TestQuery:
     def test_all_parameters_empty_selects_all_rows_and_columns(self):
-        sql_query = SQLQuery()
+        sql_query = Query()
         assert sql_query.to_sql("test_domain") == "SELECT * FROM test_domain"
 
     def test_all_parameters_provided_with_empty_values(self):
-        sql_query = SQLQuery(
+        sql_query = Query(
             select_columns=[], order_by_columns=[], group_by_columns=[]
         )
         assert sql_query.to_sql("test_domain") == "SELECT * FROM test_domain"
 
     def test_only_select_columns_provided(self):
-        sql_query = SQLQuery(select_columns=["col1", "col2", "col3"])
+        sql_query = Query(select_columns=["col1", "col2", "col3"])
         assert (
             sql_query.to_sql("test_domain") == "SELECT col1,col2,col3 FROM test_domain"
         )
 
     def test_only_filters_provided(self):
-        sql_query = SQLQuery(filter="col1 > 16")
+        sql_query = Query(filter="col1 > 16")
         assert (
             sql_query.to_sql("test_domain")
             == "SELECT * FROM test_domain WHERE col1 > 16"
         )
 
     def test_only_order_by_columns_provided(self):
-        sql_query = SQLQuery(
+        sql_query = Query(
             order_by_columns=[
-                SQLQueryOrderBy(column=""),
-                SQLQueryOrderBy(column="col1"),
-                SQLQueryOrderBy(column="col2", direction="ASC"),
-                SQLQueryOrderBy(column="col3", direction="DESC"),
+                QueryOrderBy(column=""),
+                QueryOrderBy(column="col1"),
+                QueryOrderBy(column="col2", direction="ASC"),
+                QueryOrderBy(column="col3", direction="DESC"),
             ]
         )
         assert (
@@ -42,14 +42,14 @@ class TestSQLQuery:
         )
 
     def test_only_group_by_columns_provided(self):
-        sql_query = SQLQuery(group_by_columns=["col4", "col5"])
+        sql_query = Query(group_by_columns=["col4", "col5"])
         assert (
             sql_query.to_sql("test_domain")
             == "SELECT * FROM test_domain GROUP BY col4,col5"
         )
 
     def test_only_limit_provided(self):
-        sql_query = SQLQuery(limit="10")
+        sql_query = Query(limit="10")
         assert sql_query.to_sql("test_domain") == "SELECT * FROM test_domain LIMIT 10"
 
     @pytest.mark.parametrize(
@@ -61,8 +61,8 @@ class TestSQLQuery:
                 ["col4", "col5"],
                 "col4 in ('some value', 'another value')",
                 [
-                    SQLQueryOrderBy(column="col1"),
-                    SQLQueryOrderBy(column="col2", direction="DESC"),
+                    QueryOrderBy(column="col1"),
+                    QueryOrderBy(column="col2", direction="DESC"),
                 ],
                 10,
                 "SELECT col1,col2,col3 FROM test_domain WHERE col2 = 123 GROUP BY col4,col5 HAVING col4 in ('some value', 'another value') ORDER BY col1 ASC,col2 DESC LIMIT 10",
@@ -133,7 +133,7 @@ class TestSQLQuery:
         limit,
         expected_sql,
     ):
-        sql_query = SQLQuery(
+        sql_query = Query(
             select_columns=select_columns,
             filter=filter,
             group_by_columns=group_by_columns,
