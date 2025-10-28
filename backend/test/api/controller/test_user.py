@@ -38,7 +38,7 @@ class TestUserCreation(BaseClientTest):
         mock_create_user.assert_called_once_with(user_request)
 
         assert response.status_code == 201
-        assert response.json() == expected_response.dict()
+        assert response.json() == expected_response.model_dump()
 
     @patch.object(SubjectService, "create_user")
     def test_accepts_empty_permissions_and_uses_default_permissions(
@@ -71,7 +71,7 @@ class TestUserCreation(BaseClientTest):
         mock_create_user.assert_called_once_with(user_request)
 
         assert response.status_code == 201
-        assert response.json() == expected_response.dict()
+        assert response.json() == expected_response.model_dump()
 
     def test_throws_an_exception_when_user_is_empty(self):
         response = self.client.post(

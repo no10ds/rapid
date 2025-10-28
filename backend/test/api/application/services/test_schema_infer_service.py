@@ -57,7 +57,7 @@ class TestSchemaInfer:
                     format=None,
                 ),
             ],
-        ).dict(exclude={"metadata": {"version"}})
+        ).model_dump(exclude={"metadata": {"version"}})
         file_content = b"colname1,colname2,Col name 3,Col/name 4! \nsomething,123,1,True\notherthing,123,3,False\n\n"
         temp_out_path = tempfile.mkstemp(suffix=".csv")[1]
         path = Path(temp_out_path)
@@ -95,7 +95,7 @@ class TestSchemaInfer:
                     format="%Y-%m-%d",
                 ),
             ],
-        ).dict(exclude={"metadata": {"version"}})
+        ).model_dump(exclude={"metadata": {"version"}})
         df = pd.DataFrame(data={"colname1": ["something"], "colname2": ["2021-01-01"]})
         df["colname2"] = pd.to_datetime(df["colname2"])
         temp_out_path = tempfile.mkstemp(suffix=".parquet")[1]

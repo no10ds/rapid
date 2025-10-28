@@ -17,4 +17,4 @@ class TestPermissionItem:
             "domain": "DOMAIN",
             "layer": "LAYER",
         }
-        assert permission.dict() == expected_permission_dictionary
+        assert permission.model_dump() == expected_permission_dictionary

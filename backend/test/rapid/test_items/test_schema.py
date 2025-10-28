@@ -301,4 +301,4 @@ class TestSchema:
                 },
             ],
         }
-        assert schema.dict() == expected_dict
+        assert schema.model_dump() == expected_dict

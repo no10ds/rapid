@@ -110,7 +110,7 @@ async def list_all_datasets(
     if enriched:
         return [
             EnrichedMetadata(
-                **metadata.dict(),
+                **metadata.model_dump(),
                 last_updated_date=data_service.get_last_updated_time(metadata),
             )
             for metadata in datasets

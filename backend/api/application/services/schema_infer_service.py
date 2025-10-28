@@ -47,7 +47,7 @@ class SchemaInferService:
             # We need to delete the incoming file from the local file system
             # regardless of the schema validation was successful or not
             delete_incoming_raw_file(schema, file_path)
-        return schema.dict(exclude={"metadata": {"version"}})
+        return schema.model_dump(exclude={"metadata": {"version"}})
 
     def _construct_single_chunk_dataframe(self, file_path: Path) -> pd.DataFrame:
         try:

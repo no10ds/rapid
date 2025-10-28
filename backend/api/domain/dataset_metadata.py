@@ -50,7 +50,7 @@ class DatasetMetadata(BaseModel):
 
     @classmethod
     def get_fields(cls) -> List[str]:
-        return list(cls.__fields__.keys())
+        return list(cls.model_fields.keys())
 
     def to_dict(self):
         return {

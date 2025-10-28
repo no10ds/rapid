@@ -177,8 +177,8 @@ class DynamoDBAdapter(DatabaseAdapter):
                 Item={
                     "PK": schema.metadata.dataset_identifier(with_version=False),
                     "SK": schema.metadata.get_version(),
-                    **schema.metadata.dict(),
-                    COLUMNS: [dict(col) for col in schema.columns],
+                    **schema.metadata.model_dump(),
+                    COLUMNS: [col.model_dump() for col in schema.columns],
                 }
             )
         except ClientError as error:

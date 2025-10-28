@@ -289,7 +289,7 @@ class DataService:
     ) -> EnrichedSchemaMetadata:
         dataset_size = statistics_dataframe.at[0, "data_size"]
         return EnrichedSchemaMetadata(
-            **schema.metadata.dict(),
+            **schema.metadata.model_dump(),
             number_of_rows=dataset_size,
             number_of_columns=len(schema.columns),
             last_updated=last_updated,
@@ -313,6 +313,6 @@ class DataService:
                     ),
                 }
             enriched_columns.append(
-                EnrichedColumn(**column.dict(), statistics=statistics)
+                EnrichedColumn(**column.model_dump(), statistics=statistics)
             )
         return enriched_columns
