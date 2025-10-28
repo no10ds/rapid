@@ -209,7 +209,7 @@ infra/scan:			## Print infrastructure output: make infra/output block=<infra/blo
 # SDK Testing --------------------
 ##
 sdk/test:			## Run sdk unit tests
-	@cd backend/; . .venv/bin/activate; pytest -vv -s
+	@cd backend/; . .venv/bin/activate; pytest test/rapid -vv -s
 
 # SDK Release --------------------
 ##
