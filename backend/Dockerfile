@@ -17,6 +17,7 @@ COPY --from=build-venv /venv /venv
 WORKDIR /app
 
 COPY api api
+COPY rapid rapid
 COPY static static
 
 ARG commit_sha

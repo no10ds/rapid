@@ -118,7 +118,7 @@ api/scheduled-prod-scan:	## Handle api scheduled scan result for production imag
 # API Running --------------------
 ##
 api/run:			## Run the backend application with hot reload
-	@cd backend && . .venv/bin/activate && uvicorn backend.entry:app --host 0.0.0.0 --port 8000 --reload
+	@cd backend && . .venv/bin/activate && uvicorn api.entry:app --host 0.0.0.0 --port 8000 --reload
 
 # API Setup and Config --------------------
 ##
