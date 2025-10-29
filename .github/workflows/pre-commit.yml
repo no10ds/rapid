@@ -33,7 +33,7 @@ jobs:
         uses: actions/setup-go@v6
 
       - name: Install terraform_docs
-        run: go install github.com/terraform-docs/terraform-docs
+        run: go install github.com/terraform-docs/terraform-docs@latest
 
       - id: pre-commit
         uses: pre-commit/action@v3.0.1
