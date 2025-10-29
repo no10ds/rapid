@@ -183,6 +183,6 @@ docs/_build/
 .terraform/
 .terraform.lock.hcl
 
-ui/playwright/.auth
-ui/playwright/.downloads
-ui/test-results/
+frontend/playwright/.auth
+frontend/playwright/.downloads
+frontend/test-results/

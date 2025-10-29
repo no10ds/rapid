@@ -43,7 +43,7 @@ def ask_yes_no_question(question):
 
 def check(type):
     if type == "api":
-        ask_yes_no_question("Have you updated the API, UI and Terraform version?")
+        ask_yes_no_question("Have you updated the API, Frontend and Terraform version?")
         ask_yes_no_question("Have you updated the changelog for this release?")
     elif type == "sdk":
         ask_yes_no_question("Have you updated the changelog for this release?")
