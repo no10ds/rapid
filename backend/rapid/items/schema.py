@@ -1,6 +1,6 @@
 # Note: This class is replicated in the api code, they should be de-duplicated once the external dependencies are removed from the API
 from strenum import StrEnum
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Any
 from pydantic import BaseModel, ConfigDict
 import pandera
 
@@ -44,6 +44,7 @@ class Column(BaseModel):
     allow_null: bool
     format: Optional[str] = None
     unique: bool = False
+    checks: Dict[str, Any] = {}
 
     def is_of_data_type(self, d_type: StrEnum) -> bool:
         return self.data_type in list(d_type)
