@@ -43,18 +43,18 @@ The AWS credentials need to be present as environment variables, wherever you ar
 
 For security, we recommend that these are only the temporary credentials of an assumed role.
 
-## Running the UI
+## Running the Frontend
 
-You can run the UI locally for development either against an already running rAPId instance that has been deployed or a locally running instance of rAPId.
+You can run the Frontend locally for development either against an already running rAPId instance that has been deployed or a locally running instance of rAPId.
 
 1. Install the correct version of node with nvm by running `make node-setup`
-2. Install the all the required packages `make ui/setup`
+2. Install the all the required packages `make frontend/setup`
 
-To connect the UI with your rAPId instance you will need to setup two environment variable files, both within `./ui`:
+To connect the Frontend with your rAPId instance you will need to setup two environment variable files, both within `./frontend`:
 
 ### 1. .env.local
 
-The UI uses a proxy system that allows API requests to be made to the rAPId server without them getting blocked CORS issues. You can set the `NEXT_PUBLIC_API_URL` to the api suffix of the rAPId instance `/api` and set `NEXT_PUBLIC_API_URL_PROXY` to be the full domain name, such as `https://myrapid.co.uk`.
+The Frontend uses a proxy system that allows API requests to be made to the rAPId server without them getting blocked CORS issues. You can set the `NEXT_PUBLIC_API_URL` to the api suffix of the rAPId instance `/api` and set `NEXT_PUBLIC_API_URL_PROXY` to be the full domain name, such as `https://myrapid.co.uk`.
 
 ```
 NEXT_PUBLIC_API_URL=
@@ -63,14 +63,14 @@ NEXT_PUBLIC_API_URL_PROXY=
 
 ### 2. .env.development
 
-This file allows you to set the `client_id` and `client_secret` that your locally running UI can use to authenticate to the API instance that it is running against. They are in this separate file so that they do not get packaged at build time and with the app and stay secret.
+This file allows you to set the `client_id` and `client_secret` that your locally running Frontend can use to authenticate to the API instance that it is running against. They are in this separate file so that they do not get packaged at build time and with the app and stay secret.
 
 ```
-UI_CLIENT_ID=
-UI_CLIENT_SECRET=
+FRONTEND_CLIENT_ID=
+FRONTEND_CLIENT_SECRET=
 ```
 
-Running `make ui/run-dev` will then launch the UI in development mode with hot reloading.
+Running `make frontend/run-dev` will then launch the Frontend in development mode with hot reloading.
 
 ## Testing
 
@@ -95,11 +95,11 @@ Then run the following command from within the root project directory:
 
 `make api/test`
 
-### UI
+### Frontend
 
-To test the UI run the following command from within the root project directory:
+To test the Frontend run the following command from within the root project directory:
 
-`make ui/test`
+`make frontend/test`
 
 ### SDK
 
@@ -156,11 +156,11 @@ The secret detection step is run as part of the `make precommit` target.
 rAPId has several core components that are all versioned when a release is created:
 
 1. A API image that can be pulled to run the python application.
-2. A zip package containing the static UI.
+2. A zip package containing the static Frontend.
 3. A public pypi package of the built rAPId-sdk that provides an easy and pythonic way to interact with the API.
 4. A terraform module that can be used to create the AWS services necessary for running the various components of rAPId.
 
-Performing a release involves tagging the repository with a new version number so that the API image, UI, SDK and Terraform all get versioned. Note that the API and SDK can be versioned and released independently, so you can conserve the API version number if just releasing an update to the SDK.
+Performing a release involves tagging the repository with a new version number so that the API image, Frontend, SDK and Terraform all get versioned. Note that the API and SDK can be versioned and released independently, so you can conserve the API version number if just releasing an update to the SDK.
 
 ### Prerequisites
 
@@ -168,10 +168,10 @@ Performing a release involves tagging the repository with a new version number s
 
 ### Steps
 
-1. Decide on the new version number for the API and the UI and/or the SDK following the [semantic versioning approach](https://semver.org/).
+1. Decide on the new version number for the API and the Frontend and/or the SDK following the [semantic versioning approach](https://semver.org/).
 2. Update and commit the Changelog (you can follow
    the [template](https://github.com/no10ds/rapid/blob/main/changelog_release_template.md)). You'll need to separate SDK and API changes into their respective changelogs, under docs/changelog.
-   1. Bundle API, UI and terraform changes as part of the API changelog.
+   1. Bundle API, Frontend and terraform changes as part of the API changelog.
    2. Insert SDK changes into the SDK changelog.
 3. Run `make release commit=<commit_hash> type=<sdk|api> version=vX.X.X`
 
