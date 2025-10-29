@@ -1,8 +1,5 @@
 name: pre-commit
 
-env:
-  TERRAFORM_VERSION: 1.13.4
-
 on:
   push:
     branches:
@@ -26,8 +23,6 @@ jobs:
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: ${{ env.TERRAFORM_VERSION }}
 
       - name: Setup GO
         uses: actions/setup-go@v6
