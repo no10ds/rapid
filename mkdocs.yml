@@ -34,8 +34,8 @@ nav:
       - infrastructure/certificates.md
       - infrastructure/domains_subdomains.md
       - infrastructure/overview.md
-  - UI:
-      - ui/usage.md
+  - Frontend:
+      - frontend/usage.md
   - SDK:
       - sdk/usage.md
       - sdk/useful_patterns.md

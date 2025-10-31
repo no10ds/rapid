@@ -1,0 +1,11 @@
+flake8
+pytest
+pytest-cov
+deepdiff
+mock
+pytest
+requests-mock
+setuptools
+twine
+
+-r ./requirements.txt
