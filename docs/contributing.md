@@ -31,7 +31,7 @@ You can then run the following commands from within the root project directory:
 
 - `make python-setup` - Installs and selects the correct version of Python with pyenv.
 
-- `make api/setup` - Creates the virtual environment for the API and pip installs the Python dependencies.
+- `make backend/setup` - Creates the virtual environment for the API and pip installs the Python dependencies.
 
 - `make api/run` - Runs the API in development mode
 

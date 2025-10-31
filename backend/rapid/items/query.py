@@ -111,4 +111,3 @@ class Query(BaseModel):
             [column for column in column_list if column != "" and column is not None]
         )
         return prefix + columns
-
