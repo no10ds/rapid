@@ -7,7 +7,7 @@ setup(
     name="rapid-sdk",
     version=version if TEST_SDK_VERSION is None else f"{version}.{TEST_SDK_VERSION}",
     description="A python sdk for the rAPId API",
-    url="https://github.com/no10ds/rapid/tree/main/backend", 
+    url="https://github.com/no10ds/rapid", 
     author="Lewis Card",
     author_email="lcard@no10.gov.uk",
     license="MIT",
