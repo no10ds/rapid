@@ -1,0 +1,3 @@
+year,month,destination,arrival,type,status
+1999,13,Leeds,London,invalid_type,completed
+2035,0,Manchester,Birmingham,regular,invalid_status

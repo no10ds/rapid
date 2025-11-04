@@ -4,6 +4,7 @@ from typing import List, Dict, Optional, Set
 import awswrangler as wr
 from pydantic.main import BaseModel
 import pyarrow as pa
+import pandera
 
 from api.domain.schema_metadata import Owner, SchemaMetadata
 from rapid.items.schema import Column, UpdateBehaviour
@@ -97,3 +98,11 @@ class Schema(BaseModel):
                 for column in self.columns
             ]
         )
+
+    def pandera_validate(self, df, **kwargs):
+        pandera_columns = {
+            col.name: col.to_pandera_column()
+            for col in self.columns
+        }
+        pandera_schema = pandera.DataFrameSchema(metadata=self.metadata, columns=pandera_columns)
+        return pandera_schema.validate(df, **kwargs)
