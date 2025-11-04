@@ -164,3 +164,24 @@ class Schema(BaseModel):
             new_columns = [Column(**col) for col in new_columns]
 
         return self.columns == new_columns
+
+    def pandera_validate(self, df, **kwargs):
+        """
+        Validate a DataFrame using Pandera based on the schema's column definitions and checks.
+
+        Args:
+            df: The pandas DataFrame to validate
+            **kwargs: Additional arguments to pass to Pandera's validate method (e.g., lazy=True)
+
+        Returns:
+            The validated DataFrame
+
+        Raises:
+            pandera.errors.SchemaErrors: If validation fails
+        """
+        pandera_columns = {
+            col.name: col.to_pandera_column()
+            for col in self.columns
+        }
+        pandera_schema = pandera.DataFrameSchema(metadata=self.metadata, columns=pandera_columns)
+        return pandera_schema.validate(df, **kwargs)

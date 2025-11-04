@@ -46,11 +46,11 @@ raw_data = [{"a": 1, "b": 2, "c": 3}, {"a": 10, "b": 20, "c": 30}]
 df = pd.DataFrame(raw_data)
 
 schema = rapid.generate_schema(
-    df=df, layer="layer", domain="domain", dataset="dataset", sensitivity="PUBLIC"
+    df=df, layer="default", domain="domain", dataset="dataset", sensitivity="PUBLIC"
 )
 
 print("Domain ", schema.metadata.domain)
-print("Columns ", schema.columns.dict())
+print("Columns ", [col.model_dump() for col in schema.columns])
 ```
 
 ### Download Data
@@ -62,7 +62,7 @@ import pandas as pd
 from rapid import Rapid
 
 data = rapid.download_dataframe(
-    layer="layer", domain="domain", dataset="dataset", version=1
+    layer="default", domain="domain", dataset="dataset", version=1
 )
 
 print(data.info())
@@ -80,7 +80,7 @@ query = Query(
 )
 
 data = rapid.download_dataframe(
-    layer="layer", domain="domain", dataset="dataset", version=1, query=query
+    layer="default", domain="domain", dataset="dataset", version=1, query=query
 )
 
 print(data.info())

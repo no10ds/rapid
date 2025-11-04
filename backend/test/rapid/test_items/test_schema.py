@@ -12,6 +12,7 @@ DUMMY_COLUMNS = [
         allow_null=True,
         unique=False,
         format=None,
+        checks={},
     ),
     Column(
         name="column_b",
@@ -20,6 +21,7 @@ DUMMY_COLUMNS = [
         allow_null=True,
         unique=False,
         format=None,
+        checks={},
     ),
 ]
 
@@ -31,6 +33,7 @@ DUMMY_COLUMNS_TWO = [
         allow_null=True,
         unique=False,
         format=None,
+        checks={},
     )
 ]
 
@@ -91,6 +94,7 @@ class TestColumn:
             "data_type": "object",
             "allow_null": True,
             "format": None,
+            "checks": {},
         }
 
         column = Column(**_column)
@@ -99,6 +103,7 @@ class TestColumn:
         assert column.data_type == "object"
         assert column.allow_null is True
         assert column.format is None
+        assert column.checks == {}
 
     def test_create_columns_fails_name_none(self):
         _column = {
@@ -106,6 +111,7 @@ class TestColumn:
             "data_type": "object",
             "allow_null": True,
             "format": None,
+            "checks": {},
         }
 
         with pytest.raises(ValidationError) as exc_info:
@@ -117,6 +123,7 @@ class TestColumn:
                 "data_type": "object",
                 "allow_null": True,
                 "format": None,
+                "checks": {},
             },
             "loc": ("name",),
             "msg": "Field required",
@@ -135,6 +142,7 @@ class TestColumn:
             "partition_index": None,
             "allow_null": True,
             "format": None,
+            "checks": {},
         }
 
         with pytest.raises(ValidationError) as exc_info:
@@ -146,6 +154,7 @@ class TestColumn:
                 "partition_index": None,
                 "allow_null": True,
                 "format": None,
+                "checks": {},
             },
             "loc": ("data_type",),
             "msg": "Field required",
@@ -166,6 +175,7 @@ class TestColumn:
             "allow_null": True,
             "format": None,
             "unique": False,
+            "checks": {},
         }
 
         column = Column(
@@ -174,6 +184,7 @@ class TestColumn:
             data_type="object",
             format=None,
             partition_index=None,
+            checks={},
         )
         assert column.model_dump() == _column
 
@@ -187,6 +198,7 @@ class TestSchema:
                 "data_type": "object",
                 "allow_null": True,
                 "format": None,
+                "checks": {},
             },
             {
                 "name": "column_b",
@@ -194,6 +206,7 @@ class TestSchema:
                 "data_type": "object",
                 "allow_null": True,
                 "format": None,
+                "checks": {},
             },
         ]
 
@@ -234,6 +247,7 @@ class TestSchema:
                 "data_type": "object",
                 "allow_null": True,
                 "format": None,
+                "checks": {},
             },
             {
                 "name": "column_b",
@@ -241,6 +255,7 @@ class TestSchema:
                 "data_type": "object",
                 "allow_null": True,
                 "format": None,
+                "checks": {},
             },
         ]
         schema = Schema(metadata=DUMMY_METADATA, columns=DUMMY_COLUMNS)
@@ -260,6 +275,7 @@ class TestSchema:
                 "data_type": "Float64",
                 "allow_null": True,
                 "format": None,
+                "checks": {},
             }
         ]
         schema = Schema(metadata=DUMMY_METADATA, columns=DUMMY_COLUMNS)
@@ -290,6 +306,7 @@ class TestSchema:
                     "allow_null": True,
                     "format": None,
                     "unique": False,
+                    "checks": {},
                 },
                 {
                     "name": "column_b",
@@ -298,6 +315,7 @@ class TestSchema:
                     "allow_null": True,
                     "format": None,
                     "unique": False,
+                    "checks": {},
                 },
             ],
         }
