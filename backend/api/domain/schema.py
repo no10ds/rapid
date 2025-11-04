@@ -1,5 +1,5 @@
 from strenum import StrEnum
-from typing import List, Dict, Optional, Set, Any
+from typing import List, Dict, Optional, Set
 
 import awswrangler as wr
 from pydantic.main import BaseModel
@@ -11,6 +11,7 @@ from rapid.items.schema import Column, UpdateBehaviour
 
 METADATA = "metadata"
 COLUMNS = "columns"
+
 
 class Schema(BaseModel):
     metadata: SchemaMetadata

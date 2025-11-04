@@ -80,9 +80,6 @@ backend/reqs:
 
 backend/setup:	backend/venv backend/reqs
 
-backend/lint:			## Run the backend lint checks with flake8
-	@cd backend/; . .venv/bin/activate; flake8 api test rapid
-
 backend/format:			## Run the api code format with black
 	@cd backend/; . .venv/bin/activate; black api test rapid
 
