@@ -639,6 +639,7 @@ class TestDatasetInfoRetrieval:
                 number_of_rows=48718,
                 number_of_columns=3,
                 last_updated="2022-03-01 11:03:49+00:00",
+                last_uploaded_by="Unknown",
             ),
             columns=[
                 EnrichedColumn(
@@ -664,6 +665,7 @@ class TestDatasetInfoRetrieval:
             ],
         )
         self.schema_service.get_schema.return_value = self.valid_schema
+        self.job_service.db_adapter.get_latest_successful_upload_job.return_value = None
         self.athena_adapter.query.return_value = pd.DataFrame(
             {
                 "data_size": [48718],
@@ -731,6 +733,7 @@ class TestDatasetInfoRetrieval:
                 number_of_rows=48718,
                 number_of_columns=3,
                 last_updated="2022-03-01 11:03:49+00:00",
+                last_uploaded_by="Unknown",
             ),
             columns=[
                 EnrichedColumn(
@@ -758,6 +761,7 @@ class TestDatasetInfoRetrieval:
             ],
         )
         self.schema_service.get_schema.return_value = valid_schema
+        self.job_service.db_adapter.get_latest_successful_upload_job.return_value = None
         self.athena_adapter.query.return_value = pd.DataFrame(
             {
                 "data_size": [48718],
@@ -818,6 +822,7 @@ class TestDatasetInfoRetrieval:
                 number_of_rows=48718,
                 number_of_columns=1,
                 last_updated="2022-03-01 11:03:49+00:00",
+                last_uploaded_by="Unknown",
             ),
             columns=[
                 EnrichedColumn(
@@ -829,6 +834,7 @@ class TestDatasetInfoRetrieval:
             ],
         )
         self.schema_service.get_schema.return_value = valid_schema
+        self.job_service.db_adapter.get_latest_successful_upload_job.return_value = None
         self.athena_adapter.query.return_value = pd.DataFrame({"data_size": [48718]})
 
         actual_schema = self.data_service.get_dataset_info(
