@@ -397,11 +397,11 @@ class DynamoDBAdapter(DatabaseAdapter):
                 self.service_table.query,
                 KeyConditionExpression=Key("PK").eq("JOB"),
                 FilterExpression=(
-                    Attr("Type").eq("UPLOAD") &
-                    Attr("Status").eq("SUCCESS") &
-                    Attr("Layer").eq(dataset.layer) &
-                    Attr("Domain").eq(dataset.domain) &
-                    Attr("Dataset").eq(dataset.dataset)
+                    Attr("Type").eq("UPLOAD")
+                    & Attr("Status").eq("SUCCESS")
+                    & Attr("Layer").eq(dataset.layer)
+                    & Attr("Domain").eq(dataset.domain)
+                    & Attr("Dataset").eq(dataset.dataset)
                 )
             )
 
