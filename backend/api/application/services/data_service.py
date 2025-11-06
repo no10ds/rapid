@@ -188,14 +188,25 @@ class DataService:
         )
         return last_updated or "Never updated"
 
+    def get_last_uploader(self, metadata: DatasetMetadata) -> str:
+        """
+        Get the subject_id of the user who last successfully uploaded to this dataset.
+        Returns the subject_id or "Unknown" if no upload history exists.
+        """
+        latest_job = self.job_service.db_adapter.get_latest_successful_upload_job(metadata)
+        if latest_job and latest_job.get("sk2"):
+            return latest_job["sk2"]
+        return "Unknown"
+
     def get_dataset_info(self, dataset: DatasetMetadata) -> EnrichedSchema:
         schema = self.schema_service.get_schema(dataset)
         statistics_dataframe = self.athena_adapter.query(
             dataset, self._build_query(schema)
         )
         last_updated = self.get_last_updated_time(dataset)
+        last_uploaded_by = self.get_last_uploader(dataset)
         return EnrichedSchema(
-            metadata=self._enrich_metadata(schema, statistics_dataframe, last_updated),
+            metadata=self._enrich_metadata(schema, statistics_dataframe, last_updated, last_uploaded_by),
             columns=self._enrich_columns(schema, statistics_dataframe),
         )
 
@@ -285,7 +296,7 @@ class DataService:
         return Query(select_columns=columns_to_query)
 
     def _enrich_metadata(
-        self, schema: Schema, statistics_dataframe: pd.DataFrame, last_updated: str
+        self, schema: Schema, statistics_dataframe: pd.DataFrame, last_updated: str, last_uploaded_by: str
     ) -> EnrichedSchemaMetadata:
         dataset_size = statistics_dataframe.at[0, "data_size"]
         return EnrichedSchemaMetadata(
@@ -293,6 +304,7 @@ class DataService:
             number_of_rows=dataset_size,
             number_of_columns=len(schema.columns),
             last_updated=last_updated,
+            last_uploaded_by=last_uploaded_by,
         )
 
     def _enrich_columns(

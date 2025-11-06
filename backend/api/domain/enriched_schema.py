@@ -14,6 +14,7 @@ class EnrichedSchemaMetadata(SchemaMetadata):
     number_of_rows: int
     number_of_columns: int
     last_updated: str
+    last_uploaded_by: Optional[str] = None
 
 
 class EnrichedSchema(BaseModel):

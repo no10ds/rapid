@@ -85,6 +85,10 @@ class DatabaseAdapter(ABC):
         pass
 
     @abstractmethod
+    def get_latest_successful_upload_job(self, dataset: Type[DatasetMetadata]) -> Optional[Dict]:
+        pass
+
+    @abstractmethod
     def store_schema(self, schema: Schema) -> None:
         pass
 
@@ -382,6 +386,34 @@ class DynamoDBAdapter(DatabaseAdapter):
             raise UserError(f"Could not find job with id {job_id}")
         except ClientError as error:
             self._handle_client_error("Error fetching job from the database", error)
+
+    def get_latest_successful_upload_job(self, dataset: Type[DatasetMetadata]) -> Optional[Dict]:
+        """
+        Get the most recent successful upload job for a specific dataset.
+        Returns the job details including subject_id (uploader) or None if no successful upload exists.
+        """
+        try:
+            jobs = self.collect_all_items(
+                self.service_table.query,
+                KeyConditionExpression=Key("PK").eq("JOB"),
+                FilterExpression=(
+                    Attr("Type").eq("UPLOAD") &
+                    Attr("Status").eq("SUCCESS") &
+                    Attr("Layer").eq(dataset.layer) &
+                    Attr("Domain").eq(dataset.domain) &
+                    Attr("Dataset").eq(dataset.dataset)
+                )
+            )
+
+            if not jobs:
+                return None
+
+            # Sort by SK (job_id which contains timestamp) to get the most recent
+            sorted_jobs = sorted(jobs, key=lambda x: x.get("SK", ""), reverse=True)
+            return self._map_job(sorted_jobs[0])
+        except ClientError as error:
+            AppLogger.warning(f"Error fetching latest upload job for dataset: {error}")
+            return None
 
     def get_schema(self, dataset: Type[DatasetMetadata]) -> Optional[dict]:
         try:
