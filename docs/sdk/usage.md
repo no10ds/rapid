@@ -27,7 +27,7 @@ Alternatively, you can pass the values directly to the RapidAuth class:
 ```python
 rapid_authentication = RapidAuth(
     client_id="your_client_id",
-    client_secret="your_client_secret",
+    client_secret="your_client_secret",  # pragma: allowlist secret
     url="https://your-rapid-instance.com"
 )
 rapid = Rapid(auth=rapid_authentication)
