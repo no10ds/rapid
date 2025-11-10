@@ -119,4 +119,4 @@ If you're upgrading from v0.1.12:
 
 ### Migration
 
-- See the [migration doc](migration.md) for details on how to migrate to v7 from v6.
+- See the [migration doc](../migration.md) for details on how to migrate to v7 from v6.
