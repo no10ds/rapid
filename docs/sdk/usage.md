@@ -22,19 +22,22 @@ rapid_authentication = RapidAuth()
 rapid = Rapid(auth=rapid_authentication)
 ```
 
-If you do not want to use environment variables (however this is discouraged as secrets should always be kept safe), you can pass the values directly to the class as follows.
+Alternatively, you can pass the values directly to the RapidAuth class:
 
 ```python
 rapid_authentication = RapidAuth(
-    client_id=os.getenv("RAPID_CLIENT_ID"),
-    client_secret=os.getenv("RAPID_CLIENT_SECRET"),
-    url=os.getenv("RAPID_URL"),
+    client_id="your_client_id",
+    client_secret="your_client_secret",  # pragma: allowlist secret
+    url="https://your-rapid-instance.com"
 )
+rapid = Rapid(auth=rapid_authentication)
 ```
+
+> Note: For security, it's recommended to use environment variables rather than hardcoding credentials in your code.
 
 ### Generate Schema
 
-The sdk provides an easy and intuitive way to generate a schema based on a Pandas DataFrame you might have. The function returns a custom Pydantic Schema class type that matches a valid rAPId schema. This can be used to programmatic information of the schema such as domain, dataset and lists of it's columns.
+The sdk provides an easy and intuitive way to generate a schema based on a Pandas DataFrame you might have. The function returns a custom Pydantic Schema class type that matches a valid rAPId schema. This can be used to programmatically access information about the schema such as domain, dataset and lists of columns.
 
 ```python
 import pandas as pd
@@ -53,6 +56,16 @@ print("Domain ", schema.metadata.domain)
 print("Columns ", [col.model_dump() for col in schema.columns])
 ```
 
+### Upload Schema
+
+You can upload a generated schema via the sdk.
+
+```
+rapid.create_schema(schema)
+```
+
+> Note: Uploading a schema requires `DATA_ADMIN` permissions.
+
 ### Download Data
 
 The sdk provides an easy way to automatically download a specific dataset based on an optional version and query. The function returns the data in a pandas DataFrame format. See the example below for a basic example.
@@ -68,7 +81,7 @@ data = rapid.download_dataframe(
 print(data.info())
 ```
 
-It is possible to pass a query to get more granular information about a dataset. We provide a Pydantic query class that can get passed into the download function. For more information on writing rAPId compatible queries see [the documentation]() and the example below.
+It is possible to pass a query to get more granular information about a dataset. We provide a Pydantic query class that can get passed into the download function. For more information on writing rAPId compatible queries see [the query documentation](../api/query.md) and the example below.
 
 ```python
 import pandas as pd
