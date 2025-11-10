@@ -1,5 +1,30 @@
 # SDK Changelog
 
+## v0.1.13 - _2025-11-10_
+
+### Breaking Changes
+
+- Updated from Pydantic v1 to v2 - existing code using `.dict()` must change to `.model_dump()`
+- `Column` model now requires explicit `partition_index` and `allow_null` parameters (previously had default values)
+- `Query.limit` field type changed from `Optional[str]` to `Optional[int]`
+- `Query` model now forbids extra fields via `model_config`
+- Renamed `SQLQueryOrderBy` to `QueryOrderBy`
+
+### Fixes
+
+- Internal code restructuring: moved SDK code from `sdk/` to `backend/rapid/` folder
+- Deduplicated query models between API and SDK
+- Updated repository URL references from deprecated repos to monorepo
+
+### Migration
+
+If you're upgrading from v0.1.12:
+- Replace all `.dict()` calls with `.model_dump()` on Schema and Query objects
+- Ensure `Column` definitions explicitly set `partition_index` and `allow_null` values
+- Update `Query` limit values to use integers instead of strings
+- Rename any references to `SQLQueryOrderBy` to `QueryOrderBy`
+
+
 ## v0.1.12 - \_2025-05-19
 
 - Fixing deprecation warning in download_dataframe function from passing JSON string from rAPId as literal.
@@ -94,4 +119,4 @@
 
 ### Migration
 
-- See the [migration doc](migration.md) for details on how to migrate to v7 from v6.
+- See the [migration doc](../migration.md) for details on how to migrate to v7 from v6.

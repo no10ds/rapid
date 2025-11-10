@@ -46,7 +46,7 @@ class TestCustomChecksJourney(BaseAuthenticatedJourneyTest):
         job_response = requests.get(job_url, headers=self.generate_auth_headers())
         assert job_response.status_code == HTTPStatus.OK
         assert job_response.json()["status"] == "FAILED"
-        assert "check" in str(job_response.json().get("errors", "")).lower()
+        assert "validator" in str(job_response.json().get("errors", "")).lower()
 
     def test_upload_valid_data(self):
         files = {"file": (self.valid_csv_filename, open("./test/e2e/" + self.valid_csv_filename, "rb"))}

@@ -315,7 +315,7 @@ async def delete_data_file(
 
     ### General structure
 
-    `GET /datasets/{layer}/{domain}/{dataset}/{version}/{filename}`
+    `DELETE /datasets/{layer}/{domain}/{dataset}/{version}/{filename}`
 
     ### Inputs
 

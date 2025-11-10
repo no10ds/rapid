@@ -10,7 +10,7 @@ Any
 
 ### Path
 
-`POST /schema/{sensitivity}/{domain}/{dataset}/generate`
+`POST /schema/{layer}/{sensitivity}/{domain}/{dataset}/generate`
 
 ### Inputs
 
@@ -122,40 +122,74 @@ Example schema JSON body:
 
 None
 
-## Update (new dataset version)
+## Update Schema (new dataset version)
 
-This endpoint is for uploading an updated schema definition. This will allow you to subsequently upload datasets that match the updated schema.
+This endpoint is for uploading an updated schema definition. This will create a new version of the schema and allow you to subsequently upload datasets that match the updated schema.
 
 ### Permissions
 
-Any relevant `WRITE` permissions that matches dataset sensitivity level, e.g. `WRITE_ALL`, `WRITE_PUBLIC`, `WRITE_PRIVATE`, `WRITE_PROTECTED_{DOMAIN}`.
+`DATA_ADMIN`
 
 ### Path
 
-`POST /datasets/{layer}/{domain}/{dataset}`
+`PUT /schema`
 
 ### Inputs
 
-| Parameters | Required | Usage                                   | Example values              | Definition              |
-| ---------- | -------- | --------------------------------------- | --------------------------- | ----------------------- |
-| `layer`    | True     | URL parameter                           | `default`                   | layer of the dataset    |
-| `domain`   | True     | URL parameter                           | `air`                       | domain of the dataset   |
-| `dataset`  | True     | URL parameter                           | `passengers_by_airport`     | dataset title           |
-| `version`  | False    | Query parameter                         | `3`                         | dataset version         |
-| `file`     | True     | File in form data with key value `file` | `passengers_by_airport.csv` | the dataset file itself |
+| Parameters | Usage             | Example values | Definition            |
+| ---------- | ----------------- | -------------- | --------------------- |
+| schema     | JSON request body | see below      | the schema definition |
 
-### Output
-
-If successful returns file name with a timestamp included, e.g.:
+Example updated schema JSON body:
 
 ```json
 {
-  "details": {
-    "original_filename": "the-filename.csv",
-    "raw_filename": "661c9467-5d0e-4ec7-ad05-b8651598b675.csv",
-    "dataset_version": 3,
-    "status": "Data processing",
-    "job_id": "3bd7d98f-2264-4f88-bd65-5a2089161650"
-  }
+  "metadata": {
+    "layer": "default",
+    "domain": "land",
+    "dataset": "train_journeys",
+    "sensitivity": "PUBLIC",
+    "description": "Updated description for version 2",
+    "key_value_tags": {
+      "train": "passenger"
+    },
+    "key_only_tags": ["land"],
+    "owners": [
+      {
+        "name": "Stanley Shunpike",
+        "email": "stan.shunpike@email.com"
+      }
+    ],
+    "update_behaviour": "APPEND"
+  },
+  "columns": [
+    {
+      "name": "date",
+      "partition_index": 0,
+      "data_type": "date",
+      "format": "%d/%m/%Y",
+      "allow_null": false
+    },
+    {
+      "name": "num_journeys",
+      "partition_index": null,
+      "data_type": "integer",
+      "allow_null": false
+    },
+    {
+      "name": "station_name",
+      "partition_index": null,
+      "data_type": "string",
+      "allow_null": true
+    }
+  ]
+}
+```
+
+### Output
+
+```json
+{
+  "details": "The schema for [layer/domain/dataset] has been stored"
 }
 ```

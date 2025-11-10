@@ -1,8 +1,19 @@
 # API Changelog
 
+## v7.14.0 - _2025-11-10_
+
+### Features
+
+- Integration with Pandera for enhanced data validation
+  - Added ability to add custom checks for a column in the schema
+
+### Fixes
+
+- Internal code restructuring: combined /api and /sdk into /backend and renamed /ui to /frontend
+- Deduplicated code (sqlquery/query, column, owner, update behaviour)
+
 ## v7.13.0 - _2025-10-17_
 
-See [v7.13.0] changes
 
 ### Features
 
@@ -167,4 +178,4 @@ See [v7.13.0] changes
 
 ### Migration
 
-- See the [migration doc](migration.md) for details on how to migrate to v7 from v6.
+- See the [migration doc](../migration.md) for details on how to migrate to v7 from v6.

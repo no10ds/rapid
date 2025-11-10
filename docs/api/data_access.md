@@ -20,7 +20,7 @@ not the reverse.
 
 - `PROTECTED`
 
-Protected datasets as isolated from the hierarchy and are domain specific. This means that you have to be granted access
+Protected datasets are isolated from the hierarchy and are domain specific. This means that you have to be granted access
 to specific protected domains to gain access.
 
 These domains must first be [created](./routes/protected_domain.md/#create) and then assigned to

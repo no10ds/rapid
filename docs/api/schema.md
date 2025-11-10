@@ -29,6 +29,8 @@ A schema is defined with the following structure:
 - `allow_null` - Boolean value, specifies whether the columns can have empty values or not.
 - `partition_index` (Optional) - Integer value, whether the column is a [partition](#partitions) and its index.
 - `format` (Conditional) - String value, regular expression used to specify the format of the dates. Will only be used and required if the data_type is date.
+- `unique` (Optional) - Boolean value, when set to true, enforces that all values in the column must be unique. Defaults to false.
+- `checks` (Optional) - Dictionary of validation checks to apply to the column data. See [Pandera Data Validation](#pandera-data-validation) for details.
 
 ### Sensitivity
 
@@ -151,6 +153,87 @@ year=year2
 └── month=month2
     ├── region=region1
     └── region=region2
+```
+
+### Pandera Data Validation
+
+rAPId supports custom data validation using Pandera checks. You can add validation rules to columns in the schema using the `checks` field to ensure data quality.
+
+#### Supported Check Types
+
+- `in_range` - Validates that values fall within a specified range
+  - Parameters: `min_value`, `max_value`
+- `isin` - Validates that values are in a specified list of allowed values
+  - Parameters: `allowed_values` (list)
+- `str_length` - Validates the length of string values
+  - Parameters: `min_value`, `max_value`
+- `greater_than` - Validates that values are greater than a threshold
+  - Parameters: `min_value`
+- `less_than` - Validates that values are less than a threshold
+  - Parameters: `max_value`
+- `str_matches` - Validates that string values match a regex pattern
+  - Parameters: `pattern`
+
+#### Example with Validation
+
+```json
+{
+  "metadata": {
+    "layer": "default",
+    "domain": "my_domain",
+    "dataset": "validated_data",
+    "sensitivity": "PUBLIC",
+    "owners": [{"name": "Data Team", "email": "data@example.com"}]
+  },
+  "columns": [
+    {
+      "name": "age",
+      "data_type": "integer",
+      "allow_null": false,
+      "partition_index": null,
+      "unique": false,
+      "checks": {
+        "age_range": {
+          "check_type": "in_range",
+          "parameters": {
+            "min_value": 0,
+            "max_value": 120
+          }
+        }
+      }
+    },
+    {
+      "name": "status",
+      "data_type": "string",
+      "allow_null": false,
+      "partition_index": null,
+      "unique": false,
+      "checks": {
+        "valid_status": {
+          "check_type": "isin",
+          "parameters": {
+            "allowed_values": ["active", "inactive", "pending"]
+          }
+        }
+      }
+    },
+    {
+      "name": "email",
+      "data_type": "string",
+      "allow_null": false,
+      "partition_index": null,
+      "unique": true,
+      "checks": {
+        "email_format": {
+          "check_type": "str_matches",
+          "parameters": {
+            "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+          }
+        }
+      }
+    }
+  ]
+}
 ```
 
 ## From scratch
@@ -287,7 +370,7 @@ You might then change the values that fit your data and come with something like
   "metadata": {
     "domain": "changed_domain_name",
     "dataset": "changed_dataset_name",
-    "description": "provide some human readable details about the dataset"
+    "description": "provide some human readable details about the dataset",
     "sensitivity": "SENSITIVITY",
     "key_value_tags": {},
     "key_only_tags": [
