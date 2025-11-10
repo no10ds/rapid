@@ -12,6 +12,7 @@ from api.application.services.dataset_validation import build_validated_datafram
 from api.application.services.job_service import JobService
 from api.application.services.partitioning_service import generate_partitioned_data
 from api.application.services.schema_service import SchemaService
+from api.application.services.subject_service import SubjectService
 from api.common.config.constants import (
     DATASET_ROWS_QUERY_LIMIT,
     DATASET_SIZE_QUERY_LIMIT,
@@ -51,12 +52,14 @@ class DataService:
         athena_adapter=AthenaAdapter(),
         job_service=JobService(),
         schema_service=SchemaService(),
+        subject_service=SubjectService(),
     ):
         self.s3_adapter = s3_adapter
         self.glue_adapter = glue_adapter
         self.athena_adapter = athena_adapter
         self.job_service = job_service
         self.schema_service = schema_service
+        self.subject_service = subject_service
 
     def list_raw_files(self, dataset: DatasetMetadata) -> list[str]:
         raw_files = self.s3_adapter.list_raw_files(dataset)
@@ -190,12 +193,19 @@ class DataService:
 
     def get_last_uploader(self, metadata: DatasetMetadata) -> str:
         """
-        Get the subject_id of the user who last successfully uploaded to this dataset.
-        Returns the subject_id or "Unknown" if no upload history exists.
+        Get the name of the user who last successfully uploaded to this dataset.
+        Returns the subject name or "Unknown" if no upload history exists.
         """
         latest_job = self.job_service.db_adapter.get_latest_successful_upload_job(metadata)
         if latest_job and latest_job.get("sk2"):
-            return latest_job["sk2"]
+            subject_id = latest_job["sk2"]
+            try:
+                return self.subject_service.get_subject_name_by_id(subject_id)
+            except Exception as error:
+                AppLogger.warning(
+                    f"Could not retrieve subject name for ID {subject_id}: {error}"
+                )
+                return "Unknown"
         return "Unknown"
 
     def get_dataset_info(self, dataset: DatasetMetadata) -> EnrichedSchema:
