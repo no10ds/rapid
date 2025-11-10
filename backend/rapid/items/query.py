@@ -2,8 +2,6 @@ from strenum import StrEnum
 from typing import Optional, List
 from pydantic import BaseModel, ConfigDict
 
-from api.common.logger import AppLogger
-
 
 class SortDirection(StrEnum):
     ASC = "ASC"
@@ -61,7 +59,6 @@ class Query(BaseModel):
         constructed_sql = (
             f"{select}{filter}{group_by}{aggregation_conditions}{order_by}{limit}"
         )
-        AppLogger.info(f"Constructed SQL from input query: {constructed_sql}")
         return constructed_sql
 
     def _generate_select_columns(self):

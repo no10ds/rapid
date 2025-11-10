@@ -34,6 +34,7 @@ class TestData:
                     data_type="object",
                     allow_null=True,
                     format=None,
+                    checks={},
                 ),
                 Column(
                     name="column_b",
@@ -41,6 +42,7 @@ class TestData:
                     data_type="object",
                     allow_null=True,
                     format=None,
+                    checks={},
                 ),
                 Column(
                     name="column_c",
@@ -48,6 +50,7 @@ class TestData:
                     data_type="object",
                     allow_null=True,
                     format=None,
+                    checks={},
                 ),
             ],
         )
@@ -153,6 +156,7 @@ class TestData:
                 data_type="float64",  # NOTE: Change in data type for column
                 allow_null=True,
                 format=None,
+                checks={},
             ),
             Column(
                 name="column_b",
@@ -160,6 +164,7 @@ class TestData:
                 data_type="object",
                 allow_null=True,
                 format=None,
+                checks={},
             ),
             Column(
                 name="column_c",
@@ -167,6 +172,7 @@ class TestData:
                 data_type="object",
                 allow_null=True,
                 format=None,
+                checks={},
             ),
         ]
 

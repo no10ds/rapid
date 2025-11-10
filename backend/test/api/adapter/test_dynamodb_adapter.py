@@ -1054,6 +1054,7 @@ class TestDynamoDBAdapterSchemaTable:
                         "allow_null": False,
                         "format": None,
                         "unique": False,
+                        "checks": {},
                     },
                     {
                         "name": "colname2",
@@ -1062,6 +1063,7 @@ class TestDynamoDBAdapterSchemaTable:
                         "allow_null": True,
                         "format": None,
                         "unique": False,
+                        "checks": {},
                     },
                 ],
             }
