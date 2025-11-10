@@ -1,7 +1,9 @@
+import re
 from typing import Tuple
 
 import pandas as pd
 from pandas import Timestamp
+import pandera
 
 from api.common.custom_exceptions import (
     DatasetValidationError,
@@ -30,10 +32,9 @@ def transform_and_validate(schema: Schema, data: pd.DataFrame) -> pd.DataFrame:
         .pipe(clean_column_headers)
         .pipe(dataset_has_correct_columns, schema)
         .pipe(convert_date_columns, schema)
-        .pipe(dataset_has_acceptable_null_values, schema)
-        .pipe(dataset_has_acceptable_unique_values, schema)
         .pipe(dataset_has_correct_data_types, schema)
         .pipe(dataset_has_no_illegal_characters_in_partition_columns, schema)
+        .pipe(validate_with_pandera, schema)
     )
 
     if validation_context.has_errors():
@@ -68,28 +69,6 @@ def dataset_has_correct_columns(
         )
 
     return df, error_list
-
-
-def dataset_has_acceptable_null_values(
-    data_frame: pd.DataFrame, schema: Schema
-) -> Tuple[pd.DataFrame, list[str]]:
-    error_list = []
-    for column in schema.columns:
-        if not column.allow_null and data_frame[column.name].isnull().values.any():
-            error_list.append(f"Column [{column.name}] does not allow null values")
-
-    return data_frame, error_list
-
-
-def dataset_has_acceptable_unique_values(
-    data_frame: pd.DataFrame, schema: Schema
-) -> Tuple[pd.DataFrame, list[str]]:
-    error_list = []
-    for column in schema.columns:
-        if column.unique and data_frame[column.name].dropna().duplicated().values.any():
-            error_list.append(f"Column [{column.name}] must have unique values")
-
-    return data_frame, error_list
 
 
 def convert_date_columns(
@@ -193,3 +172,54 @@ def is_valid_custom_dtype(actual_type: str, expected_type: str) -> bool:
     """
     is_custom_dtype = expected_type in list(DateType)
     return is_custom_dtype and actual_type in list(StringType)
+
+
+def parse_pandera_errors(exc: pandera.errors.SchemaErrors) -> list[str]:
+    """
+    Parse Pandera SchemaErrors exception to extract the 'error' field from error messages.
+
+    """
+    error_messages = []
+
+    error_str = str(exc)
+
+    # Creating a list of singular (json like) entries from the pandera error string
+    # For example: {'check': 'pandera_check', 'error': 'error message', ...}
+    failure_object_pattern = r'\{\s*(?:[^{}]*?)\}'
+    failure_objects = re.findall(failure_object_pattern, error_str)
+
+    # Extracting and cleaning each error statement
+    for obj in failure_objects:
+
+        error_match = re.search(r'"error":\s*"((?:[^"\\]|\\.)*)"', obj)
+
+        if not error_match:
+            continue
+
+        error_msg = error_match.group(1)
+        error_msg = error_msg.replace(r"\'", "'").replace(r'\"', '"')
+
+        check_match = re.search(r'"check":\s*"([^"]*)"', obj)
+        check_name = check_match.group(1) if check_match else None
+
+        if ':' in error_msg and ('Name:' in error_msg or 'dtype:' in error_msg):
+            error_msg = error_msg.split(':')[0]
+
+        if check_name and check_name not in ['not_nullable', 'field_uniqueness']:
+            error_msg = f"[{check_name}] {error_msg}"
+
+        error_messages.append(error_msg)
+
+    return error_messages if error_messages else [str(exc)]
+
+
+def validate_with_pandera(
+    data_frame: pd.DataFrame, schema: Schema
+) -> Tuple[pd.DataFrame, list[str]]:
+    error_list = []
+    try:
+        validated_df = schema.pandera_validate(data_frame, lazy=True)
+        return validated_df, []
+    except pandera.errors.SchemaErrors as exc:
+        error_list = parse_pandera_errors(exc)
+        return data_frame, error_list

@@ -23,7 +23,8 @@
       "allow_null": true,
       "partition_index": null,
       "format":null,
-      "unique": false
+      "unique": false,
+      "checks": {}
     },
     {
       "name": "month",
@@ -31,7 +32,8 @@
       "allow_null": true,
       "partition_index": null,
       "format":null,
-      "unique": false
+      "unique": false,
+      "checks": {}
     },
     {
       "name": "destination",
@@ -39,7 +41,8 @@
       "allow_null": true,
       "partition_index": null,
       "format":null,
-      "unique": false
+      "unique": false,
+      "checks": {}
     },
     {
       "name": "arrival",
@@ -47,7 +50,8 @@
       "allow_null": true,
       "partition_index": null,
       "format":null,
-      "unique": false
+      "unique": false,
+      "checks": {}
     },
     {
       "name": "type",
@@ -55,7 +59,8 @@
       "allow_null": true,
       "partition_index": null,
       "format":null,
-      "unique": false
+      "unique": false,
+      "checks": {}
     },
     {
       "name": "status",
@@ -63,7 +68,8 @@
       "allow_null": true,
       "partition_index": null,
       "format":null,
-      "unique": false
+      "unique": false,
+      "checks": {}
     }
   ]
 }
