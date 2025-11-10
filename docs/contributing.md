@@ -123,9 +123,9 @@ To launch a static scan on the infrastructure, you can run `make infra/scan`.
 
 #### Scanned image vulnerabilities
 
-The API image is scanned on a daily basis for vulnerabilities. New releases cannot then be made until image the vulnerabilities are addressed.
+The API image is scanned on a daily basis for vulnerabilities. New releases cannot then be made until the image vulnerabilities are addressed.
 
-To address the vulnerability, reviewed the content of it and assess if the application is likely to be affected by it.
+To address a vulnerability, review the content of it and assess if the application is likely to be affected by it.
 
 If it is deemed to be acceptable, you can ignore it by adding the `CVE` to a new
 line in the `vulnerability-ignore-list.txt` file. Ensure you commit with a meaningful error message, the URL and your

@@ -53,7 +53,7 @@ metadata = SchemaMetadata(
     domain="mydomain",
     dataset="mydataset",
     owners=[Owner(name="myname", email="myemail@email.com")],
-    _sensitivity=SensitivityLevel.PUBLIC.value,
+    sensitivity=SensitivityLevel.PUBLIC.value,
 )
 
 try:

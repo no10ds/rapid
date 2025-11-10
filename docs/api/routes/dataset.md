@@ -81,7 +81,7 @@ You will need a relevant `WRITE` permission that matches the dataset sensitivity
 
 ### Path
 
-`GET /datasets/{layer}/{domain}/{dataset}/{version}/{filename}`
+`DELETE /datasets/{layer}/{domain}/{dataset}/{version}/{filename}`
 
 ### Inputs
 
@@ -319,7 +319,7 @@ Asynchronous Job ID that can be used to track the progress of the query. Once th
 
 ## Dataset Info
 
-Use this endpoint to retrieve basic information for specific datasets, if there is no data stored for the dataset and error will be thrown.
+Use this endpoint to retrieve basic information for specific datasets, if there is no data stored for the dataset an error will be thrown.
 
 When a valid dataset is retrieved the available data will be the schema definition with some extra values such as: - number of rows - number of columns - statistics data for date columns
 
