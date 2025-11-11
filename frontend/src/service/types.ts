@@ -87,6 +87,7 @@ export type DatasetInfoResponse = {
     number_of_columns: number
     number_of_rows: number
     last_updated: string
+    last_uploaded_by?: string
   }
   columns: {
     name: string

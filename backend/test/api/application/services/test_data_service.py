@@ -35,12 +35,14 @@ class TestUploadDataset:
         self.athena_adapter = Mock()
         self.job_service = Mock()
         self.schema_service = Mock()
+        self.subject_service = Mock()
         self.data_service = DataService(
             self.s3_adapter,
             None,
             self.athena_adapter,
             self.job_service,
             self.schema_service,
+            self.subject_service,
         )
         self.valid_schema = Schema(
             metadata=SchemaMetadata(
@@ -564,6 +566,7 @@ class TestDatasetInfoRetrieval:
         self.athena_adapter = Mock()
         self.job_service = Mock()
         self.schema_service = Mock()
+        self.subject_service = Mock()
         self.valid_schema = Schema(
             metadata=SchemaMetadata(
                 layer="raw",
@@ -601,6 +604,7 @@ class TestDatasetInfoRetrieval:
             self.athena_adapter,
             self.job_service,
             self.schema_service,
+            self.subject_service,
         )
         self.s3_adapter.get_last_updated_time.return_value = "2022-03-01 11:03:49+00:00"
 
@@ -627,6 +631,38 @@ class TestDatasetInfoRetrieval:
             self.valid_schema.metadata.dataset_location()
         )
 
+    def test_get_last_uploader_returns_subject_name(self):
+        dataset_metadata = DatasetMetadata("raw", "some", "other", 2)
+        self.job_service.db_adapter.get_latest_successful_upload_job.return_value = {
+            "sk2": "subject-123"
+        }
+        self.subject_service.get_subject_name_by_id.return_value = "test_user"
+
+        last_uploader = self.data_service.get_last_uploader(dataset_metadata)
+
+        assert last_uploader == "test_user"
+        self.subject_service.get_subject_name_by_id.assert_called_once_with("subject-123")
+
+    def test_get_last_uploader_returns_unknown_when_no_job(self):
+        dataset_metadata = DatasetMetadata("raw", "some", "other", 2)
+        self.job_service.db_adapter.get_latest_successful_upload_job.return_value = None
+
+        last_uploader = self.data_service.get_last_uploader(dataset_metadata)
+
+        assert last_uploader == "Unknown"
+        self.subject_service.get_subject_name_by_id.assert_not_called()
+
+    def test_get_last_uploader_returns_unknown_when_subject_not_found(self):
+        dataset_metadata = DatasetMetadata("raw", "some", "other", 2)
+        self.job_service.db_adapter.get_latest_successful_upload_job.return_value = {
+            "sk2": "subject-123"
+        }
+        self.subject_service.get_subject_name_by_id.side_effect = Exception("Subject not found")
+
+        last_uploader = self.data_service.get_last_uploader(dataset_metadata)
+
+        assert last_uploader == "Unknown"
+
     def test_get_schema_information(self):
         expected_schema = EnrichedSchema(
             metadata=EnrichedSchemaMetadata(
@@ -639,6 +675,7 @@ class TestDatasetInfoRetrieval:
                 number_of_rows=48718,
                 number_of_columns=3,
                 last_updated="2022-03-01 11:03:49+00:00",
+                last_uploaded_by="Unknown",
             ),
             columns=[
                 EnrichedColumn(
@@ -664,6 +701,7 @@ class TestDatasetInfoRetrieval:
             ],
         )
         self.schema_service.get_schema.return_value = self.valid_schema
+        self.job_service.db_adapter.get_latest_successful_upload_job.return_value = None
         self.athena_adapter.query.return_value = pd.DataFrame(
             {
                 "data_size": [48718],
@@ -731,6 +769,7 @@ class TestDatasetInfoRetrieval:
                 number_of_rows=48718,
                 number_of_columns=3,
                 last_updated="2022-03-01 11:03:49+00:00",
+                last_uploaded_by="Unknown",
             ),
             columns=[
                 EnrichedColumn(
@@ -758,6 +797,7 @@ class TestDatasetInfoRetrieval:
             ],
         )
         self.schema_service.get_schema.return_value = valid_schema
+        self.job_service.db_adapter.get_latest_successful_upload_job.return_value = None
         self.athena_adapter.query.return_value = pd.DataFrame(
             {
                 "data_size": [48718],
@@ -818,6 +858,7 @@ class TestDatasetInfoRetrieval:
                 number_of_rows=48718,
                 number_of_columns=1,
                 last_updated="2022-03-01 11:03:49+00:00",
+                last_uploaded_by="Unknown",
             ),
             columns=[
                 EnrichedColumn(
@@ -829,6 +870,7 @@ class TestDatasetInfoRetrieval:
             ],
         )
         self.schema_service.get_schema.return_value = valid_schema
+        self.job_service.db_adapter.get_latest_successful_upload_job.return_value = None
         self.athena_adapter.query.return_value = pd.DataFrame({"data_size": [48718]})
 
         actual_schema = self.data_service.get_dataset_info(

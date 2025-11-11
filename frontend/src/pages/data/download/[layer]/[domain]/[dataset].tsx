@@ -128,6 +128,7 @@ function DownloadDataset() {
           { name: 'Description', value: datasetInfoData.metadata.description },
           { name: 'Version', value: version as string },
           { name: 'Last updated	', value: datasetInfoData.metadata.last_updated },
+          { name: 'Last uploaded by', value: datasetInfoData.metadata.last_uploaded_by || 'Unknown' },
           {
             name: 'Number of Rows',
             value: datasetInfoData.metadata.number_of_rows.toString()
