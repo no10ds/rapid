@@ -4,6 +4,7 @@ from api.adapter.cognito_adapter import CognitoAdapter
 from api.adapter.dynamodb_adapter import DynamoDBAdapter
 from api.common.config.auth import SubjectType
 from api.common.custom_exceptions import UserError
+from api.common.logger import AppLogger
 from api.domain.client import ClientResponse, ClientRequest
 from api.domain.subject_permissions import SubjectPermissions
 from api.domain.user import UserRequest, UserResponse, UserDeleteRequest
@@ -70,13 +71,24 @@ class SubjectService:
         return subject_permissions
 
     def get_subject_name_by_id(self, subject_id: str) -> str:
+        AppLogger.info(f"Getting subject name for subject_id: {subject_id}")
+
+        all_subjects = self.cognito_adapter.get_all_subjects()
+        AppLogger.info(f"Retrieved {len(all_subjects)} total subjects from Cognito")
+
         result = [
             subject["subject_name"]
-            for subject in self.cognito_adapter.get_all_subjects()
+            for subject in all_subjects
             if subject["subject_id"] == subject_id
         ]
+
         if result:
+            AppLogger.info(f"Found subject name: {result[0]} for subject_id: {subject_id}")
             return result[0]
+
+        AppLogger.warning(
+            f"Subject with ID {subject_id} not found in Cognito. Available subject IDs: {[s.get('subject_id') for s in all_subjects]}"
+        )
         raise UserError(f"Subject with ID {subject_id} does not exist")
 
     def list_subjects(self) -> List[Dict[str, Optional[str]]]:
