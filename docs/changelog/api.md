@@ -1,5 +1,13 @@
 # API Changelog
 
+## v7.15.0 - _2025-11-12_
+
+### Features
+
+- Added "last uploaded by" user information to datasets
+  - Datasets now display the name of the user who last uploaded data
+  - Enhanced dataset metadata with user identification for better audit trails
+
 ## v7.14.0 - _2025-11-10_
 
 ### Features
