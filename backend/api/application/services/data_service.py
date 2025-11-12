@@ -196,38 +196,17 @@ class DataService:
         Get the name of the user who last successfully uploaded to this dataset.
         Returns the subject name or "Unknown" if no upload history exists.
         """
-        AppLogger.info(
-            f"Getting last uploader for dataset: {metadata.string_representation()}"
-        )
-
         latest_job = self.job_service.db_adapter.get_latest_successful_upload_job(metadata)
-
-        if not latest_job:
-            AppLogger.warning(
-                f"No successful upload job found for dataset: {metadata.string_representation()}"
-            )
-            return "Unknown"
-
-        AppLogger.info(f"Found latest job: {latest_job.get('job_id', 'NO_JOB_ID')}")
-
-        if not latest_job.get("sk2"):
-            AppLogger.warning(
-                f"Latest job {latest_job.get('job_id', 'NO_JOB_ID')} has no sk2 (subject_id) field. Full job data: {latest_job}"
-            )
-            return "Unknown"
-
-        subject_id = latest_job["sk2"]
-        AppLogger.info(f"Found subject_id from job: {subject_id}")
-
-        try:
-            subject_name = self.subject_service.get_subject_name_by_id(subject_id)
-            AppLogger.info(f"Successfully retrieved subject name: {subject_name} for subject_id: {subject_id}")
-            return subject_name
-        except Exception as error:
-            AppLogger.warning(
-                f"Could not retrieve subject name for ID {subject_id}: {error}"
-            )
-            return "Unknown"
+        if latest_job and latest_job.get("sk2"):
+            subject_id = latest_job["sk2"]
+            try:
+                return self.subject_service.get_subject_name_by_id(subject_id)
+            except Exception as error:
+                AppLogger.warning(
+                    f"Could not retrieve subject name for ID {subject_id}: {error}"
+                )
+                return "Unknown"
+        return "Unknown"
 
     def get_dataset_info(self, dataset: DatasetMetadata) -> EnrichedSchema:
         schema = self.schema_service.get_schema(dataset)

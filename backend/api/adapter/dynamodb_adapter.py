@@ -393,10 +393,6 @@ class DynamoDBAdapter(DatabaseAdapter):
         Returns the job details including subject_id (uploader) or None if no successful upload exists.
         """
         try:
-            AppLogger.info(
-                f"Querying latest successful upload job for: Layer={dataset.layer}, Domain={dataset.domain}, Dataset={dataset.dataset}"
-            )
-
             jobs = self.collect_all_items(
                 self.service_table.query,
                 KeyConditionExpression=Key("PK").eq("JOB"),
@@ -409,26 +405,12 @@ class DynamoDBAdapter(DatabaseAdapter):
                 )
             )
 
-            AppLogger.info(f"Found {len(jobs)} successful upload jobs for dataset")
-
             if not jobs:
-                AppLogger.warning(
-                    f"No successful upload jobs found for: Layer={dataset.layer}, Domain={dataset.domain}, Dataset={dataset.dataset}"
-                )
                 return None
 
             # Sort by SK (job_id which contains timestamp) to get the most recent
             sorted_jobs = sorted(jobs, key=lambda x: x.get("SK", ""), reverse=True)
-            latest_job = sorted_jobs[0]
-
-            AppLogger.info(
-                f"Latest job found: SK={latest_job.get('SK')}, SK2={latest_job.get('SK2')}, Status={latest_job.get('Status')}"
-            )
-
-            mapped_job = self._map_job(latest_job)
-            AppLogger.info(f"Mapped job data: {mapped_job}")
-
-            return mapped_job
+            return self._map_job(sorted_jobs[0])
         except ClientError as error:
             AppLogger.warning(f"Error fetching latest upload job for dataset: {error}")
             return None
@@ -570,13 +552,11 @@ class DynamoDBAdapter(DatabaseAdapter):
             "RawFileIdentifier": "raw_file_identifier",
             "ResultsURL": "result_url",
         }
-        mapped = {
+        return {
             name_map.get(key, key.lower()): value
             for key, value in job.items()
             if key != "PK"
         }
-        AppLogger.info(f"Mapping job - Original SK2: {job.get('SK2')}, Mapped sk2: {mapped.get('sk2')}")
-        return mapped
 
     def _store_job(self, item: Dict):
         self.service_table.put_item(Item=item)
