@@ -656,7 +656,7 @@ class TestDynamoDBAdapterServiceTable:
                 "Domain": "domain1",
                 "Dataset": "dataset2",
                 "Version": 4,
-                "TTL": 605800,
+                "TTL": 7777000,
             },
         )
 
