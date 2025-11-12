@@ -1,5 +1,13 @@
 # API Changelog
 
+## v7.15.1 - _2025-11-12_
+
+### Features
+
+- Extended upload job expiry from 7 days to 90 days
+  - Upload jobs now persist for 90 days instead of 7 days, providing better historical data tracking
+  - Allows users to access upload information for a longer period
+
 ## v7.15.0 - _2025-11-12_
 
 ### Features

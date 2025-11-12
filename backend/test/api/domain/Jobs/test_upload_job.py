@@ -29,4 +29,4 @@ def test_initialise_upload_job(mock_time):
     assert job.dataset == "dataset2"
     assert job.layer == "raw"
     assert job.version == 12
-    assert job.expiry_time == 605800
+    assert job.expiry_time == 7777000
