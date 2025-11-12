@@ -4,7 +4,6 @@ from api.adapter.cognito_adapter import CognitoAdapter
 from api.adapter.dynamodb_adapter import DynamoDBAdapter
 from api.common.config.auth import SubjectType
 from api.common.custom_exceptions import UserError
-from api.common.logger import AppLogger
 from api.domain.client import ClientResponse, ClientRequest
 from api.domain.subject_permissions import SubjectPermissions
 from api.domain.user import UserRequest, UserResponse, UserDeleteRequest

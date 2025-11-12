@@ -548,7 +548,6 @@ class DynamoDBAdapter(DatabaseAdapter):
     def _map_job(self, job: Dict) -> Dict:
         name_map = {
             "SK": "job_id",
-            "SK2": "sk2",  # Explicitly map SK2 to preserve subject_id
             "RawFileIdentifier": "raw_file_identifier",
             "ResultsURL": "result_url",
         }
