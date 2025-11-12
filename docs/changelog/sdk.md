@@ -1,5 +1,12 @@
 # SDK Changelog
 
+## v0.1.14 - _2025-11-12_
+
+### Features
+
+- Enhanced dataset metadata to include last uploaded by user information
+  - Dataset responses now include the name of the user who last uploaded data
+
 ## v0.1.13 - _2025-11-10_
 
 ### Breaking Changes
