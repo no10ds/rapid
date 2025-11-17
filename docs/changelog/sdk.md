@@ -1,5 +1,11 @@
 # SDK Changelog
 
+## v0.1.15 - _2025-11-17_
+
+### Fixes
+
+- Pin pandas version to `>=2.3.3,<3.0.0` to ensure compatibility and prevent breaking changes from future major releases
+
 ## v0.1.14 - _2025-11-12_
 
 ### Features
