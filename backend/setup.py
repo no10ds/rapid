@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import os
 
 TEST_SDK_VERSION = os.getenv("TEST_SDK_VERSION")
-version = "0.1.14"
+version = "0.1.15"
 setup(
     name="rapid-sdk",
     version=version if TEST_SDK_VERSION is None else f"{version}.{TEST_SDK_VERSION}",
@@ -12,6 +12,6 @@ setup(
     author_email="lcard@no10.gov.uk",
     license="MIT",
     packages=find_packages(include=["rapid", "rapid.*"], exclude=["tests"]),
-    install_requires=["pandas", "requests", "deepdiff", "pyarrow", "pydantic"],
+    install_requires=["pandas>=2.3.3,<3.0.0", "requests", "deepdiff", "pyarrow", "pydantic"],
     include_package_data=True,
 )
