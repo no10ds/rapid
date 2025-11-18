@@ -10,7 +10,6 @@ resource "aws_s3_bucket" "rapid_data_storage" {
   #checkov:skip=CKV2_AWS_62:No need for event notifications
   #checkov:skip=CKV2_AWS_61:No need for lifecycle configuration
   bucket        = var.data_bucket_name
-  acl           = "private"
   force_destroy = false
 
   tags = var.tags
@@ -29,6 +28,20 @@ resource "aws_s3_bucket" "rapid_data_storage" {
     target_bucket = aws_s3_bucket.logs.bucket
     target_prefix = "log/${var.data_bucket_name}"
   }
+}
+
+resource "aws_s3_bucket_ownership_controls" "rapid_data_storage" {
+  bucket = aws_s3_bucket.rapid_data_storage.id
+
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+resource "aws_s3_bucket_acl" "rapid_data_storage" {
+  depends_on = [aws_s3_bucket_ownership_controls.rapid_data_storage]
+  bucket     = aws_s3_bucket.rapid_data_storage.id
+  acl        = "private"
 }
 
 resource "aws_s3_bucket_public_access_block" "rapid_data_storage" {
@@ -53,7 +66,6 @@ resource "aws_s3_bucket" "logs" {
   #checkov:skip=CKV2_AWS_62:No need for event notifications
   #checkov:skip=CKV2_AWS_61:No need for lifecycle configuration
   bucket        = var.log_bucket_name
-  acl           = "private"
   force_destroy = false
 
   tags = var.tags
@@ -65,6 +77,20 @@ resource "aws_s3_bucket" "logs" {
       }
     }
   }
+}
+
+resource "aws_s3_bucket_ownership_controls" "logs" {
+  bucket = aws_s3_bucket.logs.id
+
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+resource "aws_s3_bucket_acl" "logs" {
+  depends_on = [aws_s3_bucket_ownership_controls.logs]
+  bucket     = aws_s3_bucket.logs.id
+  acl        = "private"
 }
 
 resource "aws_s3_bucket_public_access_block" "logs" {
