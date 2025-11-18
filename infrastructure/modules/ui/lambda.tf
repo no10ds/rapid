@@ -48,7 +48,7 @@ resource "aws_lambda_function" "this" {
     mode = "Active"
   }
 
-  runtime = "nodejs14.x"
+  runtime = "nodejs20.x"
   handler = "lambda/lambda.handler"
 
   publish = true
