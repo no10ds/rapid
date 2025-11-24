@@ -37,14 +37,14 @@ module "app_cluster" {
 }
 
 module "auth" {
-  source                     = "../auth"
-  tags                       = var.tags
-  domain_name                = var.domain_name
-  resource-name-prefix       = var.resource-name-prefix
-  password_policy            = var.password_policy
-  layers                     = var.layers
-  cognito_ses_authentication = var.cognito_ses_authentication
-  ses_domain_identity_arn    = var.ses_domain_identity_arn
+  source                  = "../auth"
+  tags                    = var.tags
+  domain_name             = var.domain_name
+  resource-name-prefix    = var.resource-name-prefix
+  password_policy         = var.password_policy
+  layers                  = var.layers
+  ses_domain_identity_arn = var.ses_domain_identity_arn
+  ses_email_domain        = var.ses_email_domain
 }
 
 module "data_workflow" {
