@@ -24,18 +24,11 @@ resource "aws_cognito_user_pool" "rapid_user_pool" {
   }
 
   dynamic "email_configuration" {
-    for_each = var.cognito_ses_authentication ? [1] : []
+    for_each = var.ses_domain_identity_arn != null ? [1] : []
     content {
       email_sending_account = "DEVELOPER"
-      from_email_address    = "no-reply@${var.ses_email_domain}"
+      from_email_address    = "no-reply@${coalesce(var.ses_email_domain, var.domain_name)}"
       source_arn            = var.ses_domain_identity_arn
-    }
-  }
-
-  lifecycle {
-    precondition {
-      condition     = !var.cognito_ses_authentication || (var.cognito_ses_authentication && var.ses_domain_identity_arn != "")
-      error_message = "When you enable SES with cognito (cognito_ses_authentication = true), you must provide a valid SES domain identity ARN in ses_domain_identity_arn"
     }
   }
 }
