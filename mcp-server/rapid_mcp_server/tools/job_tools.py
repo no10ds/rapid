@@ -2,16 +2,20 @@
 
 import json
 from typing import Dict, Any
-from rapid import Rapid
+import httpx
+
+from ..api_client import RapidAPIClient
 
 
-def get_job_status(client: Rapid, arguments: Dict[str, Any]) -> str:
+def get_job_status(client: RapidAPIClient, arguments: Dict[str, Any]) -> str:
     """Get detailed status and error information for a job.
     """
     try:
         job_id = arguments["job_id"]
 
-        job_status = client.fetch_job_progress(job_id)
+        # GET /jobs/{job_id} endpoint
+        endpoint = f"/jobs/{job_id}"
+        job_status = client.get(endpoint)
 
         status = job_status.get("status", "UNKNOWN")
         errors = job_status.get("errors", [])
@@ -35,16 +39,21 @@ def get_job_status(client: Rapid, arguments: Dict[str, Any]) -> str:
 
         return json.dumps(response, indent=2, default=str)
 
+    except httpx.HTTPStatusError as e:
+        return json.dumps({"error": f"HTTP {e.response.status_code}: {e.response.text}"}, indent=2)
     except Exception as e:
         return json.dumps({"error": str(e)}, indent=2)
 
 
-def get_job_error_details(client: Rapid, arguments: Dict[str, Any]) -> str:
+def get_job_error_details(client: RapidAPIClient, arguments: Dict[str, Any]) -> str:
     """Get error analysis for a failed job.
     """
     try:
         job_id = arguments["job_id"]
-        job_status = client.fetch_job_progress(job_id)
+
+        # GET /jobs/{job_id} endpoint
+        endpoint = f"/jobs/{job_id}"
+        job_status = client.get(endpoint)
 
         status = job_status.get("status", "UNKNOWN")
         errors = job_status.get("errors", [])
@@ -60,5 +69,7 @@ def get_job_error_details(client: Rapid, arguments: Dict[str, Any]) -> str:
 
         return json.dumps(response, indent=2, default=str)
 
+    except httpx.HTTPStatusError as e:
+        return json.dumps({"error": f"HTTP {e.response.status_code}: {e.response.text}"}, indent=2)
     except Exception as e:
         return json.dumps({"error": str(e)}, indent=2)

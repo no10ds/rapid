@@ -12,14 +12,23 @@ mcp = FastMCP("rapid")
 
 # Dataset Tools
 @mcp.tool()
-def list_datasets() -> str:
-    """List all datasets available in the Rapid platform.
+def list_datasets(layer: str = None, domain: str = None) -> str:
+    """List datasets in the Rapid platform with optional API-level filtering.
 
-    Returns a list of all datasets the authenticated user has access to,
-    organized by layer/domain/dataset/version structure.
+    Args:
+        layer: Filter results to only show datasets in this layer (applied by API)
+        domain: Filter results to only show datasets in this domain (applied by API)
+
+    The filters are applied server-side by the Rapid API before returning results.
+    When no filters are provided, returns all accessible datasets.
+
+    Returns a list organized by layer/domain/dataset/version structure.
     """
     client = get_client()
-    return dataset_tools.list_datasets(client, {})
+    return dataset_tools.list_datasets(client, {
+        "layer": layer,
+        "domain": domain
+    })
 
 
 @mcp.tool()

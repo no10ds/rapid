@@ -2,8 +2,10 @@
 
 import os
 from typing import Optional
+import httpx
 from dotenv import load_dotenv
-from rapid import Rapid, RapidAuth
+
+from .api_client import RapidAPIClient
 
 # Load environment variables from .env file if present
 load_dotenv()
@@ -26,28 +28,52 @@ class Config:
         if not self.client_secret:
             raise ValueError("RAPID_CLIENT_SECRET environment variable is required")
 
-    def create_client(self) -> Rapid:
-        """Create and return an authenticated Rapid client.
+        # Get the access token on initialization
+        self._token = self._fetch_token()
+
+    def _fetch_token(self) -> str:
+        """Fetch OAuth2 access token from the Rapid API.
 
         Returns:
-            Rapid: Authenticated Rapid SDK client
+            str: Access token
+
+        Raises:
+            Exception: If authentication fails
+        """
+        try:
+            auth_url = f"{self.rapid_url.rstrip('/')}/oauth2/token"
+            auth = httpx.BasicAuth(self.client_id, self.client_secret)
+            headers = {"Content-Type": "application/x-www-form-urlencoded"}
+            data = {
+                "grant_type": "client_credentials",
+                "client_id": self.client_id,
+            }
+
+            response = httpx.post(
+                auth_url,
+                auth=auth,
+                headers=headers,
+                json=data,
+                timeout=30.0,
+            )
+            response.raise_for_status()
+
+            token_data = response.json()
+            return token_data["access_token"]
+        except Exception as e:
+            raise Exception(f"Failed to authenticate with Rapid: {str(e)}")
+
+    def create_client(self) -> RapidAPIClient:
+        """Create and return an authenticated Rapid API client.
+
+        Returns:
+            RapidAPIClient: Authenticated API client
 
         Raises:
             ValueError: If configuration is invalid
             Exception: If authentication fails
         """
-        try:
-            # Initialize authentication
-            auth = RapidAuth(
-                client_id=self.client_id,
-                client_secret=self.client_secret,
-                url=self.rapid_url
-            )
-
-            # Create and return authenticated client
-            return Rapid(auth)
-        except Exception as e:
-            raise Exception(f"Failed to authenticate with Rapid: {str(e)}")
+        return RapidAPIClient(self.rapid_url, self._token)
 
 
 # Global configuration instance
@@ -66,10 +92,10 @@ def get_config() -> Config:
     return _config
 
 
-def get_client() -> Rapid:
-    """Get an authenticated Rapid client.
+def get_client() -> RapidAPIClient:
+    """Get an authenticated Rapid API client.
 
     Returns:
-        Rapid: Authenticated Rapid SDK client
+        RapidAPIClient: Authenticated API client
     """
     return get_config().create_client()

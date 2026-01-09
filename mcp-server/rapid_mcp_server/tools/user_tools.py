@@ -1,26 +1,31 @@
 """User and subject management tools for the Rapid MCP server."""
 
 import json
-from typing import Dict, Any, List
-from rapid import Rapid
+from typing import Dict, Any
+import httpx
+
+from ..api_client import RapidAPIClient
 
 
-def list_subjects(client: Rapid, arguments: Dict[str, Any]) -> str:
+def list_subjects(client: RapidAPIClient, arguments: Dict[str, Any]) -> str:
     """List all users and clients (subjects) in the system.
     """
     try:
-        subjects = client.list_subjects()
+        # GET /subjects endpoint
+        subjects = client.get("/subjects")
 
         return json.dumps({
             "count": len(subjects) if isinstance(subjects, list) else 0,
             "subjects": subjects
         }, indent=2, default=str)
 
+    except httpx.HTTPStatusError as e:
+        return json.dumps({"error": f"HTTP {e.response.status_code}: {e.response.text}"}, indent=2)
     except Exception as e:
         return json.dumps({"error": str(e)}, indent=2)
 
 
-def create_user(client: Rapid, arguments: Dict[str, Any]) -> str:
+def create_user(client: RapidAPIClient, arguments: Dict[str, Any]) -> str:
     """Create a new user in the Rapid platform.
     """
     try:
@@ -28,11 +33,14 @@ def create_user(client: Rapid, arguments: Dict[str, Any]) -> str:
         email = arguments["email"]
         permissions = arguments["permissions"]
 
-        result = client.create_user(
-            user_name=username,
-            user_email=email,
-            permissions=permissions
-        )
+        user_payload = {
+            "username": username,
+            "email": email,
+            "permissions": permissions
+        }
+
+        # POST to /user endpoint
+        result = client.post("/user", json=user_payload)
 
         return json.dumps({
             "success": True,
@@ -43,21 +51,26 @@ def create_user(client: Rapid, arguments: Dict[str, Any]) -> str:
             "result": result
         }, indent=2, default=str)
 
+    except httpx.HTTPStatusError as e:
+        return json.dumps({"error": f"HTTP {e.response.status_code}: {e.response.text}"}, indent=2)
     except Exception as e:
         return json.dumps({"error": str(e)}, indent=2)
 
 
-def update_permissions(client: Rapid, arguments: Dict[str, Any]) -> str:
+def update_permissions(client: RapidAPIClient, arguments: Dict[str, Any]) -> str:
     """Update permissions for a user or client.
     """
     try:
         subject_id = arguments["subject_id"]
         permissions = arguments["permissions"]
 
-        result = client.update_subject_permissions(
-            subject_id=subject_id,
-            permissions=permissions
-        )
+        permissions_payload = {
+            "subject_id": subject_id,
+            "permissions": permissions
+        }
+
+        # PUT to /subjects/permissions endpoint
+        result = client.put("/subjects/permissions", json=permissions_payload)
 
         return json.dumps({
             "success": True,
@@ -67,11 +80,13 @@ def update_permissions(client: Rapid, arguments: Dict[str, Any]) -> str:
             "result": result
         }, indent=2, default=str)
 
+    except httpx.HTTPStatusError as e:
+        return json.dumps({"error": f"HTTP {e.response.status_code}: {e.response.text}"}, indent=2)
     except Exception as e:
         return json.dumps({"error": str(e)}, indent=2)
 
 
-def get_available_permissions(client: Rapid, arguments: Dict[str, Any]) -> str:
+def get_available_permissions(client: RapidAPIClient, arguments: Dict[str, Any]) -> str:
     """Get list of all available permissions in the system.
     """
     permissions = {
