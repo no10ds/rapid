@@ -10,13 +10,6 @@ resource "aws_cognito_user_pool" "rapid_user_pool" {
 
   mfa_configuration = "OPTIONAL"
 
-  account_recovery_setting {
-    recovery_mechanism {
-      name     = "verified_email"
-      priority = 1
-    }
-  }
-
   password_policy {
     minimum_length                   = var.password_policy["minimum_length"]
     require_lowercase                = var.password_policy["require_lowercase"]
