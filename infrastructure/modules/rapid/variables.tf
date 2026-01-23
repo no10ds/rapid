@@ -100,7 +100,7 @@ variable "password_policy" {
   })
   description = "The Cognito pool password policy"
   default = {
-    minimum_length                   = 8
+    minimum_length                   = 10
     require_lowercase                = true
     require_numbers                  = true
     require_symbols                  = true
