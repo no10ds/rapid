@@ -17,7 +17,12 @@ from api.application.services.authorisation.dataset_access_evaluator import (
     DatasetAccessEvaluator,
 )
 from api.common.config.auth import IDENTITY_PROVIDER_BASE_URL, Action
-from api.common.config.docs import custom_openapi_docs_generator, COMMIT_SHA, VERSION
+from api.common.config.docs import (
+    custom_openapi_docs_generator,
+    custom_swagger_ui_html,
+    COMMIT_SHA,
+    VERSION,
+)
 from api.common.config.constants import BASE_API_PATH
 from api.common.logger import AppLogger, init_logger
 from api.common.custom_exceptions import (
@@ -54,7 +59,7 @@ permissions_service = PermissionsService()
 upload_service = DatasetAccessEvaluator()
 
 app = FastAPI(
-    openapi_url=f"{BASE_API_PATH}/openapi.json", docs_url=f"{BASE_API_PATH}/docs"
+    openapi_url=f"{BASE_API_PATH}/openapi.json", docs_url=None
 )
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.openapi = custom_openapi_docs_generator(app)
@@ -197,6 +202,14 @@ async def favicon():
     return FileResponse("static/favicon.ico")
 
 
+@app.get(f"{BASE_API_PATH}/docs", include_in_schema=False)
+async def custom_swagger_ui():
+    """Serve custom Swagger UI with self-hosted assets"""
+    return custom_swagger_ui_html(
+        openapi_url=f"{BASE_API_PATH}/openapi.json", title="rAPId - API Documentation"
+    )
+
+
 def _determine_user_ui_actions(subject_permissions: List[str]) -> Dict[str, bool]:
     return {
         "can_manage_users": Action.USER_ADMIN in subject_permissions,
@@ -229,10 +242,8 @@ def _set_security_headers(response) -> None:
     response.headers["Content-Security-Policy"] = (
         "default-src 'self' "
         f"{IDENTITY_PROVIDER_BASE_URL}; "
-        "script-src 'self' 'unsafe-inline' "
-        "cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js; "
-        "style-src 'self' "
-        "cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css; "
+        "script-src 'self' 'unsafe-inline'; "
+        "style-src 'self'; "
         "img-src 'self' data: "
         "fastapi.tiangolo.com/img/favicon.png;"
     )
