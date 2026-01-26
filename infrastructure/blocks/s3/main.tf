@@ -13,21 +13,32 @@ resource "aws_s3_bucket" "rapid_data_storage" {
   force_destroy = false
 
   tags = var.tags
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        kms_master_key_id = "" # use default
-        sse_algorithm     = "AES256"
-      }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "rapid_data_storage" {
+  bucket = aws_s3_bucket.rapid_data_storage.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = "" # use default
+      sse_algorithm     = "AES256"
     }
   }
-  versioning {
-    enabled = true
+}
+
+resource "aws_s3_bucket_versioning" "rapid_data_storage" {
+  bucket = aws_s3_bucket.rapid_data_storage.id
+
+  versioning_configuration {
+    status = "Enabled"
   }
-  logging {
-    target_bucket = aws_s3_bucket.logs.bucket
-    target_prefix = "log/${var.data_bucket_name}"
-  }
+}
+
+resource "aws_s3_bucket_logging" "rapid_data_storage" {
+  bucket = aws_s3_bucket.rapid_data_storage.id
+
+  target_bucket = aws_s3_bucket.logs.bucket
+  target_prefix = "log/${var.data_bucket_name}"
 }
 
 resource "aws_s3_bucket_ownership_controls" "rapid_data_storage" {
@@ -69,12 +80,15 @@ resource "aws_s3_bucket" "logs" {
   force_destroy = false
 
   tags = var.tags
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        kms_master_key_id = "" # use default
-        sse_algorithm     = "AES256"
-      }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
+  bucket = aws_s3_bucket.logs.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = "" # use default
+      sse_algorithm     = "AES256"
     }
   }
 }
