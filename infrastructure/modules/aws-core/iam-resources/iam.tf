@@ -84,10 +84,27 @@ data "aws_iam_policy_document" "user_access_policy_document" {
       "iam:PassRole",
     ]
 
-    not_resources = [
-      aws_iam_role.user_access_role.arn,
-      aws_iam_role.admin_access_role.arn
+    resources = [
+      "arn:aws:iam::${local.users_account_id}:role/*-ecs-*",
+      "arn:aws:iam::${local.users_account_id}:role/*-lambda-*",
+      "arn:aws:iam::${local.users_account_id}:role/*-cloudfront-*",
+      "arn:aws:iam::${local.users_account_id}:role/*-config-*",
+      "arn:aws:iam::${local.users_account_id}:role/*-cloudtrail-*",
+      "arn:aws:iam::${local.users_account_id}:role/*-logs-*",
     ]
+
+    condition {
+      test     = "StringEquals"
+      variable = "iam:PassedToService"
+      values = [
+        "ecs-tasks.amazonaws.com",
+        "lambda.amazonaws.com",
+        "edgelambda.amazonaws.com",
+        "config.amazonaws.com",
+        "cloudtrail.amazonaws.com",
+        "logs.amazonaws.com",
+      ]
+    }
   }
 }
 
