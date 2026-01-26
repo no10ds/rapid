@@ -45,8 +45,7 @@ resource "aws_iam_policy" "pipeline_ecr_access" {
           "ecr:BatchCheckLayerAvailability",
         ],
         Resource : [
-          data.terraform_remote_state.ecr-state.outputs.ecr_private_repo_arn,
-          data.terraform_remote_state.ecr-state.outputs.ecr_private_ckan_repo_arn
+          data.terraform_remote_state.ecr-state.outputs.ecr_private_repo_arn
         ]
       }
     ]
@@ -88,8 +87,7 @@ resource "aws_iam_policy" "pipeline_ecr_public_access" {
           "ecr-public:PutImage"
         ],
         Resource : [
-          data.terraform_remote_state.ecr-state.outputs.ecr_public_repo_arn,
-          data.terraform_remote_state.ecr-state.outputs.ecr_public_ckan_repo_arn
+          data.terraform_remote_state.ecr-state.outputs.ecr_public_repo_arn
         ]
       }
     ]
