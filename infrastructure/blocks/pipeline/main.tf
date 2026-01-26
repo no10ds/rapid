@@ -5,9 +5,11 @@ resource "aws_instance" "pipeline" {
   associate_public_ip_address = false
   iam_instance_profile        = aws_iam_instance_profile.pipeline_instance_profile.name
   subnet_id                   = data.terraform_remote_state.vpc-state.outputs.private_subnets_ids[0]
-  user_data                   = data.template_file.initialise-runner.rendered
-  monitoring                  = true
-  vpc_security_group_ids      = [aws_security_group.this.id]
+  user_data = templatefile("${path.module}/initialisation-script.sh.tpl", {
+    runner-registration-token = var.runner-registration-token
+  })
+  monitoring             = true
+  vpc_security_group_ids = [aws_security_group.this.id]
 
   metadata_options {
     http_endpoint = "enabled"
@@ -30,13 +32,6 @@ resource "aws_instance" "pipeline" {
 resource "aws_iam_instance_profile" "pipeline_instance_profile" {
   name = "pipeline_instance_profile"
   role = aws_iam_role.pipeline_ecr_role.name
-}
-
-data "template_file" "initialise-runner" {
-  template = file("${path.module}/initialisation-script.sh.tpl")
-  vars = {
-    runner-registration-token = var.runner-registration-token
-  }
 }
 
 resource "aws_security_group" "this" {
