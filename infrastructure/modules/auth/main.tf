@@ -23,6 +23,10 @@ resource "aws_cognito_user_pool" "rapid_user_pool" {
     enabled = true
   }
 
+  user_pool_add_ons {
+    advanced_security_mode = "ENFORCED"
+  }
+
   dynamic "email_configuration" {
     for_each = var.cognito_ses_authentication ? [1] : []
     content {
