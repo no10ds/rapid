@@ -205,12 +205,16 @@ data "aws_iam_policy_document" "assume_role_admin_access_group_policy_document" 
   }
 }
 
-resource "aws_iam_group_policy" "assume_role_admin_access_group_policy" {
-  for_each = toset(local.admin_groups)
-  name     = "admin_access_group_policy"
-  group    = aws_iam_group.groups[each.key].id
+resource "aws_iam_policy" "admin_access_group_policy" {
+  name        = "admin_access_group_policy"
+  description = "Managed policy for admin group to assume admin role"
+  policy      = data.aws_iam_policy_document.assume_role_admin_access_group_policy_document.json
+}
 
-  policy = data.aws_iam_policy_document.assume_role_admin_access_group_policy_document.json
+resource "aws_iam_group_policy_attachment" "assume_role_admin_access_group_policy_attachment" {
+  for_each   = toset(local.admin_groups)
+  group      = aws_iam_group.groups[each.key].id
+  policy_arn = aws_iam_policy.admin_access_group_policy.arn
 }
 
 data "aws_iam_policy_document" "assume_role_users_access_group_policy_document" {
@@ -227,10 +231,14 @@ data "aws_iam_policy_document" "assume_role_users_access_group_policy_document" 
   }
 }
 
-resource "aws_iam_group_policy" "assume_role_users_access_group_policy" {
-  for_each = toset(local.user_groups)
-  name     = "users_access_group_policy"
-  group    = aws_iam_group.groups[each.key].id
+resource "aws_iam_policy" "users_access_group_policy" {
+  name        = "users_access_group_policy"
+  description = "Managed policy for users group to assume user role"
+  policy      = data.aws_iam_policy_document.assume_role_users_access_group_policy_document.json
+}
 
-  policy = data.aws_iam_policy_document.assume_role_users_access_group_policy_document.json
+resource "aws_iam_group_policy_attachment" "assume_role_users_access_group_policy_attachment" {
+  for_each   = toset(local.user_groups)
+  group      = aws_iam_group.groups[each.key].id
+  policy_arn = aws_iam_policy.users_access_group_policy.arn
 }
