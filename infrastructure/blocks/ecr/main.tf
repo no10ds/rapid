@@ -4,6 +4,18 @@ terraform {
   }
 }
 
+resource "aws_ecr_registry_scanning_configuration" "this" {
+  scan_type = "BASIC"
+
+  rule {
+    scan_frequency = "SCAN_ON_PUSH"
+    repository_filter {
+      filter      = "*"
+      filter_type = "WILDCARD"
+    }
+  }
+}
+
 resource "aws_ecr_repository" "private" {
   #checkov:skip=CKV_AWS_51:No need for immutable tags
   name                 = "data-f1-registry"
@@ -12,7 +24,6 @@ resource "aws_ecr_repository" "private" {
 
   image_scanning_configuration {
     scan_on_push = true
-    scan_type    = "BASIC"
   }
 
   encryption_configuration {
