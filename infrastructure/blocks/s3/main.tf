@@ -114,3 +114,51 @@ resource "aws_s3_bucket_public_access_block" "logs" {
   block_public_policy     = true
   restrict_public_buckets = true
 }
+
+resource "aws_s3_bucket_policy" "rapid_data_storage_secure_transport" {
+  bucket = aws_s3_bucket.rapid_data_storage.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "AllowSSLRequestsOnly"
+        Effect    = "Deny"
+        Principal = "*"
+        Action    = "s3:*"
+        Resource = [
+          aws_s3_bucket.rapid_data_storage.arn,
+          "${aws_s3_bucket.rapid_data_storage.arn}/*"
+        ]
+        Condition = {
+          Bool = {
+            "aws:SecureTransport" = "false"
+          }
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_s3_bucket_policy" "logs_secure_transport" {
+  bucket = aws_s3_bucket.logs.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "AllowSSLRequestsOnly"
+        Effect    = "Deny"
+        Principal = "*"
+        Action    = "s3:*"
+        Resource = [
+          aws_s3_bucket.logs.arn,
+          "${aws_s3_bucket.logs.arn}/*"
+        ]
+        Condition = {
+          Bool = {
+            "aws:SecureTransport" = "false"
+          }
+        }
+      }
+    ]
+  })
+}
