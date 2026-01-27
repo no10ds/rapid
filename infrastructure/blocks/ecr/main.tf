@@ -12,6 +12,7 @@ resource "aws_ecr_repository" "private" {
 
   image_scanning_configuration {
     scan_on_push = true
+    scan_type    = "BASIC"
   }
 
   encryption_configuration {
