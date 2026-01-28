@@ -87,10 +87,6 @@ data "aws_iam_policy_document" "user_access_policy_document" {
     resources = [
       "arn:aws:iam::${local.users_account_id}:role/*-ecs-*",
       "arn:aws:iam::${local.users_account_id}:role/*-lambda-*",
-      "arn:aws:iam::${local.users_account_id}:role/*-cloudfront-*",
-      "arn:aws:iam::${local.users_account_id}:role/*-config-*",
-      "arn:aws:iam::${local.users_account_id}:role/*-cloudtrail-*",
-      "arn:aws:iam::${local.users_account_id}:role/*-logs-*",
     ]
 
     condition {
@@ -99,10 +95,6 @@ data "aws_iam_policy_document" "user_access_policy_document" {
       values = [
         "ecs-tasks.amazonaws.com",
         "lambda.amazonaws.com",
-        "edgelambda.amazonaws.com",
-        "config.amazonaws.com",
-        "cloudtrail.amazonaws.com",
-        "logs.amazonaws.com",
       ]
     }
   }
