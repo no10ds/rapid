@@ -93,9 +93,6 @@ async def request_middleware(request: Request, call_next):
 async def add_security_headers(request: Request, call_next):
     response = await call_next(request)
     _set_security_headers(response)
-    # Remove server identification header
-    if "server" in response.headers:
-        del response.headers["server"]
     return response
 
 
