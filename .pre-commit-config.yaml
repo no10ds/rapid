@@ -54,3 +54,8 @@ repos:
     hooks:
       - id: prettier
         args: ['--config', 'frontend/.prettierrc.json', './frontend']
+  - repo: https://github.com/pypa/pip-audit
+    rev: v2.9.0
+    hooks:
+      - id: pip-audit
+        args: ['--skip-editable']

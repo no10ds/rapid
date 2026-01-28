@@ -35,7 +35,7 @@ help: 				## List targets and description
 precommit:			## Setup the pre-commits
 	pre-commit install
 
-security-check: detect-secrets detect-vulnerabilities	## Run the security checks
+security-check: detect-secrets detect-vulnerabilities audit-dependencies	## Run the security checks
 
 detect-secrets:		## Detect secrets
 	@git ls-files -z | xargs -0 detect-secrets-hook --baseline .secrets.baseline
@@ -45,6 +45,9 @@ ignore-secrets:		## Ignore secrets
 
 detect-vulnerabilities:		##Detect the vulnerabilities
 	bandit -qr api/api sdk/rapid
+
+audit-dependencies:		## Audit Python dependencies for known vulnerabilities
+	@cd backend && (test -f .venv/bin/activate && . .venv/bin/activate || true) && PIPAPI_PYTHON_LOCATION=.venv/bin/python pip-audit || (echo "Vulnerabilities found! Run 'pip-audit' in backend directory for details" && exit 1)
 
 python-setup:			## Setup python to run the sdk and api
 	pyenv install --skip-existing $(PYTHON_VERSION)
