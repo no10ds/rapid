@@ -2,7 +2,8 @@ import { forwardRef } from 'react'
 import { LoadingButton as MuiButton } from '@mui/lab'
 import Link from 'next/link'
 import { Props, ButtonOverrides } from './types'
-import { FormHelperText, styled } from '@mui/material'
+import { FormHelperText } from '@mui/material'
+import { styled } from '@mui/material/styles'
 
 const StyledButton = styled(MuiButton)``
 

@@ -173,7 +173,10 @@ function CreateUserPage() {
                       inputProps={{
                         'data-testid': 'field-email'
                       }}
-                      error={!!error ? !!error : watch('type') === 'User' && !field.value}
+                      error={
+                        // eslint-disable-next-line react-hooks/incompatible-library
+                        !!error ? !!error : watch('type') === 'User' && !field.value
+                      }
                       helperText={
                         watch('type') === 'User' && !field.value
                           ? 'Required'

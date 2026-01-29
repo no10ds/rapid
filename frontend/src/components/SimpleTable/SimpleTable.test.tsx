@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import SimpleTable from './SimpleTable'
 import { renderWithProviders, screen } from '@/utils/testing'
 

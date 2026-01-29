@@ -6,10 +6,10 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  styled,
   Toolbar,
   Typography
 } from '@mui/material'
+import { styled } from '@mui/material/styles'
 import { ComponentProps } from 'react'
 import { Logo } from '@/components/Icon'
 import { Icon } from '@/components/Icon/types'

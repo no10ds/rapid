@@ -1,4 +1,5 @@
-import { Container, Box, styled, Typography } from '@mui/material'
+import { Container, Box, Typography } from '@mui/material'
+import { styled } from '@mui/material/styles'
 import Link from 'next/link'
 
 const Main = styled('main')`
