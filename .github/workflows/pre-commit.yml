@@ -1,0 +1,34 @@
+name: pre-commit
+
+on:
+  push:
+    branches:
+      - main
+      - release/*
+  pull_request:
+    branches:
+      - main
+      - release/*
+
+permissions:
+  contents: read
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - id: checkout
+        name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Setup GO
+        uses: actions/setup-go@v6
+
+      - name: Install terraform_docs
+        run: go install github.com/terraform-docs/terraform-docs@latest
+
+      - id: pre-commit
+        uses: pre-commit/action@v3.0.1
