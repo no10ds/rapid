@@ -1,5 +1,4 @@
 resource "aws_alb" "application_load_balancer" {
-  #checkov:skip=CKV_AWS_150:No need for deletion protection
   #checkov:skip=CKV2_AWS_28:No need for load balancer waf
   name                       = "${var.resource-name-prefix}-alb"
   internal                   = false

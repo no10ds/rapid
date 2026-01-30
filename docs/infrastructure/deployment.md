@@ -88,7 +88,6 @@ There are two config files needed to instantiate the rAPId service, they are `in
 state_bucket = ""
 data_bucket_name = ""
 log_bucket_name = ""
-iam_account_alias = ""
 
 application_version = ""
 ui_version = ""
@@ -151,40 +150,7 @@ To set up the S3 backend follow these steps:
 - Replace the values in `backend.hcl` with your custom values (these can be any value you would like). They will be referenced to create the Terraform state components and used going forwards as the backend config.
 - In the root folder run `make infra/backend`, this will initialise Terraform by creating both the state bucket and dynamodb table in AWS.
 
-### IAM User Setup (Optional)
-
-This module is used to set the admin and user roles for the AWS account. It ensures a good level of security by expiring credentials quickly and ensuring that MFA is always needed to refresh them.
-
-> CAUTION: If you have existing AWS users and don't include them as part of the manual_users, this block will remove them!
-
-You will need define the desired IAM users (both new and previous manually added
-ones) in `input-params.tfvars` and deploy the [iam-config](#deploying-remaining-infra-blocks) block with admin privileges. After that you can use [assume-role](#assume-role) to perform infrastructure changes.
-
-`infra-params.tfvars` snippet for 'user1':
-
-```
-set_iam_user_groups = ["users", "admins"]
-
-iam_users = {
-  user1 = {
-    groups = ["users", "admins"]
-  }
-}
-
-manual_users = {
-  "user1@domain.email" = {
-    groups = ["users", "admins"]
-  }
-}
-```
-
-### Assume role
-
-In order to gain the admin privileges necessary for infrastructure changes one needs to assume admin role. This will be
-enabled only for user's defined in `input-params.tfvars`, only after logging into the AWS console for the first time as an
-IAM user and enabling MFA.
-
-### Deploying remaining infra-blocks
+### Deploying infra-blocks
 
 Once the state backend has been configured, provide/change the following inputs in `input-params.tfvars`.
 
@@ -193,17 +159,12 @@ Required:
 - `state_bucket` - The name of the state bucket, as defined in `backend.hcl`
 - `data_bucket_name` - This will be the bucket where the data is going to be stored, it needs to be a unique name.
 - `log_bucket_name` - This is the bucket that will be used for logging, it needs to have a unique name.
-- `iam_account_alias` - account alias required by AWS, it needs to be a unique name
 - `application_version` - service's docker
   image version
 - `ui_version` - The version of the static frontend site
 - `domain_name` - application hostname ([can be a domain or a subdomain](./domains_subdomains.md))
 - `aws_account` - aws account id where the application will be hosted
 - `aws_region` - aws region where the application will be hosted
-- `iam_users` - IAM users to be created automatically, with roles to be attached to them
-- `manual_users` - IAM users that has been already created manually, with roles to be attached. (Can be left empty)
-- `set_iam_user_groups` - User groups that need to be present on each user. (i.e. if the value is set to admin, then all
-  the users will require the admin role)
 - `support_emails_for_cloudwatch_alerts` - list of engineer emails that should receive alert notifications [more info](./alerting_monitoring.md)
 - `ip_whitelist` - ip range to add to application whitelist. The expected value is a list of strings.
 
@@ -225,11 +186,9 @@ Then, run the following command on each block:
 
 Run the blocks in this order:
 
-1. [iam-config](#iam-user-setup-optional)
-   > All the users' roles/policies will be handled here and will delete any previous config
-2. vpc
-3. s3
-4. auth
-5. data-workflow
-6. app-cluster
-7. ui
+1. vpc
+2. s3
+3. auth
+4. data-workflow
+5. app-cluster
+6. ui
