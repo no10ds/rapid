@@ -89,7 +89,7 @@ Column heading names should follow a strict format. The [requirements](https://d
 
 The data accepted data types for a rAPId instance can be found detailed [here](https://docs.aws.amazon.com/athena/latest/ug/data-types.html). The only Athena types that are currently unsupported are array, map and struct types.
 
-- `integer` - Use it to define integer values.
+- `int` - Use it to define integer values.
 - `double` - Use it to define float values.
 - `string` - Use it to define string.
 - `date` - Use it to define date objects, then in the format key specify the desired [date-format](#date-formats).
@@ -183,12 +183,12 @@ rAPId supports custom data validation using Pandera checks. You can add validati
     "domain": "my_domain",
     "dataset": "validated_data",
     "sensitivity": "PUBLIC",
-    "owners": [{"name": "Data Team", "email": "data@example.com"}]
+    "owners": [{ "name": "Data Team", "email": "data@example.com" }]
   },
   "columns": [
     {
       "name": "age",
-      "data_type": "integer",
+      "data_type": "int",
       "allow_null": false,
       "partition_index": null,
       "unique": false,
@@ -276,7 +276,7 @@ To create a schema manually from scratch, just create a json file filling all th
     {
       "name": "int_column_name",
       "partition_index": null,
-      "data_type": "integer",
+      "data_type": "int",
       "allow_null": true
     },
     {
@@ -300,8 +300,8 @@ Consider the following:
 - The domain and dataset names will be taken from the url, but can be changed manually afterwards.
 - It will not set any [partition columns](#partitions), ensure you add them after the schema has been generated.
 - It might not infer the `date` type and its format, ensure you add this information if required.
-- It might infer `double` instead of `integer` due to the way pandas works.
-- Numbers that are formatted with comma separators should be wrapped in double quotation marks if you wish to retain the commas. If not, remove the commas, and they will be inferred as `integer` or `double`.
+- It might infer `double` instead of `int` due to the way pandas works.
+- Numbers that are formatted with comma separators should be wrapped in double quotation marks if you wish to retain the commas. If not, remove the commas, and they will be inferred as `int` or `double`.
 - Text that contains commas should be wrapped in double quotation marks.
 
 If we try to get a dataset generated from a csv file `(my_file.csv)` with the following values:
@@ -373,9 +373,7 @@ You might then change the values that fit your data and come with something like
     "description": "provide some human readable details about the dataset",
     "sensitivity": "SENSITIVITY",
     "key_value_tags": {},
-    "key_only_tags": [
-      "custom-tag1", "custom-tag2"
-    ],
+    "key_only_tags": ["custom-tag1", "custom-tag2"],
     "owners": [
       {
         "name": "your name",
@@ -400,7 +398,7 @@ You might then change the values that fit your data and come with something like
     {
       "name": "int_column_name",
       "partition_index": 1,
-      "data_type": "integer",
+      "data_type": "int",
       "allow_null": false
     },
     {
