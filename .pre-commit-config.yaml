@@ -54,3 +54,11 @@ repos:
     hooks:
       - id: prettier
         args: ['--config', 'frontend/.prettierrc.json', './frontend']
+  - repo: local
+    hooks:
+      - id: pip-audit
+        name: pip-audit
+        entry: bash -c 'cd backend && if [ -f .venv/bin/python ]; then PIPAPI_PYTHON_LOCATION=$(pwd)/.venv/bin/python pip-audit; else pip-audit; fi'
+        language: system
+        pass_filenames: false
+        files: '^backend/requirements.*\.txt$'

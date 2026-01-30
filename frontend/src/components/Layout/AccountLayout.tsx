@@ -1,4 +1,5 @@
-import { Box, Container, LinearProgress, styled, Toolbar } from '@mui/material'
+import { Box, Container, LinearProgress, Toolbar } from '@mui/material'
+import { styled } from '@mui/material/styles'
 import { ComponentProps } from 'react'
 import { AppBar, Drawer } from '@/components'
 import Router from 'next/router'

@@ -35,6 +35,8 @@ export const api = async (
   try {
     const { details } = await res.json()
     detailMessage = details
-  } catch (e) {}
+  } catch {
+    // Ignore JSON parsing errors
+  }
   throw new Error(detailMessage || defaultError)
 }

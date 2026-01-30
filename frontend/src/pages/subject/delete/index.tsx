@@ -52,6 +52,7 @@ function DeleteSubject() {
       const users = filterSubjectList(subjectsListData, 'USER')
       const clients = filterSubjectList(subjectsListData, 'CLIENT')
 
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFilteredSubjectListData({ ClientApps: clients, Users: users })
       setSelectedSubjectId(clients[0].subjectId)
     }
@@ -59,6 +60,7 @@ function DeleteSubject() {
 
   useEffect(() => {
     if (isConfirmDeleteDialogOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUserConfirmation('')
     }
   }, [isConfirmDeleteDialogOpen])

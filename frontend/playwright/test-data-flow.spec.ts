@@ -67,7 +67,7 @@ test('test', async ({ page }) => {
   expect(fs.existsSync(downloadPath)).toBeTruthy()
 
   fs.rm(downloadPath, (err) => {
-    err ? console.error(err) : console.log('Download deleted')
+    err ? console.error(err) : console.info('Download deleted')
   })
 
   // Search for dataset

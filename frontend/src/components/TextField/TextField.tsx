@@ -1,4 +1,5 @@
-import { TextField as MuiTextField, styled } from '@mui/material'
+import { TextField as MuiTextField } from '@mui/material'
+import { styled } from '@mui/material/styles'
 import { ComponentProps } from 'react'
 
 const StyledTextField = styled(MuiTextField)<ComponentProps<typeof MuiTextField>>`

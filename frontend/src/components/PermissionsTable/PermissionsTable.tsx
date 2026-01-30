@@ -130,20 +130,23 @@ const PermissionsTable = ({
     })
 
   useEffect(() => {
-    const permissionToAdd = watch()
+    // eslint-disable-next-line react-hooks/incompatible-library
+    const subscription = watch((permissionToAdd) => {
+      // If the permission is not protected, remove the domain key
+      if (permissionToAdd.sensitivity !== 'PROTECTED') {
+        delete permissionToAdd.domain
+      }
 
-    // If the permission is not protected, remove the domain key
-    if (permissionToAdd.sensitivity !== 'PROTECTED') {
-      delete permissionToAdd.domain
-    }
+      const allValuesDefined = Object.values(permissionToAdd).every(
+        (value) => value !== undefined
+      )
+      const isAdminPermission = ['DATA_ADMIN', 'USER_ADMIN'].includes(permissionToAdd.type)
 
-    const allValuesDefined = Object.values(permissionToAdd).every(
-      (value) => value !== undefined
-    )
-    const isAdminPermission = ['DATA_ADMIN', 'USER_ADMIN'].includes(permissionToAdd.type)
+      setIsDisabled(!(allValuesDefined || isAdminPermission))
+    })
 
-    setIsDisabled(!(allValuesDefined || isAdminPermission))
-  })
+    return () => subscription.unsubscribe()
+  }, [watch])
 
   return (
     <TableContainer>

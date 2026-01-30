@@ -66,7 +66,7 @@ describe('Page: Upload page', () => {
       selectAutocompleteOption('select-domain', 'Pizza')
       selectAutocompleteOption('select-dataset', 'bit_complicated')
 
-      await fireEvent.change(screen.getByTestId('upload'), {
+      fireEvent.change(screen.getByTestId('upload'), {
         target: { files: [file] }
       })
 
@@ -103,6 +103,10 @@ describe('Page: Upload page', () => {
       renderWithProviders(<UploadPage datasetInput={mockDataset} />)
       await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
 
+      fireEvent.change(screen.getByTestId('upload'), {
+        target: { files: [file] }
+      })
+
       await userEvent.click(screen.getByTestId('submit'))
 
       await waitFor(async () => {
@@ -137,6 +141,10 @@ describe('Page: Upload page', () => {
       )
       renderWithProviders(<UploadPage datasetInput={mockDataset} />)
       await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
+
+      fireEvent.change(screen.getByTestId('upload'), {
+        target: { files: [file] }
+      })
 
       await userEvent.click(screen.getByTestId('submit'))
 
@@ -173,6 +181,10 @@ describe('Page: Upload page', () => {
       renderWithProviders(<UploadPage datasetInput={mockDataset} />)
       await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
 
+      fireEvent.change(screen.getByTestId('upload'), {
+        target: { files: [file] }
+      })
+
       await userEvent.click(screen.getByTestId('submit'))
 
       await waitFor(async () => {
@@ -192,6 +204,10 @@ describe('Page: Upload page', () => {
       fetchMock.mockResponseOnce(JSON.stringify(mockDataSetsList), { status: 200 })
       renderWithProviders(<UploadPage datasetInput={mockDataset} />)
       await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
+
+      fireEvent.change(screen.getByTestId('upload'), {
+        target: { files: [file] }
+      })
 
       fetchMock.mockReject(new Error('fake error message'))
       await userEvent.click(screen.getByTestId('submit'))

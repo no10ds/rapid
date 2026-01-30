@@ -17,7 +17,7 @@ const DatasetSelector = ({
   )
   const [layer, setLayer] = useState<string>('')
   const [domain, setDomain] = useState<string>('')
-  const [dataset, setDataset] = useState<Dataset>(null)
+  const [dataset, setDataset] = useState<Dataset | null>(null)
   const [version, setVersion] = useState<number>(1)
 
   useEffect(() => {
@@ -71,14 +71,13 @@ const DatasetSelector = ({
       version = dataset.version
       setLayer(dataset.layer)
       setDomain(dataset.domain)
+      setVersion(version)
+      setMaxVersion(version)
+      setParentDataset(dataset)
     } else {
       setLayer(null)
       setDomain(null)
     }
-
-    setVersion(version)
-    setMaxVersion(version)
-    setParentDataset(dataset)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataset])
 

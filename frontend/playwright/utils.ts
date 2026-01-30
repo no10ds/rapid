@@ -7,9 +7,11 @@ export const domain = `https://${process.env.E2E_DOMAIN_NAME.replace('/api', '')
 export async function makeAPIRequest(
   path: string,
   method: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body?: any,
   authToken?: string,
   optionalHeaders = {}
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> {
   const response = await fetch(`${domain}/api/${path}`, {
     method,
@@ -35,6 +37,7 @@ export async function getSecretValue(secretName: string): Promise<string | void>
   })
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function generateRapidAuthToken(): Promise<any> {
   const secretName = `${process.env.E2E_RESOURCE_PREFIX}_E2E_TEST_CLIENT_USER_ADMIN`
   const clientId = JSON.parse((await getSecretValue(secretName)) as string)['CLIENT_ID']
