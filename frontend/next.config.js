@@ -2,6 +2,7 @@ const path = require('path')
 const apiProx = process.env.NEXT_PUBLIC_API_URL_PROXY || null
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'export',
   reactStrictMode: true,
   trailingSlash: false,
   turbopack: {
