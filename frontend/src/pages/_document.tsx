@@ -21,6 +21,7 @@ export default class MyDocument extends Document<DocumentProps> {
         <Head>
           <meta name="emotion-insertion-point" content="" />
           <meta name="theme-color" content={theme.palette.primary.main} />
+          <meta name="emotion-insertion-point" content="" />
           <link rel="icon" href="/img/favicon.ico?v=0" sizes="any" />
           <meta charSet="UTF-8" />
           <script src="/__ENV.js" async />
@@ -53,6 +54,7 @@ MyDocument.getInitialProps = async (ctx) => {
     <style
       data-emotion={`${style.key} ${style.ids.join(' ')}`}
       key={style.key}
+      // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{ __html: style.css }}
     />
   ))

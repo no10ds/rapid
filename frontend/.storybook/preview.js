@@ -9,12 +9,11 @@ export const parameters = {
     }
   },
   backgrounds: {
-    default: 'White',
-    values: [
-      { name: 'Dark grey', value: '#AEAEAE' },
-      { name: 'Light', value: '#E9EAEC' },
-      { name: 'White', value: '#fff' }
-    ]
+    options: {
+      dark_grey: { name: 'Dark grey', value: '#AEAEAE' },
+      light: { name: 'Light', value: '#E9EAEC' },
+      white: { name: 'White', value: '#fff' }
+    }
   }
 }
 
@@ -25,3 +24,9 @@ export const decorators = [
     </ThemeProvider>
   )
 ]
+
+export const initialGlobals = {
+  backgrounds: {
+    value: 'white'
+  }
+};

@@ -1,6 +1,6 @@
-import { SecretsManager } from 'aws-sdk'
+import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager'
 
-const client = new SecretsManager({ region: process.env.AWS_REGION })
+const client = new SecretsManagerClient({ region: process.env.AWS_REGION })
 
 export const domain = `https://${process.env.E2E_DOMAIN_NAME.replace('/api', '')}`
 
@@ -25,16 +25,14 @@ export async function makeAPIRequest(
   return await response.json()
 }
 
-export async function getSecretValue(secretName: string): Promise<string | void> {
-  return new Promise((resolve, reject) => {
-    client.getSecretValue({ SecretId: secretName }, function (err, data) {
-      if (err) {
-        reject(err)
-      } else {
-        resolve(data.SecretString)
-      }
-    })
-  })
+export async function getSecretValue(secretName: string): Promise<string | undefined> {
+  try {
+    const command = new GetSecretValueCommand({ SecretId: secretName })
+    const data = await client.send(command)
+    return data.SecretString
+  } catch (err) {
+    throw err
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

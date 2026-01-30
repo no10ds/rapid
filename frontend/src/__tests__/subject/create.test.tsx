@@ -63,9 +63,9 @@ describe('Page: Subject Create', () => {
       await userEvent.selectOptions(screen.getByTestId('select-layer'), 'ALL')
       await userEvent.selectOptions(screen.getByTestId('select-sensitivity'), 'ALL')
       await userEvent.click(screen.getByTestId('add-permission'))
-      await userEvent.click(screen.getByTestId('submit'))
 
       fetchMock.mockResponseOnce(JSON.stringify(mockData), { status: 200 })
+      await userEvent.click(screen.getByTestId('submit'))
 
       await waitFor(async () => {
         expect(fetchMock).toHaveBeenCalledWith(
@@ -110,8 +110,9 @@ describe('Page: Subject Create', () => {
       await userEvent.selectOptions(screen.getByTestId('select-sensitivity'), 'ALL')
       await userEvent.click(screen.getByTestId('add-permission'))
       await new Promise((r) => setTimeout(r, 2000))
-      await userEvent.click(screen.getByTestId('submit'))
+
       fetchMock.mockResponseOnce(JSON.stringify(mockData), { status: 200 })
+      await userEvent.click(screen.getByTestId('submit'))
 
       await waitFor(async () => {
         expect(fetchMock).toHaveBeenCalledWith(
@@ -148,9 +149,9 @@ describe('Page: Subject Create', () => {
       await userEvent.selectOptions(screen.getByTestId('select-layer'), 'ALL')
       await userEvent.selectOptions(screen.getByTestId('select-sensitivity'), 'ALL')
       await userEvent.click(screen.getByTestId('add-permission'))
-      await userEvent.click(screen.getByTestId('submit'))
 
       fetchMock.mockReject(new Error(error))
+      await userEvent.click(screen.getByTestId('submit'))
 
       await waitFor(async () => {
         expect(screen.getByText(error)).toBeInTheDocument()
