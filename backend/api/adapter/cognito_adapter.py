@@ -41,6 +41,7 @@ class CognitoAdapter:
                 AllowedOAuthFlows=COGNITO_ALLOWED_FLOWS,
                 AllowedOAuthScopes=cognito_scopes,
                 AllowedOAuthFlowsUserPoolClient=True,
+                PreventUserExistenceErrors="ENABLED",
             )
 
             return self._create_client_response(
