@@ -67,6 +67,7 @@ resource "aws_cognito_user_pool_client" "test_client" {
   ]
   allowed_oauth_flows                  = ["client_credentials"]
   allowed_oauth_flows_user_pool_client = true
+  prevent_user_existence_errors        = "ENABLED"
 }
 
 resource "aws_cognito_user_pool_client" "user_login" {
@@ -84,6 +85,7 @@ resource "aws_cognito_user_pool_client" "user_login" {
   callback_urls                        = ["https://${var.domain_name}/api/oauth2/success"]
   logout_urls                          = ["https://${var.domain_name}/login"]
   default_redirect_uri                 = "https://${var.domain_name}/api/oauth2/success"
+  prevent_user_existence_errors        = "ENABLED"
 }
 
 resource "aws_cognito_user_pool_domain" "rapid_cognito_domain" {
