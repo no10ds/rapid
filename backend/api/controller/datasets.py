@@ -624,6 +624,13 @@ async def query_large_dataset(
 
     #### Domain and dataset
 
+    The domain and dataset names must adhere to the following conditions:
+
+    - Only alphanumeric and underscore `_` characters allowed
+    - Start with an alphabetic character
+
+    The domain must also be lowercase only.
+
     ### Outputs
 
     Asynchronous Job ID that can be used to track the progress of the query.
