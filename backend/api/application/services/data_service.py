@@ -249,9 +249,6 @@ class DataService:
         dataset: DatasetMetadata,
         query: Query,
     ) -> pd.DataFrame:
-        # Validate query for SQL injection
-        query.validate_for_sql_injection()
-
         if not self.is_query_too_large(dataset, query):
             return self.athena_adapter.query(dataset, query)
         else:
@@ -263,9 +260,6 @@ class DataService:
         dataset: DatasetMetadata,
         query: Query,
     ) -> str:
-        # Validate query for SQL injection
-        query.validate_for_sql_injection()
-
         query_job = self.job_service.create_query_job(subject_id, dataset)
         query_execution_id = self.athena_adapter.query_async(dataset, query)
         Thread(

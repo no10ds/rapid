@@ -1,10 +1,6 @@
-import logging
 from strenum import StrEnum
 from typing import Optional, List
 from pydantic import BaseModel, ConfigDict
-from sqlidps import SQLi, PotentialSQLiPayload
-
-logger = logging.getLogger(__name__)
 
 
 class SortDirection(StrEnum):
@@ -50,33 +46,6 @@ class Query(BaseModel):
     aggregation_conditions: Optional[str] = None
     order_by_columns: Optional[List[QueryOrderBy]] = None
     limit: Optional[int] = None
-
-    def validate_for_sql_injection(self) -> None:
-        """
-        Validates the query for SQL injection attacks using sqlidps library.
-
-        Raises:
-            ValueError: If query contains potential SQL injection
-        """
-        logger.info("Starting SQL injection validation")
-
-        if self.filter:
-            logger.info(f"Checking filter: {self.filter}")
-            try:
-                SQLi.check(self.filter)
-            except PotentialSQLiPayload:
-                logger.warning(f"SQL injection detected in filter: '{self.filter}'")
-                raise ValueError(f"Potential SQL injection detected in filter: '{self.filter}'")
-
-        if self.aggregation_conditions:
-            logger.info(f"Checking aggregation_conditions: {self.aggregation_conditions}")
-            try:
-                SQLi.check(self.aggregation_conditions)
-            except PotentialSQLiPayload:
-                logger.warning(f"SQL injection detected in aggregation_conditions: '{self.aggregation_conditions}'")
-                raise ValueError(f"Potential SQL injection detected in aggregation_conditions: '{self.aggregation_conditions}'")
-
-        logger.info("SQL injection validation passed")
 
     def to_sql(self, table_name: str) -> str:
         select = (
