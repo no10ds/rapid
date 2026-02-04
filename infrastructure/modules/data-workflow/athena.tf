@@ -1,6 +1,5 @@
 resource "aws_s3_bucket" "rapid_athena_query_results_bucket" {
   #checkov:skip=CKV_AWS_144:No need for cross region replication
-  #checkov:skip=CKV_AWS_145:No need for non default key
   #checkov:skip=CKV_AWS_21:No need to version query results
   #checkov:skip=CKV_AWS_18:No need to log query results
   #checkov:skip=CKV2_AWS_62:No need for event notifications
@@ -15,7 +14,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "rapid_athena_quer
 
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      sse_algorithm = "aws:kms"
     }
   }
 }
@@ -58,8 +57,7 @@ resource "aws_athena_workgroup" "rapid_athena_workgroup" {
       output_location = "s3://${aws_s3_bucket.rapid_athena_query_results_bucket.bucket}"
 
       encryption_configuration {
-        encryption_option = "SSE_S3"
-        # kms_key_arn = ""
+        encryption_option = "SSE_KMS"
       }
     }
   }

@@ -66,6 +66,14 @@ resource "aws_iam_policy" "app_s3_access" {
           "s3:PutObject"
         ],
         "Resource" : "${var.data_s3_bucket_arn}/data/schemas/**/*.json"
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "kms:Decrypt",
+          "kms:GenerateDataKey"
+        ],
+        "Resource" : "arn:aws:kms:${var.aws_region}:${var.aws_account}:alias/aws/s3"
       }
     ]
   })
@@ -119,6 +127,15 @@ resource "aws_iam_policy" "app_athena_query_access" {
           var.athena_query_output_bucket_arn,
           "${var.athena_query_output_bucket_arn}/*"
         ]
+      },
+      {
+        "Sid" : "KMSAccess",
+        "Effect" : "Allow",
+        "Action" : [
+          "kms:Decrypt",
+          "kms:GenerateDataKey"
+        ],
+        "Resource" : "arn:aws:kms:${var.aws_region}:${var.aws_account}:alias/aws/s3"
       }
     ]
   })

@@ -6,7 +6,6 @@ terraform {
 
 resource "aws_s3_bucket" "rapid_data_storage" {
   #checkov:skip=CKV_AWS_144:No need for cross region replication
-  #checkov:skip=CKV_AWS_145:No need for non default key
   #checkov:skip=CKV2_AWS_62:No need for event notifications
   #checkov:skip=CKV2_AWS_61:No need for lifecycle configuration
   bucket        = var.data_bucket_name
@@ -20,8 +19,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "rapid_data_storag
 
   rule {
     apply_server_side_encryption_by_default {
-      kms_master_key_id = "" # use default
-      sse_algorithm     = "AES256"
+      sse_algorithm     = "aws:kms"
     }
   }
 }
@@ -71,7 +69,6 @@ resource "aws_s3_bucket_notification" "rapid_data_storage" {
 
 resource "aws_s3_bucket" "logs" {
   #checkov:skip=CKV_AWS_144:No need for cross region replication
-  #checkov:skip=CKV_AWS_145:No need for non default key
   #checkov:skip=CKV_AWS_18:Log bucket shouldn't be logging
   #checkov:skip=CKV_AWS_21:No need to version log bucket
   #checkov:skip=CKV2_AWS_62:No need for event notifications
@@ -87,8 +84,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
 
   rule {
     apply_server_side_encryption_by_default {
-      kms_master_key_id = "" # use default
-      sse_algorithm     = "AES256"
+      sse_algorithm     = "aws:kms"
     }
   }
 }
