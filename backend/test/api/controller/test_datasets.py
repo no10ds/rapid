@@ -870,8 +870,8 @@ class TestQuery(BaseClientTest):
     ):
         request_json = {
             "select_columns": ["column1"],
-            "filter": "",
-            "aggregation_conditions": "",
+            "filter": None,
+            "aggregation_conditions": None,
             "limit": "10",
         }
 
@@ -885,8 +885,8 @@ class TestQuery(BaseClientTest):
             DatasetMetadata("raw", "mydomain", "mydataset", 1),
             Query(
                 select_columns=["column1"],
-                filter="",
-                aggregation_conditions="",
+                filter=None,
+                aggregation_conditions=None,
                 limit="10",
             ),
         )
@@ -1111,8 +1111,8 @@ class TestLargeDatasetQuery(BaseClientTest):
     ):
         request_json = {
             "select_columns": ["column1"],
-            "filter": "",
-            "aggregation_conditions": "",
+            "filter": None,
+            "aggregation_conditions": None,
             "limit": "10",
         }
 
@@ -1137,8 +1137,8 @@ class TestLargeDatasetQuery(BaseClientTest):
             ),
             Query(
                 select_columns=["column1"],
-                filter="",
-                aggregation_conditions="",
+                filter=None,
+                aggregation_conditions=None,
                 limit="10",
             ),
         )
