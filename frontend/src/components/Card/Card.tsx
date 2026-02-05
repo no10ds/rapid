@@ -1,4 +1,5 @@
-import { Card as MuiCard, styled, CardContent, CardActions } from '@mui/material'
+import { Card as MuiCard, CardContent, CardActions } from '@mui/material'
+import { styled } from '@mui/material/styles'
 import { ComponentProps, ReactNode } from 'react'
 
 type Props = {

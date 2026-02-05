@@ -7,8 +7,8 @@ import { LinearProgress, Typography } from '@mui/material'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
-function DeleteDataset({ datasetInput = null }: { datasetInput?: Dataset }) {
-  const [dataset, setDataset] = useState<Dataset>(datasetInput)
+function DeleteDataset({ datasetInput = null }: { datasetInput?: Dataset | null }) {
+  const [dataset, setDataset] = useState<Dataset | null>(datasetInput)
   const [deleteDatasetSuccessDetails, setDeleteDatasetSuccessDetails] = useState<
     string | undefined
   >()
@@ -45,12 +45,20 @@ function DeleteDataset({ datasetInput = null }: { datasetInput?: Dataset }) {
     <form
       onSubmit={async (event) => {
         event.preventDefault()
-        await mutate({ path: `${dataset.layer}/${dataset.domain}/${dataset.dataset}` })
+        if (dataset) {
+          await mutate({ path: `${dataset.layer}/${dataset.domain}/${dataset.dataset}` })
+        }
       }}
     >
       <Card
         action={
-          <Button data-testid="submit" color="primary" type="submit" loading={isLoading}>
+          <Button
+            data-testid="submit"
+            color="primary"
+            type="submit"
+            loading={isLoading}
+            disabled={!dataset}
+          >
             Delete
           </Button>
         }

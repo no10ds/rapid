@@ -1,7 +1,4 @@
 import ThemeProvider from '../src/components/ThemeProvider'
-import { setConfig } from 'next/config'
-import { publicRuntimeConfig } from '../next.config'
-setConfig({ publicRuntimeConfig })
 
 export const parameters = {
   actions: { argTypesRegex: '^on[A-Z].*' },

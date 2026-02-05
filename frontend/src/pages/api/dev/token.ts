@@ -24,7 +24,7 @@ const generateToken = async () => {
 }
 
 export default async function handler(
-  req: NextApiRequest,
+  _req: NextApiRequest,
   res: NextApiResponse<AccessTokenResponse>
 ) {
   const responseData = await generateToken()

@@ -1,4 +1,5 @@
-import { Skeleton as MuiSkeleton, styled } from '@mui/material'
+import { Skeleton as MuiSkeleton } from '@mui/material'
+import { styled } from '@mui/material/styles'
 import { ComponentProps } from 'react'
 
 type Props = ComponentProps<typeof MuiSkeleton>

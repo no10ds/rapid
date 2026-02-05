@@ -19,6 +19,7 @@ export default class MyDocument extends Document<DocumentProps> {
     return (
       <Html lang="en">
         <Head>
+          <meta name="emotion-insertion-point" content="" />
           <meta name="theme-color" content={theme.palette.primary.main} />
           <link rel="icon" href="/img/favicon.ico?v=0" sizes="any" />
           <meta charSet="UTF-8" />
@@ -43,10 +44,7 @@ MyDocument.getInitialProps = async (ctx) => {
   ctx.renderPage = () =>
     originalRenderPage({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      enhanceApp: (App: any) =>
-        function EnhanceApp(props) {
-          return <App emotionCache={cache} {...props} />
-        }
+      enhanceApp: (App: any) => (props: any) => <App emotionCache={cache} {...props} />
     })
 
   const initialProps = await Document.getInitialProps(ctx)
@@ -55,7 +53,6 @@ MyDocument.getInitialProps = async (ctx) => {
     <style
       data-emotion={`${style.key} ${style.ids.join(' ')}`}
       key={style.key}
-      // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{ __html: style.css }}
     />
   ))

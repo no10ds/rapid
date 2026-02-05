@@ -1,5 +1,4 @@
 import { CSSProperties } from 'react'
-/* eslint-disable @typescript-eslint/no-empty-interface */
 
 export type AllColors = keyof Colors
 

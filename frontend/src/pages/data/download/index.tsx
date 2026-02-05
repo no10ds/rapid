@@ -9,9 +9,9 @@ import { useState } from 'react'
 import DatasetSelector from '@/components/DatasetSelector/DatasetSelector'
 import { Dataset } from '@/service/types'
 
-function DownloadData({ datasetInput = null }: { datasetInput?: Dataset }) {
+function DownloadData({ datasetInput = null }: { datasetInput?: Dataset | null }) {
   const router = useRouter()
-  const [dataset, setDataset] = useState<Dataset>(datasetInput)
+  const [dataset, setDataset] = useState<Dataset | null>(datasetInput)
 
   const {
     isLoading: isDatasetsListLoading,
@@ -47,7 +47,9 @@ function DownloadData({ datasetInput = null }: { datasetInput?: Dataset }) {
         <Button
           data-testid="submit"
           color="primary"
+          disabled={!dataset}
           onClick={() =>
+            dataset &&
             router.push(
               `/data/download/${dataset.layer}/${dataset.domain}/${dataset.dataset}?version=${dataset.version}`
             )
