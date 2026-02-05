@@ -18,8 +18,30 @@ resource "aws_wafv2_web_acl" "rapid_acl" {
   }
 
   rule {
-    name     = "validate-request"
+    name     = "RateLimitRule"
     priority = 0
+
+    action {
+      block {}
+    }
+
+    statement {
+      rate_based_statement {
+        limit              = 1000
+        aggregate_key_type = "IP"
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "RateLimitRule"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  rule {
+    name     = "validate-request"
+    priority = 1
 
     action {
       allow {}
@@ -81,7 +103,7 @@ resource "aws_wafv2_web_acl" "rapid_acl" {
 
   rule {
     name     = "validate-query"
-    priority = 1
+    priority = 2
 
     action {
       block {}
@@ -134,7 +156,7 @@ resource "aws_wafv2_web_acl" "rapid_acl" {
 
   rule {
     name     = "validate-large-query"
-    priority = 2
+    priority = 3
 
     action {
       block {}
@@ -187,7 +209,7 @@ resource "aws_wafv2_web_acl" "rapid_acl" {
 
   rule {
     name     = "AWS-AWSManagedRulesKnownBadInputsRuleSet"
-    priority = 3
+    priority = 4
 
     override_action {
       none {}
@@ -206,7 +228,6 @@ resource "aws_wafv2_web_acl" "rapid_acl" {
       sampled_requests_enabled   = true
     }
   }
-
 
   visibility_config {
     cloudwatch_metrics_enabled = true
