@@ -14,7 +14,7 @@ def _validate_column_name(column: str, allow_empty: bool = False, allow_function
 
     # Add function characters if needed
     if allow_functions:
-        allowed = allowed + ('(', ')', '*', ' ', ',')
+        allowed = allowed + ('(', ')', '*', ',')
 
     if not all(c.isalnum() or c in allowed for c in column):
         raise ValueError(f"Invalid column name: {column}")
