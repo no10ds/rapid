@@ -44,7 +44,7 @@ repos:
           - markdown table --recursive --output-file README.md .
         exclude: '^(?!infrastructure/).*'
   - repo: https://github.com/bridgecrewio/checkov.git
-    rev: 2.3.261
+    rev: 3.2.415
     hooks:
       - id: checkov
         args: [--quiet, --compact, --skip-check, 'CKV2_GHA_1']
