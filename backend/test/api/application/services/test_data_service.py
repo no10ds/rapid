@@ -19,11 +19,6 @@ from api.common.custom_exceptions import (
 from api.domain.Jobs.QueryJob import QueryStep
 from api.domain.Jobs.UploadJob import UploadStep
 from api.domain.dataset_metadata import DatasetMetadata
-from api.domain.enriched_schema import (
-    EnrichedSchema,
-    EnrichedSchemaMetadata,
-    EnrichedColumn,
-)
 from api.domain.schema import Schema, Column
 from api.domain.schema_metadata import Owner, SchemaMetadata
 from rapid.items.query import Query
