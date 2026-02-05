@@ -26,4 +26,4 @@ ENV COMMIT_SHA=$commit_sha
 ARG version
 ENV VERSION=$version
 
-ENTRYPOINT ["/venv/bin/python3", "-m", "uvicorn", "api.entry:app", "--host", "0.0.0.0", "--port", "8000"]
+ENTRYPOINT ["/venv/bin/python3", "-m", "uvicorn", "api.entry:app", "--host", "0.0.0.0", "--port", "8000", "--no-server-header"]

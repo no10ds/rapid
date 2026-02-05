@@ -1,7 +1,7 @@
 exclude: '^frontend'
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.3.0
+    rev: v6.0.0
     hooks:
       - id: check-yaml
       - id: check-json
@@ -9,31 +9,31 @@ repos:
       - id: end-of-file-fixer
       - id: trailing-whitespace
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.5
+    rev: 1.8.6
     hooks:
       - id: bandit
         exclude: '(tests|docs|test)/.*'
   - repo: https://github.com/psf/black
-    rev: 22.6.0
+    rev: 25.9.0
     hooks:
       - id: black
   - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.3.0
+    rev: v1.5.0
     hooks:
       - id: detect-secrets
         exclude: docs/
   - repo: https://github.com/asottile/blacken-docs
-    rev: v1.12.1
+    rev: 1.20.0
     hooks:
       - id: blacken-docs
   - repo: https://github.com/PyCQA/flake8
-    rev: 7.0.0
+    rev: 7.3.0
     hooks:
       - id: flake8
         args: ['--config', 'backend/.flake8']
         exclude: (docs/|get_latest_release_changelog.py)
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.83.2
+    rev: v1.103.0
     hooks:
       - id: terraform_fmt
         exclude: '^(?!infrastructure/).*'
@@ -44,7 +44,7 @@ repos:
           - markdown table --recursive --output-file README.md .
         exclude: '^(?!infrastructure/).*'
   - repo: https://github.com/bridgecrewio/checkov.git
-    rev: 3.2.415
+    rev: 3.2.488
     hooks:
       - id: checkov
         args: [--quiet, --compact, --skip-check, 'CKV2_GHA_1']
