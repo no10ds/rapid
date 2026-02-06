@@ -7,22 +7,20 @@ module.exports = {
   ],
   addons: [
     '@storybook/addon-links',
-    '@storybook/addon-essentials',
-    '@storybook/addon-interactions',
     'storybook-addon-designs',
-    '@storybook/addon-a11y'
+    '@storybook/addon-a11y',
+    '@storybook/addon-docs'
   ],
-  framework: '@storybook/react',
+  framework: {
+    name: '@storybook/nextjs-vite',
+    options: {}
+  },
   staticDirs: ['../public'],
   core: {
-    builder: '@storybook/builder-webpack5',
     disableTelemetry: true
   },
   typescript: {
     check: true
-  },
-  features: {
-    emotionAlias: false
   },
   webpackFinal: async (config, { configType }) => {
     config.resolve.modules = [path.resolve(__dirname, '..'), 'node_modules']

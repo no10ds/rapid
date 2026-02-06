@@ -12,3 +12,9 @@ variable "resource-name-prefix" {
   type        = string
   description = "The prefix to add to resources for easier identification"
 }
+
+variable "layers" {
+  type        = list(string)
+  description = "A list of the layers that the rAPId instance will contain"
+  default     = ["default"]
+}

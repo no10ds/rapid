@@ -37,7 +37,7 @@ describe('Page: Subject Create', () => {
     await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
     expect(screen.queryByTestId('field-email')).not.toBeInTheDocument()
 
-    userEvent.selectOptions(screen.getByTestId('field-type'), 'User')
+    await userEvent.selectOptions(screen.getByTestId('field-type'), 'User')
     expect(screen.getByTestId('field-email')).toBeInTheDocument()
   })
 
@@ -56,16 +56,16 @@ describe('Page: Subject Create', () => {
       renderWithProviders(<SubjectCreatePage />)
       await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
 
-      userEvent.selectOptions(screen.getByTestId('field-type'), 'Client')
+      await userEvent.selectOptions(screen.getByTestId('field-type'), 'Client')
       await userEvent.type(screen.getByTestId('field-name'), 'James Bond')
 
-      userEvent.selectOptions(screen.getByTestId('select-type'), 'WRITE')
-      userEvent.selectOptions(screen.getByTestId('select-layer'), 'ALL')
-      userEvent.selectOptions(screen.getByTestId('select-sensitivity'), 'ALL')
+      await userEvent.selectOptions(screen.getByTestId('select-type'), 'WRITE')
+      await userEvent.selectOptions(screen.getByTestId('select-layer'), 'ALL')
+      await userEvent.selectOptions(screen.getByTestId('select-sensitivity'), 'ALL')
       await userEvent.click(screen.getByTestId('add-permission'))
-      await userEvent.click(screen.getByTestId('submit'))
 
       fetchMock.mockResponseOnce(JSON.stringify(mockData), { status: 200 })
+      await userEvent.click(screen.getByTestId('submit'))
 
       await waitFor(async () => {
         expect(fetchMock).toHaveBeenCalledWith(
@@ -101,17 +101,18 @@ describe('Page: Subject Create', () => {
       renderWithProviders(<SubjectCreatePage />)
       await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
 
-      userEvent.selectOptions(screen.getByTestId('field-type'), 'User')
+      await userEvent.selectOptions(screen.getByTestId('field-type'), 'User')
       await userEvent.type(screen.getByTestId('field-name'), 'James Bond')
       await userEvent.type(screen.getByTestId('field-email'), 'test@example.com')
 
-      userEvent.selectOptions(screen.getByTestId('select-type'), 'WRITE')
-      userEvent.selectOptions(screen.getByTestId('select-layer'), 'ALL')
-      userEvent.selectOptions(screen.getByTestId('select-sensitivity'), 'ALL')
+      await userEvent.selectOptions(screen.getByTestId('select-type'), 'WRITE')
+      await userEvent.selectOptions(screen.getByTestId('select-layer'), 'ALL')
+      await userEvent.selectOptions(screen.getByTestId('select-sensitivity'), 'ALL')
       await userEvent.click(screen.getByTestId('add-permission'))
       await new Promise((r) => setTimeout(r, 2000))
-      await userEvent.click(screen.getByTestId('submit'))
+
       fetchMock.mockResponseOnce(JSON.stringify(mockData), { status: 200 })
+      await userEvent.click(screen.getByTestId('submit'))
 
       await waitFor(async () => {
         expect(fetchMock).toHaveBeenCalledWith(
@@ -142,15 +143,15 @@ describe('Page: Subject Create', () => {
       renderWithProviders(<SubjectCreatePage />)
       await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
 
-      userEvent.selectOptions(screen.getByTestId('field-type'), 'Client')
+      await userEvent.selectOptions(screen.getByTestId('field-type'), 'Client')
       await userEvent.type(screen.getByTestId('field-name'), 'James Bond')
-      userEvent.selectOptions(screen.getByTestId('select-type'), 'WRITE')
-      userEvent.selectOptions(screen.getByTestId('select-layer'), 'ALL')
-      userEvent.selectOptions(screen.getByTestId('select-sensitivity'), 'ALL')
+      await userEvent.selectOptions(screen.getByTestId('select-type'), 'WRITE')
+      await userEvent.selectOptions(screen.getByTestId('select-layer'), 'ALL')
+      await userEvent.selectOptions(screen.getByTestId('select-sensitivity'), 'ALL')
       await userEvent.click(screen.getByTestId('add-permission'))
-      await userEvent.click(screen.getByTestId('submit'))
 
       fetchMock.mockReject(new Error(error))
+      await userEvent.click(screen.getByTestId('submit'))
 
       await waitFor(async () => {
         expect(screen.getByText(error)).toBeInTheDocument()

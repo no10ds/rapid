@@ -1,13 +1,62 @@
+const path = require('path')
 const apiProx = process.env.NEXT_PUBLIC_API_URL_PROXY || null
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'export',
   reactStrictMode: true,
   trailingSlash: false,
-  swcMinify: true,
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: [{
+          loader: '@svgr/webpack',
+          options: {
+            icon: true,
+            svgoConfig: {
+              plugins: [
+                {
+                  name: 'preset-default',
+                  params: {
+                    overrides: {
+                      removeViewBox: false,
+                    },
+                  },
+                },
+                {
+                  name: 'removeDimensions',
+                },
+              ],
+            },
+          },
+        }],
+        as: '*.js',
+      },
+    },
+  },
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,
-      use: [{ loader: '@svgr/webpack', options: { icon: true } }]
+      use: [{
+        loader: '@svgr/webpack',
+        options: {
+          icon: true,
+          svgoConfig: {
+            plugins: [
+              {
+                name: 'preset-default',
+                params: {
+                  overrides: {
+                    removeViewBox: false,
+                  },
+                },
+              },
+              {
+                name: 'removeDimensions',
+              },
+            ],
+          },
+        },
+      }]
     })
     return config
   },

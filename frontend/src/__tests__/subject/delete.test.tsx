@@ -1,6 +1,5 @@
 import React from 'react'
 import {
-  render,
   screen,
   waitForElementToBeRemoved,
   waitFor,
@@ -73,8 +72,8 @@ describe('DeleteSubject Component', () => {
       ).toHaveLength(mockData.length)
     })
 
-    userEvent.selectOptions(screen.getByTestId('field-user'), value)
-    userEvent.click(screen.getByTestId('delete-button'))
+    await userEvent.selectOptions(screen.getByTestId('field-user'), value)
+    await userEvent.click(screen.getByTestId('delete-button'))
 
     await waitFor(async () => {
       expect(screen.getByTestId('delete-confirmation-dialog')).toBeInTheDocument()
@@ -93,8 +92,8 @@ describe('DeleteSubject Component', () => {
       ).toHaveLength(mockData.length)
     })
 
-    userEvent.selectOptions(screen.getByTestId('field-user'), value)
-    userEvent.click(screen.getByTestId('delete-button'))
+    await userEvent.selectOptions(screen.getByTestId('field-user'), value)
+    await userEvent.click(screen.getByTestId('delete-button'))
 
     await waitFor(async () => {
       expect(screen.getByTestId('delete-confirmation-dialog')).toBeInTheDocument()
@@ -104,7 +103,7 @@ describe('DeleteSubject Component', () => {
     expect(screen.getByTestId('delete-confirmation-dialog-delete-button')).toBeEnabled()
 
     fetchMock.mockResponseOnce(JSON.stringify(mockData), { status: 200 })
-    userEvent.click(screen.getByTestId('delete-confirmation-dialog-delete-button'))
+    await userEvent.click(screen.getByTestId('delete-confirmation-dialog-delete-button'))
 
     await waitFor(async () => {
       expect(fetchMock).toHaveBeenCalledWith(
@@ -127,8 +126,8 @@ describe('DeleteSubject Component', () => {
       ).toHaveLength(mockData.length)
     })
 
-    userEvent.selectOptions(screen.getByTestId('field-user'), value)
-    userEvent.click(screen.getByTestId('delete-button'))
+    await userEvent.selectOptions(screen.getByTestId('field-user'), value)
+    await userEvent.click(screen.getByTestId('delete-button'))
 
     await waitFor(async () => {
       expect(screen.getByTestId('delete-confirmation-dialog')).toBeInTheDocument()
@@ -138,7 +137,7 @@ describe('DeleteSubject Component', () => {
     expect(screen.getByTestId('delete-confirmation-dialog-delete-button')).toBeEnabled()
 
     fetchMock.mockResponseOnce(JSON.stringify(mockData), { status: 200 })
-    userEvent.click(screen.getByTestId('delete-confirmation-dialog-delete-button'))
+    await userEvent.click(screen.getByTestId('delete-confirmation-dialog-delete-button'))
 
     await waitFor(async () => {
       expect(fetchMock).toHaveBeenCalledWith(

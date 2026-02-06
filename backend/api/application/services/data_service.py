@@ -210,8 +210,8 @@ class DataService:
 
     def get_dataset_info(self, dataset: DatasetMetadata) -> EnrichedSchema:
         schema = self.schema_service.get_schema(dataset)
-        statistics_dataframe = self.athena_adapter.query(
-            dataset, self._build_query(schema)
+        statistics_dataframe = self.athena_adapter.query_sql(
+            self._build_query(schema, dataset)
         )
         last_updated = self.get_last_updated_time(dataset)
         last_uploaded_by = self.get_last_uploader(dataset)
@@ -287,7 +287,7 @@ class DataService:
             self.job_service.fail(query_job, build_error_message_list(error))
             raise error
 
-    def _build_query(self, schema: Schema) -> Query:
+    def _build_query(self, schema: Schema, dataset: DatasetMetadata) -> str:
         date_columns = schema.get_columns_by_type(DateType)
         date_range_queries = [
             *[
@@ -303,7 +303,9 @@ class DataService:
             "count(*) as data_size",
             *date_range_queries,
         ]
-        return Query(select_columns=columns_to_query)
+        select_clause = ", ".join(columns_to_query)
+        table_name = dataset.glue_table_name()
+        return f"SELECT {select_clause} FROM {table_name}"
 
     def _enrich_metadata(
         self, schema: Schema, statistics_dataframe: pd.DataFrame, last_updated: str, last_uploaded_by: str

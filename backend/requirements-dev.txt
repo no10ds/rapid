@@ -7,5 +7,6 @@ pytest
 requests-mock
 setuptools
 twine
+pip-audit
 
 -r ./requirements.txt

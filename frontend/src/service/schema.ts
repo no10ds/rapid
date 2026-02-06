@@ -35,11 +35,7 @@ export const AdminPermission = z.object({
 export const Permission = z.discriminatedUnion(
   'type',
   [DataPermission, AdminPermission],
-  {
-    errorMap: () => {
-      return { message: 'Required' }
-    }
-  }
+  'Required'
 )
 
 export const SubjectCreate = z.object({
@@ -65,8 +61,8 @@ export const schemaCreateSchema = z.object({
 })
 
 export const schemaGenerateSchema = z.object({
-  sensitivity: SensitivityEnum,
-  layer: z.string(),
-  domain: z.string(),
-  title: z.string()
+  sensitivity: z.string().min(1, { message: 'Required' }),
+  layer: z.string().min(1, { message: 'Required' }),
+  domain: z.string().min(1, { message: 'Required' }),
+  title: z.string().min(1, { message: 'Required' })
 })

@@ -10,6 +10,7 @@ resource "aws_cognito_user_pool_client" "e2e_test_client_user_admin" {
   ]
   allowed_oauth_flows                  = ["client_credentials"]
   allowed_oauth_flows_user_pool_client = true
+  prevent_user_existence_errors        = "ENABLED"
 }
 
 resource "aws_secretsmanager_secret" "e2e_test_client_user_admin" {
@@ -40,6 +41,7 @@ resource "aws_cognito_user_pool_client" "e2e_test_client_read_all_public" {
   ]
   allowed_oauth_flows                  = ["client_credentials"]
   allowed_oauth_flows_user_pool_client = true
+  prevent_user_existence_errors        = "ENABLED"
 }
 
 resource "aws_secretsmanager_secret" "e2e_test_client_read_all_public" {
@@ -72,6 +74,7 @@ resource "aws_cognito_user_pool_client" "e2e_test_client_data_admin" {
   ]
   allowed_oauth_flows                  = ["client_credentials"]
   allowed_oauth_flows_user_pool_client = true
+  prevent_user_existence_errors        = "ENABLED"
 }
 
 resource "aws_secretsmanager_secret" "e2e_test_client_data_admin" {
@@ -102,6 +105,7 @@ resource "aws_cognito_user_pool_client" "e2e_test_client_read_and_write" {
   ]
   allowed_oauth_flows                  = ["client_credentials"]
   allowed_oauth_flows_user_pool_client = true
+  prevent_user_existence_errors        = "ENABLED"
 }
 
 resource "aws_secretsmanager_secret" "e2e_test_client_read_and_write" {
@@ -132,6 +136,7 @@ resource "aws_cognito_user_pool_client" "e2e_test_client_write_all" {
   ]
   allowed_oauth_flows                  = ["client_credentials"]
   allowed_oauth_flows_user_pool_client = true
+  prevent_user_existence_errors        = "ENABLED"
 }
 
 resource "aws_secretsmanager_secret" "e2e_test_client_write_all" {

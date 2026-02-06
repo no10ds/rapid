@@ -39,7 +39,7 @@ variable "password_policy" {
   })
   description = "The Cognito pool password policy"
   default = {
-    minimum_length                   = 8
+    minimum_length                   = 10
     require_lowercase                = true
     require_numbers                  = true
     require_symbols                  = true
@@ -108,20 +108,14 @@ variable "layers" {
   default     = ["default"]
 }
 
-variable "cognito_ses_authentication" {
-  type        = bool
-  description = "Use Cognito with SES for authentication emails to allow custom email addresses for cognito emails."
-  default     = false
-}
-
 variable "ses_domain_identity_arn" {
   type        = string
   description = "The ARN of the SES domain identity to use for sending emails from Cognito"
-  default     = ""
+  default     = null
 }
 
 variable "ses_email_domain" {
   type        = string
   description = "The domain to use for the SES email 'from' address (e.g., no-reply@<domain>). Defaults to domain_name if not specified."
-  default     = ""
+  default     = null
 }

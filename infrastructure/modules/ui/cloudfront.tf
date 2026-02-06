@@ -135,6 +135,17 @@ resource "aws_cloudfront_distribution" "rapid_ui" {
     origin_request_policy_id = aws_cloudfront_origin_request_policy.rapid_ui_lb.id
   }
 
+  ordered_cache_behavior {
+    allowed_methods        = ["GET", "HEAD", "OPTIONS"]
+    cached_methods         = ["HEAD", "GET"]
+    target_origin_id       = "${var.resource-name-prefix}-api-origin"
+    viewer_protocol_policy = "redirect-to-https"
+    path_pattern           = "/static/*"
+
+    cache_policy_id          = data.aws_cloudfront_cache_policy.optimised.id
+    origin_request_policy_id = aws_cloudfront_origin_request_policy.rapid_ui_lb.id
+  }
+
   logging_config {
     bucket          = "${var.log_bucket_name}.s3.amazonaws.com"
     prefix          = "${var.resource-name-prefix}-cloudfront"

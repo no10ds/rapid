@@ -29,10 +29,15 @@ data "aws_iam_policy_document" "this" {
   }
 }
 
-resource "aws_iam_role_policy" "github_runner_lambda" {
-  name   = "${var.resource-name-prefix}-cloudfront-router-policy"
-  role   = aws_iam_role.this.name
-  policy = data.aws_iam_policy_document.this.json
+resource "aws_iam_policy" "cloudfront_router_policy" {
+  name        = "${var.resource-name-prefix}-cloudfront-router-policy"
+  description = "Managed policy for CloudFront Lambda@Edge router logging"
+  policy      = data.aws_iam_policy_document.this.json
+}
+
+resource "aws_iam_role_policy_attachment" "cloudfront_router_policy_attachment" {
+  role       = aws_iam_role.this.name
+  policy_arn = aws_iam_policy.cloudfront_router_policy.arn
 }
 
 resource "aws_lambda_function" "this" {

@@ -23,19 +23,18 @@ resource "aws_cognito_user_pool" "rapid_user_pool" {
     enabled = true
   }
 
-  dynamic "email_configuration" {
-    for_each = var.cognito_ses_authentication ? [1] : []
-    content {
-      email_sending_account = "DEVELOPER"
-      from_email_address    = "no-reply@${var.ses_email_domain}"
-      source_arn            = var.ses_domain_identity_arn
-    }
+  user_pool_tier = "PLUS"
+
+  user_pool_add_ons {
+    advanced_security_mode = "ENFORCED"
   }
 
-  lifecycle {
-    precondition {
-      condition     = !var.cognito_ses_authentication || (var.cognito_ses_authentication && var.ses_domain_identity_arn != "")
-      error_message = "When you enable SES with cognito (cognito_ses_authentication = true), you must provide a valid SES domain identity ARN in ses_domain_identity_arn"
+  dynamic "email_configuration" {
+    for_each = var.ses_domain_identity_arn != null ? [1] : []
+    content {
+      email_sending_account = "DEVELOPER"
+      from_email_address    = "no-reply@${coalesce(var.ses_email_domain, var.domain_name)}"
+      source_arn            = var.ses_domain_identity_arn
     }
   }
 }
@@ -70,6 +69,7 @@ resource "aws_cognito_user_pool_client" "test_client" {
   ]
   allowed_oauth_flows                  = ["client_credentials"]
   allowed_oauth_flows_user_pool_client = true
+  prevent_user_existence_errors        = "ENABLED"
 }
 
 resource "aws_cognito_user_pool_client" "user_login" {
@@ -87,6 +87,7 @@ resource "aws_cognito_user_pool_client" "user_login" {
   callback_urls                        = ["https://${var.domain_name}/api/oauth2/success"]
   logout_urls                          = ["https://${var.domain_name}/login"]
   default_redirect_uri                 = "https://${var.domain_name}/api/oauth2/success"
+  prevent_user_existence_errors        = "ENABLED"
 }
 
 resource "aws_cognito_user_pool_domain" "rapid_cognito_domain" {

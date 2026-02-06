@@ -49,13 +49,13 @@ describe('isUrlInternal()', () => {
   })
 
   it('throws error if invalid url', () => {
-    expect(() => isUrlInternal('')).toThrowError('Invalid URL:')
-    expect(() => isUrlInternal('*^&*YH')).toThrowError('Invalid URL:')
+    expect(() => isUrlInternal('')).toThrow('Invalid URL:')
+    expect(() => isUrlInternal('*^&*YH')).toThrow('Invalid URL:')
   })
 
   it('throws error if invalid currentUrl', () => {
-    expect(() => isUrlInternal(sitename, '')).toThrowError('Invalid URL:')
-    expect(() => isUrlInternal(sitename, '*^&*YH')).toThrowError('Invalid URL:')
+    expect(() => isUrlInternal(sitename, '')).toThrow('Invalid URL:')
+    expect(() => isUrlInternal(sitename, '*^&*YH')).toThrow('Invalid URL:')
   })
 
   it('url is external site', () => {

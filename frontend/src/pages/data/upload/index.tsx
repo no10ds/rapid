@@ -13,9 +13,9 @@ import { Typography, LinearProgress } from '@mui/material'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
-function UploadDataset({ datasetInput = null }: { datasetInput?: Dataset }) {
+function UploadDataset({ datasetInput = null }: { datasetInput?: Dataset | null }) {
   const [file, setFile] = useState<File | undefined>()
-  const [dataset, setDataset] = useState<Dataset>(datasetInput)
+  const [dataset, setDataset] = useState<Dataset | null>(datasetInput)
   const [disable, setDisable] = useState<boolean>(false)
   const [uploadSuccessDetails, setUploadSuccessDetails] = useState<
     UploadDatasetResponseDetails | undefined
@@ -54,12 +54,14 @@ function UploadDataset({ datasetInput = null }: { datasetInput?: Dataset }) {
     <form
       onSubmit={async (event) => {
         event.preventDefault()
-        const formData = new FormData()
-        formData.append('file', file)
-        await mutate({
-          path: `${dataset.layer}/${dataset.domain}/${dataset.dataset}?version=${dataset.version}`,
-          data: formData
-        })
+        if (dataset && file) {
+          const formData = new FormData()
+          formData.append('file', file)
+          await mutate({
+            path: `${dataset.layer}/${dataset.domain}/${dataset.dataset}?version=${dataset.version}`,
+            data: formData
+          })
+        }
       }}
     >
       <Card
@@ -70,6 +72,7 @@ function UploadDataset({ datasetInput = null }: { datasetInput?: Dataset }) {
               type="submit"
               loading={isLoading}
               data-testid="submit"
+              disabled={!dataset || !file}
             >
               Upload dataset
             </Button>
