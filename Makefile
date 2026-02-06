@@ -130,7 +130,7 @@ api/run:			## Run the backend application with hot reload
 ##
 
 api/create-image:		## Manually (re)create the api environment image
-	@cd backend/; docker build --build-arg commit_sha=$(GITHUB_SHA) --build-arg version=$(GITHUB_SHORT_SHA) -t rapid-api/service-image .
+	@cd backend/; docker build --platform linux/amd64 --build-arg commit_sha=$(GITHUB_SHA) --build-arg version=$(GITHUB_SHORT_SHA) -t rapid-api/service-image .
 
 api/lint:			## Run the api lint checks with flake8
 	@cd backend/; . .venv/bin/activate; flake8 api test

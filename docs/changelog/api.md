@@ -1,5 +1,31 @@
 # API Changelog
 
+## v7.16.0 - _2026-02-06_
+
+See [v7.16.0] changes
+
+### Features
+
+- Added filter groups for query endpoint, allowing users to input filters as JSON
+- Added ECR container image scanning
+- Added S3 bucket encryption policies
+- Upgraded frontend to Next.js v16 and updated npm dependencies
+- Upgraded Storybook and AWS SDK
+
+### Fixes
+
+- Prevented user enumeration via Cognito error responses
+- Updated Cognito password policy to enforce stronger requirements
+- Removed unused CKAN infrastructure
+- Removed unused pipeline infrastructure
+- Updated deprecated S3 and pipeline code
+- Removed unused multi-host VPC and subnets
+- Removed aws-core and optional IAM setup
+- Fixed SES variables required by Cognito configuration
+- Added pip-audit to pre-commit hooks for dependency vulnerability scanning
+
+[v7.16.0]: https://github.com/no10ds/rapid/compare/v7.15.1...v7.16.0
+
 ## v7.15.1 - _2025-11-12_
 
 ### Features

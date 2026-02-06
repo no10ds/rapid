@@ -242,7 +242,7 @@ def _set_security_headers(response) -> None:
     response.headers["Content-Security-Policy"] = (
         "default-src 'self' "
         f"{IDENTITY_PROVIDER_BASE_URL}; "
-        "script-src 'self'; "
+        "script-src 'self' 'sha256-TsjSCX4yUK50HmnZXTe4FVW3iPTz1cIqzuXQu1ozcFU='; "
         "style-src 'self'; "
         "img-src 'self' data: "
         "fastapi.tiangolo.com/img/favicon.png;"

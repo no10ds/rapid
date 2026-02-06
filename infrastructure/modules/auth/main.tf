@@ -23,6 +23,8 @@ resource "aws_cognito_user_pool" "rapid_user_pool" {
     enabled = true
   }
 
+  user_pool_tier = "PLUS"
+
   user_pool_add_ons {
     advanced_security_mode = "ENFORCED"
   }
