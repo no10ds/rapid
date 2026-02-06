@@ -33,6 +33,7 @@
     "jest.config.js"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "playwright"
   ]
 }

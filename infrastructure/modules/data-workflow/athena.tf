@@ -58,6 +58,7 @@ resource "aws_athena_workgroup" "rapid_athena_workgroup" {
 
       encryption_configuration {
         encryption_option = "SSE_KMS"
+        kms_key_arn       = "arn:aws:kms:${var.aws_region}:${var.aws_account}:alias/aws/s3"
       }
     }
   }
