@@ -20,7 +20,7 @@ import { GenerateSchemaResponse, SchemaGenerate } from '@/service/types'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { LinearProgress, Typography } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { useQuery } from '@tanstack/react-query'
 
@@ -33,9 +33,23 @@ function CreateSchema() {
     error: layersError
   } = useQuery(['layers'], getLayers)
 
-  const { control, handleSubmit } = useForm<SchemaGenerate>({
-    resolver: zodResolver(schemaGenerateSchema)
+  const { control, handleSubmit, setValue } = useForm<SchemaGenerate>({
+    resolver: zodResolver(schemaGenerateSchema),
+    mode: 'onSubmit',
+    defaultValues: {
+      sensitivity: '',
+      layer: '',
+      domain: '',
+      title: ''
+    }
   })
+
+  // Auto-select layer if only one option
+  useEffect(() => {
+    if (layersData?.length === 1) {
+      setValue('layer', layersData[0])
+    }
+  }, [layersData, setValue])
 
   const {
     isLoading,
@@ -60,12 +74,18 @@ function CreateSchema() {
 
   return (
     <form
-      onSubmit={handleSubmit(async (data: SchemaGenerate) => {
-        const formData = new FormData()
-        formData.append('file', file)
-        const path = `${data.layer}/${data.sensitivity}/${data.domain}/${data.title}/generate`
-        await mutate({ path, data: formData })
-      })}
+      onSubmit={handleSubmit(
+        async (data: SchemaGenerate) => {
+          const formData = new FormData()
+          formData.append('file', file)
+          const path = `${data.layer}/${data.sensitivity}/${data.domain}/${data.title}/generate`
+          await mutate({ path, data: formData })
+        },
+        (errors) => {
+          // Handle validation errors - react-hook-form will display them
+          console.error('Form validation errors:', errors)
+        }
+      )}
     >
       <Card
         action={
@@ -108,7 +128,6 @@ function CreateSchema() {
           <Controller
             name="layer"
             control={control}
-            defaultValue={layersData.length === 1 ? layersData[0] : ''}
             render={({ field, fieldState: { error } }) => (
               <>
                 <Typography variant="caption">Dataset Layer</Typography>

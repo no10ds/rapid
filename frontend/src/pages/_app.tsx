@@ -64,9 +64,9 @@ export default function MyApp({
   }, [router.pathname])
 
   return (
-    <ErrorBoundary FallbackComponent={ErrorBoundryComponent}>
-      <CacheProvider value={emotionCache}>
-        <ThemeProvider>
+    <CacheProvider value={emotionCache}>
+      <ThemeProvider>
+        <ErrorBoundary FallbackComponent={ErrorBoundryComponent}>
           <QueryClientProvider client={queryClient}>
             <style jsx global>
               {`
@@ -81,8 +81,8 @@ export default function MyApp({
             {getLayout(<Component {...pageProps} />)}
             <ReactQueryDevtools initialIsOpen={false} />
           </QueryClientProvider>
-        </ThemeProvider>
-      </CacheProvider>
-    </ErrorBoundary>
+        </ErrorBoundary>
+      </ThemeProvider>
+    </CacheProvider>
   )
 }

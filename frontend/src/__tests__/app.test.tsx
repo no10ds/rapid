@@ -19,7 +19,7 @@ describe('Page: App page', () => {
 
     jest.runOnlyPendingTimers()
 
-    expect(fetchMock).toBeCalledWith('/api/oauth2/logout', {
+    expect(fetchMock).toHaveBeenCalledWith('/api/oauth2/logout', {
       credentials: 'include',
       method: 'GET'
     })

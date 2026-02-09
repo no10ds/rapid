@@ -82,7 +82,7 @@ describe('Page: Subject Modify', () => {
       ).toHaveLength(mockData.length)
     })
 
-    userEvent.selectOptions(screen.getByTestId('field-user'), value)
+    await userEvent.selectOptions(screen.getByTestId('field-user'), value)
 
     fetchMock.mockResponseOnce(JSON.stringify(mockData), { status: 200 })
     await userEvent.click(screen.getByTestId('submit-button'))

@@ -60,7 +60,6 @@ describe('Component: SchemaCreate', () => {
       <CreateSchema schemaData={mockSchemaData} layersData={mockLayersData} />
     )
 
-    // eslint-disable-next-line jest-dom/prefer-in-document
     expect(screen.getAllByTestId('date-format')).toHaveLength(1)
     expect(screen.getAllByTestId('date-format')[0]).toBeRequired()
   })

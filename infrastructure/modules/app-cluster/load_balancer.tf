@@ -1,5 +1,4 @@
 resource "aws_alb" "application_load_balancer" {
-  #checkov:skip=CKV_AWS_150:No need for deletion protection
   #checkov:skip=CKV2_AWS_28:No need for load balancer waf
   name                       = "${var.resource-name-prefix}-alb"
   internal                   = false
@@ -161,7 +160,7 @@ resource "aws_lb_listener" "listener" {
   protocol          = "HTTPS"
   certificate_arn   = var.certificate_validation_arn != "" ? var.certificate_validation_arn : aws_acm_certificate_validation.rapid-certificate-validation[0].certificate_arn
   tags              = var.tags
-  ssl_policy        = "ELBSecurityPolicy-TLS-1-2-2017-01"
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
 
   default_action {
     type             = "forward"

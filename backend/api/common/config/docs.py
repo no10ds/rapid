@@ -1,6 +1,7 @@
 import os
 
 from fastapi.openapi.utils import get_openapi
+from fastapi.openapi.docs import get_swagger_ui_html
 
 VERSION = os.getenv("VERSION", None)
 COMMIT_SHA = os.getenv("COMMIT_SHA", None)
@@ -60,3 +61,14 @@ def custom_openapi_docs_generator(app):
         return app.openapi_schema
 
     return custom_openapi_docs
+
+
+def custom_swagger_ui_html(openapi_url: str, title: str):
+    """Generate custom Swagger UI HTML using self-hosted assets"""
+    return get_swagger_ui_html(
+        openapi_url=openapi_url,
+        title=title,
+        swagger_js_url="/static/swagger-ui/swagger-ui-bundle.js",
+        swagger_css_url="/static/swagger-ui/swagger-ui.css",
+        swagger_favicon_url="/static/favicon.ico",
+    )

@@ -1,4 +1,5 @@
-import { Box, Container, styled, Typography } from '@mui/material'
+import { Box, Container, Typography } from '@mui/material'
+import { styled } from '@mui/material/styles'
 import { Logo, GovLogo } from '@/components/Icon'
 import { ComponentProps, ReactNode } from 'react'
 

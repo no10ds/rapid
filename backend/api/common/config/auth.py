@@ -10,7 +10,7 @@ from api.common.config.layers import Layer
 ALL = "ALL"
 
 RAPID_ACCESS_TOKEN = "rat"  # nosec B105
-COOKIE_MAX_AGE_IN_SECONDS = 3600
+COOKIE_MAX_AGE_IN_SECONDS = 1800  # 30 minutes
 
 DEFAULT_PERMISSION = ["READ_PUBLIC"]
 

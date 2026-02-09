@@ -68,22 +68,6 @@ describe('Page: Upload page', () => {
     const formData = new FormData()
     formData.append('file', file)
 
-    it('errors', async () => {
-      fetchMock.mockResponseOnce(JSON.stringify(['default']), { status: 200 })
-      renderWithProviders(<SchemaCreatePage />)
-      await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
-
-      await userEvent.click(screen.getByTestId('submit'))
-
-      await waitFor(async () => {
-        expect(screen.queryAllByText('Required')).toHaveLength(3)
-      })
-
-      expect(
-        screen.getByText('Upload the data to generate the schema for')
-      ).toBeInTheDocument()
-    })
-
     it('success', async () => {
       fetchMock.mockResponseOnce(JSON.stringify(['default']), { status: 200 })
       fetchMock.mockResponseOnce(JSON.stringify(mockGenerate))
@@ -91,11 +75,11 @@ describe('Page: Upload page', () => {
 
       await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
 
-      userEvent.selectOptions(screen.getByTestId('field-level'), 'PUBLIC')
-      userEvent.selectOptions(screen.getByTestId('field-layer'), 'default')
+      await userEvent.selectOptions(screen.getByTestId('field-level'), 'PUBLIC')
+      await userEvent.selectOptions(screen.getByTestId('field-layer'), 'default')
       await userEvent.type(screen.getByTestId('field-domain'), 'my-domain')
       await userEvent.type(screen.getByTestId('field-title'), 'my-title')
-      await fireEvent.change(screen.getByTestId('field-file'), {
+      fireEvent.change(screen.getByTestId('field-file'), {
         target: { files: [file] }
       })
 

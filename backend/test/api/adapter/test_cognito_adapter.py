@@ -96,6 +96,7 @@ class TestCognitoAdapterClientApps(BaseCognitoAdapter):
             AllowedOAuthFlows=["client_credentials"],
             AllowedOAuthScopes=[f"https://{DOMAIN_NAME}/CLIENT_APP"],
             AllowedOAuthFlowsUserPoolClient=True,
+            PreventUserExistenceErrors="ENABLED",
         )
         assert actual_response == expected_response
 
@@ -135,6 +136,7 @@ class TestCognitoAdapterClientApps(BaseCognitoAdapter):
             AllowedOAuthFlows=["client_credentials"],
             AllowedOAuthScopes=[f"https://{DOMAIN_NAME}/CLIENT_APP"],
             AllowedOAuthFlowsUserPoolClient=True,
+            PreventUserExistenceErrors="ENABLED",
         )
 
     def test_delete_client_app(self):

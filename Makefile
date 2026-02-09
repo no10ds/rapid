@@ -46,6 +46,7 @@ ignore-secrets:		## Ignore secrets
 detect-vulnerabilities:		##Detect the vulnerabilities
 	bandit -qr api/api sdk/rapid
 
+
 python-setup:			## Setup python to run the sdk and api
 	pyenv install --skip-existing $(PYTHON_VERSION)
 	pyenv local $(PYTHON_VERSION)
@@ -82,6 +83,14 @@ backend/setup:	backend/venv backend/reqs
 
 backend/format:			## Run the api code format with black
 	@cd backend/; . .venv/bin/activate; black api test rapid
+
+backend/audit-dependencies:		## Audit Python dependencies for known vulnerabilities
+	@cd backend; \
+		if [ -f .venv/bin/activate ]; then \
+			. .venv/bin/activate; PIPAPI_PYTHON_LOCATION=$$(pwd)/.venv/bin/python pip-audit; \
+		else \
+			pip-audit; \
+		fi
 
 ##
 ##----- API -----
@@ -121,7 +130,7 @@ api/run:			## Run the backend application with hot reload
 ##
 
 api/create-image:		## Manually (re)create the api environment image
-	@cd backend/; docker build --build-arg commit_sha=$(GITHUB_SHA) --build-arg version=$(GITHUB_SHORT_SHA) -t rapid-api/service-image .
+	@cd backend/; docker build --platform linux/amd64 --build-arg commit_sha=$(GITHUB_SHA) --build-arg version=$(GITHUB_SHORT_SHA) -t rapid-api/service-image .
 
 api/lint:			## Run the api lint checks with flake8
 	@cd backend/; . .venv/bin/activate; flake8 api test
