@@ -1,11 +1,10 @@
 /* eslint-disable testing-library/prefer-screen-queries */
 import { test, expect } from '@playwright/test'
-import { v4 } from 'uuid'
 import fs from 'fs'
 
 import { domain } from './utils'
 
-const datasetName = `ui_test_dataset_${v4().replace('-', '_').slice(0, 8)}`
+const datasetName = `ui_test_dataset_${crypto.randomUUID().replace('-', '_').slice(0, 8)}`
 const filePath = 'playwright/gapminder.csv'
 const downloadPath = `playwright/.downloads/${datasetName}`
 
