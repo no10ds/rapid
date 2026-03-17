@@ -6,7 +6,7 @@ See [v7.16.1] changes
 
 ### Fixes
 
-- Upgraded CloudFront router Lambda runtime from nodejs20.x to nodejs24.x
+- Upgraded CloudFront router Lambda runtime from nodejs20.x to nodejs22.x
 
 [v7.16.1]: https://github.com/no10ds/rapid/compare/v7.16.0...v7.16.1
 
