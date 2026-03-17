@@ -5,7 +5,6 @@ from test.e2e.journeys.base_journey import (
     BaseAuthenticatedJourneyTest,
     RESOURCE_PREFIX,
 )
-import json
 import pytest
 
 
