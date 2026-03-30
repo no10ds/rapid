@@ -18,7 +18,7 @@ from api.application.services.authorisation.dataset_access_evaluator import (
     DatasetAccessEvaluator,
 )
 from api.application.services.data_service import DataService
-
+from api.application.services.job_service import JobService
 from api.application.services.delete_service import DeleteService
 from api.application.services.format_service import FormatService
 from api.application.services.schema_service import SchemaService
@@ -53,6 +53,7 @@ CATALOG_DISABLED = strtobool(os.environ.get("CATALOG_DISABLED", "False"))
 
 athena_adapter = AthenaAdapter()
 data_service = DataService()
+job_service = JobService()
 delete_service = DeleteService()
 schema_service = SchemaService()
 data_access_evaluator = DatasetAccessEvaluator()
@@ -567,9 +568,11 @@ async def query_dataset(
     ### Click  `Try it out` to use the endpoint
 
     """
-    df = data_service.query_data(
-        construct_dataset_metadata(layer, domain, dataset, version), query
-    )
+    subject_id = get_subject_id(request)
+    dataset_metadata = construct_dataset_metadata(layer, domain, dataset, version)
+    df = data_service.query_data(dataset_metadata, query)
+    query_job = job_service.create_query_job(subject_id, dataset_metadata)
+    job_service.succeed_query(query_job, url=None)
     if df.shape[0] == 0:
         # Return 204 if dataframe is empty
         return PlainTextResponse(
