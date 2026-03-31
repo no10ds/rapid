@@ -369,7 +369,16 @@
     <div class="sb-foot"><div class="usr"><div class="ava">AM</div><div class="usr-info"><div class="usr-name">Abigail M.</div><div class="usr-role">User Admin</div></div></div></div>
   </div>
   <div class="main">
-    <div class="topbar"><div class="topbar-title">Catalog</div><div class="topbar-spacer"></div></div>
+    <div class="topbar" id="cat-topbar">
+      <div class="topbar-title">Catalog</div>
+      <div class="topbar-spacer"></div>
+      <!-- Bulk action bar — shown when rows are selected -->
+      <div id="cat-bulk" style="display:flex;align-items:center;gap:10px;background:#fdf2f8;border:1px solid rgba(236,72,153,.25);border-radius:var(--radius-sm);padding:5px 12px;">
+        <span style="font-size:12px;font-weight:500;color:var(--text-secondary);">3 datasets selected</span>
+        <button class="btn-primary" style="height:28px;font-size:11px;">↓ Download selected</button>
+        <span style="font-size:12px;color:var(--text-tertiary);cursor:pointer;" onclick="document.querySelectorAll('#screen-catalog input[type=checkbox]').forEach(c=>c.checked=false)">✕ Clear</span>
+      </div>
+    </div>
     <div class="content">
       <div class="tbl-wrap">
         <div class="tbl-toolbar" style="flex-direction:column;align-items:flex-start;gap:10px;">
@@ -395,6 +404,7 @@
         <table>
           <thead>
             <tr>
+              <th style="width:36px;padding:10px 8px 10px 16px;"><input type="checkbox" title="Select all" style="cursor:pointer;width:14px;height:14px;accent-color:var(--pink);"></th>
               <th onclick="sortCol(this)">Domain <span class="si">↕</span></th>
               <th onclick="sortCol(this)">Dataset <span class="si">↕</span></th>
               <th onclick="sortCol(this)">Version <span class="si">↕</span></th>
@@ -406,7 +416,8 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
+            <tr style="background:rgba(236,72,153,.04);">
+              <td style="padding:8px 8px 8px 16px;"><input type="checkbox" checked style="cursor:pointer;width:14px;height:14px;accent-color:var(--pink);"></td>
               <td>transport</td>
               <td style="font-weight:500;color:#18181b;">road_incidents</td>
               <td class="mn">3</td>
@@ -419,7 +430,8 @@
                 <button class="act-btn act-btn-del">Delete</button>
               </div></td>
             </tr>
-            <tr>
+            <tr style="background:rgba(236,72,153,.04);">
+              <td style="padding:8px 8px 8px 16px;"><input type="checkbox" checked style="cursor:pointer;width:14px;height:14px;accent-color:var(--pink);"></td>
               <td>health</td>
               <td style="font-weight:500;color:#18181b;">a_e_attendance</td>
               <td class="mn">1</td>
@@ -433,6 +445,7 @@
               </div></td>
             </tr>
             <tr>
+              <td style="padding:8px 8px 8px 16px;"><input type="checkbox" style="cursor:pointer;width:14px;height:14px;accent-color:var(--pink);"></td>
               <td>education</td>
               <td style="font-weight:500;color:#18181b;">pupil_absence</td>
               <td class="mn">2</td>
@@ -444,7 +457,8 @@
                 <button class="act-btn" style="color:var(--pink);border-color:rgba(236,72,153,.3);">↓ Download</button>
               </div></td>
             </tr>
-            <tr>
+            <tr style="background:rgba(236,72,153,.04);">
+              <td style="padding:8px 8px 8px 16px;"><input type="checkbox" checked style="cursor:pointer;width:14px;height:14px;accent-color:var(--pink);"></td>
               <td>finance</td>
               <td style="font-weight:500;color:#18181b;">budget_allocations</td>
               <td class="mn">5</td>
@@ -458,6 +472,7 @@
               </div></td>
             </tr>
             <tr>
+              <td style="padding:8px 8px 8px 16px;"><input type="checkbox" style="cursor:pointer;width:14px;height:14px;accent-color:var(--pink);"></td>
               <td>health</td>
               <td style="font-weight:500;color:#18181b;">gp_registrations</td>
               <td class="mn">1</td>
@@ -485,8 +500,9 @@
 <div class="anno-bar">
   <div class="ai"><div class="n">1</div><p><strong>Three dropdowns to narrow</strong> — Layer, Domain, Dataset let users zero in on exactly what they want. Selecting a dataset filters to just that row.</p></div>
   <div class="ai"><div class="n">2</div><p><strong>Free-text search for everything else</strong> — searches descriptions, column names, and anything not covered by the dropdowns.</p></div>
-  <div class="ai"><div class="n">3</div><p><strong>Download per row</strong> — takes the user straight to the query/download page for that dataset. No intermediate select screen.</p></div>
-  <div class="ai"><div class="n">4</div><p><strong>Delete only shown for data admins</strong> — rows without a delete button are datasets the user doesn't have admin rights over.</p></div>
+  <div class="ai"><div class="n">3</div><p><strong>Checkbox selection + bulk download</strong> — select-all in header, per-row checkboxes, "Download selected" button appears in topbar when any are checked. Selected rows get a subtle pink tint.</p></div>
+  <div class="ai"><div class="n">4</div><p><strong>Download per row</strong> — takes the user straight to the query/download page for that dataset. No intermediate select screen.</p></div>
+  <div class="ai"><div class="n">5</div><p><strong>Delete only shown for data admins</strong> — rows without a delete button are datasets the user doesn't have admin rights over.</p></div>
 </div>
 </div>
 
