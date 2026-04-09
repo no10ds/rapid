@@ -25,8 +25,8 @@
   /* TABS — wireframe nav */
   .nav-tabs{position:fixed;top:0;left:0;right:0;z-index:100;background:#13151a;border-bottom:1px solid #1f2229;display:flex;align-items:center;padding:0 20px;height:44px;gap:0;}
   .nav-tabs h1{font-family:'Poppins',sans-serif;font-size:13px;font-weight:400;font-style:italic;color:var(--pink);margin-right:20px;white-space:nowrap;opacity:.8;}
-  .tab{padding:0 12px;height:44px;display:flex;align-items:center;font-size:10px;font-weight:500;color:#4b5563;cursor:pointer;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;white-space:nowrap;letter-spacing:.05em;text-transform:uppercase;user-select:none;}
-  .tab:hover{color:#8b919e;}
+  .tab{padding:0 12px;height:44px;display:flex;align-items:center;font-size:10px;font-weight:500;color:#9ca3af;cursor:pointer;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;white-space:nowrap;letter-spacing:.05em;text-transform:uppercase;user-select:none;}
+  .tab:hover{color:#d1d5db;}
   .tab.active{color:var(--text);border-bottom-color:var(--pink);}
 
   /* SCREENS */
@@ -41,7 +41,7 @@
   .sidebar::after{content:'';position:absolute;right:0;top:0;bottom:0;width:1px;background:var(--sidebar-border);}
   .sidebar.col{width:var(--sidebar-col);}
   .sb-header{height:64px;padding:0 10px 0 0;display:flex;align-items:center;border-bottom:1px solid var(--sidebar-border);flex-shrink:0;overflow:hidden;background:#ffffff;}
-  .logo-img{flex:1;min-width:0;height:100%;object-fit:contain;object-position:center;padding:12px 16px;transition:opacity .2s;}
+  .logo-img{flex:1;min-width:0;height:100%;object-fit:contain;object-position:center;padding:8px 12px;transition:opacity .2s;}
   .sidebar.col .logo-img{opacity:0;}
   .sb-tog{margin-left:auto;width:24px;height:24px;border-radius:4px;background:transparent;border:none;color:#6b7280;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;transition:background .15s,color .15s;}
   .sb-tog:hover{background:rgba(0,0,0,.08);color:#374151;}
@@ -49,18 +49,18 @@
 
   .sb-sec{padding:20px 8px 4px;flex-shrink:0;}
   .sb-sec:first-of-type{padding-top:12px;}
-  .sb-sec-lbl{font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#3d4149;padding:0 8px;margin-bottom:3px;white-space:nowrap;overflow:hidden;transition:opacity .15s;}
+  .sb-sec-lbl{font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#9ca3af;padding:0 8px;margin-bottom:3px;white-space:nowrap;overflow:hidden;transition:opacity .15s;}
   .sidebar.col .sb-sec-lbl{opacity:0;}
   .ni{height:32px;border-radius:var(--radius-sm);display:flex;align-items:center;gap:9px;padding:0 8px;cursor:pointer;transition:background .12s;position:relative;overflow:hidden;margin-bottom:1px;}
   .ni:hover{background:var(--sidebar-hover);}
   .ni.act{background:rgba(236,72,153,.1);}
   .ni.act::before{content:'';position:absolute;left:0;top:6px;bottom:6px;width:2px;background:var(--pink);border-radius:0 2px 2px 0;}
-  .ni-ico{width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#4b5563;}
-  .ni-ico svg{width:14px;height:14px;}
+  .ni-ico{width:20px;height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#c9ced6;}
+  .ni-ico svg{width:17px;height:17px;}
   .ni-ico svg.stroke{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
   .ni-ico svg.fill{fill:currentColor;stroke:none;}
   .ni.act .ni-ico{color:var(--pink);}
-  .ni-lbl{font-size:12px;font-weight:400;color:#6b7280;white-space:nowrap;overflow:hidden;transition:opacity .15s;letter-spacing:.01em;}
+  .ni-lbl{font-size:12px;font-weight:400;color:#d1d5db;white-space:nowrap;overflow:hidden;transition:opacity .15s;letter-spacing:.01em;}
   .ni.act .ni-lbl{color:#e8eaed;font-weight:500;}
   .sidebar.col .ni-lbl{opacity:0;}
   .ni-badge{margin-left:auto;background:var(--pink);color:white;font-size:9px;font-weight:600;border-radius:10px;padding:1px 6px;flex-shrink:0;transition:opacity .15s;letter-spacing:.02em;}
@@ -73,7 +73,7 @@
   .usr-info{overflow:hidden;transition:opacity .15s;}
   .sidebar.col .usr-info{opacity:0;}
   .usr-name{font-size:12px;font-weight:500;color:#d1d5db;white-space:nowrap;}
-  .usr-role{font-size:10px;color:#4b5563;white-space:nowrap;font-weight:400;}
+  .usr-role{font-size:10px;color:#9ca3af;white-space:nowrap;font-weight:400;}
 
   /* MAIN */
   .main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);}
@@ -159,18 +159,59 @@
   .selected-dataset .lbl{font-size:11px;color:var(--text-tertiary);}
   .selected-dataset .val{font-family:'DM Mono',monospace;font-size:12px;color:var(--text-primary);font-weight:500;}
 
-  /* HOMEPAGE CARDS */
-  .hc-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:780px;margin:0 auto;}
-  .hc{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);display:flex;align-items:stretch;overflow:hidden;transition:box-shadow .2s,transform .2s;cursor:pointer;box-shadow:var(--shadow-sm);}
-  .hc>img{width:110px;height:auto;align-self:stretch;object-fit:cover;flex-shrink:0;}
-  .hc:hover{box-shadow:var(--shadow-md);transform:translateY(-1px);}
-  .hc-body{padding:16px 18px;display:flex;flex-direction:column;gap:5px;}
-  .hc-title{font-size:14px;font-weight:600;color:var(--text-primary);letter-spacing:-.01em;}
-  .hc-desc{font-size:12px;color:var(--text-secondary);line-height:1.55;}
-  .hc-links{display:flex;gap:14px;margin-top:6px;flex-wrap:wrap;}
-  .hc-link{font-size:12px;font-weight:500;color:var(--pink);text-decoration:none;display:flex;align-items:center;gap:3px;transition:gap .15s;}
-  .hc-link:hover{gap:6px;}
-  .hc-link::after{content:'→';font-size:11px;}
+  /* HOMEPAGE */
+  .hp-wrap{display:flex;flex-direction:column;min-height:100%;}
+  .hp-hero{background:var(--sidebar);padding:28px 40px;position:relative;overflow:hidden;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.06);}
+  .hp-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 50% 120% at 100% 50%,rgba(236,72,153,.1) 0%,transparent 65%);pointer-events:none;}
+  .hp-hero-inner{display:flex;align-items:center;justify-content:space-between;gap:24px;}
+  .hp-hero-eyebrow{font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:rgba(236,72,153,.7);margin-bottom:8px;}
+  .hp-hero-title{font-size:22px;font-weight:700;color:#f1f3f5;letter-spacing:-.02em;line-height:1.2;margin-bottom:6px;}
+  .hp-hero-sub{font-size:12px;color:rgba(255,255,255,.85);font-weight:400;line-height:1.6;max-width:360px;}
+  .hp-hero-stats{display:flex;gap:0;flex-shrink:0;border:1px solid rgba(255,255,255,.08);border-radius:8px;overflow:hidden;}
+  .hp-hstat{padding:12px 22px;display:flex;flex-direction:column;gap:3px;background:rgba(255,255,255,.03);}
+  .hp-hstat+.hp-hstat{border-left:1px solid rgba(255,255,255,.08);}
+  .hp-hstat-val{font-size:20px;font-weight:700;color:#f1f3f5;font-family:'DM Mono',monospace;letter-spacing:-.02em;}
+  .hp-hstat-lbl{font-size:10px;color:rgba(255,255,255,.55);letter-spacing:.08em;text-transform:uppercase;font-weight:500;}
+  @keyframes hpfade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  /* Main grid */
+  .hp-body{padding:28px 40px 36px;display:grid;grid-template-columns:1fr 260px;gap:20px;align-items:start;}
+  .hp-cards{display:flex;flex-direction:column;gap:14px;}
+  .hp-card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);padding:22px 26px 22px 28px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;cursor:pointer;transition:box-shadow .15s,transform .15s;opacity:0;animation:hpfade .35s ease forwards;}
+  .hp-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px);}
+  .hp-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;}
+  .hp-card-data::before{background:var(--pink);}
+  .hp-card-schema::before{background:#10b981;}
+  .hp-card-admin::before{background:#8b5cf6;}
+  .hp-card:nth-child(1){animation-delay:.04s}
+  .hp-card:nth-child(2){animation-delay:.1s}
+  .hp-card:nth-child(3){animation-delay:.16s}
+  .hp-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:8px;}
+  .hp-card-tag{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text-tertiary);}
+  .hp-card-title{font-size:15px;font-weight:700;color:var(--text-primary);letter-spacing:-.02em;margin-top:2px;}
+  .hp-admin-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.18);font-size:9px;font-weight:700;color:#7c3aed;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;}
+  .hp-card-desc{font-size:12px;color:var(--text-secondary);line-height:1.65;margin-bottom:16px;}
+  .hp-card-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .hp-btn{height:30px;padding:0 14px;border-radius:5px;font-size:11px;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:all .15s;letter-spacing:.01em;}
+  .hp-btn-primary{background:var(--pink);color:white;border:none;box-shadow:0 1px 3px rgba(236,72,153,.3);}
+  .hp-btn-primary:hover{opacity:.88;}
+  .hp-btn-ghost{background:white;color:var(--text-secondary);border:1px solid var(--border);}
+  .hp-btn-ghost:hover{border-color:#9ca3af;color:var(--text-primary);}
+  /* Right panel */
+  .hp-panel{display:flex;flex-direction:column;gap:12px;}
+  .hp-panel-card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);padding:16px 18px;box-shadow:var(--shadow-sm);}
+  .hp-panel-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:12px;}
+  .hp-quick-link{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f3f4f6;cursor:pointer;text-decoration:none;}
+  .hp-quick-link:last-child{border-bottom:none;}
+  .hp-quick-lbl{font-size:12px;font-weight:500;color:var(--text-primary);}
+  .hp-quick-sub{font-size:11px;color:var(--text-tertiary);margin-top:1px;}
+  .hp-quick-arrow{font-size:13px;color:var(--text-tertiary);}
+  .hp-quick-link:hover .hp-quick-lbl{color:var(--pink);}
+  .hp-quick-link:hover .hp-quick-arrow{color:var(--pink);}
+  .hp-getting-started{display:flex;flex-direction:column;gap:10px;}
+  .hp-step{display:flex;align-items:flex-start;gap:10px;}
+  .hp-step-num{width:20px;height:20px;border-radius:50%;background:var(--pink-faint);border:1px solid rgba(236,72,153,.2);color:var(--pink);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+  .hp-step-text{font-size:12px;color:var(--text-secondary);line-height:1.5;}
+  .hp-step-text strong{color:var(--text-primary);font-weight:600;}
 
   /* STATS */
   .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;}
@@ -200,8 +241,8 @@
   <div class="tab" onclick="show('catalog',this)">Catalog</div>
   <div class="tab" onclick="show('upload',this)">Upload Data</div>
   <div class="tab" id="tab-downloaddetail" onclick="show('downloaddetail',this)">Download — Query</div>
-  <div class="tab" onclick="show('tasks',this)">Tasks</div>
-  <div class="tab" id="tab-taskdetail" onclick="show('taskdetail',this)">Task Detail</div>
+  <div class="tab" onclick="show('tasks',this)">Jobs</div>
+  <div class="tab" id="tab-taskdetail" onclick="show('taskdetail',this)">Job Detail</div>
   <div class="tab" onclick="show('delete',this)">Delete Data</div>
   <div class="tab" onclick="show('schema',this)">Create Schema</div>
   <div class="tab" onclick="show('createuser',this)">Create Subject</div>
@@ -232,7 +273,7 @@
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Jobs</div>
-      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Tasks</div><div class="ni-badge">3</div></div>
+      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Jobs</div><div class="ni-badge">3</div></div>
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Admin</div>
@@ -275,7 +316,7 @@
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Jobs</div>
-      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Tasks</div><div class="ni-badge">3</div></div>
+      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Jobs</div><div class="ni-badge">3</div></div>
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Admin</div>
@@ -285,62 +326,77 @@
   </div>
   <div class="main">
     <div class="topbar"><div class="topbar-title">Dashboard</div><div class="topbar-spacer"></div></div>
-    <div class="content">
-      <div style="margin-bottom:24px;">
-        <div style="font-size:20px;font-weight:700;color:#18181b;margin-bottom:4px;">Welcome to rAPId</div>
-        <div style="font-size:13px;color:#71717a;">Choose an action below, or use the sidebar to navigate.</div>
-      </div>
-      <div class="hc-grid">
-        <div class="hc">
-          <img src="../frontend/public/img/user_icon.png" alt="User Management">
-          <div class="hc-body">
-            <div class="hc-title">User Management</div>
-            <div class="hc-desc">Manage users and clients and their permissions.</div>
-            <div class="hc-links">
-              <a class="hc-link" href="#">User Admin</a>
-            </div>
+    <div class="content" style="padding:0;overflow-y:auto;">
+      <div class="hp-wrap">
+
+        <!-- Hero band -->
+        <div class="hp-hero">
+          <div class="hp-hero-title">Welcome to rAPId</div>
+          <div class="hp-hero-sub">Manage, share and govern datasets across your organisation.</div>
+          <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;">
+            <a href="#" style="height:28px;padding:0 12px;border-radius:5px;font-size:11px;font-weight:500;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:5px;text-decoration:none;background:rgba(255,255,255,.1);color:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.15);">View the API docs</a>
+            <a href="#" style="height:28px;padding:0 12px;border-radius:5px;font-size:11px;font-weight:500;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:5px;text-decoration:none;background:rgba(255,255,255,.1);color:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.15);">See the source code</a>
+            <a href="#" style="height:28px;padding:0 12px;border-radius:5px;font-size:11px;font-weight:500;font-family:'Poppins',sans-serif;display:inline-flex;align-items:center;gap:5px;text-decoration:none;background:rgba(255,255,255,.1);color:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.15);">Contact</a>
           </div>
         </div>
-        <div class="hc">
-          <img src="../frontend/public/img/data_icon.png" alt="Data Management">
-          <div class="hc-body">
-            <div class="hc-title">Data Management</div>
-            <div class="hc-desc">Browse, download and upload data.</div>
-            <div class="hc-links">
-              <a class="hc-link" href="#">Catalog</a>
-              <a class="hc-link" href="#">Upload Data</a>
+
+        <!-- Body — full width cards, no right panel -->
+        <div class="hp-body" style="grid-template-columns:1fr;">
+          <div class="hp-cards">
+
+            <!-- User Management — User Admins only -->
+            <div class="hp-card hp-card-admin">
+              <div class="hp-card-header">
+                <div>
+                  <div class="hp-card-title">User Management</div>
+                </div>
+                <div class="hp-admin-badge">User Admin only</div>
+              </div>
+              <div class="hp-card-desc">Create and modify different users and clients.</div>
+              <div class="hp-card-actions">
+                <a class="hp-btn hp-btn-primary" href="#">Create User</a>
+                <a class="hp-btn hp-btn-ghost" href="#">Modify User</a>
+              </div>
             </div>
+
+            <!-- Data Management -->
+            <div class="hp-card hp-card-data">
+              <div class="hp-card-header">
+                <div>
+                  <div class="hp-card-title">Data Management</div>
+                </div>
+              </div>
+              <div class="hp-card-desc">Upload and download existing data files.</div>
+              <div class="hp-card-actions">
+                <a class="hp-btn hp-btn-primary" href="#">Download Data</a>
+                <a class="hp-btn hp-btn-ghost" href="#">Upload Data</a>
+              </div>
+            </div>
+
+            <!-- Schema Management -->
+            <div class="hp-card hp-card-schema">
+              <div class="hp-card-header">
+                <div>
+                  <div class="hp-card-title">Schema Management</div>
+                </div>
+              </div>
+              <div class="hp-card-desc">Manually create new schemas from raw data.</div>
+              <div class="hp-card-actions">
+                <a class="hp-btn hp-btn-primary" href="#">Create Schema</a>
+              </div>
+            </div>
+
           </div>
         </div>
-        <div class="hc">
-          <img src="../frontend/public/img/schema_icon.png" alt="Schema Management">
-          <div class="hc-body">
-            <div class="hc-title">Schema Management</div>
-            <div class="hc-desc">Manually create new schemas from raw data.</div>
-            <div class="hc-links">
-              <a class="hc-link" href="#">Create Schema</a>
-            </div>
-          </div>
-        </div>
-        <div class="hc">
-          <img src="../frontend/public/img/task_icon.png" alt="Task Status">
-          <div class="hc-body">
-            <div class="hc-title">Task Status</div>
-            <div class="hc-desc">View pending and complete API tasks.</div>
-            <div class="hc-links">
-              <a class="hc-link" href="#">Tasks</a>
-            </div>
-          </div>
-        </div>
+
       </div>
     </div>
   </div>
 </div>
 <div class="anno-bar">
-  <div class="ai"><div class="n">1</div><p><strong>Same layout DNA as original</strong> — large coloured tile left, title + description + links right. Familiar but cleaner.</p></div>
-  <div class="ai"><div class="n">2</div><p><strong>Icon tiles</strong> — replace the PNG images. Same visual weight, consistent with the rest of the UI. Colours drawn from the steel-blue palette of the originals.</p></div>
-  <div class="ai"><div class="n">3</div><p><strong>Links as text</strong> — plain pink text links with arrow, same feel as the original `&lt;Link&gt;` components. No pill buttons.</p></div>
-  <div class="ai"><div class="n">4</div><p><strong>No stats bar</strong> — removed. The card list is the whole page, same as today.</p></div>
+  <div class="ai"><div class="n">1</div><p><strong>Dark hero band</strong> — platform identity + two factual stats (datasets, subjects). No time-of-day greeting, no jobs metric.</p></div>
+  <div class="ai"><div class="n">2</div><p><strong>Left-accent cards</strong> — Data, Schemas, Admin. Staggered fade-in. Each has a tag, title, description and CTA(s). Admin card shows "User Admin only" badge and is only visible to users with that role.</p></div>
+  <div class="ai"><div class="n">3</div><p><strong>Right panel</strong> — Quick links for fast navigation, and a "New to rAPId?" getting-started guide. Useful for infrequent users without cluttering the main flow.</p></div>
 </div>
 </div>
 
@@ -360,7 +416,7 @@
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Jobs</div>
-      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Tasks</div></div>
+      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Jobs</div></div>
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Admin</div>
@@ -522,7 +578,7 @@
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Jobs</div>
-      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Tasks</div></div>
+      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Jobs</div></div>
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Admin</div>
@@ -602,7 +658,7 @@
                 <span style="font-size:11px;color:var(--green);font-weight:600">65%</span>
               </div>
               <div class="progress-bar-wrap"><div class="progress-bar"></div></div>
-              <div style="font-size:11px;color:#a1a1aa">Job ID: <span style="font-family:'DM Mono',monospace">job_3f8a2c</span> — <a href="#" style="color:var(--pink);text-decoration:none">View in Tasks →</a></div>
+              <div style="font-size:11px;color:#a1a1aa">Job ID: <span style="font-family:'DM Mono',monospace">job_3f8a2c</span> — <a href="#" style="color:var(--pink);text-decoration:none">View in Jobs →</a></div>
             </div>
           </div>
         </div>
@@ -635,7 +691,7 @@
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Jobs</div>
-      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Tasks</div></div>
+      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Jobs</div></div>
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Admin</div>
@@ -701,7 +757,7 @@
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Jobs</div>
-      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Tasks</div></div>
+      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Jobs</div></div>
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Admin</div>
@@ -836,7 +892,7 @@
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Jobs</div>
-      <div class="ni act"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Tasks</div><div class="ni-badge">3</div></div>
+      <div class="ni act"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Jobs</div><div class="ni-badge">3</div></div>
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Admin</div>
@@ -845,7 +901,7 @@
     <div class="sb-foot"><div class="usr"><div class="ava">AM</div><div class="usr-info"><div class="usr-name">Abigail M.</div><div class="usr-role">User Admin</div></div></div></div>
   </div>
   <div class="main">
-    <div class="topbar"><div class="topbar-title">Tasks</div><div class="topbar-spacer"></div><button class="tb-icon">↻</button></div>
+    <div class="topbar"><div class="topbar-title">Jobs</div><div class="topbar-spacer"></div><button class="tb-icon">↻</button></div>
     <div class="content">
       <div class="tbl-wrap">
         <div class="tbl-toolbar">
@@ -917,7 +973,7 @@
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Jobs</div>
-      <div class="ni act"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Tasks</div></div>
+      <div class="ni act"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Jobs</div></div>
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Admin</div>
@@ -927,7 +983,7 @@
   </div>
   <div class="main">
     <div class="topbar">
-      <span style="font-size:12px;color:#a1a1aa;cursor:pointer" onclick="show('tasks', document.querySelector('[onclick*=tasks]'))">← Tasks</span>
+      <span style="font-size:12px;color:#a1a1aa;cursor:pointer" onclick="show('tasks', document.querySelector('[onclick*=tasks]'))">← Jobs</span>
       <div class="topbar-title" style="margin-left:12px">Job Detail</div>
       <div class="topbar-spacer"></div>
       <div style="display:flex;align-items:center;gap:8px;padding:5px 12px;background:#f3f4f6;border:1px solid var(--border);border-radius:var(--radius-sm);">
@@ -938,43 +994,39 @@
     <div class="content">
       <div class="form-wrap" style="max-width:860px;margin:0 auto">
 
-        <!-- Status banner — shown for FAILED jobs -->
-        <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:var(--radius);padding:14px 18px;display:flex;align-items:flex-start;gap:12px;margin-bottom:20px;">
-          <span style="font-size:18px;flex-shrink:0">✕</span>
-          <div>
-            <div style="font-size:13px;font-weight:600;color:#dc2626;margin-bottom:2px;">This job failed</div>
-            <div style="font-size:12px;color:#b91c1c;">Upload could not be completed. See the error details below.</div>
-          </div>
-        </div>
-
-        <!-- Job metadata -->
-        <div class="form-card" style="margin-bottom:16px">
+        <!-- 1. Job detail table -->
+        <div class="form-card" style="margin-bottom:16px;">
           <div class="form-card-hd">
-            <div class="form-card-title">Job metadata</div>
-            <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:#a1a1aa">job_1a4f93</div>
+            <div class="form-card-title">Job Detail</div>
+            <span class="badge err" style="margin-left:auto;"><span class="bdot"></span>Failed</span>
           </div>
-          <div class="form-card-body" style="padding:0">
+          <div class="form-card-body" style="padding:0;">
             <table style="width:100%">
               <tbody>
-                <tr style="border-bottom:1px solid #f4f4f5"><td style="padding:10px 20px;font-size:11px;font-weight:600;color:#71717a;width:140px;text-transform:uppercase;letter-spacing:.04em">Type</td><td style="padding:10px 20px;font-size:13px;color:#18181b">UPLOAD</td></tr>
-                <tr style="border-bottom:1px solid #f4f4f5"><td style="padding:10px 20px;font-size:11px;font-weight:600;color:#71717a;text-transform:uppercase;letter-spacing:.04em">Status</td><td style="padding:10px 20px"><span class="badge err"><span class="bdot"></span>Failed</span></td></tr>
-                <tr style="border-bottom:1px solid #f4f4f5"><td style="padding:10px 20px;font-size:11px;font-weight:600;color:#71717a;text-transform:uppercase;letter-spacing:.04em">Step</td><td style="padding:10px 20px;font-size:13px;color:#18181b;font-family:'DM Mono',monospace">VALIDATION</td></tr>
-                <tr style="border-bottom:1px solid #f4f4f5"><td style="padding:10px 20px;font-size:11px;font-weight:600;color:#71717a;text-transform:uppercase;letter-spacing:.04em">Layer</td><td style="padding:10px 20px;font-size:13px;color:#18181b">curated</td></tr>
-                <tr style="border-bottom:1px solid #f4f4f5"><td style="padding:10px 20px;font-size:11px;font-weight:600;color:#71717a;text-transform:uppercase;letter-spacing:.04em">Domain</td><td style="padding:10px 20px;font-size:13px;color:#18181b">transport</td></tr>
-                <tr style="border-bottom:1px solid #f4f4f5"><td style="padding:10px 20px;font-size:11px;font-weight:600;color:#71717a;text-transform:uppercase;letter-spacing:.04em">Dataset</td><td style="padding:10px 20px;font-size:13px;color:#18181b">road_incidents</td></tr>
-                <tr style="border-bottom:1px solid #f4f4f5"><td style="padding:10px 20px;font-size:11px;font-weight:600;color:#71717a;text-transform:uppercase;letter-spacing:.04em">Version</td><td style="padding:10px 20px;font-size:13px;color:#18181b;font-family:'DM Mono',monospace">4</td></tr>
-                <tr><td style="padding:10px 20px;font-size:11px;font-weight:600;color:#71717a;text-transform:uppercase;letter-spacing:.04em">Filename</td><td style="padding:10px 20px;font-size:12px;color:#18181b;font-family:'DM Mono',monospace">road_incidents_2026-03-30.csv</td></tr>
+                <tr style="border-bottom:1px solid #f4f4f5"><td style="padding:9px 20px;font-size:11px;font-weight:600;color:var(--text-tertiary);width:140px;text-transform:uppercase;letter-spacing:.04em">Job ID</td><td style="padding:9px 20px;font-size:12px;font-family:'DM Mono',monospace;color:var(--text-primary);user-select:all;">job_1a4f93</td></tr>
+                <tr style="border-bottom:1px solid #f4f4f5"><td style="padding:9px 20px;font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.04em">Type</td><td style="padding:9px 20px;font-size:13px;color:var(--text-primary);">Upload</td></tr>
+                <tr style="border-bottom:1px solid #f4f4f5"><td style="padding:9px 20px;font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.04em">File</td><td style="padding:9px 20px;font-size:12px;font-family:'DM Mono',monospace;color:var(--text-primary);">road_incidents_2026-03-30.csv</td></tr>
+                <tr style="border-bottom:1px solid #f4f4f5"><td style="padding:9px 20px;font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.04em">Dataset</td><td style="padding:9px 20px;font-size:13px;color:var(--text-primary);">transport / road_incidents</td></tr>
+                <tr style="border-bottom:1px solid #f4f4f5"><td style="padding:9px 20px;font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.04em">Layer</td><td style="padding:9px 20px;font-size:13px;color:var(--text-primary);">curated</td></tr>
+                <tr style="border-bottom:1px solid #f4f4f5"><td style="padding:9px 20px;font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.04em">Version</td><td style="padding:9px 20px;font-size:13px;font-family:'DM Mono',monospace;color:var(--text-primary);">4</td></tr>
+                <tr><td style="padding:9px 20px;font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.04em">Started</td><td style="padding:9px 20px;font-size:13px;color:var(--text-primary);">30 March 2026, 12:18</td></tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- Error details — only shown when status is FAILED -->
-        <div class="form-card" style="border-color:#fecaca">
-          <div class="form-card-hd" style="background:#fef2f2;border-bottom-color:#fecaca">
-            <div class="form-card-title" style="color:#dc2626">Error details</div>
+        <!-- 2. Errors + next steps combined -->
+        <div class="form-card" style="border-color:#fecaca;">
+          <div class="form-card-hd" style="background:#fef2f2;border-bottom-color:#fecaca;gap:10px;">
+            <div style="display:flex;flex-direction:column;gap:2px;">
+              <div class="form-card-title" style="color:#dc2626;">Your file didn't match the schema</div>
+              <div style="font-size:12px;color:#b91c1c;">No data was written. Fix the issues below or update the schema.</div>
+            </div>
+            <div style="margin-left:auto;font-size:11px;color:#b91c1c;font-weight:500;white-space:nowrap;">3 errors</div>
           </div>
-          <div class="form-card-body" style="display:flex;flex-direction:column;gap:6px">
+          <div class="form-card-body" style="display:flex;flex-direction:column;gap:12px;">
+
+            <!-- Error list -->
             <div style="display:flex;flex-direction:column;gap:6px;">
               <div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;">
                 <span style="color:#dc2626;font-size:13px;flex-shrink:0;margin-top:1px;">✕</span>
@@ -987,7 +1039,7 @@
                 <span style="color:#dc2626;font-size:13px;flex-shrink:0;margin-top:1px;">✕</span>
                 <div>
                   <div style="font-size:12px;font-weight:600;color:#dc2626;margin-bottom:2px;">Null values not permitted in column <code style="font-family:'DM Mono',monospace;font-size:11px;background:#fee2e2;padding:1px 4px;border-radius:3px;">date</code></div>
-                  <div style="font-size:12px;color:#7f1d1d;">3 null values found — this column is required</div>
+                  <div style="font-size:12px;color:#7f1d1d;">3 null values found — this column is required by the schema</div>
                 </div>
               </div>
               <div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;">
@@ -998,7 +1050,24 @@
                 </div>
               </div>
             </div>
-            <div style="font-size:11px;color:#9ca3af;padding-top:4px;">3 validation errors · Failed at step VALIDATION · No data was written</div>
+
+            <!-- Divider -->
+            <div style="border-top:1px solid var(--border);padding-top:12px;">
+              <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:10px;">What would you like to do?</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div style="padding:14px 16px;border:1px solid var(--border);border-radius:var(--radius);background:#fafafa;">
+                  <div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:4px;">Fix my file</div>
+                  <div style="font-size:12px;color:var(--text-secondary);line-height:1.55;margin-bottom:12px;">Update the values in your file to match what the schema expects, then re-upload.</div>
+                  <button class="btn-primary" style="font-size:11px;height:28px;">↑ Upload again</button>
+                </div>
+                <div style="padding:14px 16px;border:1px solid var(--border);border-radius:var(--radius);background:#fafafa;">
+                  <div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:4px;">Update the schema</div>
+                  <div style="font-size:12px;color:var(--text-secondary);line-height:1.55;margin-bottom:12px;">If your file is correct, delete the existing data first, then update the schema and re-upload. Requires schema permissions.</div>
+                  <button class="btn-secondary" style="font-size:11px;height:28px;">Go to Catalog →</button>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -1007,10 +1076,8 @@
   </div>
 </div>
 <div class="anno-bar">
-  <div class="ai"><div class="n">1</div><p><strong>Red status banner</strong> — immediately visible at the top for failed jobs. Not shown for success/in-progress.</p></div>
-  <div class="ai"><div class="n">2</div><p><strong>Metadata table</strong> — key-value layout, same fields as today (type, status, step, layer, domain, dataset, version, filename).</p></div>
-  <div class="ai"><div class="n">3</div><p><strong>Error details block</strong> — one card per validation error with a clear title and plain-English description. Inline code highlighting for column names. Only rendered when <code>data.errors</code> has entries.</p></div>
-  <div class="ai"><div class="n">4</div><p><strong>← Tasks breadcrumb</strong> — back link in topbar. Replaces browser back button reliance.</p></div>
+  <div class="ai"><div class="n">1</div><p><strong>Job detail table first</strong> — clean key-value rows: Job ID, Type, File, Dataset, Layer, Version, Started. Status badge in the header.</p></div>
+  <div class="ai"><div class="n">2</div><p><strong>Errors + next steps combined</strong> — single red card with errors at top, then a two-option panel: "Fix my file" or "Update the schema" with the delete-first warning inline.</p></div>
 </div>
 </div>
 
@@ -1030,7 +1097,7 @@
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Jobs</div>
-      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Tasks</div></div>
+      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Jobs</div></div>
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Admin</div>
@@ -1111,7 +1178,7 @@
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Jobs</div>
-      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Tasks</div></div>
+      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Jobs</div></div>
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Admin</div>
@@ -1263,7 +1330,7 @@
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Jobs</div>
-      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Tasks</div></div>
+      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Jobs</div></div>
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Admin</div>
@@ -1363,7 +1430,7 @@
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Jobs</div>
-      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Tasks</div></div>
+      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Jobs</div></div>
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Admin</div>
@@ -1472,7 +1539,7 @@
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Jobs</div>
-      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Tasks</div></div>
+      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Jobs</div></div>
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Admin</div>
@@ -1551,7 +1618,7 @@
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Jobs</div>
-      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Tasks</div></div>
+      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Jobs</div></div>
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Admin</div>
@@ -1567,13 +1634,24 @@
     </div>
     <div class="content">
       <div class="tbl-wrap">
-        <div class="tbl-toolbar">
-          <input class="search-in" placeholder="Search by name or email…" style="min-width:240px;">
-          <div class="fchip on" onclick="chipSel(this)">All</div>
-          <div class="fchip" onclick="chipSel(this)">Users</div>
-          <div class="fchip" onclick="chipSel(this)">Clients</div>
-          <div class="t-sp"></div>
-          <span style="font-size:11px;color:#a1a1aa;">24 subjects</span>
+        <div class="tbl-toolbar" style="flex-direction:column;align-items:flex-start;gap:10px;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%;">
+            <input class="search-in" placeholder="Search by name or email…" style="min-width:220px;flex:1;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#a1a1aa;white-space:nowrap;">Role</span>
+              <select class="cat-sel"><option>All roles</option><option>READ</option><option>WRITE</option><option>ADMIN</option></select>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#a1a1aa;white-space:nowrap;">Domain</span>
+              <select class="cat-sel"><option>All domains</option><option>transport</option><option>health</option><option>education</option><option>finance</option></select>
+            </div>
+            <span style="font-size:11px;color:#a1a1aa;margin-left:auto;">24 subjects</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div class="fchip on" onclick="chipSel(this)">All</div>
+            <div class="fchip" onclick="chipSel(this)">Users</div>
+            <div class="fchip" onclick="chipSel(this)">Clients</div>
+          </div>
         </div>
         <table>
           <thead>
@@ -1581,6 +1659,7 @@
               <th onclick="sortCol(this)">Name <span class="si">↕</span></th>
               <th onclick="sortCol(this)">Type <span class="si">↕</span></th>
               <th onclick="sortCol(this)">Email <span class="si">↕</span></th>
+              <th onclick="sortCol(this)">Domain <span class="si">↕</span></th>
               <th class="srt" onclick="sortCol(this)">Permissions <span class="si">↓</span></th>
               <th>Actions</th>
             </tr>
@@ -1590,18 +1669,15 @@
               <td style="font-weight:500;color:#18181b;">alice.jones</td>
               <td><span class="badge" style="background:rgba(96,165,250,.1);color:#2563eb;">User</span></td>
               <td class="mn">alice.jones@example.gov.uk</td>
+              <td class="mn">transport</td>
               <td><span class="badge" style="background:rgba(52,211,153,.1);color:#059669;margin-right:3px;">READ</span><span class="badge" style="background:rgba(251,191,36,.1);color:#d97706;">WRITE</span></td>
-              <td>
-                <div style="display:flex;gap:6px;">
-                  <button class="act-btn" onclick="">Modify</button>
-                  <button class="act-btn act-btn-del" onclick="">Delete</button>
-                </div>
-              </td>
+              <td><div style="display:flex;gap:6px;"><button class="act-btn">Modify</button><button class="act-btn act-btn-del">Delete</button></div></td>
             </tr>
             <tr>
               <td style="font-weight:500;color:#18181b;">bob.smith</td>
               <td><span class="badge" style="background:rgba(96,165,250,.1);color:#2563eb;">User</span></td>
               <td class="mn">bob.smith@example.gov.uk</td>
+              <td class="mn">health</td>
               <td><span class="badge" style="background:rgba(52,211,153,.1);color:#059669;">READ</span></td>
               <td><div style="display:flex;gap:6px;"><button class="act-btn">Modify</button><button class="act-btn act-btn-del">Delete</button></div></td>
             </tr>
@@ -1609,6 +1685,7 @@
               <td style="font-weight:500;color:#18181b;">data-pipeline-client</td>
               <td><span class="badge" style="background:rgba(167,139,250,.1);color:#7c3aed;">Client</span></td>
               <td class="mn">—</td>
+              <td class="mn">transport, health</td>
               <td><span class="badge" style="background:rgba(52,211,153,.1);color:#059669;margin-right:3px;">READ</span><span class="badge" style="background:rgba(251,191,36,.1);color:#d97706;margin-right:3px;">WRITE</span><span class="badge" style="background:rgba(239,68,68,.1);color:#dc2626;">ADMIN</span></td>
               <td><div style="display:flex;gap:6px;"><button class="act-btn">Modify</button><button class="act-btn act-btn-del">Delete</button></div></td>
             </tr>
@@ -1616,6 +1693,7 @@
               <td style="font-weight:500;color:#18181b;">carol.white</td>
               <td><span class="badge" style="background:rgba(96,165,250,.1);color:#2563eb;">User</span></td>
               <td class="mn">carol.white@example.gov.uk</td>
+              <td class="mn">finance</td>
               <td><span class="badge" style="background:rgba(52,211,153,.1);color:#059669;margin-right:3px;">READ</span><span class="badge" style="background:rgba(251,191,36,.1);color:#d97706;">WRITE</span></td>
               <td><div style="display:flex;gap:6px;"><button class="act-btn">Modify</button><button class="act-btn act-btn-del">Delete</button></div></td>
             </tr>
@@ -1623,6 +1701,7 @@
               <td style="font-weight:500;color:#18181b;">reporting-client</td>
               <td><span class="badge" style="background:rgba(167,139,250,.1);color:#7c3aed;">Client</span></td>
               <td class="mn">—</td>
+              <td class="mn">finance</td>
               <td><span class="badge" style="background:rgba(52,211,153,.1);color:#059669;">READ</span></td>
               <td><div style="display:flex;gap:6px;"><button class="act-btn">Modify</button><button class="act-btn act-btn-del">Delete</button></div></td>
             </tr>
@@ -1630,6 +1709,7 @@
               <td style="font-weight:500;color:#18181b;">david.chen</td>
               <td><span class="badge" style="background:rgba(96,165,250,.1);color:#2563eb;">User</span></td>
               <td class="mn">david.chen@example.gov.uk</td>
+              <td class="mn">education</td>
               <td><span class="badge" style="background:rgba(52,211,153,.1);color:#059669;margin-right:3px;">READ</span><span class="badge" style="background:rgba(251,191,36,.1);color:#d97706;">WRITE</span></td>
               <td><div style="display:flex;gap:6px;"><button class="act-btn">Modify</button><button class="act-btn act-btn-del">Delete</button></div></td>
             </tr>
@@ -1669,7 +1749,7 @@
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Jobs</div>
-      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Tasks</div></div>
+      <div class="ni"><div class="ni-ico"><svg class="fill" viewBox="0 0 24 24"><path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z"/></svg></div><div class="ni-lbl">Jobs</div></div>
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Admin</div>
