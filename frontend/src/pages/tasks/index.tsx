@@ -1,23 +1,39 @@
-import { Card, Link, SimpleTable, AccountLayout } from '@/components'
-import { getAllJobs } from '@/service'
-import { Typography, LinearProgress } from '@mui/material'
-import { useQuery } from '@tanstack/react-query'
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
-import CancelIcon from '@mui/icons-material/Cancel'
-import QueryBuilderIcon from '@mui/icons-material/QueryBuilder'
+import AccountLayout from '@/components/Layout/AccountLayout'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
+import { getAllJobs } from '@/service'
+import { useQuery } from '@tanstack/react-query'
+import { ReactNode } from 'react'
 
-function getStatusSymbol(status: string) {
-  if (status === 'SUCCESS') return <CheckCircleOutlineIcon color="success" />
-  else if (status === 'IN PROGRESS') return <QueryBuilderIcon />
-  else if (status === 'FAILED') return <CancelIcon color="error" />
+function getStatusBadge(status: string) {
+  if (status === 'SUCCESS')
+    return (
+      <span className="badge ok">
+        <span className="bdot" />
+        Success
+      </span>
+    )
+  if (status === 'IN PROGRESS')
+    return (
+      <span className="badge pnd">
+        <span className="bdot" />
+        In Progress
+      </span>
+    )
+  if (status === 'FAILED')
+    return (
+      <span className="badge err">
+        <span className="bdot" />
+        Failed
+      </span>
+    )
+  return <span className="badge">{status}</span>
 }
 
 function StatusPage() {
   const { isLoading, data, error } = useQuery(['jobs'], getAllJobs)
 
   if (isLoading) {
-    return <LinearProgress />
+    return <div className="rapid-loading-bar" role="progressbar" />
   }
 
   if (error) {
@@ -25,59 +41,71 @@ function StatusPage() {
   }
 
   return (
-    <Card data-testid="tasks-content">
-      <Typography variant="body1" gutterBottom>
-        View all the tracked asynchronous processing jobs and the status of each job.
-        Press the desired job id to get greater details on it's run.
-      </Typography>
-
-      <Typography variant="h2" gutterBottom>
-        Jobs
-      </Typography>
-
-      <SimpleTable
-        list={data.map((job) => {
-          return [
-            { children: <>{job.type}</> },
-            { children: <>{job.layer}</> },
-            { children: <>{job.domain}</> },
-            { children: <>{job.dataset}</> },
-            { children: <>{job.version}</> },
-            { children: getStatusSymbol(job.status as string) },
-            { children: <>{job.step}</> },
-            {
-              children: (
-                <Link color="inherit" href={`tasks/${job.job_id}`}>
-                  {job.job_id}
-                </Link>
-              )
-            },
-            {
-              children:
-                job.status === 'FAILED' ? (
-                  <Link href={`tasks/${job.job_id}`}>Failure Details</Link>
-                ) : (
-                  <></>
-                )
-            }
-          ]
-        })}
-        headers={[
-          { children: 'Type' },
-          { children: 'Layer' },
-          { children: 'Domain' },
-          { children: 'Dataset' },
-          { children: 'Version' },
-          { children: 'Status' },
-          { children: 'Step' },
-          { children: 'Job ID' },
-          { children: '' }
-        ]}
-      />
-    </Card>
+    <div data-testid="tasks-content">
+      <div className="tbl-wrap">
+        <div className="tbl-toolbar">
+          <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+            View all tracked asynchronous processing jobs. Click a job ID for details.
+          </p>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Job ID</th>
+              <th>Type</th>
+              <th>Layer</th>
+              <th>Domain</th>
+              <th>Dataset</th>
+              <th>Version</th>
+              <th>Status</th>
+              <th>Step</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((job, idx) => (
+              <tr key={idx}>
+                <td className="mn">
+                  <a
+                    href={`tasks/${job.job_id}`}
+                    style={{ color: 'var(--pink)', textDecoration: 'none' }}
+                  >
+                    {job.job_id}
+                  </a>
+                </td>
+                <td>{job.type}</td>
+                <td>{job.layer}</td>
+                <td>{job.domain}</td>
+                <td style={{ fontWeight: 500 }}>{job.dataset}</td>
+                <td className="mn">{job.version}</td>
+                <td>{getStatusBadge(job.status as string)}</td>
+                <td className="mn">{job.step}</td>
+                <td>
+                  {job.status === 'FAILED' && (
+                    <a
+                      href={`tasks/${job.job_id}`}
+                      className="act-btn act-btn-del"
+                    >
+                      Failure Details
+                    </a>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="pager">
+          <div className="pg-info">
+            {data.length} job{data.length !== 1 ? 's' : ''}
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 
 export default StatusPage
 
-StatusPage.getLayout = (page) => <AccountLayout title="Task Status">{page}</AccountLayout>
+StatusPage.getLayout = (page: ReactNode) => (
+  <AccountLayout title="Task Status">{page}</AccountLayout>
+)

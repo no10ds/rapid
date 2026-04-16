@@ -1,22 +1,11 @@
-import {
-  AccountLayout,
-  Button,
-  Card,
-  Link,
-  Row,
-  Select,
-  SimpleTable,
-  TextField,
-  Alert
-} from '@/components'
+import AccountLayout from '@/components/Layout/AccountLayout'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
-import { asVerticalTableList } from '@/utils'
 import { getDatasetInfo, queryDataset } from '@/service'
 import { DataFormats } from '@/service/types'
-import { Typography, LinearProgress } from '@mui/material'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { useState, ReactNode } from 'react'
+import Link from 'next/link'
 
 function DownloadDataset() {
   const router = useRouter()
@@ -47,7 +36,7 @@ function DownloadDataset() {
     { path: string; dataFormat: DataFormats; data: unknown }
   >({
     mutationFn: queryDataset,
-    onSuccess: async (response, { dataFormat }) => {
+    onSuccess: async (response, { dataFormat: fmt }) => {
       if (response.status === 200) {
         setNoContentReturn(false)
         const blob = await response.blob()
@@ -55,7 +44,7 @@ function DownloadDataset() {
         const a = document.createElement('a')
         a.style.display = 'none'
         a.href = url
-        a.download = `${layer}_${domain}_${dataset}_${version}.${dataFormat}`
+        a.download = `${layer}_${domain}_${dataset}_${version}.${fmt}`
         document.body.appendChild(a)
         a.click()
         window.URL.revokeObjectURL(url)
@@ -66,27 +55,35 @@ function DownloadDataset() {
   })
 
   if (isDatasetInfoLoading) {
-    return <LinearProgress />
+    return <div className="rapid-loading-bar" role="progressbar" />
   }
 
   if (datasetInfoError) {
     return <ErrorCard error={datasetInfoError as Error} />
   }
 
-  const addListValueToQuery = (queryBody, key, value) => {
+  const addListValueToQuery = (
+    queryBodyData: Record<string, unknown>,
+    key: string,
+    value: string
+  ) => {
     if (value) {
-      queryBody[key] = value.split(',')
+      queryBodyData[key] = value.split(',')
     }
   }
 
-  const addStringValueToQuery = (queryBody, key, value) => {
+  const addStringValueToQuery = (
+    queryBodyData: Record<string, unknown>,
+    key: string,
+    value: string
+  ) => {
     if (value) {
-      queryBody[key] = value
+      queryBodyData[key] = value
     }
   }
 
   const createQueryBodyData = () => {
-    const queryBodyData = {}
+    const queryBodyData: Record<string, unknown> = {}
     addListValueToQuery(queryBodyData, 'select_columns', queryBody.select_columns)
     addStringValueToQuery(queryBodyData, 'filter', queryBody.filter)
     addListValueToQuery(queryBodyData, 'group_by_columns', queryBody.group_by_columns)
@@ -99,176 +96,204 @@ function DownloadDataset() {
     return queryBodyData
   }
 
+  const overviewRows: [string, string][] = [
+    ['Domain', domain as string],
+    ['Dataset', dataset as string],
+    ['Description', datasetInfoData.metadata.description],
+    ['Version', version as string],
+    ['Last updated', datasetInfoData.metadata.last_updated],
+    ['Last uploaded by', datasetInfoData.metadata.last_uploaded_by || 'Unknown'],
+    ['Number of rows', datasetInfoData.metadata.number_of_rows?.toString()],
+    ['Number of columns', datasetInfoData.metadata.number_of_columns?.toString()]
+  ]
+
   return (
-    <Card
-      action={
-        <Button
-          color="primary"
-          onClick={() =>
-            mutate({
-              path: `${layer}/${domain}/${dataset}/query?version=${version}`,
-              dataFormat,
-              data: createQueryBodyData()
-            })
-          }
-          loading={isLoading}
-        >
-          Download
-        </Button>
-      }
-    >
-      <Typography variant="h2" gutterBottom>
-        Dataset Overview
-      </Typography>
+    <div className="form-wrap-wide">
+      {/* Card 1 — Dataset overview */}
+      <div className="form-card">
+        <div className="form-card-hd">
+          <div className="form-card-num">1</div>
+          <div className="form-card-title">Dataset overview</div>
+        </div>
+        <div className="form-card-body" style={{ padding: 0 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <tbody>
+              {overviewRows.map(([k, v]) => (
+                <tr key={k} style={{ borderBottom: '1px solid #f9fafb' }}>
+                  <td
+                    style={{
+                      width: '200px',
+                      padding: '10px 16px',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      color: 'var(--text-tertiary)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em'
+                    }}
+                  >
+                    {k}
+                  </td>
+                  <td className="mn" style={{ padding: '10px 16px' }}>
+                    {v}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-      <SimpleTable
-        list={asVerticalTableList([
-          { name: 'Domain', value: domain as string },
-          { name: 'Dataset', value: dataset as string },
-          { name: 'Description', value: datasetInfoData.metadata.description },
-          { name: 'Version', value: version as string },
-          { name: 'Last updated	', value: datasetInfoData.metadata.last_updated },
-          {
-            name: 'Last uploaded by',
-            value: datasetInfoData.metadata.last_uploaded_by || 'Unknown'
-          },
-          {
-            name: 'Number of Rows',
-            value: datasetInfoData.metadata.number_of_rows.toString()
-          },
-          {
-            name: 'Number of Columns',
-            value: datasetInfoData.metadata.number_of_columns.toString()
-          }
-        ])}
-      />
+      {/* Card 2 — Columns */}
+      <div className="form-card">
+        <div className="form-card-hd">
+          <div className="form-card-num">2</div>
+          <div className="form-card-title">Columns</div>
+        </div>
+        <div className="form-card-body" style={{ padding: 0 }}>
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Data Type</th>
+                <th>Allows Null</th>
+                <th>Is Unique</th>
+                <th>Max</th>
+                <th>Min</th>
+              </tr>
+            </thead>
+            <tbody>
+              {datasetInfoData.columns.map((column, idx) => (
+                <tr key={idx}>
+                  <td className="mn">{column.name}</td>
+                  <td>{column.data_type}</td>
+                  <td>{column.allow_null ? 'True' : 'False'}</td>
+                  <td>{column.unique ? 'True' : 'False'}</td>
+                  <td className="mn">{column.statistics ? column.statistics.max : '—'}</td>
+                  <td className="mn">{column.statistics ? column.statistics.min : '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-      <Typography variant="h2" gutterBottom>
-        Columns
-      </Typography>
-      <SimpleTable
-        sx={{ mb: 4 }}
-        headers={[
-          { children: 'Name' },
-          { children: 'Data Type' },
-          { children: 'Allows Null' },
-          { children: 'Is Unique' },
-          { children: 'Max' },
-          { children: 'Min' }
-        ]}
-        list={datasetInfoData.columns.map((column) => {
-          return [
-            { children: column.name },
-            { children: column.data_type },
-            { children: column.allow_null ? 'True' : 'False' },
-            { children: column.unique ? 'True' : 'False' },
-            { children: column.statistics ? column.statistics.max : '-' },
-            { children: column.statistics ? column.statistics.min : '-' }
-          ]
-        })}
-      />
-      <Typography variant="h2" gutterBottom>
-        Format
-      </Typography>
-      <Row>
-        <Select
-          label="Data format"
-          data={['csv', 'json']}
-          value={dataFormat}
-          onChange={(e) => setDataFormat(e.target.value as DataFormats)}
-        />
-      </Row>
+      {/* Card 3 — Query (optional) */}
+      <div className="form-card">
+        <div className="form-card-hd">
+          <div className="form-card-num">3</div>
+          <div className="form-card-title">
+            Query
+            <span
+              style={{
+                fontWeight: 400,
+                color: 'var(--text-tertiary)',
+                fontSize: '11px',
+                marginLeft: '6px'
+              }}
+            >
+              (optional)
+            </span>
+          </div>
+        </div>
+        <div className="form-card-body">
+          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+            For further information on writing queries consult the{' '}
+            <a
+              href="https://rapid.readthedocs.io/en/latest/api/query/"
+              target="_blank"
+              rel="noreferrer"
+              style={{ color: 'var(--pink)', textDecoration: 'none' }}
+            >
+              query writing guide
+            </a>
+          </p>
+          {[
+            { key: 'select_columns', label: 'Select Columns', placeholder: 'column1, avg(column2)' },
+            { key: 'filter', label: 'Filter', placeholder: 'column >= 10' },
+            {
+              key: 'group_by_columns',
+              label: 'Group by Columns',
+              placeholder: 'column1, column3'
+            },
+            {
+              key: 'aggregation_conditions',
+              label: 'Aggregation Conditions',
+              placeholder: 'avg(column2) <= 15'
+            },
+            { key: 'limit', label: 'Row Limit', placeholder: '30' }
+          ].map(({ key, label, placeholder }) => (
+            <div className="field-row" key={key}>
+              <label className="f-lbl">{label}</label>
+              <input
+                className="f-sel"
+                placeholder={placeholder}
+                value={queryBody[key as keyof typeof queryBody]}
+                onChange={(e) => setQueryBody({ ...queryBody, [key]: e.target.value })}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
 
-      <Typography variant="h2" gutterBottom>
-        Query (optional)
-      </Typography>
-
-      <Typography variant="body2" gutterBottom>
-        For further information on writing queries consult the{' '}
-        <Link href="https://rapid.readthedocs.io/en/latest/api/query/" target="_blank">
-          query writing guide
-        </Link>
-      </Typography>
-
-      <Row>
-        <Typography variant="caption">Select Columns</Typography>
-        <TextField
-          fullWidth
-          size="small"
-          variant="outlined"
-          placeholder="column1, avg(column2)"
-          onChange={(event) =>
-            setQueryBody({ ...queryBody, select_columns: event.target.value })
-          }
-        />
-      </Row>
-
-      <Row>
-        <Typography variant="caption">Filter</Typography>
-        <TextField
-          fullWidth
-          size="small"
-          variant="outlined"
-          placeholder="column >= 10"
-          onChange={(event) => setQueryBody({ ...queryBody, filter: event.target.value })}
-        />
-      </Row>
-
-      <Row>
-        <Typography variant="caption">Group by Columns</Typography>
-        <TextField
-          fullWidth
-          size="small"
-          variant="outlined"
-          placeholder="column1, column3"
-          onChange={(event) =>
-            setQueryBody({ ...queryBody, group_by_columns: event.target.value })
-          }
-        />
-      </Row>
-
-      <Row>
-        <Typography variant="caption">Aggregation Conditions</Typography>
-        <TextField
-          fullWidth
-          size="small"
-          variant="outlined"
-          placeholder="avg(column2) <= 15"
-          onChange={(event) =>
-            setQueryBody({ ...queryBody, aggregation_conditions: event.target.value })
-          }
-        />
-      </Row>
-
-      <Row>
-        <Typography variant="caption">Row Limit</Typography>
-        <TextField
-          fullWidth
-          size="small"
-          variant="outlined"
-          placeholder="30"
-          onChange={(event) => setQueryBody({ ...queryBody, limit: event.target.value })}
-        />
-      </Row>
+      {/* Card 4 — Format & Download */}
+      <div className="form-card">
+        <div className="form-card-hd">
+          <div className="form-card-num">4</div>
+          <div className="form-card-title">Output format</div>
+        </div>
+        <div className="form-card-body">
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {(['csv', 'json'] as DataFormats[]).map((fmt) => (
+              <button
+                key={fmt}
+                type="button"
+                onClick={() => setDataFormat(fmt)}
+                className={`fchip${dataFormat === fmt ? ' on' : ''}`}
+                style={{
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                  fontSize: '11px'
+                }}
+              >
+                {fmt.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="form-actions">
+          <button
+            className="btn-primary"
+            type="button"
+            disabled={isLoading}
+            onClick={() =>
+              mutate({
+                path: `${layer}/${domain}/${dataset}/query?version=${version}`,
+                dataFormat,
+                data: createQueryBodyData()
+              })
+            }
+          >
+            {isLoading ? 'Downloading…' : 'Download'}
+          </button>
+          <Link href="/data/download" className="btn-secondary">
+            Back
+          </Link>
+        </div>
+      </div>
 
       {noContentReturn && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {
-            'No data returned for this query. Please ensure that data has been uploaded and the query is not too restrictive.'
-          }
-        </Alert>
+        <div className="warn-box">
+          No data returned for this query. Please ensure that data has been uploaded and the
+          query is not too restrictive.
+        </div>
       )}
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error?.message}
-        </Alert>
-      )}
-    </Card>
+      {error && <div className="warn-box">{error?.message}</div>}
+    </div>
   )
 }
 
 export default DownloadDataset
 
-DownloadDataset.getLayout = (page) => (
+DownloadDataset.getLayout = (page: ReactNode) => (
   <AccountLayout title="Download">{page}</AccountLayout>
 )

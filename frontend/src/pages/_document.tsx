@@ -24,6 +24,13 @@ export default class MyDocument extends Document<DocumentProps> {
           <link rel="icon" href="/img/favicon.ico?v=0" sizes="any" />
           <meta charSet="UTF-8" />
           <script src="/__ENV.js" async />
+          {/* Google Fonts — Poppins (UI) + DM Mono (monospace) */}
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+            rel="stylesheet"
+          />
 
           {this.props.emotionStyleTags}
         </Head>

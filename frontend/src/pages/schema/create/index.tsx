@@ -1,14 +1,6 @@
-import {
-  Row,
-  AccountLayout,
-  Card,
-  Select,
-  TextField,
-  Button,
-  Alert,
-  CreateSchema as CreateSchemaComponent
-} from '@/components'
+import AccountLayout from '@/components/Layout/AccountLayout'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
+import { CreateSchema as CreateSchemaComponent } from '@/components'
 import {
   generateSchema,
   schemaGenerateSchema,
@@ -18,11 +10,9 @@ import {
 import { getLayers } from '@/service/fetch'
 import { GenerateSchemaResponse, SchemaGenerate } from '@/service/types'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { LinearProgress, Typography } from '@mui/material'
-import { useMutation } from '@tanstack/react-query'
-import { useState, useEffect } from 'react'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { useState, useEffect, ReactNode } from 'react'
 import { useForm, Controller } from 'react-hook-form'
-import { useQuery } from '@tanstack/react-query'
 
 function CreateSchema() {
   const [file, setFile] = useState<File | undefined>()
@@ -44,7 +34,6 @@ function CreateSchema() {
     }
   })
 
-  // Auto-select layer if only one option
   useEffect(() => {
     if (layersData?.length === 1) {
       setValue('layer', layersData[0])
@@ -65,7 +54,7 @@ function CreateSchema() {
   }
 
   if (isLayersLoading) {
-    return <LinearProgress />
+    return <div className="rapid-loading-bar" role="progressbar" />
   }
 
   if (layersError) {
@@ -74,6 +63,7 @@ function CreateSchema() {
 
   return (
     <form
+      className="form-wrap-wide"
       onSubmit={handleSubmit(
         async (data: SchemaGenerate) => {
           const formData = new FormData()
@@ -82,36 +72,31 @@ function CreateSchema() {
           await mutate({ path, data: formData })
         },
         (errors) => {
-          // Handle validation errors - react-hook-form will display them
           console.error('Form validation errors:', errors)
         }
       )}
     >
-      <Card
-        action={
-          <Button color="primary" type="submit" loading={isLoading} data-testid="submit">
-            Generate Schema
-          </Button>
-        }
-      >
-        <Typography variant="h2" gutterBottom>
-          Populate dataset properties for the new schema:
-        </Typography>
-
-        <Row>
+      {/* Card 1 — Dataset properties */}
+      <div className="form-card">
+        <div className="form-card-hd">
+          <div className="form-card-num">1</div>
+          <div className="form-card-title">Dataset properties</div>
+        </div>
+        <div className="form-card-body">
           <Controller
             name="sensitivity"
             control={control}
-            render={({ field, fieldState: { error } }) => (
-              <>
-                <Typography variant="caption">Sensitivity Level</Typography>
-                <Select
+            render={({ field, fieldState: { error: fieldError } }) => (
+              <div className="field-row">
+                <label className="f-lbl" htmlFor="field-level">
+                  Sensitivity Level
+                </label>
+                <select
                   {...field}
-                  defaultValue=""
-                  native
-                  error={!!error}
-                  helperText={error?.message}
-                  inputProps={{ 'data-testid': 'field-level' }}
+                  id="field-level"
+                  className="f-sel"
+                  data-testid="field-level"
+                  style={fieldError ? { borderColor: 'var(--red)' } : undefined}
                 >
                   <option value="" disabled>
                     Please select
@@ -119,24 +104,30 @@ function CreateSchema() {
                   {[...GlobalSensitivities, ProtectedSensitivity].map((value) => (
                     <option key={value}>{value}</option>
                   ))}
-                </Select>
-              </>
+                </select>
+                {fieldError && (
+                  <span className="f-hint" style={{ color: 'var(--red)' }}>
+                    {fieldError.message}
+                  </span>
+                )}
+              </div>
             )}
           />
-        </Row>
-        <Row>
+
           <Controller
             name="layer"
             control={control}
-            render={({ field, fieldState: { error } }) => (
-              <>
-                <Typography variant="caption">Dataset Layer</Typography>
-                <Select
+            render={({ field, fieldState: { error: fieldError } }) => (
+              <div className="field-row">
+                <label className="f-lbl" htmlFor="field-layer">
+                  Dataset Layer
+                </label>
+                <select
                   {...field}
-                  native
-                  error={!!error}
-                  helperText={error?.message}
-                  inputProps={{ 'data-testid': 'field-layer' }}
+                  id="field-layer"
+                  className="f-sel"
+                  data-testid="field-layer"
+                  style={fieldError ? { borderColor: 'var(--red)' } : undefined}
                 >
                   <option value="" disabled>
                     Please select
@@ -144,82 +135,132 @@ function CreateSchema() {
                   {layersData.map((value) => (
                     <option key={value}>{value}</option>
                   ))}
-                </Select>
-              </>
+                </select>
+                {fieldError && (
+                  <span className="f-hint" style={{ color: 'var(--red)' }}>
+                    {fieldError.message}
+                  </span>
+                )}
+              </div>
             )}
           />
-        </Row>
 
-        <Row>
           <Controller
             name="domain"
             control={control}
-            render={({ field, fieldState: { error } }) => (
-              <>
-                <Typography variant="caption">Dataset Domain</Typography>
-                <TextField
+            render={({ field, fieldState: { error: fieldError } }) => (
+              <div className="field-row">
+                <label className="f-lbl" htmlFor="field-domain">
+                  Dataset Domain
+                </label>
+                <input
                   {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
+                  id="field-domain"
+                  className="f-sel"
                   placeholder="showcase"
-                  error={!!error}
-                  helperText={error?.message}
-                  inputProps={{ 'data-testid': 'field-domain' }}
-                />{' '}
-              </>
+                  data-testid="field-domain"
+                  style={fieldError ? { borderColor: 'var(--red)' } : undefined}
+                />
+                {fieldError && (
+                  <span className="f-hint" style={{ color: 'var(--red)' }}>
+                    {fieldError.message}
+                  </span>
+                )}
+              </div>
             )}
           />
-        </Row>
 
-        <Row>
           <Controller
             name="title"
             control={control}
-            render={({ field, fieldState: { error } }) => (
-              <>
-                <Typography variant="caption">Dataset Title</Typography>
-                <TextField
+            render={({ field, fieldState: { error: fieldError } }) => (
+              <div className="field-row">
+                <label className="f-lbl" htmlFor="field-title">
+                  Dataset Title
+                </label>
+                <input
                   {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
+                  id="field-title"
+                  className="f-sel"
                   placeholder="movies"
-                  error={!!error}
-                  helperText={error?.message}
-                  inputProps={{ 'data-testid': 'field-title' }}
+                  data-testid="field-title"
+                  style={fieldError ? { borderColor: 'var(--red)' } : undefined}
                 />
-              </>
+                {fieldError && (
+                  <span className="f-hint" style={{ color: 'var(--red)' }}>
+                    {fieldError.message}
+                  </span>
+                )}
+              </div>
             )}
           />
-        </Row>
+        </div>
+      </div>
 
-        <Typography variant="h2" gutterBottom>
-          Upload the data to generate the schema for
-        </Typography>
+      {/* Card 2 — Upload CSV */}
+      <div className="form-card">
+        <div className="form-card-hd">
+          <div className="form-card-num">2</div>
+          <div className="form-card-title">Upload sample data</div>
+        </div>
+        <div className="form-card-body">
+          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '14px' }}>
+            Upload a CSV file to automatically generate the schema from its structure.
+          </p>
 
-        <Row>
+          {!file && (
+            <label className="upload-zone" htmlFor="schema-file">
+              <div className="upload-ico">↑</div>
+              <div className="upload-text">Click to browse or drag &amp; drop</div>
+              <div className="upload-sub">CSV file only</div>
+            </label>
+          )}
+
+          {file && (
+            <div
+              style={{
+                fontSize: '12px',
+                color: 'var(--pink)',
+                fontWeight: 500,
+                marginBottom: '8px'
+              }}
+            >
+              {file.name}
+            </div>
+          )}
+
           <input
             name="file"
-            id="file"
+            id="schema-file"
             type="file"
             data-testid="field-file"
+            style={{ display: 'none' }}
             onChange={(event) => setFile(event.target.files[0])}
           />
-        </Row>
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {error?.message}
-          </Alert>
-        )}
-      </Card>
+          {error && (
+            <div className="warn-box" style={{ marginTop: '12px' }}>
+              {error?.message}
+            </div>
+          )}
+        </div>
+        <div className="form-actions">
+          <button
+            className="btn-primary"
+            type="submit"
+            data-testid="submit"
+            disabled={isLoading || !file}
+          >
+            {isLoading ? 'Generating…' : 'Generate schema'}
+          </button>
+        </div>
+      </div>
     </form>
   )
 }
 
 export default CreateSchema
 
-CreateSchema.getLayout = (page) => (
+CreateSchema.getLayout = (page: ReactNode) => (
   <AccountLayout title="Create Schema">{page}</AccountLayout>
 )

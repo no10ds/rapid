@@ -1,37 +1,8 @@
-import { Typography, Grid, Stack, LinearProgress } from '@mui/material'
-import Image, { StaticImageData } from 'next/image'
 import AccountLayout from '@/components/Layout/AccountLayout'
-import { Link, Row } from '@/components'
-import userIcon from '../../public/img/user_icon.png'
-import dataIcon from '../../public/img/data_icon.png'
-import schemaIcon from '../../public/img/schema_icon.png'
-import taskIcon from '../../public/img/task_icon.png'
-import { ComponentProps, ReactNode } from 'react'
+import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
 import { getMethods } from '@/service'
-
-function ManagementCard({
-  iconImage,
-  title,
-  children,
-  ...rest
-}: {
-  iconImage: StaticImageData
-  title: string
-  children: ReactNode
-} & ComponentProps<typeof Grid>) {
-  return (
-    <Grid item xs={6} {...rest}>
-      <Stack direction="row" spacing={2}>
-        <Image src={iconImage} width={120} height={120} alt="User Management" />
-        <Stack>
-          <Typography variant="h2">{title}</Typography>
-          {children}
-        </Stack>
-      </Stack>
-    </Grid>
-  )
-}
+import { ReactNode } from 'react'
 
 function AccountIndexPage() {
   const { data, isLoading } = useQuery({
@@ -43,129 +14,138 @@ function AccountIndexPage() {
   })
 
   if (isLoading) {
-    return <LinearProgress />
+    return <div className="rapid-loading-bar" role="progressbar" />
   }
 
   return (
-    <div>
-      <Typography variant="h1" gutterBottom>
-        Welcome to rAPId
-      </Typography>
-
-      <div style={{ marginBottom: '3rem ' }} data-testid="intro">
-        <Typography variant="h2">Getting Started</Typography>
-        <Typography paragraph>
-          With rAPId, users and clients can ingest, validate and query data via an API.
-          The rAPId web application makes interactions with the API quicker and easier.
-        </Typography>
-        <Typography paragraph gutterBottom>
-          To read more about the API or for technical architecture, see the links below.
-          Otherwise, to get started choose an action from the menu below.
-        </Typography>
-
-        <Stack sx={{ marginBottom: '1rem' }} spacing={1}>
-          <Link color="inherit" href={`/api/docs`} variant="body1">
+    <div className="hp-wrap">
+      {/* ── Hero banner ──────────────────────────────────────── */}
+      <div className="hp-hero">
+        <div className="hp-hero-eyebrow">Data Platform</div>
+        <h1 className="hp-hero-title">Welcome to rAPId</h1>
+        <p className="hp-hero-sub">
+          Manage, share and govern datasets across your organisation.
+        </p>
+        <div className="hp-hero-links">
+          <a href="/api/docs" className="hp-hero-link">
             View the API docs
-          </Link>
-          <Link color="inherit" href="https://github.com/no10ds/rapid" variant="body1">
+          </a>
+          <a
+            href="https://github.com/no10ds/rapid"
+            className="hp-hero-link"
+            target="_blank"
+            rel="noreferrer"
+          >
             See the source code
-          </Link>
-          <Link
-            color="inherit"
+          </a>
+          <a
             href="https://ukgovernmentdigital.slack.com/archives/C03E5GV2LQM"
-            variant="body1"
+            className="hp-hero-link"
+            target="_blank"
+            rel="noreferrer"
           >
             Contact
-          </Link>
-        </Stack>
+          </a>
+        </div>
       </div>
 
-      <Row>
-        <Grid container spacing={4}>
-          {data.can_manage_users && (
-            <ManagementCard
-              iconImage={userIcon}
-              title="User Management"
-              data-testid="user-management"
-            >
-              <>
-                <Typography paragraph>
-                  Create and modify different users and clients.
-                </Typography>
-                <Link color="inherit" href="/subject/create">
+      {/* ── Action cards ─────────────────────────────────────── */}
+      <div className="hp-body">
+        <div className="hp-cards" data-testid="intro">
+          {/* User Management — User Admins only */}
+          {data?.can_manage_users && (
+            <div className="hp-card hp-card-admin" data-testid="user-management">
+              <div className="hp-card-header">
+                <div>
+                  <div className="hp-card-title">User Management</div>
+                </div>
+                <div className="hp-admin-badge">User Admin only</div>
+              </div>
+              <p className="hp-card-desc">
+                Create and modify different users and clients.
+              </p>
+              <div className="hp-card-actions">
+                <Link href="/subject/create" className="hp-btn hp-btn-primary">
                   Create User
                 </Link>
-                <Link color="inherit" href="/subject/modify">
+                <Link href="/subject/modify" className="hp-btn hp-btn-ghost">
                   Modify User
                 </Link>
-              </>
-            </ManagementCard>
+              </div>
+            </div>
           )}
 
-          {(data.can_upload || data.can_download) && (
-            <>
-              <ManagementCard
-                iconImage={dataIcon}
-                title="Data Management"
-                data-testid="data-management"
-              >
-                <>
-                  <Typography paragraph>
-                    Upload and download existing data files.
-                  </Typography>
-                  {data.can_download && (
-                    <Link color="inherit" href="/data/download">
-                      Download Data
-                    </Link>
-                  )}
-
-                  {data.can_download && (
-                    <Link color="inherit" href="/data/upload">
-                      Upload Data
-                    </Link>
-                  )}
-                </>
-              </ManagementCard>
-
-              {data.can_create_schema && (
-                <ManagementCard
-                  iconImage={schemaIcon}
-                  title="Schema Management"
-                  data-testid="schema-management"
-                >
-                  <>
-                    <Typography paragraph>
-                      Manually create new schemas from raw data.
-                    </Typography>
-                    <Link color="inherit" href="/schema/create">
-                      Create Schema
-                    </Link>
-                  </>
-                </ManagementCard>
-              )}
-
-              <ManagementCard
-                iconImage={taskIcon}
-                title="Task Status"
-                data-testid="task-status"
-              >
-                <>
-                  <Typography paragraph>View pending and complete api tasks.</Typography>
-                  <Link color="inherit" href="/tasks">
-                    Tasks
+          {/* Data Management */}
+          {(data?.can_upload || data?.can_download) && (
+            <div className="hp-card hp-card-data" data-testid="data-management">
+              <div className="hp-card-header">
+                <div>
+                  <div className="hp-card-title">Data Management</div>
+                </div>
+              </div>
+              <p className="hp-card-desc">
+                Upload and download existing data files.
+              </p>
+              <div className="hp-card-actions">
+                {data?.can_download && (
+                  <Link href="/data/download" className="hp-btn hp-btn-primary">
+                    Download Data
                   </Link>
-                </>
-              </ManagementCard>
-            </>
+                )}
+                {data?.can_upload && (
+                  <Link href="/data/upload" className="hp-btn hp-btn-ghost">
+                    Upload Data
+                  </Link>
+                )}
+              </div>
+            </div>
           )}
-        </Grid>
-      </Row>
+
+          {/* Schema Management */}
+          {data?.can_create_schema && (
+            <div className="hp-card hp-card-schema" data-testid="schema-management">
+              <div className="hp-card-header">
+                <div>
+                  <div className="hp-card-title">Schema Management</div>
+                </div>
+              </div>
+              <p className="hp-card-desc">
+                Manually create new schemas from raw data.
+              </p>
+              <div className="hp-card-actions">
+                <Link href="/schema/create" className="hp-btn hp-btn-primary">
+                  Create Schema
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* Task Status */}
+          {(data?.can_upload || data?.can_download) && (
+            <div className="hp-card hp-card-data" data-testid="task-status">
+              <div className="hp-card-header">
+                <div>
+                  <div className="hp-card-title">Task Status</div>
+                </div>
+              </div>
+              <p className="hp-card-desc">
+                View pending and complete API tasks.
+              </p>
+              <div className="hp-card-actions">
+                <Link href="/tasks" className="hp-btn hp-btn-primary">
+                  Tasks
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
 
 export default AccountIndexPage
 
-AccountIndexPage.getLayout = (page) => (
+AccountIndexPage.getLayout = (page: ReactNode) => (
   <AccountLayout title="Dashboard">{page}</AccountLayout>
 )
