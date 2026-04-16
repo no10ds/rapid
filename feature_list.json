@@ -212,6 +212,6 @@
       "PR title and description summarise the UI modernisation changes",
       "PR is not merged by the agent"
     ],
-    "passes": false
+    "passes": true
   }
 ]
