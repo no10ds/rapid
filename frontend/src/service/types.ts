@@ -164,6 +164,7 @@ export type Dataset = {
   domain: string
   dataset: string
   version: number
+  sensitivity?: string
 }
 
 export type SubjectPermission = {
