@@ -1,11 +1,10 @@
-import { AccountLayout, Alert, Button, Card } from '@/components'
+import AccountLayout from '@/components/Layout/AccountLayout'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import DatasetSelector from '@/components/DatasetSelector/DatasetSelector'
 import { deleteDataset, getDatasetsUi } from '@/service'
 import { Dataset, DeleteDatasetResponse } from '@/service/types'
-import { LinearProgress, Typography } from '@mui/material'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useState, ReactNode } from 'react'
 
 function DeleteDataset({ datasetInput = null }: { datasetInput?: Dataset | null }) {
   const [dataset, setDataset] = useState<Dataset | null>(datasetInput)
@@ -34,7 +33,7 @@ function DeleteDataset({ datasetInput = null }: { datasetInput?: Dataset | null 
   })
 
   if (isDatasetsListLoading) {
-    return <LinearProgress />
+    return <div className="rapid-loading-bar" role="progressbar" />
   }
 
   if (datasetsError) {
@@ -43,6 +42,7 @@ function DeleteDataset({ datasetInput = null }: { datasetInput?: Dataset | null 
 
   return (
     <form
+      className="form-wrap-wide"
       onSubmit={async (event) => {
         event.preventDefault()
         if (dataset) {
@@ -50,50 +50,94 @@ function DeleteDataset({ datasetInput = null }: { datasetInput?: Dataset | null 
         }
       }}
     >
-      <Card
-        action={
-          <Button
-            data-testid="submit"
-            color="primary"
+      {/* Warning banner */}
+      <div className="form-card" style={{ marginBottom: '16px' }}>
+        <div className="form-card-hd form-card-hd-danger">
+          <div className="form-card-num form-card-num-danger">!</div>
+          <div className="form-card-title form-card-title-danger">Destructive action</div>
+        </div>
+        <div className="form-card-body">
+          <div className="warn-box" style={{ marginBottom: 0 }}>
+            This action permanently deletes the dataset, its schema, crawlers, and all raw
+            data. This <strong>cannot be undone</strong>.
+          </div>
+        </div>
+      </div>
+
+      {/* Select dataset */}
+      <div className="form-card">
+        <div className="form-card-hd">
+          <div className="form-card-num">1</div>
+          <div className="form-card-title">Select dataset to delete</div>
+        </div>
+        <div className="form-card-body">
+          <DatasetSelector
+            datasetsList={datasetsList}
+            setParentDataset={setDataset}
+            enableVersionSelector={false}
+          />
+
+          {deleteDatasetSuccessDetails && (
+            <div
+              data-testid="delete-status"
+              style={{
+                marginTop: '14px',
+                padding: '10px 14px',
+                background: 'var(--green-faint)',
+                border: '1px solid rgba(16,185,129,.2)',
+                borderRadius: '6px',
+                fontSize: '12px',
+                color: '#059669',
+                fontWeight: 500
+              }}
+            >
+              Dataset deleted:{' '}
+              {dataset
+                ? `${dataset.layer}/${dataset.domain}/${dataset.dataset}`
+                : deleteDatasetSuccessDetails}
+            </div>
+          )}
+
+          {error && (
+            <div className="warn-box" style={{ marginTop: '14px', marginBottom: 0 }}>
+              {error.message}
+            </div>
+          )}
+        </div>
+        <div className="form-actions">
+          <button
+            className="btn-danger"
             type="submit"
-            loading={isLoading}
-            disabled={!dataset}
+            data-testid="submit"
+            disabled={!dataset || isLoading}
           >
-            Delete
-          </Button>
-        }
-      >
-        <Typography variant="body1" gutterBottom>
-          Delete all the contents of a datasource from rAPId. Select the relevant dataset
-          you want to delete. Please note this also deletes the schemas relating to this
-          dataset and the underlying crawlers and raw data.
-        </Typography>
-
-        <DatasetSelector
-          datasetsList={datasetsList}
-          setParentDataset={setDataset}
-          enableVersionSelector={false}
-        ></DatasetSelector>
-
-        {deleteDatasetSuccessDetails ? (
-          <Alert
-            title={`Dataset deleted: ${dataset.layer}/${dataset.domain}/${dataset.dataset}`}
-            data-testid="delete-status"
-          ></Alert>
-        ) : null}
-
-        {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {error.message}
-          </Alert>
-        )}
-      </Card>
+            {isLoading ? 'Deleting…' : 'Delete dataset'}
+          </button>
+          <button
+            className="btn-secondary"
+            type="button"
+            onClick={() => {
+              setDataset(null)
+              setDeleteDatasetSuccessDetails(undefined)
+            }}
+          >
+            Cancel
+          </button>
+          {dataset && (
+            <span className="info-chip" style={{ marginLeft: 'auto' }}>
+              <span>
+                {dataset.layer} / {dataset.domain} / {dataset.dataset}
+              </span>
+            </span>
+          )}
+        </div>
+      </div>
     </form>
   )
 }
 
 export default DeleteDataset
 
-DeleteDataset.getLayout = (page) => (
+DeleteDataset.getLayout = (page: ReactNode) => (
   <AccountLayout title="Delete Data">{page}</AccountLayout>
 )

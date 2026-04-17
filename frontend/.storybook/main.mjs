@@ -1,13 +1,14 @@
-const path = require('path')
+import path from 'path'
+import { fileURLToPath } from 'url'
 
-module.exports = {
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+const config = {
   stories: [
-    '../src/components/**/*.stories.mdx',
     '../src/components/**/*.stories.@(js|jsx|ts|tsx)'
   ],
   addons: [
     '@storybook/addon-links',
-    'storybook-addon-designs',
     '@storybook/addon-a11y',
     '@storybook/addon-docs'
   ],
@@ -22,8 +23,7 @@ module.exports = {
   typescript: {
     check: true
   },
-  webpackFinal: async (config, { configType }) => {
-    config.resolve.modules = [path.resolve(__dirname, '..'), 'node_modules']
+  viteFinal: async (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': path.resolve(__dirname, '../src/')
@@ -31,3 +31,5 @@ module.exports = {
     return config
   }
 }
+
+export default config

@@ -1,0 +1,217 @@
+[
+  {
+    "id": 1,
+    "description": "Read the wireframe HTML in full before writing any code",
+    "acceptance_criteria": [
+      "The file wireframes/ui-modernisation.html has been read completely",
+      "All 14 screen tabs have been reviewed",
+      "Design tokens, typography, and layout details are understood"
+    ],
+    "passes": true
+  },
+  {
+    "id": 2,
+    "description": "Set up design tokens and typography (Poppins + DM Mono fonts)",
+    "acceptance_criteria": [
+      "All CSS custom properties from the plan are defined (--pink, --sidebar, --bg, --radius, --shadow-sm, --shadow-md, etc.)",
+      "Poppins (weights 300, 400, 500, 600, 700) loaded from Google Fonts in _document.tsx",
+      "DM Mono (weights 400, 500) loaded from Google Fonts in _document.tsx",
+      "Fonts applied globally in theme.ts or global CSS"
+    ],
+    "passes": true
+  },
+  {
+    "id": 3,
+    "description": "Implement shell layout and collapsible sidebar (Screen 1 – Navigation)",
+    "acceptance_criteria": [
+      "Sidebar is 240px wide, collapses to 60px via CSS class .col with transition: width .22s cubic-bezier(.4,0,.2,1)",
+      "Sidebar background is #1e2128, right border is #2a2d35",
+      "Sidebar header: logo (left-aligned) + collapse toggle button (right)",
+      "Nav sections have uppercase labels (DATA, SCHEMA, ADMIN)",
+      "Active nav item has 5px pink left border and rgba(236,72,153,.1) background",
+      "Nav items are 32px height with icon + label",
+      "In collapsed state, labels and section headings are hidden, icons remain at 60px",
+      "Sidebar footer: avatar + username + role, collapses to avatar only",
+      "Main area has 64px topbar (white, bottom border) with page title left + actions right",
+      "Content area has #eef0f3 background, 28px padding, overflow-y: auto",
+      "Nav icons use SVG stroke style at 17x17px"
+    ],
+    "passes": true
+  },
+  {
+    "id": 4,
+    "description": "Implement homepage with hero banner and action cards (Screen 2 – Homepage)",
+    "acceptance_criteria": [
+      "Hero banner has #1e2128 background, full width",
+      "Hero left: eyebrow text (DATA PLATFORM), title (Welcome to rAPId), subtitle",
+      "Hero right: 3 stats (Datasets, Schemas, Subjects) with DM Mono font for numbers",
+      "Pink radial gradient overlay on the right side of the hero",
+      "Body is a two-column grid: main 1fr + right panel 260px, 28px padding",
+      "Three action cards (Data=pink left border, Schema=green left border, Admin=purple left border)",
+      "Admin card has an Admin Only badge (purple)",
+      "Cards have staggered fade-in animation (0.04s, 0.10s, 0.16s delay)",
+      "Right panel shows recent activity list and quick stats widget"
+    ],
+    "passes": true
+  },
+  {
+    "id": 5,
+    "description": "Implement catalog page with filterable dataset table (Screen 3 – Catalog)",
+    "acceptance_criteria": [
+      "Topbar shows Data Catalog title and Upload Dataset primary button",
+      "Table is wrapped in a white card (border-radius: 8px, border, shadow)",
+      "Toolbar has search input with magnifier icon (pink focus ring)",
+      "Filter chips: All, Raw, Curated — active chip has pink border and faint pink background",
+      "Right side of toolbar has rows-per-page select and category dropdown",
+      "thead has #fafafa background, 10px uppercase headers with sort indicators",
+      "tbody rows have hover state #fafafa and 11px row border",
+      "Columns: Dataset Name (monospace), Domain, Layer (badge), Owner, Last Updated, Size, Actions",
+      "Action buttons per row: Download and Delete (small outline buttons, delete is red)",
+      "Layer badges: Raw=blue, Curated=purple",
+      "Pagination: info text (left) + page buttons (right), active page = pink filled"
+    ],
+    "passes": true
+  },
+  {
+    "id": 6,
+    "description": "Implement upload data form (Screen 4 – Upload Data)",
+    "acceptance_criteria": [
+      "Form is max-width 640px centred in the content area",
+      "Three numbered cards stacked vertically",
+      "Card 1 has pink numbered circle badge (1), dataset selector dropdown (full width, 36px height), and Create new dataset link",
+      "Card 2 has drag-and-drop zone with dashed border, upload icon in pink circle, Drop file here or browse text, and CSV/Parquet hint",
+      "Drag-and-drop zone shows pink border and pink faint background on hover",
+      "Progress bar is pink, 4px height, shown during upload",
+      "Card 3 has checkboxes for upload options (overwrite, validate schema, etc.) matching wireframe labels",
+      "Form actions bar has Upload primary button, Cancel secondary button, and status chip showing selected dataset"
+    ],
+    "passes": true
+  },
+  {
+    "id": 7,
+    "description": "Implement download query form (Screen 5 – Download/Query)",
+    "acceptance_criteria": [
+      "Card layout similar to Upload Data",
+      "Card 1: Select Dataset — selected dataset shown as pink info chip once chosen",
+      "Card 2: Query builder with date range, filters, row limit fields (36px height inputs, pink focus)",
+      "Card 3: Output format selector (CSV / Parquet toggle chips)",
+      "Form actions have Download primary button and query result info chip showing row count"
+    ],
+    "passes": true
+  },
+  {
+    "id": 8,
+    "description": "Implement jobs table page (Screen 6 – Jobs)",
+    "acceptance_criteria": [
+      "Same card/table pattern as Catalog",
+      "Columns: Job ID (monospace), Type, Dataset, Status (badge), Started, Duration, Actions",
+      "Status badges: Running=blue, Complete=green, Failed=red, Queued=amber",
+      "Row click navigates to Job Detail page"
+    ],
+    "passes": true
+  },
+  {
+    "id": 9,
+    "description": "Implement job detail page (Screen 7 – Job Detail)",
+    "acceptance_criteria": [
+      "Two-section layout: status card and log card",
+      "Status card shows job metadata in a grid (ID, type, dataset, started, duration, status badge)",
+      "Log card has monospace log output in a #1e2128 dark box with scrollable content using DM Mono font",
+      "Topbar actions: Re-run button (secondary) and Delete button (red outline)"
+    ],
+    "passes": true
+  },
+  {
+    "id": 10,
+    "description": "Implement delete data form (Screen 8 – Delete Data)",
+    "acceptance_criteria": [
+      "Single card layout",
+      "Dataset selector present",
+      "Confirmation input requiring the user to type the dataset name",
+      "Red Delete button",
+      "Warning info box with red faint background matching wireframe style"
+    ],
+    "passes": true
+  },
+  {
+    "id": 11,
+    "description": "Implement create schema form (Screen 9 – Create Schema)",
+    "acceptance_criteria": [
+      "Multi-card form with cards for: Dataset Details, Schema Fields, Metadata",
+      "Schema Fields card has dynamic add/remove rows for column name, type, nullable",
+      "Field rows match wireframe style (uppercase label, 36px input, hint text below)"
+    ],
+    "passes": true
+  },
+  {
+    "id": 12,
+    "description": "Implement subject management pages (Screens 10–12 – Create/Modify/Delete Subject)",
+    "acceptance_criteria": [
+      "Create Subject page: name input + permissions checkboxes + datasets selector",
+      "Modify Subject page: subject selector + permissions editor (same as create)",
+      "Delete Subject page: subject selector + confirmation",
+      "All three pages use the same card form pattern"
+    ],
+    "passes": true
+  },
+  {
+    "id": 13,
+    "description": "Implement user admin table (Screen 13 – User Admin)",
+    "acceptance_criteria": [
+      "Table of subjects using the same card/table pattern as Catalog",
+      "Columns: Subject Name (monospace), Type, Permissions count, Created, Actions (Edit, Delete)"
+    ],
+    "passes": true
+  },
+  {
+    "id": 14,
+    "description": "Implement data admin table (Screen 14 – Data Admin)",
+    "acceptance_criteria": [
+      "Admin-only dataset table using the same table pattern",
+      "Additional columns compared to Catalog: owner, sensitivity level, raw/curated toggle",
+      "Admin badge shown in topbar"
+    ],
+    "passes": true
+  },
+  {
+    "id": 15,
+    "description": "Update shared component library to new design tokens",
+    "acceptance_criteria": [
+      "Button component: primary (pink, border-radius: 5px), secondary (white/border), destructive (red border on hover)",
+      "Badge/Chip component matches status badge styles from wireframe",
+      "Table abstracted into a reusable card+table component if not already",
+      "Input/Select: 36px height, pink focus ring, border-radius: 5px",
+      "Card component: border-radius: 8px, border: 1px solid #e5e7eb, box-shadow: var(--shadow-sm)"
+    ],
+    "passes": true
+  },
+  {
+    "id": 16,
+    "description": "All tests pass after UI changes",
+    "acceptance_criteria": [
+      "cd frontend && npm test exits with code 0",
+      "Any test failures caused only by structural/class name changes (not business logic) have been fixed",
+      "No business-logic test assertions have been altered"
+    ],
+    "passes": true
+  },
+  {
+    "id": 17,
+    "description": "Linter passes after UI changes",
+    "acceptance_criteria": [
+      "cd frontend && npm run lint exits with code 0",
+      "No ESLint errors remain"
+    ],
+    "passes": true
+  },
+  {
+    "id": 18,
+    "description": "Pull request raised against feature/ui_modernisation (not main)",
+    "acceptance_criteria": [
+      "A PR is open with base branch feature/ui_modernisation",
+      "PR title and description summarise the UI modernisation changes",
+      "PR is not merged by the agent"
+    ],
+    "passes": true
+  }
+]

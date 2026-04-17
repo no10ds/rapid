@@ -10,6 +10,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import ErrorBoundryComponent from '@/components/ErrorBoundryComponent'
+import '@/style/globals.css'
 
 interface MyAppProps extends AppProps {
   emotionCache?: EmotionCache
@@ -71,7 +72,7 @@ export default function MyApp({
             <style jsx global>
               {`
                 body {
-                  background-color: #fbfbfb;
+                  background-color: var(--bg, #eef0f3);
                 }
               `}
             </style>

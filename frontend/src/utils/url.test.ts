@@ -19,23 +19,6 @@ describe('createUrl()', () => {
 
 describe('isUrlInternal()', () => {
   const sitename = 'http://myapp/'
-  const { location } = window
-
-  beforeAll(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    delete (window as any).location
-  })
-
-  afterAll(() => {
-    window.location = location
-  })
-
-  beforeEach(() => {
-    window.location = {
-      ...location,
-      href: sitename
-    }
-  })
 
   it('url is only path', () => {
     expect(isUrlInternal('/someurl')).toBeTruthy()
@@ -43,9 +26,9 @@ describe('isUrlInternal()', () => {
   })
 
   it('url contains full site', () => {
-    expect(isUrlInternal(sitename)).toBeTruthy()
-    expect(isUrlInternal(sitename + 'product/')).toBeTruthy()
-    expect(isUrlInternal(sitename + '?param=1')).toBeTruthy()
+    expect(isUrlInternal(sitename, sitename)).toBeTruthy()
+    expect(isUrlInternal(sitename + 'product/', sitename)).toBeTruthy()
+    expect(isUrlInternal(sitename + '?param=1', sitename)).toBeTruthy()
   })
 
   it('throws error if invalid url', () => {
@@ -59,7 +42,7 @@ describe('isUrlInternal()', () => {
   })
 
   it('url is external site', () => {
-    expect(isUrlInternal('http://externalapp/')).toBeFalsy()
-    expect(isUrlInternal('https://myapp/')).toBeFalsy()
+    expect(isUrlInternal('http://externalapp/', sitename)).toBeFalsy()
+    expect(isUrlInternal('https://myapp/', sitename)).toBeFalsy()
   })
 })

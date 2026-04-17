@@ -1,12 +1,10 @@
-import { Card, Row, Button, Select } from '@/components'
-import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import AccountLayout from '@/components/Layout/AccountLayout'
+import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import { getSubjectsListUi } from '@/service'
 import { FilteredSubjectList } from '@/service/types'
-import { FormControl, Typography, LinearProgress } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, ReactNode } from 'react'
 import { filterSubjectList } from '@/utils/subject'
 
 function SubjectModifyPage() {
@@ -33,7 +31,7 @@ function SubjectModifyPage() {
   }, [subjectsListData])
 
   if (isSubjectsListLoading) {
-    return <LinearProgress />
+    return <div className="rapid-loading-bar" role="progressbar" />
   }
 
   if (subjectsListError) {
@@ -41,68 +39,70 @@ function SubjectModifyPage() {
   }
 
   return (
-    <Card
-      action={
-        <Button
-          color="primary"
-          data-testid="submit-button"
-          onClick={() => {
-            const subject = subjectsListData.filter(
-              (item) => item.subject_id === selectedSubjectId
-            )[0]
-            router.push({
-              pathname: `/subject/modify/${selectedSubjectId}`,
-              query: {
-                name: subject.subject_name
-              }
-            })
-          }}
-        >
-          Next
-        </Button>
-      }
-    >
-      <Typography variant="body1" gutterBottom>
-        Modify the permissions a user or client can have. Select the user or client from
-        the list below and update their permissions on the next screen.
-      </Typography>
-
-      <Typography variant="h2" gutterBottom>
-        Select Subject
-      </Typography>
-
-      <Row>
-        <FormControl fullWidth size="small">
-          <Select
-            label="Select a Client App or User"
-            onChange={(event) => setSelectedSubjectId(event.target.value as string)}
-            inputProps={{ 'data-testid': 'field-user' }}
-            native
+    <div className="form-wrap-wide">
+      <div className="form-card">
+        <div className="form-card-hd">
+          <div className="form-card-num">1</div>
+          <div className="form-card-title">Select subject to modify</div>
+        </div>
+        <div className="form-card-body">
+          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+            Modify the permissions a user or client can have. Select the user or client from
+            the list below and update their permissions on the next screen.
+          </p>
+          <div className="field-row">
+            <label className="f-lbl" htmlFor="field-user">
+              Select a Client App or User
+            </label>
+            <select
+              id="field-user"
+              className="subject-sel"
+              onChange={(event) => setSelectedSubjectId(event.target.value)}
+              data-testid="field-user"
+            >
+              <optgroup label="Client Apps">
+                {filteredSubjectListData.ClientApps.map((item) => (
+                  <option value={item.subjectId} key={item.subjectId}>
+                    {item.subjectName}
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label="Users">
+                {filteredSubjectListData.Users.map((item) => (
+                  <option value={item.subjectId} key={item.subjectId}>
+                    {item.subjectName}
+                  </option>
+                ))}
+              </optgroup>
+            </select>
+          </div>
+        </div>
+        <div className="form-actions">
+          <button
+            className="btn-primary"
+            type="button"
+            data-testid="submit-button"
+            disabled={!selectedSubjectId}
+            onClick={() => {
+              const subject = subjectsListData.filter(
+                (item) => item.subject_id === selectedSubjectId
+              )[0]
+              router.push({
+                pathname: `/subject/modify/${selectedSubjectId}`,
+                query: { name: subject.subject_name }
+              })
+            }}
           >
-            <optgroup label="Client Apps">
-              {filteredSubjectListData.ClientApps.map((item) => (
-                <option value={item.subjectId} key={item.subjectId}>
-                  {item.subjectName}
-                </option>
-              ))}
-            </optgroup>
-
-            <optgroup label="Users">
-              {filteredSubjectListData.Users.map((item) => (
-                <option value={item.subjectId} key={item.subjectId}>
-                  {item.subjectName}
-                </option>
-              ))}
-            </optgroup>
-          </Select>
-        </FormControl>
-      </Row>
-    </Card>
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
 
 export default SubjectModifyPage
 
-SubjectModifyPage.getLayout = (page) => (
+SubjectModifyPage.getLayout = (page: ReactNode) => (
   <AccountLayout title="Modify User">{page}</AccountLayout>
 )

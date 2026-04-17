@@ -627,9 +627,11 @@ class TestDynamoDBAdapterServiceTable:
         self.test_service_table_name = "TEST SERVICE TABLE"
         self.dynamo_adapter = DynamoDBAdapter(self.dynamo_data_source)
 
+    @patch("api.domain.Jobs.Job.time")
     @patch("api.domain.Jobs.UploadJob.time")
-    def test_store_async_upload_job(self, mock_time):
-        mock_time.time.return_value = 1000
+    def test_store_async_upload_job(self, mock_upload_time, mock_job_time):
+        mock_upload_time.time.return_value = 1000
+        mock_job_time.time.return_value = 1000
 
         self.dynamo_adapter.store_upload_job(
             UploadJob(
@@ -656,6 +658,7 @@ class TestDynamoDBAdapterServiceTable:
                 "Domain": "domain1",
                 "Dataset": "dataset2",
                 "Version": 4,
+                "CreatedAt": 1000,
                 "TTL": 7777000,
             },
         )
@@ -663,9 +666,11 @@ class TestDynamoDBAdapterServiceTable:
         self.permissions_table.assert_not_called()
 
     @patch("api.domain.Jobs.Job.uuid")
+    @patch("api.domain.Jobs.Job.time")
     @patch("api.domain.Jobs.QueryJob.time")
-    def test_store_async_query_job(self, mock_time, mock_uuid):
-        mock_time.time.return_value = 2000
+    def test_store_async_query_job(self, mock_query_time, mock_job_time, mock_uuid):
+        mock_query_time.time.return_value = 2000
+        mock_job_time.time.return_value = 2000
         mock_uuid.uuid4.return_value = "abc-123"
         version = 5
 
@@ -689,6 +694,7 @@ class TestDynamoDBAdapterServiceTable:
                 "Dataset": "dataset1",
                 "Version": 5,
                 "ResultsURL": None,
+                "CreatedAt": 2000,
                 "TTL": 88400,
             },
         )

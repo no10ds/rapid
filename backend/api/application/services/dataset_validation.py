@@ -120,10 +120,8 @@ def dataset_has_no_illegal_characters_in_partition_columns(
     error_list = []
     for column in schema.get_partition_columns():
         series = data_frame[column.name]
-        if not column.is_of_data_type(DateType) and series.dtype == object:
-            any_illegal_characters = any(
-                [value is True for value in series.str.contains("/")]
-            )
+        if not column.is_of_data_type(DateType) and pd.api.types.is_string_dtype(series):
+            any_illegal_characters = series.str.contains("/", na=False).any()
             if any_illegal_characters:
                 error_list.append(
                     f"Partition column [{column.name}] has values with illegal characters '/'"

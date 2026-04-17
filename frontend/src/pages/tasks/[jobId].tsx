@@ -1,11 +1,35 @@
-import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import AccountLayout from '@/components/Layout/AccountLayout'
-import SimpleTable from '@/components/SimpleTable/SimpleTable'
-import { asVerticalTableList } from '@/utils'
+import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import { getJob } from '@/service'
-import { Card, Typography, LinearProgress } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/router'
+import { ReactNode } from 'react'
+import Link from 'next/link'
+
+function getStatusBadge(status: string) {
+  if (status === 'SUCCESS')
+    return (
+      <span className="badge ok">
+        <span className="bdot" />
+        Success
+      </span>
+    )
+  if (status === 'IN PROGRESS')
+    return (
+      <span className="badge pnd">
+        <span className="bdot" />
+        In Progress
+      </span>
+    )
+  if (status === 'FAILED')
+    return (
+      <span className="badge err">
+        <span className="bdot" />
+        Failed
+      </span>
+    )
+  return <span className="badge">{status}</span>
+}
 
 function GetJob() {
   const router = useRouter()
@@ -13,61 +37,86 @@ function GetJob() {
   const { isLoading, data, error } = useQuery(['getJob', jobId], getJob)
 
   if (isLoading) {
-    return <LinearProgress />
+    return <div className="rapid-loading-bar" role="progressbar" />
   }
 
   if (error) {
     return <ErrorCard error={error as Error} />
   }
 
-  const renderErrors = () => {
-    if (data.errors) {
-      if ((data.errors as string[]).length) {
-        return (
-          <>
-            <Typography variant="h2" gutterBottom>
-              Errors
-            </Typography>
-            {(data.errors as string[]).map((error, index) => (
-              <Typography variant="body2" color="error" component="code" key={index}>
-                {error}
-              </Typography>
-            ))}
-          </>
-        )
-      }
-    }
-    return null
-  }
+  const metaRows: [string, ReactNode][] = [
+    ['Job ID', <span className="mono" key="id" style={{ fontSize: '12px' }}>{data.job_id}</span>],
+    ['Type', data.type as string],
+    ['Status', getStatusBadge(data.status as string)],
+    ['Step', data.step as string],
+    ['Filename', data.filename as string],
+    ['Raw Filename', data.raw_file_identifier as string],
+    ['Layer', data.layer as string],
+    ['Domain', data.domain as string],
+    ['Dataset', data.dataset as string],
+    ['Version', String(data.version)]
+  ]
 
   return (
-    <Card>
-      <Typography variant="h2" gutterBottom>
-        Job Detail
-      </Typography>
+    <div>
+      {/* Status card */}
+      <div className="form-card" style={{ marginBottom: '16px' }}>
+        <div className="form-card-hd">
+          <div className="form-card-title">Job Detail</div>
+          <div style={{ marginLeft: 'auto' }}>
+            <Link href="/tasks" className="btn-secondary" style={{ textDecoration: 'none' }}>
+              ← Back to Jobs
+            </Link>
+          </div>
+        </div>
+        <div className="form-card-body" style={{ padding: 0 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <tbody>
+              {metaRows.map(([k, v]) => (
+                <tr key={k as string} style={{ borderBottom: '1px solid #f9fafb' }}>
+                  <td
+                    style={{
+                      width: '180px',
+                      padding: '10px 16px',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      color: 'var(--text-tertiary)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em'
+                    }}
+                  >
+                    {k}
+                  </td>
+                  <td style={{ padding: '10px 16px', fontSize: '13px' }}>{v}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-      <Typography gutterBottom>Status - {data.status}</Typography>
-      <Typography gutterBottom>ID - {data.job_id}</Typography>
-
-      <SimpleTable
-        list={asVerticalTableList([
-          { name: 'Job Type', value: data.type as string },
-          { name: 'Status', value: data.status as string },
-          { name: 'Step', value: data.step as string },
-          { name: 'Filename', value: data.filename as string },
-          { name: 'Raw Filename	', value: data.raw_file_identifier as string },
-          { name: 'Layer	', value: data.layer as string },
-          { name: 'Domain	', value: data.domain as string },
-          { name: 'Dataset	', value: data.dataset as string },
-          { name: 'Version	', value: data.version.toString() }
-        ])}
-      />
-
-      {renderErrors()}
-    </Card>
+      {/* Errors card */}
+      {data.errors && (data.errors as string[]).length > 0 && (
+        <div className="form-card">
+          <div className="form-card-hd form-card-hd-danger">
+            <div className="form-card-num form-card-num-danger">!</div>
+            <div className="form-card-title form-card-title-danger">Errors</div>
+          </div>
+          <div className="form-card-body">
+            <div className="log-box">
+              {(data.errors as string[]).map((err, i) => (
+                <div key={i}>{err}</div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 
 export default GetJob
 
-GetJob.getLayout = (page) => <AccountLayout title="Task Status">{page}</AccountLayout>
+GetJob.getLayout = (page: ReactNode) => (
+  <AccountLayout title="Task Status">{page}</AccountLayout>
+)
