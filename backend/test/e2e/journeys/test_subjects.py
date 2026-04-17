@@ -5,7 +5,6 @@ from test.e2e.journeys.base_journey import (
     BaseAuthenticatedJourneyTest,
     RESOURCE_PREFIX,
 )
-import json
 import pytest
 
 
@@ -124,12 +123,10 @@ class TestSubjectJourneys(BaseAuthenticatedJourneyTest):
         response = requests.delete(
             self.user_url(),
             headers=self.generate_auth_headers(),
-            data=json.dumps(
-                {
-                    "username": username_payload["username"],
-                    "user_id": self.subject_id,
-                }
-            ),
+            json={
+                "username": username_payload["username"],
+                "user_id": self.subject_id,
+            },
         )
 
         assert response.status_code == HTTPStatus.OK

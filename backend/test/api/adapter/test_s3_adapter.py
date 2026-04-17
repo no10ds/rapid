@@ -121,8 +121,9 @@ class TestS3AdapterUpload:
             partitioned_data,
         )
 
-        partition_1_parquet = partition_1.to_parquet(compression="gzip", index=False)
-        partition_2_parquet = partition_2.to_parquet(compression="gzip", index=False)
+        storage_schema = schema.generate_storage_schema()
+        partition_1_parquet = partition_1.to_parquet(compression="gzip", index=False, schema=storage_schema)
+        partition_2_parquet = partition_2.to_parquet(compression="gzip", index=False, schema=storage_schema)
 
         calls = [
             call(
