@@ -191,7 +191,7 @@ infra/backend:			## Create terraform backend for infrastructure
 	@cd infrastructure/; ./scripts/infra_make_helper.sh create_backend
 
 infra/init:			## Terraform init: make infra/init block=<infra/block>
-	@cd infrastructure/; ./scripts/infra_make_helper.sh run_init "${block}"
+	@cd infrastructure/; ./scripts/infra_make_helper.sh run_init "${block}" "${args}"
 
 infra/plan:			## Terraform view infrastructure changes: make infra/plan block=<infra/block>
 	@cd infrastructure/; ./scripts/infra_make_helper.sh run_tf plan "${block}" "${env}"

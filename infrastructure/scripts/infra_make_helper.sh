@@ -49,9 +49,10 @@ function run_tf() {
 
 function run_init() {
   local block="$1"
+  local extra_args="${2:-}"
   _go_to_block "$block"
   local config_path="${CONFIG_DIR}/backend.hcl"
-  local cmd="init -backend-config ${config_path}"
+  local cmd="init -backend-config ${config_path} ${extra_args}"
   echo "$TERRAFORM $cmd" |bash
 }
 
