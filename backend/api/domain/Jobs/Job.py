@@ -39,6 +39,7 @@ class Job:
         self.status: JobStatus = JobStatus.IN_PROGRESS
         self.job_id: str = job_id if job_id else generate_uuid()
         self.errors: Set[str] = set()
+        self.created_at: int = int(time.time())
         self.expiry_time: int = int(
             time.time() + DEFAULT_JOB_EXPIRY_DAYS * 24 * 60 * 60
         )

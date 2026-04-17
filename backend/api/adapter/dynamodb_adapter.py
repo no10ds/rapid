@@ -338,6 +338,7 @@ class DynamoDBAdapter(DatabaseAdapter):
             "Domain": upload_job.domain,
             "Dataset": upload_job.dataset,
             "Version": upload_job.version,
+            "CreatedAt": upload_job.created_at,
             "TTL": upload_job.expiry_time,
         }
         self._store_job(item_config)
@@ -356,6 +357,7 @@ class DynamoDBAdapter(DatabaseAdapter):
             "Dataset": query_job.dataset,
             "Version": query_job.version,
             "ResultsURL": query_job.results_url,
+            "CreatedAt": query_job.created_at,
             "TTL": query_job.expiry_time,
         }
         self._store_job(item_config)
@@ -408,8 +410,7 @@ class DynamoDBAdapter(DatabaseAdapter):
             if not jobs:
                 return None
 
-            # Sort by SK (job_id which contains timestamp) to get the most recent
-            sorted_jobs = sorted(jobs, key=lambda x: x.get("SK", ""), reverse=True)
+            sorted_jobs = sorted(jobs, key=lambda x: x.get("CreatedAt", 0), reverse=True)
             return self._map_job(sorted_jobs[0])
         except ClientError as error:
             AppLogger.warning(f"Error fetching latest upload job for dataset: {error}")
