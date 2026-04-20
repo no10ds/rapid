@@ -7,7 +7,7 @@
 import '@testing-library/jest-dom'
 import '@testing-library/jest-dom/extend-expect'
 import { TextDecoder, TextEncoder } from 'util'
-global.TextEncoder = TextEncoder
+;(global as any).TextEncoder = TextEncoder
 ;(global as any).TextDecoder = TextDecoder
 
 require('jest-fetch-mock').enableMocks()
