@@ -171,6 +171,19 @@ class TestDataJourneys(BaseAuthenticatedJourneyTest):
         assert response.status_code == HTTPStatus.FORBIDDEN
 
     @pytest.mark.order(2)
+    def test_info_returns_last_uploaded_by(self):
+        url = self.info_dataset_url(
+            layer=self.layer,
+            domain=self.e2e_test_domain,
+            dataset=self.dataset,
+            version=1,
+        )
+
+        response = requests.get(url, headers=self.generate_auth_headers())
+        assert response.status_code == HTTPStatus.OK
+        assert response.json()["metadata"]["last_uploaded_by"] is not None
+
+    @pytest.mark.order(2)
     def test_get_dataset_info(self):
         info_url = self.info_dataset_url(
             layer=self.layer,

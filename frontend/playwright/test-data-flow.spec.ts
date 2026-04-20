@@ -56,6 +56,12 @@ test('test', async ({ page }) => {
   await page.getByTestId('select-dataset').getByRole('combobox').click()
   await page.getByRole('option', { name: datasetName }).click()
   await page.getByTestId('submit').click()
+
+  const metadataTable = page.getByRole('table').first()
+  expect(await metadataTable.innerText()).toContain('Last uploaded by')
+  const lastUploadedByValue = await page.getByRole('row', { name: /Last uploaded by/ }).locator('td').last().innerText()
+  expect(lastUploadedByValue).not.toEqual('')
+
   await page.locator('div').filter({ hasText: 'Row Limit' }).locator('div').nth(1).click()
   await page.getByPlaceholder('30').fill('200')
   const downloadPromise = page.waitForEvent('download')

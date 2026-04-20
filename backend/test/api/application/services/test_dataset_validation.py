@@ -111,7 +111,7 @@ class TestDatasetValidation:
         )
         expected["colname1"] = expected["colname1"].astype(dtype=pd.Int32Dtype())
         expected["colname3"] = expected["colname3"].astype(dtype=pd.BooleanDtype())
-        expected["colname4"] = expected["colname4"].astype(dtype="datetime64[ns]")
+        expected["colname4"] = pd.to_datetime(expected["colname4"])
 
         validated_dataframe = build_validated_dataframe(full_valid_schema, dataframe)
 
@@ -716,10 +716,8 @@ class TestDatasetTransformation:
 
         transformed_df, _ = convert_date_columns(data, schema)
 
-        expected_date_column = pd.Series(
-            expected_date_column_data,
-            dtype="datetime64[ns]",
-        )
+        expected_date_column = pd.to_datetime(pd.Series(expected_date_column_data))
+        expected_date_column.name = "date"
 
         assert transformed_df["date"].equals(expected_date_column)
 
@@ -752,14 +750,14 @@ class TestDatasetTransformation:
         )
         transformed_df, _ = convert_date_columns(data, schema)
 
-        expected_date_column_1 = pd.Series(
-            ["2008-01-30", "2008-01-31", "2008-02-01", "2008-02-02"],
-            dtype="datetime64[ns]",
-        )
-        expected_date_column_2 = pd.Series(
-            ["2008-05-15", "2008-12-13", "2008-07-09", "2008-03-17"],
-            dtype="datetime64[ns]",
-        )
+        expected_date_column_1 = pd.to_datetime(pd.Series(
+            ["2008-01-30", "2008-01-31", "2008-02-01", "2008-02-02"]
+        ))
+        expected_date_column_1.name = "date1"
+        expected_date_column_2 = pd.to_datetime(pd.Series(
+            ["2008-05-15", "2008-12-13", "2008-07-09", "2008-03-17"]
+        ))
+        expected_date_column_2.name = "date2"
 
         assert transformed_df["date1"].equals(expected_date_column_1)
         assert transformed_df["date2"].equals(expected_date_column_2)
