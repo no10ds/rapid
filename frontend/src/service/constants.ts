@@ -1,6 +1,11 @@
 export const userManagementMethods = [
   { text: 'User Management' },
   {
+    text: 'User Admin',
+    href: '/subject/admin/',
+    icon: 'UserAdd'
+  },
+  {
     text: 'Create User',
     href: '/subject/create/',
     icon: 'UserAdd'

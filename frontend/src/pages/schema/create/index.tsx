@@ -18,7 +18,7 @@ import {
 import { getLayers } from '@/service/fetch'
 import { GenerateSchemaResponse, SchemaGenerate } from '@/service/types'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { LinearProgress, Typography } from '@mui/material'
+import { LinearProgress, Typography, Box } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
 import { useState, useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
@@ -73,148 +73,151 @@ function CreateSchema() {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit(
-        async (data: SchemaGenerate) => {
-          const formData = new FormData()
-          formData.append('file', file)
-          const path = `${data.layer}/${data.sensitivity}/${data.domain}/${data.title}/generate`
-          await mutate({ path, data: formData })
-        },
-        (errors) => {
-          // Handle validation errors - react-hook-form will display them
-          console.error('Form validation errors:', errors)
-        }
-      )}
-    >
-      <Card
-        action={
-          <Button color="primary" type="submit" loading={isLoading} data-testid="submit">
-            Generate Schema
-          </Button>
-        }
-      >
-        <Typography variant="h2" gutterBottom>
-          Populate dataset properties for the new schema:
-        </Typography>
-
-        <Row>
-          <Controller
-            name="sensitivity"
-            control={control}
-            render={({ field, fieldState: { error } }) => (
-              <>
-                <Typography variant="caption">Sensitivity Level</Typography>
-                <Select
-                  {...field}
-                  defaultValue=""
-                  native
-                  error={!!error}
-                  helperText={error?.message}
-                  inputProps={{ 'data-testid': 'field-level' }}
-                >
-                  <option value="" disabled>
-                    Please select
-                  </option>
-                  {[...GlobalSensitivities, ProtectedSensitivity].map((value) => (
-                    <option key={value}>{value}</option>
-                  ))}
-                </Select>
-              </>
-            )}
-          />
-        </Row>
-        <Row>
-          <Controller
-            name="layer"
-            control={control}
-            render={({ field, fieldState: { error } }) => (
-              <>
-                <Typography variant="caption">Dataset Layer</Typography>
-                <Select
-                  {...field}
-                  native
-                  error={!!error}
-                  helperText={error?.message}
-                  inputProps={{ 'data-testid': 'field-layer' }}
-                >
-                  <option value="" disabled>
-                    Please select
-                  </option>
-                  {layersData.map((value) => (
-                    <option key={value}>{value}</option>
-                  ))}
-                </Select>
-              </>
-            )}
-          />
-        </Row>
-
-        <Row>
-          <Controller
-            name="domain"
-            control={control}
-            render={({ field, fieldState: { error } }) => (
-              <>
-                <Typography variant="caption">Dataset Domain</Typography>
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  placeholder="showcase"
-                  error={!!error}
-                  helperText={error?.message}
-                  inputProps={{ 'data-testid': 'field-domain' }}
-                />{' '}
-              </>
-            )}
-          />
-        </Row>
-
-        <Row>
-          <Controller
-            name="title"
-            control={control}
-            render={({ field, fieldState: { error } }) => (
-              <>
-                <Typography variant="caption">Dataset Title</Typography>
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  placeholder="movies"
-                  error={!!error}
-                  helperText={error?.message}
-                  inputProps={{ 'data-testid': 'field-title' }}
-                />
-              </>
-            )}
-          />
-        </Row>
-
-        <Typography variant="h2" gutterBottom>
-          Upload the data to generate the schema for
-        </Typography>
-
-        <Row>
-          <input
-            name="file"
-            id="file"
-            type="file"
-            data-testid="field-file"
-            onChange={(event) => setFile(event.target.files[0])}
-          />
-        </Row>
-
-        {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {error?.message}
-          </Alert>
+    <Box sx={{ maxWidth: 720, mx: 'auto', px: 2 }}>
+      <form
+        onSubmit={handleSubmit(
+          async (data: SchemaGenerate) => {
+            const formData = new FormData()
+            formData.append('file', file)
+            const path = `${data.layer}/${data.sensitivity}/${data.domain}/${data.title}/generate`
+            await mutate({ path, data: formData })
+          },
+          (errors) => {
+            // Handle validation errors - react-hook-form will display them
+            console.error('Form validation errors:', errors)
+          }
         )}
-      </Card>
-    </form>
+      >
+        <Card
+          action={
+            <Button color="primary" type="submit" loading={isLoading} data-testid="submit">
+              Generate Schema
+            </Button>
+          }
+        >
+          <Typography variant="h2" gutterBottom>
+            Populate dataset properties for the new schema:
+          </Typography>
+
+          <Row>
+            <Controller
+              name="sensitivity"
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <>
+                  <Typography variant="caption">Sensitivity Level</Typography>
+                  <Select
+                    {...field}
+                    defaultValue=""
+                    native
+                    error={!!error}
+                    helperText={error?.message}
+                    inputProps={{ 'data-testid': 'field-level' }}
+                  >
+                    <option value="" disabled>
+                      Please select
+                    </option>
+                    {[...GlobalSensitivities, ProtectedSensitivity].map((value) => (
+                      <option key={value}>{value}</option>
+                    ))}
+                  </Select>
+                </>
+              )}
+            />
+          </Row>
+
+          <Row>
+            <Controller
+              name="layer"
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <>
+                  <Typography variant="caption">Dataset Layer</Typography>
+                  <Select
+                    {...field}
+                    native
+                    error={!!error}
+                    helperText={error?.message}
+                    inputProps={{ 'data-testid': 'field-layer' }}
+                  >
+                    <option value="" disabled>
+                      Please select
+                    </option>
+                    {layersData.map((value) => (
+                      <option key={value}>{value}</option>
+                    ))}
+                  </Select>
+                </>
+              )}
+            />
+          </Row>
+
+          <Row>
+            <Controller
+              name="domain"
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <>
+                  <Typography variant="caption">Dataset Domain</Typography>
+                  <TextField
+                    {...field}
+                    fullWidth
+                    size="small"
+                    variant="outlined"
+                    placeholder="showcase"
+                    error={!!error}
+                    helperText={error?.message}
+                    inputProps={{ 'data-testid': 'field-domain' }}
+                  />
+                </>
+              )}
+            />
+          </Row>
+
+          <Row>
+            <Controller
+              name="title"
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <>
+                  <Typography variant="caption">Dataset Title</Typography>
+                  <TextField
+                    {...field}
+                    fullWidth
+                    size="small"
+                    variant="outlined"
+                    placeholder="movies"
+                    error={!!error}
+                    helperText={error?.message}
+                    inputProps={{ 'data-testid': 'field-title' }}
+                  />
+                </>
+              )}
+            />
+          </Row>
+
+          <Typography variant="h2" gutterBottom>
+            Upload the data to generate the schema for
+          </Typography>
+
+          <Row>
+            <input
+              name="file"
+              id="file"
+              type="file"
+              data-testid="field-file"
+              onChange={(event) => setFile(event.target.files[0])}
+            />
+          </Row>
+
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error?.message}
+            </Alert>
+          )}
+        </Card>
+      </form>
+    </Box>
   )
 }
 

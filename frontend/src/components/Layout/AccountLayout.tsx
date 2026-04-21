@@ -123,7 +123,7 @@ const AccountLayout = ({ children, title, ...props }: Props) => {
 
       <Container maxWidth="xl">
         <Box className="columns" {...props}>
-          <Drawer variant="permanent" open list={allowedDrawerMethods} />
+          <Drawer variant="permanent" open list={allowedDrawerMethods} username="" />
           <Box className="main-content">
             <Toolbar />
             {children}
