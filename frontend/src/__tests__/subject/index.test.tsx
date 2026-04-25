@@ -1,8 +1,7 @@
 import React from 'react'
 import {
   screen,
-  waitForElementToBeRemoved,
-  waitFor
+  waitForElementToBeRemoved
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import fetchMock from 'jest-fetch-mock'
@@ -54,11 +53,9 @@ describe('Subject index page', () => {
     expect(screen.getByText('Bob')).toBeInTheDocument()
     expect(screen.getByText('ClientOne')).toBeInTheDocument()
 
-    await waitFor(() => {
-      expect(screen.getByText('User Admin')).toBeInTheDocument()
-      expect(screen.getByText('Read Only')).toBeInTheDocument()
-      expect(screen.getByText('Read/Write')).toBeInTheDocument()
-    })
+    await screen.findByText('User Admin')
+    expect(screen.getByText('Read Only')).toBeInTheDocument()
+    expect(screen.getByText('Read/Write')).toBeInTheDocument()
   })
 
   it('filters by type', async () => {

@@ -153,6 +153,7 @@ function CreateUserPage() {
             )}
           />
 
+          {/* eslint-disable-next-line react-hooks/incompatible-library */}
           {watch('type') === 'User' && (
             <Controller
               name="email"
