@@ -1,4 +1,4 @@
-import { screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import fetchMock from 'jest-fetch-mock'
 import DeletePage from '@/pages/data/delete'
@@ -20,10 +20,7 @@ describe('Page: Delete page', () => {
     fetchMock.mockResponseOnce(JSON.stringify(mockDataSetsList), { status: 200 })
     renderWithProviders(<DeletePage datasetInput={mockDataset} />)
 
-    await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
-
-    const datasetDropdown = screen.getByTestId('select-dataset')
-    expect(datasetDropdown).toBeVisible()
+    await screen.findByTestId('select-dataset')
 
     expect(screen.getByTestId('submit')).toBeInTheDocument()
   })
@@ -32,7 +29,6 @@ describe('Page: Delete page', () => {
     fetchMock.mockReject(new Error('fake error message'))
     renderWithProviders(<DeletePage datasetInput={mockDataset} />)
 
-    await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
     await waitFor(async () => {
       expect(screen.getByText('fake error message')).toBeInTheDocument()
     })
@@ -43,7 +39,7 @@ describe('Page: Delete page', () => {
       fetchMock.mockResponseOnce(JSON.stringify(mockDataSetsList), { status: 200 })
       renderWithProviders(<DeletePage datasetInput={mockDataset} />)
 
-      await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
+      await screen.findByTestId('submit')
 
       await userEvent.click(screen.getByTestId('submit'))
 
@@ -67,7 +63,7 @@ describe('Page: Delete page', () => {
         [JSON.stringify(mockSuccess), { status: 200 }]
       )
       renderWithProviders(<DeletePage />)
-      await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
+      await screen.findByTestId('select-dataset')
 
       selectAutocompleteOption('select-layer', 'layer')
       selectAutocompleteOption('select-domain', 'Pizza')
@@ -88,11 +84,9 @@ describe('Page: Delete page', () => {
       fetchMock.mockResponseOnce(JSON.stringify(mockDataSetsList), { status: 200 })
       renderWithProviders(<DeletePage datasetInput={mockDataset} />)
 
-      await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
-
       fetchMock.mockReject(new Error('fake error message'))
 
-      await userEvent.click(screen.getByTestId('submit'))
+      await userEvent.click(await screen.findByTestId('submit'))
 
       await waitFor(async () => {
         expect(screen.getByText('fake error message')).toBeInTheDocument()

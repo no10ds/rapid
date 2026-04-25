@@ -1,6 +1,5 @@
 import { Card } from '@/components'
 import AccountLayout from '@/components/Layout/AccountLayout'
-import { Typography } from '@mui/material'
 import { useRouter } from 'next/router'
 
 function SuccessPage() {
@@ -8,20 +7,14 @@ function SuccessPage() {
 
   return (
     <Card>
-      <Typography variant="h1" gutterBottom>
-        Success - Created
-      </Typography>
-      <Typography gutterBottom>
-        You will only see this page once. Please make note of the details below.
-      </Typography>
+      <h1>Success - Created</h1>
+      <p>You will only see this page once. Please make note of the details below.</p>
 
-      {Object.keys(router.query).map((key, index) => {
-        return (
-          <Typography variant="body2" key={index}>
-            <b>{key}:</b> {router.query[key]}
-          </Typography>
-        )
-      })}
+      {Object.keys(router.query).map((key, index) => (
+        <p key={index}>
+          <b>{key}:</b> {router.query[key]}
+        </p>
+      ))}
     </Card>
   )
 }

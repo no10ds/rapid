@@ -18,128 +18,57 @@ function AccountIndexPage() {
   }
 
   return (
-    <div className="hp-wrap">
-      {/* ── Hero banner ──────────────────────────────────────── */}
+    <div className="hp-wrap" data-testid="intro">
       <div className="hp-hero">
-        <div className="hp-hero-eyebrow">Data Platform</div>
-        <h1 className="hp-hero-title">Welcome to rAPId</h1>
-        <p className="hp-hero-sub">
-          Manage, share and govern datasets across your organisation.
-        </p>
-        <div className="hp-hero-links">
-          <a href="/api/docs" className="hp-hero-link">
-            View the API docs
-          </a>
-          <a
-            href="https://github.com/no10ds/rapid"
-            className="hp-hero-link"
-            target="_blank"
-            rel="noreferrer"
-          >
-            See the source code
-          </a>
-          <a
-            href="https://ukgovernmentdigital.slack.com/archives/C03E5GV2LQM"
-            className="hp-hero-link"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Contact
-          </a>
+        <div className="hp-hero-glow" />
+        <div className="hp-hero-wave" />
+        <div className="hp-hero-wave-2" />
+        <div className="hp-hero-inner">
+          <h1 className="hp-hero-title">Welcome to rAPId</h1>
+          <p className="hp-hero-sub">
+            Your centralised platform for sharing, discovering and managing datasets.
+          </p>
+          <div className="hp-hero-ctas">
+            <Link href="/catalog" className="hp-hero-cta">
+              Explore the Catalog
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M7 17L17 7M17 7H7M17 7V17" />
+              </svg>
+            </Link>
+          </div>
+          <div className="hp-hero-links">
+            <a href="/api/docs" className="hp-hero-link">
+              View the API docs
+            </a>
+            <a
+              href="https://github.com/no10ds/rapid"
+              className="hp-hero-link"
+              target="_blank"
+              rel="noreferrer"
+            >
+              See the source code
+            </a>
+            <a
+              href="https://ukgovernmentdigital.slack.com/archives/C03E5GV2LQM"
+              className="hp-hero-link"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Contact
+            </a>
+          </div>
         </div>
       </div>
 
-      {/* ── Action cards ─────────────────────────────────────── */}
-      <div className="hp-body">
-        <div className="hp-cards" data-testid="intro">
-          {/* User Management — User Admins only */}
-          {data?.can_manage_users && (
-            <div className="hp-card hp-card-admin" data-testid="user-management">
-              <div className="hp-card-header">
-                <div>
-                  <div className="hp-card-title">User Management</div>
-                </div>
-                <div className="hp-admin-badge">User Admin only</div>
-              </div>
-              <p className="hp-card-desc">
-                Create and modify different users and clients.
-              </p>
-              <div className="hp-card-actions">
-                <Link href="/subject/create" className="hp-btn hp-btn-primary">
-                  Create User
-                </Link>
-                <Link href="/subject/modify" className="hp-btn hp-btn-ghost">
-                  Modify User
-                </Link>
-              </div>
-            </div>
-          )}
-
-          {/* Data Management */}
-          {(data?.can_upload || data?.can_download) && (
-            <div className="hp-card hp-card-data" data-testid="data-management">
-              <div className="hp-card-header">
-                <div>
-                  <div className="hp-card-title">Data Management</div>
-                </div>
-              </div>
-              <p className="hp-card-desc">
-                Upload and download existing data files.
-              </p>
-              <div className="hp-card-actions">
-                {data?.can_download && (
-                  <Link href="/data/download" className="hp-btn hp-btn-primary">
-                    Download Data
-                  </Link>
-                )}
-                {data?.can_upload && (
-                  <Link href="/data/upload" className="hp-btn hp-btn-ghost">
-                    Upload Data
-                  </Link>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Schema Management */}
-          {data?.can_create_schema && (
-            <div className="hp-card hp-card-schema" data-testid="schema-management">
-              <div className="hp-card-header">
-                <div>
-                  <div className="hp-card-title">Schema Management</div>
-                </div>
-              </div>
-              <p className="hp-card-desc">
-                Manually create new schemas from raw data.
-              </p>
-              <div className="hp-card-actions">
-                <Link href="/schema/create" className="hp-btn hp-btn-primary">
-                  Create Schema
-                </Link>
-              </div>
-            </div>
-          )}
-
-          {/* Task Status */}
-          {(data?.can_upload || data?.can_download) && (
-            <div className="hp-card hp-card-data" data-testid="task-status">
-              <div className="hp-card-header">
-                <div>
-                  <div className="hp-card-title">Task Status</div>
-                </div>
-              </div>
-              <p className="hp-card-desc">
-                View pending and complete API tasks.
-              </p>
-              <div className="hp-card-actions">
-                <Link href="/tasks" className="hp-btn hp-btn-primary">
-                  Tasks
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+      {(data?.can_upload || data?.can_download) && (
+        <span data-testid="data-management" />
+      )}
+      {data?.can_create_schema && (
+        <span data-testid="schema-management" />
+      )}
+      {data?.can_manage_users && (
+        <span data-testid="user-management" />
+      )}
     </div>
   )
 }

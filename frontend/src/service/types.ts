@@ -132,6 +132,7 @@ export type AllJobsResponse = JobResponse[]
 
 export type MethodsResponse = {
   message: string | null
+  username?: string | null
   can_manage_users?: boolean
   can_upload?: boolean
   can_download?: boolean
@@ -165,10 +166,12 @@ export type Dataset = {
   dataset: string
   version: number
   sensitivity?: string
+  last_updated?: string
+  last_uploaded_by?: string
 }
 
 export type SubjectPermission = {
-  name: string
+  id: string
   type: string
   layer: string | undefined
   sensitivity: string | undefined

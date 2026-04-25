@@ -212,7 +212,7 @@ function CreateUserPage() {
           <div className="form-card-num">2</div>
           <div className="form-card-title">Select permissions</div>
         </div>
-        <div className="form-card-body">
+        <div className="form-card-body" style={{ padding: 0 }}>
           <PermissionsTable
             permissionsListData={permissionsListData}
             fieldArrayReturn={fieldArrayReturn}

@@ -148,6 +148,7 @@ class TestMethodsUI(BaseClientTest):
         assert response.status_code == 200
         assert response.json() == {
             "error_message": None,
+            "username": None,
             "can_manage_users": True,
             "can_upload": True,
             "can_download": True,
@@ -173,6 +174,7 @@ class TestMethodsUI(BaseClientTest):
         assert response.status_code == 200
         assert response.json() == {
             "error_message": "You have not been granted relevant permissions. Please speak to your system administrator.",
+            "username": None,
         }
 
     @patch("api.entry.get_subject_id")
@@ -193,6 +195,7 @@ class TestMethodsUI(BaseClientTest):
         assert response.status_code == 200
         assert response.json() == {
             "error_message": "a custom message",
+            "username": None,
         }
 
     @patch("api.entry.get_subject_id")
@@ -213,4 +216,5 @@ class TestMethodsUI(BaseClientTest):
         assert response.status_code == 200
         assert response.json() == {
             "error_message": "You have not been granted relevant permissions. Please speak to your system administrator.",
+            "username": None,
         }

@@ -63,20 +63,16 @@ function CreateSchema() {
 
   return (
     <form
-      className="form-wrap-wide"
+      className="form-page"
       onSubmit={handleSubmit(
         async (data: SchemaGenerate) => {
           const formData = new FormData()
           formData.append('file', file)
           const path = `${data.layer}/${data.sensitivity}/${data.domain}/${data.title}/generate`
           await mutate({ path, data: formData })
-        },
-        (errors) => {
-          console.error('Form validation errors:', errors)
         }
       )}
     >
-      {/* Card 1 — Dataset properties */}
       <div className="form-card">
         <div className="form-card-hd">
           <div className="form-card-num">1</div>
@@ -197,7 +193,6 @@ function CreateSchema() {
         </div>
       </div>
 
-      {/* Card 2 — Upload CSV */}
       <div className="form-card">
         <div className="form-card-hd">
           <div className="form-card-num">2</div>

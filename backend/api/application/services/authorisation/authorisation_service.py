@@ -164,6 +164,17 @@ def get_subject_id(request: Request):
     return parsed_token.subject if token else None
 
 
+def get_username(request: Request) -> Optional[str]:
+    token = get_token(request)
+    if not token:
+        return None
+    try:
+        parsed_token = parse_token(token)
+    except DecodeError:
+        return None
+    return parsed_token.username
+
+
 def check_credentials_availability(
     browser_request: bool,
     client_token: Optional[str],

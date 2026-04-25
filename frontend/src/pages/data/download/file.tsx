@@ -8,7 +8,6 @@ import {
   Row,
   TextField
 } from '@/components'
-import { Typography } from '@mui/material'
 import { useRouter } from 'next/router'
 import { asVerticalTableList } from '@/utils'
 
@@ -18,9 +17,7 @@ function FilePage() {
 
   return (
     <Card action={<Button color="primary">Download</Button>}>
-      <Typography variant="h2" gutterBottom>
-        Dataset Overview
-      </Typography>
+      <h2>Dataset Overview</h2>
 
       <SimpleTable
         list={asVerticalTableList([
@@ -33,9 +30,7 @@ function FilePage() {
         ])}
       />
 
-      <Typography variant="h2" gutterBottom>
-        Columns
-      </Typography>
+      <h2>Columns</h2>
       <SimpleTable
         sx={{ mb: 4 }}
         headers={[
@@ -69,26 +64,22 @@ function FilePage() {
           ]
         ]}
       />
-      <Typography variant="h2" gutterBottom>
-        Format
-      </Typography>
+      <h2>Format</h2>
       <Row>
         <Select label="Data format" data={['csv', 'json']} />
       </Row>
 
-      <Typography variant="h2" gutterBottom>
-        Query (optional)
-      </Typography>
+      <h2>Query (optional)</h2>
 
-      <Typography variant="body2" gutterBottom>
+      <p>
         For further information on writing queries consult the{' '}
         <Link href="https://rapid.readthedocs.io/en/latest/api/query/" target="_blank">
           query writing guide
         </Link>
-      </Typography>
+      </p>
 
       <Row>
-        <Typography variant="caption">Select Columns</Typography>
+        <label>Select Columns</label>
         <TextField
           fullWidth
           size="small"
@@ -98,12 +89,12 @@ function FilePage() {
       </Row>
 
       <Row>
-        <Typography variant="caption">Filter</Typography>
+        <label>Filter</label>
         <TextField fullWidth size="small" variant="outlined" placeholder="column >= 10" />
       </Row>
 
       <Row>
-        <Typography variant="caption">Group by Columns</Typography>
+        <label>Group by Columns</label>
         <TextField
           fullWidth
           size="small"
@@ -113,7 +104,7 @@ function FilePage() {
       </Row>
 
       <Row>
-        <Typography variant="caption">Aggregation Conditions</Typography>
+        <label>Aggregation Conditions</label>
         <TextField
           fullWidth
           size="small"
@@ -123,7 +114,7 @@ function FilePage() {
       </Row>
 
       <Row>
-        <Typography variant="caption">Row Limit</Typography>
+        <label>Row Limit</label>
         <TextField fullWidth size="small" variant="outlined" placeholder="30" />
       </Row>
     </Card>

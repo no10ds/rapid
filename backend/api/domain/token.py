@@ -4,6 +4,7 @@ from api.common.logger import AppLogger
 class Token:
     def __init__(self, payload: dict):
         self.subject: str = self._extract_subject(payload)
+        self.username: str | None = payload.get("cognito:username") or payload.get("username")
 
     def _extract_subject(self, payload: dict) -> str:
         try:

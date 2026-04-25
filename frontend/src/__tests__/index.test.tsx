@@ -61,7 +61,7 @@ describe('Page: Index page', () => {
       await waitFor(async () =>
         expect(screen.getByTestId('data-management')).toBeVisible()
       )
-      expect(screen.getByTestId('task-status')).toBeInTheDocument()
+      expect(screen.queryByTestId('task-status')).not.toBeInTheDocument()
       expect(screen.queryByTestId('user-management')).not.toBeInTheDocument()
       expect(screen.queryByTestId('schema-management')).not.toBeInTheDocument()
     })
@@ -73,7 +73,7 @@ describe('Page: Index page', () => {
       await waitFor(async () =>
         expect(screen.getByTestId('data-management')).toBeVisible()
       )
-      expect(screen.getByTestId('task-status')).toBeInTheDocument()
+      expect(screen.queryByTestId('task-status')).not.toBeInTheDocument()
       expect(screen.queryByTestId('user-management')).not.toBeInTheDocument()
       expect(screen.queryByTestId('schema-management')).not.toBeInTheDocument()
     })
@@ -88,8 +88,7 @@ describe('Page: Index page', () => {
         expect(screen.getByTestId('data-management')).toBeVisible()
       )
       expect(screen.getByTestId('schema-management')).toBeVisible()
-      expect(screen.getByTestId('task-status')).toBeInTheDocument()
-
+      expect(screen.queryByTestId('task-status')).not.toBeInTheDocument()
       expect(screen.queryByTestId('user-management')).not.toBeInTheDocument()
     })
   })

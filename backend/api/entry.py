@@ -11,11 +11,13 @@ from starlette.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_401_UNAUTHORI
 from api.application.services.authorisation.authorisation_service import (
     secure_endpoint,
     get_subject_id,
+    get_username,
 )
 from api.application.services.permissions_service import PermissionsService
 from api.application.services.authorisation.dataset_access_evaluator import (
     DatasetAccessEvaluator,
 )
+from api.application.services.data_service import DataService
 from api.common.config.auth import IDENTITY_PROVIDER_BASE_URL, Action
 from api.common.config.docs import (
     custom_openapi_docs_generator,
@@ -57,6 +59,7 @@ CATALOG_DISABLED = strtobool(os.environ.get("CATALOG_DISABLED", "False"))
 
 permissions_service = PermissionsService()
 upload_service = DatasetAccessEvaluator()
+data_service = DataService()
 
 app = FastAPI(
     openapi_url=f"{BASE_API_PATH}/openapi.json", docs_url=None
@@ -172,7 +175,7 @@ async def methods(request: Request):
     except AWSServiceError as error:
         error_message = error.message
 
-    return {"error_message": error_message, **allowed_actions}
+    return {"error_message": error_message, "username": get_username(request), **allowed_actions}
 
 
 @app.get(
@@ -194,7 +197,13 @@ async def get_permissions_ui():
 async def get_datasets_ui(action: Action, request: Request):
     subject_id = get_subject_id(request)
     datasets = upload_service.get_authorised_datasets(subject_id, action)
-    return [dataset.to_dict() for dataset in datasets]
+    result = []
+    for dataset in datasets:
+        d = dataset.to_dict()
+        d["last_updated"] = data_service.get_last_updated_time(dataset)
+        d["last_uploaded_by"] = data_service.get_last_uploader(dataset)
+        result.append(d)
+    return result
 
 
 @app.get("/favicon.ico", include_in_schema=False)

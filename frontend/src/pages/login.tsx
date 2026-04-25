@@ -1,5 +1,4 @@
 import { Button, PublicLayout } from '@/components'
-import { Typography } from '@mui/material'
 import { useState } from 'react'
 import { useQueries } from '@tanstack/react-query'
 import { useRouter } from 'next/router'
@@ -65,23 +64,23 @@ IndexPage.getLayout = (page) => (
     title="Welcome Back"
     promo={
       <>
-        <Typography gutterBottom variant="body1">
+        <p>
           Project rAPId aims to create consistent, secure, interoperable data storage and
           sharing interfaces (APIs) that enable departments to discover, manage and share
           data and metadata amongst themselves.
-        </Typography>
+        </p>
 
-        <Typography gutterBottom variant="body1">
+        <p>
           This will improve the government's use of data by making it more scalable,
           secure, and resilient, helping to match the rising demand for good-quality
           evidence in the design, delivery, and evaluation of public policy.
-        </Typography>
+        </p>
 
-        <Typography gutterBottom variant="body1">
+        <p>
           The project aims to deliver a replicable template for simple data storage
           infrastructure in AWS, a RESTful API and custom frontend UI to ingest and share
           named, standardised datasets.
-        </Typography>
+        </p>
       </>
     }
   >

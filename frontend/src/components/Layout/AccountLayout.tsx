@@ -1,4 +1,4 @@
-import { ComponentProps, ReactNode, useState } from 'react'
+import { ComponentProps, ReactNode, useState, useRef, useEffect } from 'react'
 import { useQueries } from '@tanstack/react-query'
 import { getAuthStatus, getMethods } from '@/service'
 import { MethodsResponse } from '@/service/types'
@@ -6,8 +6,6 @@ import { useRouter } from 'next/router'
 import Router from 'next/router'
 import Link from 'next/link'
 import Image from 'next/image'
-
-// ─── SVG Icons (stroke/fill style, 17×17 rendered via CSS) ──────────────────
 
 const IconDashboard = () => (
   <svg className="stroke-icon" viewBox="0 0 24 24">
@@ -54,14 +52,6 @@ const IconUserAdmin = () => (
   </svg>
 )
 
-const IconDataAdmin = () => (
-  <svg className="fill-icon" viewBox="0 0 24 24">
-    <path d="M12 2C6.48 2 2 4.69 2 8v8c0 3.31 4.48 6 10 6s10-2.69 10-6V8c0-3.31-4.48-6-10-6zm0 2c4.42 0 8 2.01 8 4s-3.58 4-8 4-8-2.01-8-4 3.58-4 8-4zm0 16c-4.42 0-8-2.01-8-4v-2.23c1.61 1.38 4.62 2.23 8 2.23s6.39-.85 8-2.23V16c0 1.99-3.58 4-8 4zm0-6c-4.42 0-8-2.01-8-4v-2.23c1.61 1.38 4.62 2.23 8 2.23s6.39-.85 8-2.23V10c0 1.99-3.58 4-8 4z"/>
-  </svg>
-)
-
-// ─── Nav item component ──────────────────────────────────────────────────────
-
 type NavItemProps = {
   href: string
   icon: ReactNode
@@ -88,15 +78,80 @@ function NavItem({ href, icon, label, badge, activePaths }: NavItemProps) {
   )
 }
 
-// ─── Props ───────────────────────────────────────────────────────────────────
+function SidebarFooter({
+  methods,
+  collapsed
+}: {
+  methods: MethodsResponse | undefined
+  collapsed: boolean
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const username = methods?.username ?? null
+  const initials = username ? username.slice(0, 2).toUpperCase() : null
+
+  return (
+    <div className="sb-foot" ref={ref}>
+      {!collapsed && (
+        <div className="sb-foot-links">
+          <Link href="/" className="sb-foot-link" title="Home">
+            Home
+          </Link>
+          <a href="/api/docs" className="sb-foot-link" title="Docs">
+            Docs
+          </a>
+        </div>
+      )}
+      <button
+        type="button"
+        className="usr usr-btn"
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="true"
+        aria-expanded={open}
+      >
+        <div className="ava">
+          {initials ?? (
+            <svg viewBox="0 0 24 24" style={{ width: 14, height: 14, fill: 'white' }}>
+              <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+            </svg>
+          )}
+        </div>
+        {!collapsed && (
+          <div className="usr-info">
+            {username && <div className="usr-name">{username}</div>}
+            <div className="usr-role">
+              {methods?.can_manage_users ? 'User Admin' : 'Data User'}
+            </div>
+          </div>
+        )}
+      </button>
+      {open && (
+        <div className="usr-menu">
+          <a href="/api/oauth2/logout" className="usr-menu-item">
+            Sign out
+          </a>
+        </div>
+      )}
+    </div>
+  )
+}
 
 type AccountLayoutProps = {
   title?: string
   topbarActions?: ReactNode
   children: ReactNode
 } & Omit<ComponentProps<'div'>, 'children' | 'title'>
-
-// ─── Component ───────────────────────────────────────────────────────────────
 
 const AccountLayout = ({ children, title, topbarActions }: AccountLayoutProps) => {
   const [collapsed, setCollapsed] = useState(false)
@@ -110,9 +165,11 @@ const AccountLayout = ({ children, title, topbarActions }: AccountLayoutProps) =
       {
         queryKey: ['authStatus'],
         queryFn: getAuthStatus,
-        keepPreviousData: false,
+        keepPreviousData: true,
+        staleTime: Infinity,
         cacheTime: 0,
         refetchInterval: 0,
+        refetchOnWindowFocus: false,
         onError: () => redirect(),
         onSuccess: (data: { detail: string }) => {
           if (data.detail === 'fail') redirect()
@@ -121,9 +178,11 @@ const AccountLayout = ({ children, title, topbarActions }: AccountLayoutProps) =
       {
         queryKey: ['methods'],
         queryFn: getMethods,
-        keepPreviousData: false,
+        keepPreviousData: true,
+        staleTime: Infinity,
         cacheTime: 0,
-        refetchInterval: 0
+        refetchInterval: 0,
+        refetchOnWindowFocus: false
       }
     ]
   })
@@ -147,9 +206,7 @@ const AccountLayout = ({ children, title, topbarActions }: AccountLayoutProps) =
 
   return (
     <div className="rapid-shell">
-      {/* ── Sidebar ─────────────────────────────────────────── */}
       <aside className={`rapid-sidebar${collapsed ? ' col' : ''}`}>
-        {/* Header: logo + collapse toggle */}
         <div className="sb-header">
           <Link
             href="/"
@@ -159,6 +216,7 @@ const AccountLayout = ({ children, title, topbarActions }: AccountLayoutProps) =
               height: '100%',
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'center',
               overflow: 'hidden'
             }}
           >
@@ -170,9 +228,9 @@ const AccountLayout = ({ children, title, topbarActions }: AccountLayoutProps) =
               className="logo-img"
               style={{
                 objectFit: 'contain',
-                objectPosition: 'left center',
-                padding: '8px 12px',
-                height: '80%',
+                objectPosition: 'center',
+                padding: '6px 8px',
+                height: '90%',
                 width: 'auto',
                 maxWidth: '100%',
                 transition: 'opacity 0.2s'
@@ -181,20 +239,25 @@ const AccountLayout = ({ children, title, topbarActions }: AccountLayoutProps) =
             />
           </Link>
           <button
+            type="button"
             className="sb-tog"
             onClick={toggleCollapse}
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            {collapsed ? '▶' : '◀'}
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              {collapsed ? (
+                <polyline points="9 18 15 12 9 6" />
+              ) : (
+                <polyline points="15 18 9 12 15 6" />
+              )}
+            </svg>
           </button>
         </div>
 
-        {/* Dashboard — always visible */}
         <div className="sb-sec">
           <NavItem href="/" icon={<IconDashboard />} label="Dashboard" />
         </div>
 
-        {/* DATA section */}
         {hasDataSection && (
           <div className="sb-sec">
             <div className="sb-sec-lbl">Data</div>
@@ -225,7 +288,6 @@ const AccountLayout = ({ children, title, topbarActions }: AccountLayoutProps) =
           </div>
         )}
 
-        {/* JOBS section */}
         {hasJobsSection && (
           <div className="sb-sec">
             <div className="sb-sec-lbl">Jobs</div>
@@ -238,7 +300,6 @@ const AccountLayout = ({ children, title, topbarActions }: AccountLayoutProps) =
           </div>
         )}
 
-        {/* ADMIN section */}
         {methods?.can_manage_users && (
           <div className="sb-sec">
             <div className="sb-sec-lbl">Admin</div>
@@ -248,39 +309,19 @@ const AccountLayout = ({ children, title, topbarActions }: AccountLayoutProps) =
               label="User Admin"
               activePaths={['/subject']}
             />
-            <NavItem
-              href="/admin"
-              icon={<IconDataAdmin />}
-              label="Data Admin"
-              activePaths={['/admin']}
-            />
           </div>
         )}
 
-        {/* Footer */}
-        <div className="sb-foot">
-          <div className="usr">
-            <div className="ava">rA</div>
-            <div className="usr-info">
-              <div className="usr-name">rAPId User</div>
-              <div className="usr-role">
-                {methods?.can_manage_users ? 'User Admin' : 'Data User'}
-              </div>
-            </div>
-          </div>
-        </div>
+        <SidebarFooter methods={methods} collapsed={collapsed} />
       </aside>
 
-      {/* ── Main area ────────────────────────────────────────── */}
       <div className="rapid-main">
-        {/* Topbar */}
         <div className="rapid-topbar">
           <div className="topbar-title">{title}</div>
           <div className="topbar-spacer" />
           {topbarActions}
         </div>
 
-        {/* Page content */}
         <div className="rapid-content">{children}</div>
       </div>
     </div>
