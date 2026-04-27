@@ -122,7 +122,7 @@ body {
   padding: 0 10px 0 0;
   display: flex;
   align-items: center;
-  border-bottom: 1px solid var(--sidebar-border);
+  border-bottom: 1px solid var(--border);
   flex-shrink: 0;
   overflow: hidden;
   background: #ffffff;
@@ -1349,8 +1349,6 @@ td.mn {
   display: flex;
   gap: 0;
   width: 100%;
-  max-width: 460px;
-  margin-top: 8px;
 }
 
 .hp-search-input {
@@ -1399,7 +1397,7 @@ td.mn {
 
 .hp-search-wrap {
   width: 100%;
-  max-width: 520px;
+  max-width: 680px;
   position: relative;
   margin-top: 8px;
 }

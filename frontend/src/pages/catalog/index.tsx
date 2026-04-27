@@ -19,19 +19,6 @@ function layerBadge(layer: string) {
   return <span className={`badge ${mod}`.trim()}>{layer}</span>
 }
 
-const SENSITIVITY_BADGE_CLASS: Record<string, string> = {
-  PUBLIC: 'sens-public',
-  PRIVATE: 'sens-private',
-  PROTECTED: 'sens-protected',
-  SENSITIVE: 'sens-protected'
-}
-
-function sensitivityBadge(s: string) {
-  const u = s?.toUpperCase()
-  const mod = SENSITIVITY_BADGE_CLASS[u] ?? ''
-  return <span className={`badge ${mod}`.trim()}>{u || s}</span>
-}
-
 function CatalogPage() {
   const router = useRouter()
 
@@ -216,20 +203,19 @@ function CatalogPage() {
                   style={{ cursor: 'pointer', width: 14, height: 14, accentColor: 'var(--pink)' }}
                 />
               </th>
-              <th style={{ width: '12%' }}>Domain</th>
-              <th style={{ width: '16%' }}>Dataset</th>
+              <th style={{ width: '13%' }}>Domain</th>
+              <th style={{ width: '18%' }}>Dataset</th>
               <th style={{ width: '7%' }}>Version</th>
-              <th style={{ width: '8%' }}>Layer</th>
-              <th style={{ width: '10%' }}>Sensitivity</th>
-              <th style={{ width: '13%' }}>Last Updated</th>
-              <th style={{ width: '12%' }}>Updated By</th>
-              <th style={{ width: '16%' }}>Actions</th>
+              <th style={{ width: '9%' }}>Layer</th>
+              <th style={{ width: '16%' }}>Last Updated</th>
+              <th style={{ width: '14%' }}>Updated By</th>
+              <th style={{ width: '17%' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {pageItems.length === 0 ? (
               <tr>
-                <td colSpan={9} style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-tertiary)', fontSize: '13px' }}>
+                <td colSpan={8} style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-tertiary)', fontSize: '13px' }}>
                   {filtered.length === 0 && !search && domainFilter === 'All' && layerFilter === 'All'
                     ? 'No datasets available.'
                     : 'No datasets match the current filters.'}
@@ -256,7 +242,6 @@ function CatalogPage() {
                     <td style={{ fontWeight: 500, color: '#18181b' }}>{d.dataset}</td>
                     <td className="mn">{d.version}</td>
                     <td>{layerBadge(d.layer)}</td>
-                    <td>{d.sensitivity ? sensitivityBadge(d.sensitivity) : <span className="mn">—</span>}</td>
                     <td className="mn">{d.last_updated ?? '—'}</td>
                     <td className="mn">{d.last_uploaded_by ?? '—'}</td>
                     <td style={{ overflow: 'visible', whiteSpace: 'nowrap' }}>
