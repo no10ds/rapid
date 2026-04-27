@@ -1,5 +1,4 @@
 from typing import Dict, List
-from concurrent.futures import ThreadPoolExecutor
 import os
 
 from dotenv import load_dotenv
@@ -18,7 +17,6 @@ from api.application.services.permissions_service import PermissionsService
 from api.application.services.authorisation.dataset_access_evaluator import (
     DatasetAccessEvaluator,
 )
-from api.application.services.data_service import DataService
 from api.common.config.auth import IDENTITY_PROVIDER_BASE_URL, Action
 from api.common.config.docs import (
     custom_openapi_docs_generator,
@@ -60,7 +58,6 @@ CATALOG_DISABLED = strtobool(os.environ.get("CATALOG_DISABLED", "False"))
 
 permissions_service = PermissionsService()
 upload_service = DatasetAccessEvaluator()
-data_service = DataService()
 
 app = FastAPI(
     openapi_url=f"{BASE_API_PATH}/openapi.json", docs_url=None
@@ -198,22 +195,7 @@ async def get_permissions_ui():
 async def get_datasets_ui(action: Action, request: Request):
     subject_id = get_subject_id(request)
     datasets = upload_service.get_authorised_datasets(subject_id, action)
-
-    def enrich(dataset):
-        d = dataset.to_dict()
-        try:
-            d["last_updated"] = data_service.get_last_updated_time(dataset)
-        except Exception:
-            d["last_updated"] = None
-        try:
-            d["last_uploaded_by"] = data_service.get_last_uploader(dataset)
-        except Exception:
-            d["last_uploaded_by"] = None
-        return d
-
-    with ThreadPoolExecutor(max_workers=10) as pool:
-        result = list(pool.map(enrich, datasets))
-    return result
+    return [dataset.to_dict() for dataset in datasets]
 
 
 @app.get("/favicon.ico", include_in_schema=False)

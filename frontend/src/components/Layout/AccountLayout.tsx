@@ -105,9 +105,6 @@ function SidebarFooter({
     <div className="sb-foot" ref={ref}>
       {!collapsed && (
         <div className="sb-foot-links">
-          <Link href="/" className="sb-foot-link" title="Home">
-            Home
-          </Link>
           <a href="/api/docs" className="sb-foot-link" title="API Docs">
             API Docs
           </a>
@@ -281,7 +278,7 @@ const AccountLayout = ({ children, title, topbarActions, noPad }: AccountLayoutP
                 href="/data/upload"
                 icon={<IconUpload />}
                 label="Upload"
-                activePaths={['/data/upload', '/data/delete', '/data/download']}
+                activePaths={['/data/upload']}
               />
             )}
             {methods?.can_create_schema && (

@@ -45,16 +45,13 @@ class TestStatus(BaseClientTest):
 
 
 class TestDatasetsUI(BaseClientTest):
-    @patch("api.entry.data_service")
     @patch("api.entry.get_subject_id")
     @patch.object(DatasetAccessEvaluator, "get_authorised_datasets")
     def test_gets_datasets_for_ui_write(
-        self, mock_get_authorised_datasets, mock_get_subject_id, mock_data_service
+        self, mock_get_authorised_datasets, mock_get_subject_id
     ):
         subject_id = "123abc"
         mock_get_subject_id.return_value = subject_id
-        mock_data_service.get_last_updated_time.return_value = None
-        mock_data_service.get_last_uploader.return_value = None
 
         mock_get_authorised_datasets.return_value = [
             DatasetMetadata("layer", "domain1", "datset1", 1),
@@ -69,16 +66,13 @@ class TestDatasetsUI(BaseClientTest):
         mock_get_authorised_datasets.assert_called_once_with(subject_id, Action.WRITE)
         assert response.status_code == 200
 
-    @patch("api.entry.data_service")
     @patch("api.entry.get_subject_id")
     @patch.object(DatasetAccessEvaluator, "get_authorised_datasets")
     def test_gets_datasets_for_ui_read(
-        self, mock_get_authorised_datasets, mock_get_subject_id, mock_data_service
+        self, mock_get_authorised_datasets, mock_get_subject_id
     ):
         subject_id = "123abc"
         mock_get_subject_id.return_value = subject_id
-        mock_data_service.get_last_updated_time.return_value = None
-        mock_data_service.get_last_uploader.return_value = None
 
         mock_get_authorised_datasets.return_value = [
             DatasetMetadata("layer", "domain1", "datset1", 1),
