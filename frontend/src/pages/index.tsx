@@ -1,10 +1,13 @@
 import AccountLayout from '@/components/Layout/AccountLayout'
-import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
 import { getMethods } from '@/service'
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
+import { useRouter } from 'next/router'
 
 function AccountIndexPage() {
+  const router = useRouter()
+  const [search, setSearch] = useState('')
+
   const { data, isLoading } = useQuery({
     queryKey: ['methods'],
     queryFn: getMethods,
@@ -15,6 +18,15 @@ function AccountIndexPage() {
 
   if (isLoading) {
     return <div className="rapid-loading-bar" role="progressbar" />
+  }
+
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault()
+    if (search.trim()) {
+      router.push({ pathname: '/catalog', query: { q: search.trim() } })
+    } else {
+      router.push('/catalog')
+    }
   }
 
   return (
@@ -28,35 +40,18 @@ function AccountIndexPage() {
           <p className="hp-hero-sub">
             Your centralised platform for sharing, discovering and managing datasets.
           </p>
-          <div className="hp-hero-ctas">
-            <Link href="/catalog" className="hp-hero-cta">
-              Explore the Catalog
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M7 17L17 7M17 7H7M17 7V17" />
-              </svg>
-            </Link>
-          </div>
-          <div className="hp-hero-links">
-            <a href="/api/docs" className="hp-hero-link">
-              View the API docs
-            </a>
-            <a
-              href="https://github.com/no10ds/rapid"
-              className="hp-hero-link"
-              target="_blank"
-              rel="noreferrer"
-            >
-              See the source code
-            </a>
-            <a
-              href="https://ukgovernmentdigital.slack.com/archives/C03E5GV2LQM"
-              className="hp-hero-link"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Contact
-            </a>
-          </div>
+          <form className="hp-search-form" onSubmit={handleSearch}>
+            <input
+              className="hp-search-input"
+              type="text"
+              placeholder="Search datasets…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <button className="hp-search-btn" type="submit">
+              Search
+            </button>
+          </form>
         </div>
       </div>
 
@@ -76,5 +71,5 @@ function AccountIndexPage() {
 export default AccountIndexPage
 
 AccountIndexPage.getLayout = (page: ReactNode) => (
-  <AccountLayout title="Dashboard">{page}</AccountLayout>
+  <AccountLayout title="Dashboard" noPad>{page}</AccountLayout>
 )

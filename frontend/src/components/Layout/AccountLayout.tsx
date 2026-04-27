@@ -108,8 +108,14 @@ function SidebarFooter({
           <Link href="/" className="sb-foot-link" title="Home">
             Home
           </Link>
-          <a href="/api/docs" className="sb-foot-link" title="Docs">
-            Docs
+          <a href="/api/docs" className="sb-foot-link" title="API Docs">
+            API Docs
+          </a>
+          <a href="https://github.com/no10ds/rapid" className="sb-foot-link" target="_blank" rel="noreferrer" title="Source Code">
+            Source Code
+          </a>
+          <a href="https://ukgovernmentdigital.slack.com/archives/C03E5GV2LQM" className="sb-foot-link" target="_blank" rel="noreferrer" title="Contact">
+            Contact
           </a>
         </div>
       )}
@@ -150,10 +156,11 @@ function SidebarFooter({
 type AccountLayoutProps = {
   title?: string
   topbarActions?: ReactNode
+  noPad?: boolean
   children: ReactNode
 } & Omit<ComponentProps<'div'>, 'children' | 'title'>
 
-const AccountLayout = ({ children, title, topbarActions }: AccountLayoutProps) => {
+const AccountLayout = ({ children, title, topbarActions, noPad }: AccountLayoutProps) => {
   const [collapsed, setCollapsed] = useState(false)
 
   const redirect = () => {
@@ -322,7 +329,7 @@ const AccountLayout = ({ children, title, topbarActions }: AccountLayoutProps) =
           {topbarActions}
         </div>
 
-        <div className="rapid-content">{children}</div>
+        <div className={`rapid-content${noPad ? ' no-pad' : ''}`}>{children}</div>
       </div>
     </div>
   )

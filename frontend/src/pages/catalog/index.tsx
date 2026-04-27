@@ -35,9 +35,11 @@ function sensitivityBadge(s: string) {
 function CatalogPage() {
   const router = useRouter()
 
+  const initialSearch = typeof router.query.q === 'string' ? router.query.q : ''
+
   const [layerFilter, setLayerFilter] = useState('All')
   const [domainFilter, setDomainFilter] = useState('All')
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useState(initialSearch)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [page, setPage] = useState(1)
   const [bulkDownloading, setBulkDownloading] = useState(false)
@@ -202,7 +204,7 @@ function CatalogPage() {
         </div>
 
         {/* Table */}
-        <table>
+        <table style={{ tableLayout: 'fixed' }}>
           <thead>
             <tr>
               <th style={{ width: 36, padding: '10px 8px 10px 16px' }}>
@@ -214,14 +216,14 @@ function CatalogPage() {
                   style={{ cursor: 'pointer', width: 14, height: 14, accentColor: 'var(--pink)' }}
                 />
               </th>
-              <th>Domain</th>
-              <th>Dataset</th>
-              <th>Version</th>
-              <th>Layer</th>
-              <th>Sensitivity</th>
-              <th>Last Updated</th>
-              <th>Updated By</th>
-              <th>Actions</th>
+              <th style={{ width: '12%' }}>Domain</th>
+              <th style={{ width: '16%' }}>Dataset</th>
+              <th style={{ width: '7%' }}>Version</th>
+              <th style={{ width: '8%' }}>Layer</th>
+              <th style={{ width: '10%' }}>Sensitivity</th>
+              <th style={{ width: '13%' }}>Last Updated</th>
+              <th style={{ width: '12%' }}>Updated By</th>
+              <th style={{ width: '16%' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -257,7 +259,7 @@ function CatalogPage() {
                     <td>{d.sensitivity ? sensitivityBadge(d.sensitivity) : <span className="mn">—</span>}</td>
                     <td className="mn">{d.last_updated ?? '—'}</td>
                     <td className="mn">{d.last_uploaded_by ?? '—'}</td>
-                    <td>
+                    <td style={{ overflow: 'visible', whiteSpace: 'nowrap' }}>
                       <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                         <button
                           type="button"

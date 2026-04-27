@@ -475,6 +475,10 @@ body {
   padding: 28px;
 }
 
+.rapid-content.no-pad {
+  padding: 0;
+}
+
 /* =============================================================
    BUTTONS
    ============================================================= */
@@ -882,6 +886,9 @@ td {
   padding: 11px 16px;
   font-size: 13px;
   color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 td.mn {
@@ -1337,6 +1344,58 @@ td.mn {
 .hp-hero-link:hover {
   background: rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.8);
+}
+
+.hp-search-form {
+  display: flex;
+  gap: 0;
+  width: 100%;
+  max-width: 460px;
+  margin-top: 8px;
+}
+
+.hp-search-input {
+  flex: 1;
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-right: none;
+  border-radius: var(--radius) 0 0 var(--radius);
+  background: rgba(255, 255, 255, 0.06);
+  color: #f1f3f5;
+  font-size: 13px;
+  font-family: 'Poppins', sans-serif;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.hp-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.hp-search-input:focus {
+  outline: none;
+  border-color: var(--pink);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.hp-search-btn {
+  height: 42px;
+  padding: 0 22px;
+  border: none;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: var(--pink);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(236, 72, 153, 0.35);
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+
+.hp-search-btn:hover {
+  opacity: 0.9;
 }
 
 /* =============================================================

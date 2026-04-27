@@ -1,4 +1,5 @@
 from typing import Dict, List
+from concurrent.futures import ThreadPoolExecutor
 import os
 
 from dotenv import load_dotenv
@@ -197,12 +198,21 @@ async def get_permissions_ui():
 async def get_datasets_ui(action: Action, request: Request):
     subject_id = get_subject_id(request)
     datasets = upload_service.get_authorised_datasets(subject_id, action)
-    result = []
-    for dataset in datasets:
+
+    def enrich(dataset):
         d = dataset.to_dict()
-        d["last_updated"] = data_service.get_last_updated_time(dataset)
-        d["last_uploaded_by"] = data_service.get_last_uploader(dataset)
-        result.append(d)
+        try:
+            d["last_updated"] = data_service.get_last_updated_time(dataset)
+        except Exception:
+            d["last_updated"] = None
+        try:
+            d["last_uploaded_by"] = data_service.get_last_uploader(dataset)
+        except Exception:
+            d["last_uploaded_by"] = None
+        return d
+
+    with ThreadPoolExecutor(max_workers=10) as pool:
+        result = list(pool.map(enrich, datasets))
     return result
 
 
