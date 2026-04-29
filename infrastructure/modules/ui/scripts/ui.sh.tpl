@@ -3,8 +3,8 @@
 url="${REGISTRY_URL}/${VERSION}.zip"
 router_url="${REGISTRY_URL}/${VERSION}-router-lambda.zip"
 
-wget $url
-wget $router_url
+curl -LO $url
+curl -LO $router_url
 
 unzip -o "${VERSION}.zip"
 cd out/ || { echo "./out folder does not exist"; exit 1; }
