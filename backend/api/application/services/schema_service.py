@@ -56,6 +56,7 @@ class SchemaService:
         return Schema(
             metadata=metadata,
             columns=[Column.model_validate(col) for col in schema[COLUMNS]],
+            panderaDataFrameSchema=schema["panderaDataFrameSchema"],
         )
 
     def get_schema_metadatas(
