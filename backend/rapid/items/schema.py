@@ -4,7 +4,7 @@ from typing import Dict, List, Optional, Union, Any
 from pydantic import BaseModel, ConfigDict, field_serializer, field_validator
 import pandera
 import pandera.pandas as pandera_pandas
-import pandera.io as pandera_io
+import pandera.io.pandas_io as pandera_io
 
 
 class SensitivityLevel(StrEnum):
@@ -157,11 +157,11 @@ class Schema(BaseModel):
             return value
 
     @field_validator("panderaDataFrameSchema", mode="before")
-    def capitalize(cls, value: str) -> pandera_pandas.DataFrameSchema:
-        if value is not None:
+    def pandera_load(cls, value: str) -> pandera_pandas.DataFrameSchema:
+        if value is not None and value != "":
             return pandera_io.from_json(value)
         else:
-            return value
+            return None
 
     def are_columns_the_same(
         self, new_columns: Union[List[Column], List[dict]]

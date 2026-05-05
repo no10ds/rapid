@@ -7,7 +7,7 @@ from pydantic import field_serializer, field_validator
 import pyarrow as pa
 import pandera
 import pandera.pandas as pandera_pandas
-import pandera.io as pandera_io
+import pandera.io.pandas_io as pandera_io
 
 from api.domain.schema_metadata import Owner, SchemaMetadata
 from rapid.items.schema import Column, UpdateBehaviour
@@ -29,11 +29,11 @@ class Schema(BaseModel):
             return value
 
     @field_validator("panderaDataFrameSchema", mode="before")
-    def capitalize(cls, value: str) -> pandera_pandas.DataFrameSchema:
-        if value is not None:
+    def pandera_load(cls, value: str) -> pandera_pandas.DataFrameSchema:
+        if value is not None and value != "":
             return pandera_io.from_json(value)
         else:
-            return value
+            return None
 
     def get_layer(self) -> str:
         return self.metadata.get_layer()

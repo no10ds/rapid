@@ -8,5 +8,6 @@ requests-mock
 setuptools
 twine
 pip-audit
+watchfiles
 
 -r ./requirements.txt
