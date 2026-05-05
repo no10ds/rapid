@@ -202,3 +202,10 @@ variable "task_cpu" {
   description = "rAPId ecs task cpu"
   default     = 256
 }
+
+variable "pandera_files" {
+  type        = map(string)
+  description = "Map of python files path and python files content with pandera custom checks"
+  default     = null
+  nullable    = true
+}
