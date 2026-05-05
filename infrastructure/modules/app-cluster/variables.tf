@@ -225,6 +225,6 @@ variable "task_cpu" {
 variable "pandera_files" {
   type        = map(string)
   description = "Map of python files path and the python files content with pandera custom checks"
-  default     = null
-  nullable    = true
+  default     = {}
+  nullable    = false
 }

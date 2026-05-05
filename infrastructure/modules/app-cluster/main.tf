@@ -10,7 +10,7 @@ locals {
     "RESOURCE_PREFIX" : var.resource-name-prefix,
     "COGNITO_USER_LOGIN_APP_CREDENTIALS_SECRETS_NAME" : var.cognito_user_login_app_credentials_secrets_name,
     "CUSTOM_USER_NAME_REGEX" : var.custom_user_name_regex == null ? "" : var.custom_user_name_regex,
-    "PANDERA_FILES" : var.pandera_files == null ? jsonencode({}) : jsonencode(var.pandera_files)
+    "PANDERA_FILES" : jsonencode(var.pandera_files)
     },
     var.project_information
   )

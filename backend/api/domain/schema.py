@@ -30,7 +30,7 @@ class Schema(BaseModel):
 
     @field_validator("panderaDataFrameSchema", mode="before")
     def pandera_load(cls, value: str) -> pandera_pandas.DataFrameSchema:
-        if value is not None and value != "":
+        if value is not None:
             return pandera_io.from_json(value)
         else:
             return None

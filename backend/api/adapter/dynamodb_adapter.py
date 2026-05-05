@@ -179,19 +179,15 @@ class DynamoDBAdapter(DatabaseAdapter):
             AppLogger.info(
                 f"Storing schema for {schema.metadata.string_representation()}"
             )
-            self.schema_table.put_item(
-                Item={
-                    "PK": schema.metadata.dataset_identifier(with_version=False),
-                    "SK": schema.metadata.get_version(),
-                    **schema.metadata.model_dump(),
-                    COLUMNS: [col.model_dump() for col in schema.columns],
-                    "panderaDataFrameSchema": (
-                        schema.panderaDataFrameSchema.to_json()
-                        if schema.panderaDataFrameSchema is not None
-                        else ""
-                    ),
-                }
-            )
+            item = {
+                "PK": schema.metadata.dataset_identifier(with_version=False),
+                "SK": schema.metadata.get_version(),
+                **schema.metadata.model_dump(),
+                COLUMNS: [col.model_dump() for col in schema.columns],
+            }
+            if schema.panderaDataFrameSchema is not None:
+                item["panderaDataFrameSchema"] = schema.panderaDataFrameSchema.to_json()
+            self.schema_table.put_item(Item=item)
         except ClientError as error:
             self._handle_client_error(
                 f"Error storing schema for {schema.metadata.string_representation()}",
