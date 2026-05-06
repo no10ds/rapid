@@ -1,5 +1,5 @@
 locals {
-  pandera_files_json = jsonencode({ for file_path in var.pandera_files : file_path => file(file_path) })
+  pandera_files_json = jsonencode({ for file_path in var.pandera_files : trimprefix(trimprefix(file_path, "/"), "./") => file(file_path) })
   environment_variables = merge({
     "AWS_ACCOUNT" : var.aws_account,
     "DATA_BUCKET" : var.data_s3_bucket_name,
