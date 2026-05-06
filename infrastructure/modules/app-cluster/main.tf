@@ -1,4 +1,5 @@
 locals {
+  pandera_files_json = jsonencode({ for file_path in var.pandera_files : file_path => file(file_path) })
   environment_variables = merge({
     "AWS_ACCOUNT" : var.aws_account,
     "DATA_BUCKET" : var.data_s3_bucket_name,
@@ -10,7 +11,7 @@ locals {
     "RESOURCE_PREFIX" : var.resource-name-prefix,
     "COGNITO_USER_LOGIN_APP_CREDENTIALS_SECRETS_NAME" : var.cognito_user_login_app_credentials_secrets_name,
     "CUSTOM_USER_NAME_REGEX" : var.custom_user_name_regex == null ? "" : var.custom_user_name_regex,
-    "PANDERA_FILES" : jsonencode(var.pandera_files)
+    "PANDERA_FILES" : local.pandera_files_json
     },
     var.project_information
   )
