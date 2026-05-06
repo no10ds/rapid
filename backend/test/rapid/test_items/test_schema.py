@@ -318,5 +318,6 @@ class TestSchema:
                     "checks": {},
                 },
             ],
+            "panderaDataFrameSchema": None,
         }
         assert schema.model_dump() == expected_dict
