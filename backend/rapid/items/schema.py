@@ -158,10 +158,10 @@ class Schema(BaseModel):
 
     @field_validator("panderaDataFrameSchema", mode="before")
     def pandera_load(cls, value: str) -> pandera_pandas.DataFrameSchema:
-        if value is not None:
+        if type(value) is str:
             return pandera_io.from_json(value)
         else:
-            return None
+            return value
 
     def are_columns_the_same(
         self, new_columns: Union[List[Column], List[dict]]

@@ -14,7 +14,7 @@ from api.application.services.dataset_validation import (
     dataset_has_correct_data_types,
     dataset_has_no_illegal_characters_in_partition_columns,
     dataset_has_rows,
-    validate_with_pandera
+    validate_with_pandera,
 )
 from api.common.custom_exceptions import (
     DatasetValidationError,
@@ -24,6 +24,8 @@ from api.common.custom_exceptions import (
 from api.domain.schema import Schema
 from rapid.items.schema import Column, Owner
 from api.domain.schema_metadata import SchemaMetadata
+
+import pandera.pandas as pandera_pandas
 
 
 class TestDatasetValidation:
@@ -58,6 +60,38 @@ class TestDatasetValidation:
                     allow_null=True,
                 ),
             ],
+        )
+
+        self.valid_schema_pandera = Schema(
+            metadata=SchemaMetadata(
+                layer="raw",
+                domain="somedomain",
+                dataset="otherDataset",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
+            ),
+            columns=[
+                Column(
+                    name="colname1",
+                    partition_index=0,
+                    data_type="int",
+                    allow_null=False,
+                ),
+                Column(
+                    name="colname2",
+                    partition_index=None,
+                    data_type="string",
+                    allow_null=False,
+                ),
+            ],
+            panderaDataFrameSchema=pandera_pandas.DataFrameSchema(
+                columns={
+                    "colname1": pandera_pandas.Column(
+                        int, checks=[pandera_pandas.Check.less_than(10)]
+                    ),
+                    "colname2": pandera_pandas.Column(str),
+                },
+            ),
         )
 
     def test_fully_valid_dataset(self):
@@ -116,6 +150,38 @@ class TestDatasetValidation:
         validated_dataframe = build_validated_dataframe(full_valid_schema, dataframe)
 
         assert validated_dataframe.to_dict() == expected.to_dict()
+
+    def test_fully_valid_dataset_pandera_schema(self):
+        full_valid_schema = self.valid_schema_pandera
+
+        dataframe = pd.DataFrame(
+            {
+                "colname1": [1, 4],
+                "colname2": ["Carlos", "Ada"],
+            }
+        )
+
+        validated_dataframe = build_validated_dataframe(full_valid_schema, dataframe)
+
+        assert validated_dataframe.to_dict() == dataframe.to_dict()
+
+    def test_invalid_dataset_pandera_schema(self):
+        full_valid_schema = self.valid_schema_pandera
+
+        dataframe = pd.DataFrame(
+            {
+                "colname1": [11, 4],
+                "colname2": ["Carlos", "Ada"],
+            }
+        )
+
+        try:
+            build_validated_dataframe(full_valid_schema, dataframe)
+        except DatasetValidationError as error:
+            print(error)
+            assert error.message == [
+                '{\n  "PanderaErrors": {\n    "DATA": {\n      "DATAFRAME_CHECK": [\n        {\n          "schema": null,\n          "column": "colname1",\n          "check": "less_than(10)",\n          "error": "Column \'colname1\' failed element-wise validator number 0: less_than(10) failure cases: 11"\n        }\n      ]\n    }\n  }\n}',
+            ]
 
     def test_invalid_column_names(self):
         dataframe = pd.DataFrame(
@@ -750,13 +816,13 @@ class TestDatasetTransformation:
         )
         transformed_df, _ = convert_date_columns(data, schema)
 
-        expected_date_column_1 = pd.to_datetime(pd.Series(
-            ["2008-01-30", "2008-01-31", "2008-02-01", "2008-02-02"]
-        ))
+        expected_date_column_1 = pd.to_datetime(
+            pd.Series(["2008-01-30", "2008-01-31", "2008-02-01", "2008-02-02"])
+        )
         expected_date_column_1.name = "date1"
-        expected_date_column_2 = pd.to_datetime(pd.Series(
-            ["2008-05-15", "2008-12-13", "2008-07-09", "2008-03-17"]
-        ))
+        expected_date_column_2 = pd.to_datetime(
+            pd.Series(["2008-05-15", "2008-12-13", "2008-07-09", "2008-03-17"])
+        )
         expected_date_column_2.name = "date2"
 
         assert transformed_df["date1"].equals(expected_date_column_1)
@@ -849,7 +915,7 @@ class TestDatasetTransformation:
                         "year_range": {
                             "check_type": "in_range",
                             "parameters": {"min_value": 2000, "max_value": 2030},
-                            "error": "Year must be between 2000 and 2030"
+                            "error": "Year must be between 2000 and 2030",
                         }
                     },
                 ),
@@ -873,7 +939,7 @@ class TestDatasetTransformation:
                         "year_range": {
                             "check_type": "in_range",
                             "parameters": {"min_value": 2000, "max_value": 2030},
-                            "error": "Year must be between 2000 and 2030"
+                            "error": "Year must be between 2000 and 2030",
                         }
                     },
                 ),
@@ -899,7 +965,7 @@ class TestDatasetTransformation:
                         "status_check": {
                             "check_type": "isin",
                             "parameters": {"allowed_values": ["Carlos", "Ada"]},
-                            "error": "colname1 must be one of: Carlos, Ada"
+                            "error": "colname1 must be one of: Carlos, Ada",
                         }
                     },
                 ),
@@ -923,7 +989,7 @@ class TestDatasetTransformation:
                         "status_check": {
                             "check_type": "isin",
                             "parameters": {"allowed_values": ["Carlos", "Ada"]},
-                            "error": "colname1 must be one of: Carlos, Ada"
+                            "error": "colname1 must be one of: Carlos, Ada",
                         }
                     },
                 ),
@@ -954,13 +1020,13 @@ class TestDatasetTransformation:
                         "username_length": {
                             "check_type": "str_length",
                             "parameters": {"min_value": 5, "max_value": 20},
-                            "error": "Username must be between 5 and 20 characters"
+                            "error": "Username must be between 5 and 20 characters",
                         },
                         "username_pattern": {
                             "check_type": "str_matches",
                             "parameters": {"pattern": r"^[a-z]+\d+$"},
-                            "error": "Username must be lowercase letters followed by numbers"
-                        }
+                            "error": "Username must be lowercase letters followed by numbers",
+                        },
                     },
                 ),
                 Column(
@@ -972,13 +1038,13 @@ class TestDatasetTransformation:
                         "age_minimum": {
                             "check_type": "greater_than",
                             "parameters": {"min_value": 18},
-                            "error": "Age must be greater than 18"
+                            "error": "Age must be greater than 18",
                         },
                         "age_maximum": {
                             "check_type": "less_than",
                             "parameters": {"max_value": 100},
-                            "error": "Age must be less than 100"
-                        }
+                            "error": "Age must be less than 100",
+                        },
                     },
                 ),
             ],
@@ -990,7 +1056,11 @@ class TestDatasetTransformation:
     def test_validate_with_pandera_multiple_checks_on_column_invalid(self):
         df = pd.DataFrame(
             {
-                "colname1": ["ab", "BOB456", "carlosabcdefghijklmnop"],  # Fails str_length and str_matches
+                "colname1": [
+                    "ab",
+                    "BOB456",
+                    "carlosabcdefghijklmnop",
+                ],  # Fails str_length and str_matches
                 "colname2": [15, 30, 105],  # Fails greater_than and less_than
             }
         )
@@ -1006,13 +1076,13 @@ class TestDatasetTransformation:
                         "username_length": {
                             "check_type": "str_length",
                             "parameters": {"min_value": 5, "max_value": 20},
-                            "error": "Username must be between 5 and 20 characters"
+                            "error": "Username must be between 5 and 20 characters",
                         },
                         "username_pattern": {
                             "check_type": "str_matches",
                             "parameters": {"pattern": r"^[a-z]+\d+$"},
-                            "error": "Username must be lowercase letters followed by numbers"
-                        }
+                            "error": "Username must be lowercase letters followed by numbers",
+                        },
                     },
                 ),
                 Column(
@@ -1024,13 +1094,13 @@ class TestDatasetTransformation:
                         "age_minimum": {
                             "check_type": "greater_than",
                             "parameters": {"min_value": 18},
-                            "error": "Age must be greater than 18"
+                            "error": "Age must be greater than 18",
                         },
                         "age_maximum": {
                             "check_type": "less_than",
                             "parameters": {"max_value": 100},
-                            "error": "Age must be less than 100"
-                        }
+                            "error": "Age must be less than 100",
+                        },
                     },
                 ),
             ],

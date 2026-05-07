@@ -15,6 +15,8 @@ from api.domain.schema import Schema
 from api.domain.schema_metadata import SchemaMetadata
 from rapid.items.schema import UpdateBehaviour, Owner, Column
 
+import pandera.pandas as pandera_pandas
+
 
 class TestSchemaValidation:
     def setup_method(self):
@@ -48,6 +50,38 @@ class TestSchemaValidation:
             ],
         )
 
+        self.valid_schema_pandera = Schema(
+            metadata=SchemaMetadata(
+                layer="raw",
+                domain="somedomain",
+                dataset="otherDataset",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
+            ),
+            columns=[
+                Column(
+                    name="colname1",
+                    partition_index=0,
+                    data_type="int",
+                    allow_null=False,
+                ),
+                Column(
+                    name="colname2",
+                    partition_index=None,
+                    data_type="string",
+                    allow_null=False,
+                ),
+            ],
+            panderaDataFrameSchema=pandera_pandas.DataFrameSchema(
+                columns={
+                    "colname1": pandera_pandas.Column(
+                        int, checks=[pandera_pandas.Check.less_than(10)]
+                    ),
+                    "colname2": pandera_pandas.Column(str),
+                },
+            ),
+        )
+
     def _assert_validate_schema_raises_error(
         self, invalid_schema: Schema, message_pattern: str
     ):
@@ -55,6 +89,12 @@ class TestSchemaValidation:
             validate_schema(invalid_schema)
 
     def test_valid_schema(self):
+        try:
+            validate_schema(self.valid_schema_pandera)
+        except SchemaValidationError:
+            pytest.fail("Unexpected SchemaError was thrown")
+
+    def test_valid_schema_pandera(self):
         try:
             validate_schema(self.valid_schema)
         except SchemaValidationError:
