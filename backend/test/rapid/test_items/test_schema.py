@@ -3,6 +3,7 @@ from pydantic import ValidationError
 
 from rapid.items.schema import Schema, SchemaMetadata, Column, Owner, SensitivityLevel
 
+import pandera.pandas as pandera_pandas
 
 DUMMY_COLUMNS = [
     Column(
@@ -319,5 +320,55 @@ class TestSchema:
                 },
             ],
             "panderaDataFrameSchema": None,
+        }
+        assert schema.model_dump() == expected_dict
+
+    def test_schema_pandera_returns_correct_dictionary(self):
+        pandera_schema = pandera_pandas.DataFrameSchema(
+            columns={
+                "colname1": pandera_pandas.Column(int),
+                "colname2": pandera_pandas.Column(str),
+            },
+        )
+        schema = Schema(
+            metadata=DUMMY_METADATA,
+            columns=DUMMY_COLUMNS,
+            panderaDataFrameSchema=pandera_schema,
+        )
+        expected_dict = {
+            "metadata": {
+                "layer": "raw",
+                "domain": "test",
+                "dataset": "rapid_sdk",
+                "sensitivity": "PUBLIC",
+                "owners": [{"name": "Test", "email": "test@email.com"}],
+                "version": None,
+                "key_value_tags": {},
+                "key_only_tags": [],
+                "description": "test",
+                "update_behaviour": "OVERWRITE",
+                "is_latest_version": True,
+            },
+            "columns": [
+                {
+                    "name": "column_a",
+                    "data_type": "object",
+                    "partition_index": None,
+                    "allow_null": True,
+                    "format": None,
+                    "unique": False,
+                    "checks": {},
+                },
+                {
+                    "name": "column_b",
+                    "data_type": "object",
+                    "partition_index": None,
+                    "allow_null": True,
+                    "format": None,
+                    "unique": False,
+                    "checks": {},
+                },
+            ],
+            "panderaDataFrameSchema": pandera_schema.to_json(),
         }
         assert schema.model_dump() == expected_dict
