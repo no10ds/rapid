@@ -20,6 +20,14 @@ function layerBadge(layer: string) {
   return <span className={`badge ${mod}`.trim()}>{layer}</span>
 }
 
+function formatDate(raw: string | undefined): string {
+  if (!raw) return '—'
+  const d = new Date(raw)
+  if (isNaN(d.getTime())) return raw
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+    + ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+}
+
 function CatalogPage() {
   const router = useRouter()
 
@@ -191,7 +199,7 @@ function CatalogPage() {
                   </td>
                   <td className="mn">{d.version}</td>
                   <td>{layerBadge(d.layer)}</td>
-                  <td className="mn">{d.last_updated ?? '—'}</td>
+                  <td className="mn">{formatDate(d.last_updated)}</td>
                   <td className="mn">{d.last_uploaded_by ?? '—'}</td>
                 </tr>
               ))

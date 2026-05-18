@@ -65,5 +65,5 @@ function EditSchema() {
 export default EditSchema
 
 EditSchema.getLayout = (page: ReactNode) => (
-  <AccountLayout title="Edit Dataset">{page}</AccountLayout>
+  <AccountLayout title="Edit Schema">{page}</AccountLayout>
 )

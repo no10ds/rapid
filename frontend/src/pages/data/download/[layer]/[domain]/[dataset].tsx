@@ -7,6 +7,14 @@ import { useRouter } from 'next/router'
 import { useState, ReactNode } from 'react'
 import Link from 'next/link'
 
+function formatDate(raw: string | undefined): string {
+  if (!raw) return '—'
+  const d = new Date(raw)
+  if (isNaN(d.getTime())) return raw
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+    + ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+}
+
 function DownloadDataset() {
   const router = useRouter()
   const { layer, domain, dataset } = router.query
@@ -101,7 +109,7 @@ function DownloadDataset() {
     ['Dataset', dataset as string],
     ['Description', datasetInfoData.metadata.description],
     ['Version', version as string],
-    ['Last updated', datasetInfoData.metadata.last_updated],
+    ['Last updated', formatDate(datasetInfoData.metadata.last_updated)],
     ['Last uploaded by', datasetInfoData.metadata.last_uploaded_by || 'Unknown'],
     ['Number of rows', datasetInfoData.metadata.number_of_rows?.toString()],
     ['Number of columns', datasetInfoData.metadata.number_of_columns?.toString()]

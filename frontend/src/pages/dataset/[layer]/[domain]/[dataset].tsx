@@ -9,6 +9,14 @@ import { useState, ReactNode } from 'react'
 
 type ActiveTab = 'download' | 'upload' | null
 
+function formatDate(raw: string | undefined): string {
+  if (!raw) return '—'
+  const d = new Date(raw)
+  if (isNaN(d.getTime())) return raw
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+    + ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+}
+
 function DatasetDetailPage() {
   const router = useRouter()
   const { layer, domain, dataset } = router.query
@@ -137,7 +145,7 @@ function DatasetDetailPage() {
               `/schema/edit/${layer}/${domain}/${dataset}?version=${version}`
             )}
           >
-            Edit Dataset
+            Edit Schema
           </button>
         )}
         {methods?.can_create_schema && (
@@ -336,7 +344,7 @@ function DatasetDetailPage() {
           <div className="ds-stat-label">Version</div>
         </div>
         <div className="ds-stat">
-          <div className="ds-stat-value">{meta.last_updated || '—'}</div>
+          <div className="ds-stat-value">{formatDate(meta.last_updated)}</div>
           <div className="ds-stat-label">Last Updated</div>
         </div>
         <div className="ds-stat">

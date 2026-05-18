@@ -61,7 +61,7 @@ function CreateSchema({
         <div className="form-card">
           <div className="form-card-hd" style={{ background: 'rgba(16,185,129,.06)', borderBottomColor: 'rgba(16,185,129,.2)' }}>
             <div className="form-card-title" style={{ color: '#059669' }}>
-              {mode === 'edit' ? 'Dataset updated successfully' : 'Dataset added successfully'}
+              {mode === 'edit' ? 'Schema updated — a new version has been created' : 'Dataset added successfully'}
             </div>
           </div>
           <div className="form-card-body">
@@ -349,7 +349,7 @@ function CreateSchema({
           <button className="btn-primary" type="submit" disabled={isLoading}>
             {isLoading
               ? (mode === 'edit' ? 'Saving…' : 'Adding…')
-              : (mode === 'edit' ? 'Save Changes' : 'Add Dataset')}
+              : (mode === 'edit' ? 'Update Schema' : 'Add Dataset')}
           </button>
           {error && <span style={{ fontSize: 12, color: '#dc2626', marginLeft: 8 }}>{error.message}</span>}
         </div>
