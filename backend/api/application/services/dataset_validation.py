@@ -18,6 +18,7 @@ from api.domain.data_types import (
 )
 from api.domain.schema import Schema
 from api.domain.validation_context import ValidationContext
+from api.common.logger import AppLogger
 
 
 def build_validated_dataframe(schema: Schema, dataframe: pd.DataFrame) -> pd.DataFrame:
@@ -226,6 +227,28 @@ def validate_with_pandera(
         return data_frame, error_list
 
 
+def parse_pandera_schema_errors(exc: pandera.errors.SchemaErrors) -> list[str]:
+
+    error_messages = []
+
+    for error_reason in exc.message["DATA"]:
+        if error_reason == "CHECK_ERROR":
+            for error_entry in exc.message["DATA"][error_reason]:
+                if error_entry["column"] is not None:
+                    error_messages.append(
+                        f"Column '{error_entry['column']}' internal error in check: {error_entry['check']}"
+                    )
+                else:
+                    error_messages.append(
+                        f"Internal error in check: {error_entry['check']}"
+                    )
+        else:
+            for error_entry in exc.message["DATA"][error_reason]:
+                error_messages.append(error_entry["error"])
+
+    return error_messages
+
+
 def validate_with_pandera_schema(
     data_frame: pd.DataFrame, schema: Schema
 ) -> Tuple[pd.DataFrame, list[str]]:
@@ -233,4 +256,6 @@ def validate_with_pandera_schema(
         validated_df = schema.pandera_schema_validate(data_frame, lazy=True)
         return validated_df, []
     except pandera.errors.SchemaErrors as exc:
-        return data_frame, [json.dumps({"PanderaErrors": exc.message}, indent=2)]
+        AppLogger.info(f"    Pandera schema entire error: {exc.message}")
+        error_list = parse_pandera_schema_errors(exc)
+        return data_frame, error_list

@@ -180,7 +180,7 @@ class TestDatasetValidation:
         except DatasetValidationError as error:
             print(error)
             assert error.message == [
-                '{\n  "PanderaErrors": {\n    "DATA": {\n      "DATAFRAME_CHECK": [\n        {\n          "schema": null,\n          "column": "colname1",\n          "check": "less_than(10)",\n          "error": "Column \'colname1\' failed element-wise validator number 0: less_than(10) failure cases: 11"\n        }\n      ]\n    }\n  }\n}',
+                "Column 'colname1' failed element-wise validator number 0: less_than(10) failure cases: 11"
             ]
 
     def test_invalid_column_names(self):
