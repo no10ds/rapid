@@ -49,22 +49,17 @@ function StatusPage() {
   return (
     <div data-testid="tasks-content">
       <div className="tbl-wrap">
-        <div className="tbl-toolbar" style={{ gap: '12px', flexWrap: 'wrap' }}>
-          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', flex: 1 }}>
-            View all tracked asynchronous processing jobs.
-          </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            {typeFilters.map((f) => (
-              <button
-                key={f}
-                className={`fchip${typeFilter === f ? ' on' : ''}`}
-                onClick={() => setTypeFilter(f)}
-                type="button"
-              >
-                {f}
-              </button>
-            ))}
-          </div>
+        <div className="tbl-toolbar" style={{ gap: '6px' }}>
+          {typeFilters.map((f) => (
+            <button
+              key={f}
+              className={`fchip${typeFilter === f ? ' on' : ''}`}
+              onClick={() => setTypeFilter(f)}
+              type="button"
+            >
+              {f}
+            </button>
+          ))}
         </div>
         <table>
           <thead>

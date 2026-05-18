@@ -8,8 +8,10 @@ import fetchMock from 'jest-fetch-mock'
 import SubjectIndex from '@/pages/subject/index'
 import { renderWithProviders } from '@/utils/testing'
 
+const mockPush = jest.fn()
+
 jest.mock('next/router', () => ({
-  useRouter: () => ({ push: jest.fn(), query: {} })
+  useRouter: () => ({ push: mockPush, query: {} })
 }))
 
 const subjects = [
@@ -53,9 +55,9 @@ describe('Subject index page', () => {
     expect(screen.getByText('Bob')).toBeInTheDocument()
     expect(screen.getByText('ClientOne')).toBeInTheDocument()
 
-    await screen.findByText('User Admin')
-    expect(screen.getByText('Read Only')).toBeInTheDocument()
-    expect(screen.getByText('Read/Write')).toBeInTheDocument()
+    await screen.findByText('User Admin', {}, { timeout: 3000 })
+    expect(await screen.findByText('Read Only')).toBeInTheDocument()
+    expect(await screen.findByText('Read/Write')).toBeInTheDocument()
   })
 
   it('filters by type', async () => {
@@ -82,6 +84,20 @@ describe('Subject index page', () => {
     expect(screen.getByText('Alice')).toBeInTheDocument()
     expect(screen.queryByText('Bob')).not.toBeInTheDocument()
     expect(screen.queryByText('ClientOne')).not.toBeInTheDocument()
+  })
+
+  it('navigates to modify page on row click', async () => {
+    mockInitial()
+    renderWithProviders(<SubjectIndex />)
+
+    await waitForElementToBeRemoved(() => screen.queryByRole('progressbar'))
+
+    await userEvent.click(screen.getByText('Alice'))
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/subject/modify/u1',
+      query: { name: 'Alice', type: 'USER' }
+    })
   })
 
   it('handles error on fetch', async () => {

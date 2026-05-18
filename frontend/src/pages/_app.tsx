@@ -23,7 +23,7 @@ interface MyAppProps extends AppProps {
 const clientSideEmotionCache = createEmotionCache()
 
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { staleTime: 5 * 1000, cacheTime: 0, retry: false } }
+  defaultOptions: { queries: { staleTime: 30 * 1000, cacheTime: 5 * 60 * 1000, retry: false } }
 })
 
 const ACTIVITY_EVENTS = ['mousemove', 'mousedown', 'touchstart', 'click', 'keydown'] as const

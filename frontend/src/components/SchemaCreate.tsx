@@ -1,5 +1,6 @@
 import {
   createSchema,
+  updateSchema,
   schemaCreateSchema,
   GlobalSensitivities,
   ProtectedSensitivity
@@ -22,10 +23,12 @@ const dataTypes = [
 
 function CreateSchema({
   schemaData,
-  layersData
+  layersData,
+  mode = 'create'
 }: {
   schemaData: GenerateSchemaResponse
   layersData: string[]
+  mode?: 'create' | 'edit'
 }) {
   const [newSchemaData, setNewSchemaData] = useState<GenerateSchemaResponse>(schemaData)
   const [keyValueTag, setKeyValueTag] = useState({ key: '', value: '' })
@@ -40,7 +43,7 @@ function CreateSchema({
     Error,
     GenerateSchemaResponse
   >({
-    mutationFn: createSchema
+    mutationFn: mode === 'edit' ? updateSchema : createSchema
   })
 
   const setMeta = (key: string, value: unknown) =>
@@ -57,7 +60,9 @@ function CreateSchema({
       <div className="form-page">
         <div className="form-card">
           <div className="form-card-hd" style={{ background: 'rgba(16,185,129,.06)', borderBottomColor: 'rgba(16,185,129,.2)' }}>
-            <div className="form-card-title" style={{ color: '#059669' }}>Schema created successfully</div>
+            <div className="form-card-title" style={{ color: '#059669' }}>
+              {mode === 'edit' ? 'Dataset updated successfully' : 'Dataset added successfully'}
+            </div>
           </div>
           <div className="form-card-body">
             <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{data.details}</p>
@@ -169,7 +174,7 @@ function CreateSchema({
       <div className="form-card">
         <div className="form-card-hd">
           <div className="form-card-num">2</div>
-          <div className="form-card-title">Validate the data types for the schema</div>
+          <div className="form-card-title">Validate the data types</div>
         </div>
         <div className="form-card-body" style={{ padding: 0 }}>
           <p style={{ fontSize: 12, color: 'var(--text-secondary)', padding: '0 20px 12px' }}>
@@ -179,12 +184,16 @@ function CreateSchema({
             </a>{' '}
             for further information.
           </p>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
             <thead>
               <tr style={{ borderBottom: '2px solid #f0f0f0' }}>
-                {['Name', 'Data Type', hasDateColumn ? 'Date Format' : '', 'Allows Null', 'Is Unique', 'Partition Index'].map((h, i) =>
-                  h ? <th key={i} style={thStyle}>{h}</th> : <th key={i} style={{ ...thStyle, width: 0, padding: 0 }} />
-                )}
+                <th style={thStyle}>Name</th>
+                <th style={thStyle}>Data Type</th>
+                {hasDateColumn && <th style={thStyle}>Date Format</th>}
+                <th style={thStyle}>Allows Null</th>
+                <th style={thStyle}>Is Unique</th>
+                <th style={thStyle}>Partition Index</th>
               </tr>
             </thead>
             <tbody>
@@ -192,7 +201,7 @@ function CreateSchema({
                 <tr key={col.name} style={{ borderBottom: '1px solid #f9f9f9' }}>
                   <td style={tdStyle}>{col.name}</td>
                   <td style={tdStyle}>
-                    <select className="f-sel" style={{ height: 28, fontSize: 12 }} value={col.data_type} onChange={(e) => setCol(col.name, 'data_type', e.target.value)}>
+                    <select className="f-sel" style={{ height: 28, fontSize: 12, width: '100%' }} value={col.data_type} onChange={(e) => setCol(col.name, 'data_type', e.target.value)}>
                       {dataTypes.map((t) => <option key={t}>{t}</option>)}
                     </select>
                   </td>
@@ -201,7 +210,7 @@ function CreateSchema({
                       {col.data_type === 'date' && (
                         <input
                           className="f-sel"
-                          style={{ height: 28, fontSize: 12, width: 100 }}
+                          style={{ height: 28, fontSize: 12, width: '100%' }}
                           placeholder="%Y-%m-%d"
                           data-testid="date-format"
                           required
@@ -211,19 +220,19 @@ function CreateSchema({
                     </td>
                   )}
                   <td style={tdStyle}>
-                    <select className="f-sel" style={{ height: 28, fontSize: 12 }} value={String(col.allow_null)} onChange={(e) => setCol(col.name, 'allow_null', e.target.value === 'true')}>
+                    <select className="f-sel" style={{ height: 28, fontSize: 12, width: '100%' }} value={String(col.allow_null)} onChange={(e) => setCol(col.name, 'allow_null', e.target.value === 'true')}>
                       <option>true</option><option>false</option>
                     </select>
                   </td>
                   <td style={tdStyle}>
-                    <select className="f-sel" style={{ height: 28, fontSize: 12 }} value={String(col.unique ?? false)} onChange={(e) => setCol(col.name, 'unique', e.target.value === 'true')}>
+                    <select className="f-sel" style={{ height: 28, fontSize: 12, width: '100%' }} value={String(col.unique ?? false)} onChange={(e) => setCol(col.name, 'unique', e.target.value === 'true')}>
                       <option>true</option><option>false</option>
                     </select>
                   </td>
                   <td style={tdStyle}>
                     <input
                       className="f-sel"
-                      style={{ height: 28, fontSize: 12, width: 70 }}
+                      style={{ height: 28, fontSize: 12, width: '100%' }}
                       type="number"
                       value={col.partition_index ?? ''}
                       onChange={(e) => setCol(col.name, 'partition_index', parseInt(e.target.value))}
@@ -233,6 +242,7 @@ function CreateSchema({
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
 
@@ -337,7 +347,9 @@ function CreateSchema({
 
         <div className="form-actions">
           <button className="btn-primary" type="submit" disabled={isLoading}>
-            {isLoading ? 'Creating…' : 'Create Schema'}
+            {isLoading
+              ? (mode === 'edit' ? 'Saving…' : 'Adding…')
+              : (mode === 'edit' ? 'Save Changes' : 'Add Dataset')}
           </button>
           {error && <span style={{ fontSize: 12, color: '#dc2626', marginLeft: 8 }}>{error.message}</span>}
         </div>

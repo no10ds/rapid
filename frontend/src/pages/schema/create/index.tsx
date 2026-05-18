@@ -200,7 +200,7 @@ function CreateSchema() {
         </div>
         <div className="form-card-body">
           <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '14px' }}>
-            Upload a CSV file to automatically generate the schema from its structure.
+            Upload a sample CSV file so we can detect the column types automatically.
           </p>
 
           {!file && (
@@ -246,7 +246,7 @@ function CreateSchema() {
             data-testid="submit"
             disabled={isLoading || !file}
           >
-            {isLoading ? 'Generating…' : 'Generate schema'}
+            {isLoading ? 'Detecting…' : 'Next'}
           </button>
         </div>
       </div>
@@ -257,5 +257,5 @@ function CreateSchema() {
 export default CreateSchema
 
 CreateSchema.getLayout = (page: ReactNode) => (
-  <AccountLayout title="Create Schema">{page}</AccountLayout>
+  <AccountLayout title="Add New Dataset">{page}</AccountLayout>
 )

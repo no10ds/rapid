@@ -14,10 +14,7 @@ function AccountIndexPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['methods'],
-    queryFn: getMethods,
-    keepPreviousData: false,
-    cacheTime: 0,
-    refetchInterval: 0
+    queryFn: getMethods
   })
 
   const canRead = data?.can_download || data?.can_search_catalog
@@ -124,34 +121,19 @@ function AccountIndexPage() {
                 {filtered.map((d) => {
                   const key = `${d.layer}/${d.domain}/${d.dataset}`
                   return (
-                    <div key={key} className="hp-result-row">
+                    <div
+                      key={key}
+                      className="hp-result-row"
+                      onClick={() => router.push(
+                        `/dataset/${d.layer}/${d.domain}/${d.dataset}?version=${d.version}`
+                      )}
+                      style={{ cursor: 'pointer' }}
+                    >
                       <div className="hp-result-info">
                         <span className="hp-result-name">{d.dataset}</span>
                         <span className="hp-result-meta">
                           {d.layer} / {d.domain} {d.version ? `v${d.version}` : ''}
                         </span>
-                      </div>
-                      <div className="hp-result-actions">
-                        {canRead && (
-                          <button
-                            type="button"
-                            className="hp-result-btn"
-                            onClick={() => router.push(
-                              `/data/download/${d.layer}/${d.domain}/${d.dataset}?version=${d.version}`
-                            )}
-                          >
-                            Download
-                          </button>
-                        )}
-                        {canWrite && (
-                          <button
-                            type="button"
-                            className="hp-result-btn hp-result-btn-upload"
-                            onClick={() => router.push('/data/upload')}
-                          >
-                            Upload
-                          </button>
-                        )}
                       </div>
                     </div>
                   )
@@ -159,11 +141,6 @@ function AccountIndexPage() {
               </div>
             )}
 
-            {open && search.trim() && filtered.length === 0 && (
-              <div className="hp-results">
-                <div className="hp-result-empty">No datasets match your search.</div>
-              </div>
-            )}
           </div>
         </div>
       </div>

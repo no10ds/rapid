@@ -27,7 +27,10 @@ function UserAdminPage() {
   const router = useRouter()
   const [typeFilter, setTypeFilter] = useState<SubjectType>('All')
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('All')
+  const [domainFilter, setDomainFilter] = useState('All')
   const [search, setSearch] = useState('')
+  const [sortCol, setSortCol] = useState<'subject_name' | null>(null)
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
 
   const { isLoading, data, error } = useQuery(['subjectsList'], getSubjectsListUi, {
     staleTime: Infinity,
@@ -51,6 +54,14 @@ function UserAdminPage() {
     )
   }, [data, permissionQueries])
 
+  const allDomains = useMemo(() => {
+    const domains = new Set<string>()
+    Object.values(permsBySubjectId).forEach((perms) => {
+      perms?.forEach((p) => { if (p.domain) domains.add(p.domain) })
+    })
+    return ['All', ...Array.from(domains).sort()]
+  }, [permsBySubjectId])
+
   const filtered = useMemo(() => {
     if (!data) return []
     return data.filter((s) => {
@@ -59,13 +70,37 @@ function UserAdminPage() {
         const q = search.trim().toLowerCase()
         if (!String(s.subject_name ?? '').toLowerCase().includes(q)) return false
       }
+      const perms = permsBySubjectId[s.subject_id as string]
       if (roleFilter !== 'All') {
-        const role = deriveRole(permsBySubjectId[s.subject_id as string])
+        const role = deriveRole(perms)
         if (role !== roleFilter) return false
+      }
+      if (domainFilter !== 'All') {
+        if (!perms || !perms.some((p) => p.domain === domainFilter)) return false
       }
       return true
     })
-  }, [data, typeFilter, roleFilter, search, permsBySubjectId])
+  }, [data, typeFilter, roleFilter, domainFilter, search, permsBySubjectId])
+
+  const sorted = useMemo(() => {
+    if (!sortCol) return filtered
+    return [...filtered].sort((a, b) => {
+      const av = (String(a[sortCol] ?? '')).toLowerCase()
+      const bv = (String(b[sortCol] ?? '')).toLowerCase()
+      if (av < bv) return sortDir === 'asc' ? -1 : 1
+      if (av > bv) return sortDir === 'asc' ? 1 : -1
+      return 0
+    })
+  }, [filtered, sortCol, sortDir])
+
+  function toggleSort() {
+    if (sortCol === 'subject_name') {
+      setSortDir((d) => d === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortCol('subject_name')
+      setSortDir('asc')
+    }
+  }
 
   if (isLoading) return <div className="rapid-loading-bar" role="progressbar" />
   if (error) return <ErrorCard error={error as Error} />
@@ -119,28 +154,51 @@ function UserAdminPage() {
                 ))}
               </select>
             </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span className="cat-lbl">Domain</span>
+              <select
+                className="cat-sel"
+                value={domainFilter}
+                onChange={(e) => setDomainFilter(e.target.value)}
+              >
+                {allDomains.map((d) => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
         <table>
           <thead>
             <tr>
-              <th>Name</th>
+              <th style={{ cursor: 'pointer' }} onClick={toggleSort}>
+                Name <span className={`sort-icon${sortCol === 'subject_name' ? ' active' : ''}`}>{sortCol === 'subject_name' ? (sortDir === 'asc' ? '↑' : '↓') : '↕'}</span>
+              </th>
               <th>Type</th>
               <th>Role</th>
               <th>Subject ID</th>
-              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filtered.length > 0 ? (
-              filtered.map((subject, idx) => {
+            {sorted.length > 0 ? (
+              sorted.map((subject, idx) => {
                 const perms = permsBySubjectId[subject.subject_id as string]
                 const role = deriveRole(perms)
                 const isLoadingPerms = !perms && permissionQueries[data.indexOf(subject)]?.isLoading
                 return (
-                  <tr key={idx}>
-                    <td style={{ fontWeight: 500 }}>{subject.subject_name}</td>
+                  <tr
+                    key={idx}
+                    className="cat-row-link"
+                    onClick={() =>
+                      router.push({
+                        pathname: `/subject/modify/${subject.subject_id}`,
+                        query: { name: subject.subject_name, type: subject.type }
+                      })
+                    }
+                  >
+                    <td style={{ fontWeight: 500, color: 'var(--pink)', cursor: 'pointer' }}>{subject.subject_name}</td>
                     <td>
                       <span className={`badge ${subject.type === 'USER' ? 'raw' : 'cur'}`}>
                         {subject.type === 'USER' ? 'User' : 'Client'}
@@ -153,36 +211,13 @@ function UserAdminPage() {
                       }
                     </td>
                     <td className="mn">{subject.subject_id}</td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '6px' }}>
-                        <button
-                          className="act-btn"
-                          type="button"
-                          onClick={() =>
-                            router.push({
-                              pathname: `/subject/modify/${subject.subject_id}`,
-                              query: { name: subject.subject_name }
-                            })
-                          }
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="act-btn act-btn-del"
-                          type="button"
-                          onClick={() => router.push('/subject/delete')}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
                   </tr>
                 )
               })
             ) : (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={4}
                   style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-tertiary)', fontSize: '13px' }}
                 >
                   {data?.length === 0

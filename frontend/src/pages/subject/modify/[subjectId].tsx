@@ -3,7 +3,9 @@ import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import {
   getPermissionsListUi,
   getSubjectPermissions,
-  updateSubjectPermissions
+  updateSubjectPermissions,
+  deleteUser as deleteUserFn,
+  deleteClient as deleteClientFn
 } from '@/service'
 import { Permission, ActionEnum, SensitivityEnum } from '@/service'
 import { extractPermissionNames } from '@/service/permissions'
@@ -22,7 +24,7 @@ type SensitivityType = z.infer<typeof SensitivityEnum>
 
 function SubjectModifyPage() {
   const router = useRouter()
-  const { subjectId, name } = router.query
+  const { subjectId, name, type: subjectType } = router.query
 
   const { control, handleSubmit } = useForm()
   const fieldArrayReturn = useFieldArray({ control, name: 'permissions' })
@@ -62,6 +64,22 @@ function SubjectModifyPage() {
     mutationFn: updateSubjectPermissions,
     onSuccess: () => {
       router.push({ pathname: `/subject/modify/success/${subjectId}`, query: { name } })
+    }
+  })
+
+  const { isLoading: isDeleting, mutate: doDelete, error: deleteError } = useMutation<
+    Response,
+    Error,
+    void
+  >({
+    mutationFn: async () => {
+      if (subjectType === 'CLIENT') {
+        return deleteClientFn({ clientId: subjectId as string })
+      }
+      return deleteUserFn({ userId: subjectId as string, username: name as string })
+    },
+    onSuccess: () => {
+      router.push('/subject')
     }
   })
 
@@ -127,7 +145,6 @@ function SubjectModifyPage() {
       >
         <div className="form-card">
           <div className="form-card-hd">
-            <div className="form-card-num">2</div>
             <div className="form-card-title">
               Edit permissions —{' '}
               <span style={{ fontWeight: 400, fontFamily: "'DM Mono', monospace", fontSize: 12 }}>
@@ -270,6 +287,36 @@ function SubjectModifyPage() {
           </div>
         </div>
       </form>
+
+      <div className="form-card" style={{ marginTop: 24 }}>
+        <div className="form-card-hd form-card-hd-danger">
+          <div className="form-card-num form-card-num-danger">!</div>
+          <div className="form-card-title form-card-title-danger">Destructive action</div>
+        </div>
+        <div className="form-card-body">
+          <div className="warn-box" style={{ marginBottom: 0 }}>
+            Permanently delete <strong>{name as string}</strong> and all their permissions. This <strong>cannot be undone</strong>.
+          </div>
+        </div>
+        <div className="form-actions">
+          <button
+            type="button"
+            className="btn-danger"
+            disabled={isDeleting}
+            onClick={() => doDelete()}
+          >
+            {isDeleting ? 'Deleting…' : 'Delete subject'}
+          </button>
+          <Link href="/subject" className="btn-secondary" style={{ textDecoration: 'none' }}>
+            Cancel
+          </Link>
+          {deleteError && (
+            <span style={{ fontSize: 12, color: '#dc2626', marginLeft: 'auto' }}>
+              {deleteError.message}
+            </span>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

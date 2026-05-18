@@ -105,6 +105,9 @@ function SidebarFooter({
     <div className="sb-foot" ref={ref}>
       {!collapsed && (
         <div className="sb-foot-links">
+          <a href="https://rapid.readthedocs.io/en/latest/" className="sb-foot-link" target="_blank" rel="noreferrer" title="Documentation">
+            Docs
+          </a>
           <a href="/api/docs" className="sb-foot-link" title="API Docs">
             API Docs
           </a>
@@ -184,17 +187,14 @@ const AccountLayout = ({ children, title, topbarActions, noPad }: AccountLayoutP
         queryFn: getMethods,
         keepPreviousData: true,
         staleTime: Infinity,
-        cacheTime: 0,
-        refetchInterval: 0,
         refetchOnWindowFocus: false
       }
     ]
   })
 
-  const isLoading = results[0].isLoading || results[1].isLoading
   const methods: MethodsResponse | undefined = results[1].data
 
-  if (isLoading) {
+  if (results[0].isLoading) {
     return <div className="rapid-loading-bar" role="progressbar" aria-label="Loading" />
   }
 
@@ -258,10 +258,6 @@ const AccountLayout = ({ children, title, topbarActions, noPad }: AccountLayoutP
           </button>
         </div>
 
-        <div className="sb-sec">
-          <NavItem href="/" icon={<IconDashboard />} label="Dashboard" />
-        </div>
-
         {hasDataSection && (
           <div className="sb-sec">
             <div className="sb-sec-lbl">Data</div>
@@ -273,20 +269,12 @@ const AccountLayout = ({ children, title, topbarActions, noPad }: AccountLayoutP
                 activePaths={['/catalog']}
               />
             )}
-            {methods?.can_upload && (
-              <NavItem
-                href="/data/upload"
-                icon={<IconUpload />}
-                label="Upload"
-                activePaths={['/data/upload']}
-              />
-            )}
             {methods?.can_create_schema && (
               <NavItem
                 href="/schema/create"
                 icon={<IconSchema />}
-                label="Create Schema"
-                activePaths={['/schema']}
+                label="Add Dataset"
+                activePaths={['/schema/create']}
               />
             )}
           </div>

@@ -42,9 +42,9 @@ export const dataDeleteMethod = [
 ]
 
 export const schemaManagementMethods = [
-  { text: 'Schema Management' },
+  { text: 'Dataset Management' },
   {
-    text: 'Create Schema',
+    text: 'Add New Dataset',
     href: '/schema/create/',
     icon: 'AppsAdd'
   }

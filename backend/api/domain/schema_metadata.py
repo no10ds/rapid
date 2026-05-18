@@ -40,11 +40,7 @@ class SchemaMetadata(DatasetMetadata):
         return self.is_latest_version
 
     def remove_duplicates(self):
-        updated_key_only_list = []
-
-        if len(self.key_only_tags) != 0 and self.key_value_tags:
-            for key in self.key_only_tags:
-                if key not in self.key_value_tags.keys():
-                    updated_key_only_list.append(key)
-
-        self.key_only_tags = updated_key_only_list
+        if self.key_value_tags:
+            self.key_only_tags = [
+                key for key in self.key_only_tags if key not in self.key_value_tags
+            ]

@@ -93,14 +93,14 @@ function UploadDataset({ datasetInput = null }: { datasetInput?: Dataset | null 
             }}
           >
             <span style={{ fontSize: '12px', color: '#71717a' }}>
-              Can&apos;t find your dataset? You&apos;ll need to create a schema for it first.
+              Can&apos;t find your dataset? You&apos;ll need to add it first.
             </span>
             <Link
               href="/schema/create"
               className="act-btn"
               style={{ color: 'var(--pink)', borderColor: 'rgba(236,72,153,.3)', whiteSpace: 'nowrap' }}
             >
-              + Create schema
+              + Add new dataset
             </Link>
           </div>
         </div>
