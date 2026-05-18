@@ -43,10 +43,8 @@ class TestCustomChecksJourney(BaseAuthenticatedJourneyTest):
         job_id = response.json()["details"]["job_id"]
         job_url = f"{self.jobs_url()}/{job_id}"
 
-        job_response = requests.get(job_url, headers=self.generate_auth_headers())
-        assert job_response.status_code == HTTPStatus.OK
-        assert job_response.json()["status"] == "FAILED"
-        assert "validator" in str(job_response.json().get("errors", "")).lower()
+        job_response = self.wait_for_job_status(job_url, "FAILED")
+        assert "validator" in str(job_response.get("errors", "")).lower()
 
     def test_upload_valid_data(self):
         files = {"file": (self.valid_csv_filename, open("./test/e2e/" + self.valid_csv_filename, "rb"))}
@@ -67,9 +65,7 @@ class TestCustomChecksJourney(BaseAuthenticatedJourneyTest):
         dataset_version = upload_response.json()["details"]["dataset_version"]
         job_url = f"{self.jobs_url()}/{job_id}"
 
-        job_response = requests.get(job_url, headers=self.generate_auth_headers())
-        assert job_response.status_code == HTTPStatus.OK
-        assert job_response.json()["status"] == "SUCCESS"
+        self.wait_for_job_status(job_url, "SUCCESS")
 
         query_url = self.query_dataset_url(
             self.layer, self.e2e_test_domain, self.dataset, version=dataset_version

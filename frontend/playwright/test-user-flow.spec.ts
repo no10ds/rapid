@@ -5,7 +5,7 @@ import { makeAPIRequest, generateRapidAuthToken, domain } from './utils'
 
 const user = `${process.env.E2E_RESOURCE_PREFIX}_ui_test_user`
 
-test('test', async ({ page }) => {
+test('test', { timeout: 60000 }, async ({ page }) => {
   await page.goto(domain)
 
   // Modify user to have data admin permissions
@@ -48,6 +48,10 @@ test('test', async ({ page }) => {
   await expect(page).toHaveURL(`${domain}/subject/modify`)
   await page.locator('[data-testid="field-user"]').selectOption({ label: user })
   await page.locator('[data-testid="submit-button"]').click()
+  await page
+    .getByRole('row', { name: 'READ DEFAULT PROTECTED TEST_E2E_PROTECTED' })
+    .getByRole('button')
+    .waitFor({ timeout: 30000 })
   await page
     .getByRole('row', { name: 'READ DEFAULT PROTECTED TEST_E2E_PROTECTED' })
     .getByRole('button')

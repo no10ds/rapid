@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import os
+import time
 import uuid
 from api.common.config.aws import PERMISSIONS_TABLE_SUFFIX
 from api.common.config.constants import CONTENT_ENCODING
@@ -200,6 +201,15 @@ class BaseAuthenticatedJourneyTest(BaseJourneyTest):
             "client_name": f"john_doe_client_{unique_id}",
             "permissions": ["READ_ALL", "WRITE_DEFAULT_PUBLIC"],
         }
+
+    def wait_for_job_status(self, job_url: str, expected_status: str, retries: int = 10, interval: int = 3) -> dict:
+        for _ in range(retries):
+            response = requests.get(job_url, headers=self.generate_auth_headers())
+            assert response.status_code == HTTPStatus.OK
+            if response.json()["status"] == expected_status:
+                return response.json()
+            time.sleep(interval)
+        raise AssertionError(f"Job did not reach '{expected_status}' after {retries * interval}s. Last status: {response.json()['status']}")
 
     def make_file_invalid(self, buffer_obj: StringIO) -> StringIO:
         df = pd.read_csv(buffer_obj)
