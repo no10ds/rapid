@@ -3,6 +3,7 @@ import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import { getSubjectPermissions } from '@/service'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/router'
+import { LinearProgress } from '@mui/material'
 
 function SubjectModifyPageSuccess() {
   const router = useRouter()
@@ -17,7 +18,7 @@ function SubjectModifyPageSuccess() {
   })
 
   if (isSubjectPermissionsLoading) {
-    return <div className="rapid-loading-bar" role="progressbar" />
+    return <LinearProgress color="primary" role="progressbar" />
   }
 
   if (subjectPermissionsError) {

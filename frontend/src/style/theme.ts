@@ -31,10 +31,32 @@ const theme = createTheme({
       dark: colors.pink3
     },
     secondary: {
-      main: colors.grey3,
-      light: colors.grey1,
-      dark: colors.grey4
-    }
+      main: '#1e3a5f',
+      light: '#2a4a72',
+      dark: '#162d4a'
+    },
+    error: {
+      main: '#ef4444'
+    },
+    warning: {
+      main: '#f59e0b'
+    },
+    success: {
+      main: '#10b981'
+    },
+    info: {
+      main: '#3b82f6'
+    },
+    background: {
+      default: '#eef0f3',
+      paper: '#ffffff'
+    },
+    text: {
+      primary: '#111827',
+      secondary: '#4b5563',
+      disabled: '#9ca3af'
+    },
+    divider: '#e5e7eb'
   },
   typography: {
     fontFamily: fonts.default.join(','),
@@ -69,7 +91,7 @@ const theme = createTheme({
     body1: {
       fontWeight: 500,
       fontSize: 14,
-      lineHeight: '150%;',
+      lineHeight: '150%',
       letterSpacing: '0.15px',
       '&.MuiTypography-gutterBottom': {
         marginBottom: 10
@@ -79,7 +101,7 @@ const theme = createTheme({
       fontSize: 12,
       fontWeight: 500,
       color: colors.grey4,
-      lineHeight: '150%;',
+      lineHeight: '150%',
       letterSpacing: '0.15px',
       '&.MuiTypography-gutterBottom': {
         marginBottom: 10
@@ -133,18 +155,60 @@ const theme = createTheme({
         }
       `
     },
+    MuiTableHead: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#fafafa',
+          '& .MuiTableCell-head': {
+            fontSize: 11,
+            fontWeight: 600,
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase',
+            color: '#9ca3af',
+            padding: '10px 16px',
+            borderBottom: '1px solid #f3f4f6'
+          }
+        }
+      }
+    },
+    MuiTableCell: {
+      styleOverrides: {
+        body: {
+          fontSize: 13,
+          padding: '11px 16px',
+          borderBottom: '1px solid #f5f5f5'
+        }
+      }
+    },
+    MuiTableRow: {
+      styleOverrides: {
+        root: {
+          '&.MuiTableRow-hover:hover': {
+            backgroundColor: '#fafafa',
+            cursor: 'pointer'
+          }
+        }
+      }
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          fontWeight: 600
+        },
+        sizeSmall: {
+          fontSize: 11,
+          height: 22
+        }
+      }
+    },
     MuiListItemButton: {
       styleOverrides: {
         root: {
           '&.Mui-selected': {
             '&:hover': {
-              backgroundColor: '#f8f8f8'
+              backgroundColor: 'rgba(255,255,255,0.12)'
             },
-            backgroundColor: '#f8f8f8',
-
-            '.MuiListItemText-root': {
-              fontWeight: 900
-            }
+            backgroundColor: 'rgba(255,255,255,0.08)'
           },
           '&.Mui-disabled': {
             opacity: 1
@@ -161,8 +225,7 @@ const theme = createTheme({
     MuiInputBase: {
       styleOverrides: {
         root: {
-          fontSize: 16,
-          // To stop chrome autofill changing background color
+          fontSize: 14,
           '& input': {
             '&:-webkit-autofill': {
               transition:
@@ -183,7 +246,7 @@ const theme = createTheme({
     MuiMenuItem: {
       styleOverrides: {
         root: {
-          fontSize: 16
+          fontSize: 14
         }
       }
     },
@@ -191,7 +254,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           textTransform: 'none',
-          backgrondColor: colors.blue1
+          fontWeight: 600
         }
       }
     },
@@ -206,7 +269,9 @@ const theme = createTheme({
     MuiFormLabel: {
       styleOverrides: {
         root: {
-          fontSize: 16
+          fontSize: 13,
+          fontWeight: 600,
+          color: '#374151'
         }
       }
     },
@@ -214,7 +279,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           '.MuiFormControlLabel-label': {
-            fontSize: 16
+            fontSize: 14
           }
         }
       }
@@ -230,22 +295,26 @@ const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
-          padding: 20
+          boxShadow: '0px 1px 3px rgba(0,0,0,0.06), 0px 1px 2px rgba(0,0,0,0.04)',
+          padding: 0
         }
       }
     },
     MuiPaper: {
       styleOverrides: {
         root: {
-          boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)'
+          boxShadow: '0px 1px 3px rgba(0,0,0,0.06), 0px 1px 2px rgba(0,0,0,0.04)'
+        },
+        outlined: {
+          boxShadow: 'none'
         }
       }
     },
     MuiAlert: {
       styleOverrides: {
         root: {
-          boxShadow: 'none'
+          boxShadow: 'none',
+          fontSize: 13
         }
       }
     },
@@ -264,6 +333,13 @@ const theme = createTheme({
           '.MuiDialogTitle-root': {
             fontWeight: 600
           }
+        }
+      }
+    },
+    MuiLinearProgress: {
+      styleOverrides: {
+        root: {
+          borderRadius: 4
         }
       }
     }

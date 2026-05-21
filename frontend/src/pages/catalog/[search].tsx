@@ -5,6 +5,20 @@ import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { ReactNode } from 'react'
+import {
+  Box,
+  Paper,
+  Typography,
+  Button,
+  Chip,
+  LinearProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow
+} from '@mui/material'
 
 type MatchField = 'columns' | 'dataset' | 'description'
 
@@ -15,11 +29,11 @@ function getMatchLabel(type: MatchField) {
   return type
 }
 
-function getMatchBadgeClass(type: MatchField) {
-  if (type === 'columns') return 'badge err'
-  if (type === 'dataset') return 'badge raw'
-  if (type === 'description') return 'badge pnd'
-  return 'badge'
+function getMatchColor(type: MatchField): 'error' | 'info' | 'warning' | 'default' {
+  if (type === 'columns') return 'error'
+  if (type === 'dataset') return 'info'
+  if (type === 'description') return 'warning'
+  return 'default'
 }
 
 function GetSearch() {
@@ -33,7 +47,7 @@ function GetSearch() {
   )
 
   if (isLoading) {
-    return <div className="rapid-loading-bar" role="progressbar" />
+    return <LinearProgress color="primary" role="progressbar" />
   }
 
   if (error) {
@@ -42,67 +56,64 @@ function GetSearch() {
 
   if (!data.length) {
     return (
-      <div className="tbl-wrap" data-testid="empty-search-content">
-        <div style={{ padding: '40px 24px', textAlign: 'center' }}>
-          <p style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '6px' }}>
-            No Results Found
-          </p>
-          <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-            Try a less specific query
-          </p>
-          <Link href="/catalog" style={{ fontSize: '12px', color: 'var(--pink)', textDecoration: 'none', marginTop: '12px', display: 'inline-block' }}>
-            ← Back to Catalog
-          </Link>
-        </div>
-      </div>
+      <Paper variant="outlined" data-testid="empty-search-content" sx={{ p: 5, textAlign: 'center' }}>
+        <Typography sx={{ fontSize: 15, fontWeight: 600, mb: 0.5 }}>No Results Found</Typography>
+        <Typography variant="body2" sx={{ fontSize: 13, mb: 2 }}>Try a less specific query</Typography>
+        <Button component={Link} href="/catalog" size="small">← Back to Catalog</Button>
+      </Paper>
     )
   }
 
   return (
-    <div>
-      <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <Link href="/catalog" style={{ fontSize: '12px', color: 'var(--text-tertiary)', textDecoration: 'none' }}>
+    <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+        <Button component={Link} href="/catalog" size="small">
           ← Back to Catalog
-        </Link>
-        <h2 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
+        </Button>
+        <Typography variant="h3" sx={{ fontSize: 14 }}>
           Results for &ldquo;{search}&rdquo;
-        </h2>
-      </div>
+        </Typography>
+      </Box>
 
-      <div className="tbl-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Dataset Domain</th>
-              <th>Dataset Title</th>
-              <th>Version</th>
-              <th>Match Result</th>
-              <th>Type</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((item, idx) => (
-              <tr key={idx}>
-                <td>{item.domain}</td>
-                <td style={{ fontWeight: 500 }}>{item.dataset}</td>
-                <td className="mn">{item.version}</td>
-                <td className="mn">{item.matching_data}</td>
-                <td>
-                  <span className={getMatchBadgeClass(item.matching_field as MatchField)}>
-                    {getMatchLabel(item.matching_field as MatchField)}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="pager">
-          <div className="pg-info">
+      <Paper variant="outlined">
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Dataset Domain</TableCell>
+                <TableCell>Dataset Title</TableCell>
+                <TableCell>Version</TableCell>
+                <TableCell>Match Result</TableCell>
+                <TableCell>Type</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data.map((item, idx) => (
+                <TableRow key={idx} hover>
+                  <TableCell>{item.domain}</TableCell>
+                  <TableCell sx={{ fontWeight: 500 }}>{item.dataset}</TableCell>
+                  <TableCell sx={{ fontFamily: 'monospace', fontSize: 11 }}>{item.version}</TableCell>
+                  <TableCell sx={{ fontFamily: 'monospace', fontSize: 11 }}>{item.matching_data}</TableCell>
+                  <TableCell>
+                    <Chip
+                      size="small"
+                      variant="outlined"
+                      color={getMatchColor(item.matching_field as MatchField)}
+                      label={getMatchLabel(item.matching_field as MatchField)}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <Box sx={{ px: 2, py: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
+          <Typography variant="body2" sx={{ fontSize: 12 }}>
             Showing {data.length} result{data.length !== 1 ? 's' : ''} for &ldquo;{search}&rdquo;
-          </div>
-        </div>
-      </div>
-    </div>
+          </Typography>
+        </Box>
+      </Paper>
+    </Box>
   )
 }
 

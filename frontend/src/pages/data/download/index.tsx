@@ -1,4 +1,4 @@
-import AccountLayout from '@/components/Layout/AccountLayout'
+import { AccountLayout, FormCard } from '@/components'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import DatasetSelector from '@/components/DatasetSelector/DatasetSelector'
 import { getDatasetsUi } from '@/service'
@@ -6,6 +6,7 @@ import { Dataset } from '@/service/types'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/router'
 import { useState, ReactNode } from 'react'
+import { Box, Paper, Typography, Button, Chip, LinearProgress } from '@mui/material'
 
 function DownloadData({ datasetInput = null }: { datasetInput?: Dataset | null }) {
   const router = useRouter()
@@ -18,7 +19,7 @@ function DownloadData({ datasetInput = null }: { datasetInput?: Dataset | null }
   } = useQuery(['datasetsList', 'READ'], getDatasetsUi)
 
   if (isDatasetsListLoading) {
-    return <div className="rapid-loading-bar" role="progressbar" />
+    return <LinearProgress color="primary" role="progressbar" />
   }
 
   if (datasetsError) {
@@ -27,17 +28,15 @@ function DownloadData({ datasetInput = null }: { datasetInput?: Dataset | null }
 
   if (Object.keys(datasetsList).length === 0) {
     return (
-      <div className="form-card" data-testid="no-data-helper">
-        <div className="form-card-body">
-          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '10px' }}>
-            You currently do not have any data to download. Get started by creating a schema
-            and uploading a dataset that you want to store in rAPId.
-          </p>
-          <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-            All datasets will then become available to be downloaded from here.
-          </p>
-        </div>
-      </div>
+      <Paper variant="outlined" sx={{ maxWidth: 860, mx: 'auto', p: 2 }} data-testid="no-data-helper">
+        <Typography variant="body2" sx={{ fontSize: 13, mb: 1 }}>
+          You currently do not have any data to download. Get started by creating a schema
+          and uploading a dataset that you want to store in rAPId.
+        </Typography>
+        <Typography variant="body2" sx={{ fontSize: 13 }}>
+          All datasets will then become available to be downloaded from here.
+        </Typography>
+      </Paper>
     )
   }
 
@@ -46,8 +45,9 @@ function DownloadData({ datasetInput = null }: { datasetInput?: Dataset | null }
     : null
 
   return (
-    <form
-      className="form-wrap-wide"
+    <Box
+      component="form"
+      sx={{ maxWidth: 860, mx: 'auto' }}
       onSubmit={(event) => {
         event.preventDefault()
         if (dataset) {
@@ -57,36 +57,26 @@ function DownloadData({ datasetInput = null }: { datasetInput?: Dataset | null }
         }
       }}
     >
-      {/* Card 1 — Select dataset */}
-      <div className="form-card">
-        <div className="form-card-hd">
-          <div className="form-card-num">1</div>
-          <div className="form-card-title">Select dataset</div>
-        </div>
-        <div className="form-card-body">
-          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-            Download the contents of a datasource from rAPId. Select the relevant dataset
-            and version to download from. Large datasets may take some time to query.
-          </p>
-          <DatasetSelector datasetsList={datasetsList} setParentDataset={setDataset} />
-        </div>
-        <div className="form-actions">
-          <button
-            className="btn-primary"
-            type="submit"
-            data-testid="submit"
-            disabled={!dataset}
-          >
-            Next
-          </button>
-          {datasetLabel && (
-            <span className="info-chip" style={{ marginLeft: 'auto' }}>
-              <span>{datasetLabel}</span>
-            </span>
-          )}
-        </div>
-      </div>
-    </form>
+      <FormCard
+        title="Select dataset"
+        actions={
+          <>
+            <Button variant="contained" type="submit" data-testid="submit" disabled={!dataset}>
+              Next
+            </Button>
+            {datasetLabel && (
+              <Chip size="small" variant="outlined" label={datasetLabel} sx={{ ml: 'auto' }} />
+            )}
+          </>
+        }
+      >
+        <Typography variant="body2" sx={{ fontSize: 13, mb: 2 }}>
+          Download the contents of a datasource from rAPId. Select the relevant dataset
+          and version to download from. Large datasets may take some time to query.
+        </Typography>
+        <DatasetSelector datasetsList={datasetsList} setParentDataset={setDataset} />
+      </FormCard>
+    </Box>
   )
 }
 

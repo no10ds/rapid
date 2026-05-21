@@ -1,19 +1,32 @@
-import AccountLayout from '@/components/Layout/AccountLayout'
+import { AccountLayout, FormCard } from '@/components'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import { getJob } from '@/service'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/router'
 import { ReactNode } from 'react'
 import Link from 'next/link'
+import {
+  Box,
+  Paper,
+  Typography,
+  Button,
+  Chip,
+  Alert,
+  AlertTitle,
+  LinearProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  Stack
+} from '@mui/material'
 
-function getStatusBadge(status: string) {
-  if (status === 'SUCCESS')
-    return <span className="badge ok"><span className="bdot" />Success</span>
-  if (status === 'IN PROGRESS')
-    return <span className="badge pnd"><span className="bdot" />In Progress</span>
-  if (status === 'FAILED')
-    return <span className="badge err"><span className="bdot" />Failed</span>
-  return <span className="badge">{status}</span>
+function statusChip(status: string) {
+  if (status === 'SUCCESS') return <Chip size="small" label="Success" color="success" variant="outlined" />
+  if (status === 'IN PROGRESS') return <Chip size="small" label="In Progress" color="warning" variant="outlined" />
+  if (status === 'FAILED') return <Chip size="small" label="Failed" color="error" variant="outlined" />
+  return <Chip size="small" label={status} variant="outlined" />
 }
 
 function formatTs(ts: number | string | undefined): string | null {
@@ -32,7 +45,6 @@ type ParsedError = {
 }
 
 function parseError(raw: string): ParsedError {
-  // Expected columns: [...], received: [...]
   const colMismatch = raw.match(/Expected columns:\s*(\[[\s\S]*?\]),\s*received:\s*(\[[\s\S]*?\])/)
   if (colMismatch) {
     return {
@@ -41,7 +53,6 @@ function parseError(raw: string): ParsedError {
     }
   }
 
-  // Column [X] does not match specified date format in at least one row
   const dateFormat = raw.match(/Column \[(.+?)\] does not match specified date format/)
   if (dateFormat) {
     return {
@@ -50,7 +61,6 @@ function parseError(raw: string): ParsedError {
     }
   }
 
-  // Column [X] has an incorrect data type. Expected Y, received Z
   const dataType = raw.match(/Column \[(.+?)\] has an incorrect data type\. Expected (.+?), received (.+)/)
   if (dataType) {
     return {
@@ -59,7 +69,6 @@ function parseError(raw: string): ParsedError {
     }
   }
 
-  // Partition column [X] has values with illegal characters '/'
   const partition = raw.match(/Partition column \[(.+?)\] has values with illegal characters/)
   if (partition) {
     return {
@@ -68,7 +77,6 @@ function parseError(raw: string): ParsedError {
     }
   }
 
-  // Dataset has no rows
   if (/dataset has no rows/i.test(raw)) {
     return {
       title: 'File contains no data rows',
@@ -76,7 +84,6 @@ function parseError(raw: string): ParsedError {
     }
   }
 
-  // Pandera not_nullable — column X
   const nullable = raw.match(/column\s*['""]?(.+?)['""]?\s+.*?null/i)
   if (nullable && /null/i.test(raw)) {
     const col = nullable[1].replace(/['"]/g, '').trim()
@@ -86,7 +93,6 @@ function parseError(raw: string): ParsedError {
     }
   }
 
-  // Pandera uniqueness — column X
   if (/unique/i.test(raw)) {
     const colMatch = raw.match(/column\s+['""]?(.+?)['""]?[\s,]/i)
     const col = colMatch ? colMatch[1].replace(/['"]/g, '').trim() : 'a column'
@@ -96,7 +102,6 @@ function parseError(raw: string): ParsedError {
     }
   }
 
-  // Fallback — clean up common technical noise but show original
   return {
     title: 'Validation error',
     detail: raw
@@ -108,7 +113,7 @@ function GetJob() {
   const { jobId } = router.query
   const { isLoading, data, error } = useQuery(['getJob', jobId], getJob)
 
-  if (isLoading) return <div className="rapid-loading-bar" role="progressbar" />
+  if (isLoading) return <LinearProgress color="primary" role="progressbar" />
   if (error) return <ErrorCard error={error as Error} />
 
   const errors: string[] = Array.isArray(data.errors)
@@ -122,9 +127,9 @@ function GetJob() {
   const createdAtStr = formatTs(data.createdat as number | string | undefined)
 
   const metaRows: [string, ReactNode][] = [
-    ['Job ID', <span key="id" style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, userSelect: 'all' }}>{data.job_id as string}</span>],
+    ['Job ID', <Box key="id" component="span" sx={{ fontFamily: 'monospace', fontSize: 12, userSelect: 'all' }}>{data.job_id as string}</Box>],
     ['Type', data.type as string],
-    ...(data.filename ? [['File', <span key="fn" style={{ fontFamily: "'DM Mono', monospace", fontSize: 12 }}>{data.filename as string}</span>] as [string, ReactNode]] : []),
+    ...(data.filename ? [['File', <Box key="fn" component="span" sx={{ fontFamily: 'monospace', fontSize: 12 }}>{data.filename as string}</Box>] as [string, ReactNode]] : []),
     ['Dataset', `${data.domain} / ${data.dataset}`],
     ['Layer', data.layer as string],
     ['Version', String(data.version)],
@@ -132,125 +137,98 @@ function GetJob() {
   ]
 
   return (
-    <div style={{ maxWidth: 860, margin: '0 auto' }}>
-      {/* Job detail card */}
-      <div className="form-card" style={{ marginBottom: 16 }}>
-        <div className="form-card-hd">
-          <div className="form-card-title">Job Detail</div>
-          <div style={{ marginLeft: 'auto' }}>
-            {getStatusBadge(data.status as string)}
-          </div>
-        </div>
-        <div className="form-card-body" style={{ padding: 0 }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <tbody>
+    <Box sx={{ maxWidth: 860, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <FormCard
+        title="Job Detail"
+        headerAction={statusChip(data.status as string)}
+        bodySx={{ p: 0 }}
+      >
+        <TableContainer>
+          <Table size="small">
+            <TableBody>
               {metaRows.map(([k, v]) => (
-                <tr key={k as string} style={{ borderBottom: '1px solid #f4f4f5' }}>
-                  <td style={{
-                    width: 140, padding: '9px 20px',
-                    fontSize: 11, fontWeight: 600,
-                    color: 'var(--text-tertiary)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '.04em',
-                    whiteSpace: 'nowrap'
-                  }}>
+                <TableRow key={k as string}>
+                  <TableCell sx={{ width: 140, fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', color: 'text.disabled', whiteSpace: 'nowrap' }}>
                     {k}
-                  </td>
-                  <td style={{ padding: '9px 20px', fontSize: 13 }}>{v}</td>
-                </tr>
+                  </TableCell>
+                  <TableCell sx={{ fontSize: 13 }}>{v}</TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </FormCard>
 
-      {/* Errors card */}
       {hasFailed && parsedErrors.length > 0 && (
-        <div className="form-card" style={{ borderColor: '#fecaca' }}>
-          <div className="form-card-hd" style={{ background: '#fef2f2', borderBottomColor: '#fecaca', gap: 10 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <div className="form-card-title" style={{ color: '#dc2626' }}>
+        <FormCard
+          title={
+            <Box sx={{ color: 'error.main' }}>
+              <Box>
                 {parsedErrors.length === 1 && parsedErrors[0].title !== 'Validation error'
                   ? parsedErrors[0].title
                   : "Your file didn't pass validation"}
-              </div>
-              <div style={{ fontSize: 12, color: '#b91c1c' }}>
+              </Box>
+              <Typography sx={{ fontSize: 12, fontWeight: 400, color: 'error.main', mt: 0.5 }}>
                 No data was written. Fix the issues below, then re-upload.
-              </div>
-            </div>
-            <div style={{ marginLeft: 'auto', fontSize: 11, color: '#b91c1c', fontWeight: 600, whiteSpace: 'nowrap' }}>
-              {parsedErrors.length} error{parsedErrors.length !== 1 ? 's' : ''}
-            </div>
-          </div>
-
-          <div className="form-card-body" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {/* Error list */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              </Typography>
+            </Box>
+          }
+          headerAction={
+            <Chip
+              size="small"
+              color="error"
+              variant="outlined"
+              label={`${parsedErrors.length} error${parsedErrors.length !== 1 ? 's' : ''}`}
+            />
+          }
+        >
+          <Stack spacing={1.5}>
+            <Stack spacing={1}>
               {parsedErrors.map((e, i) => (
-                <div key={i} style={{
-                  display: 'flex', gap: 10, alignItems: 'flex-start',
-                  padding: '10px 12px',
-                  background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 6
-                }}>
-                  <span style={{ color: '#dc2626', fontSize: 13, flexShrink: 0, marginTop: 1 }}>✕</span>
-                  <div>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: '#dc2626', marginBottom: 2 }}>
-                      {e.title}
-                    </div>
-                    <div style={{ fontSize: 12, color: '#7f1d1d', lineHeight: 1.5 }}>
-                      {e.detail}
-                    </div>
-                  </div>
-                </div>
+                <Alert key={i} severity="error" variant="outlined">
+                  <AlertTitle sx={{ fontSize: 12, fontWeight: 600 }}>{e.title}</AlertTitle>
+                  <Typography sx={{ fontSize: 12 }}>{e.detail}</Typography>
+                </Alert>
               ))}
-            </div>
+            </Stack>
 
-            {/* Next steps */}
-            <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12 }}>
-              <div style={{
-                fontSize: 11, fontWeight: 700, letterSpacing: '.06em',
-                textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: 10
-              }}>
+            <Box sx={{ borderTop: '1px solid', borderColor: 'divider', pt: 2 }}>
+              <Typography sx={{ fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: 'text.disabled', mb: 1 }}>
                 What would you like to do?
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                <div style={{ padding: '14px 16px', border: '1px solid var(--border)', borderRadius: 'var(--radius)', background: '#fafafa' }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
-                    Fix my file
-                  </div>
-                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.55, marginBottom: 12 }}>
+              </Typography>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 1.5 }}>
+                <Paper variant="outlined" sx={{ p: 2, bgcolor: 'background.default' }}>
+                  <Typography sx={{ fontSize: 13, fontWeight: 600, mb: 0.5 }}>Fix my file</Typography>
+                  <Typography sx={{ fontSize: 12, color: 'text.secondary', mb: 1.5 }}>
                     Update the values in your file to match what the schema expects, then re-upload.
-                  </div>
-                  <Link href="/data/upload" className="btn-primary" style={{ textDecoration: 'none', fontSize: 11, height: 28, display: 'inline-flex', alignItems: 'center', padding: '0 12px' }}>
+                  </Typography>
+                  <Button component={Link} href="/data/upload" size="small" variant="contained">
                     ↑ Upload again
-                  </Link>
-                </div>
-                <div style={{ padding: '14px 16px', border: '1px solid var(--border)', borderRadius: 'var(--radius)', background: '#fafafa' }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
-                    Update the schema
-                  </div>
-                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.55, marginBottom: 12 }}>
+                  </Button>
+                </Paper>
+                <Paper variant="outlined" sx={{ p: 2, bgcolor: 'background.default' }}>
+                  <Typography sx={{ fontSize: 13, fontWeight: 600, mb: 0.5 }}>Update the schema</Typography>
+                  <Typography sx={{ fontSize: 12, color: 'text.secondary', mb: 1.5 }}>
                     If your file is correct, delete the existing dataset first, then create a new schema and re-upload. Requires Data Admin permissions.
-                  </div>
-                  <Link href="/catalog" className="btn-secondary" style={{ textDecoration: 'none', fontSize: 11, height: 28, display: 'inline-flex', alignItems: 'center', padding: '0 12px' }}>
+                  </Typography>
+                  <Button component={Link} href="/catalog" size="small" variant="outlined">
                     Go to Catalog →
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+                  </Button>
+                </Paper>
+              </Box>
+            </Box>
+          </Stack>
+        </FormCard>
       )}
 
-      {/* Non-failed job with no errors — back link */}
       {!hasFailed && (
-        <div style={{ marginTop: 8 }}>
-          <Link href="/tasks" style={{ fontSize: 12, color: 'var(--text-tertiary)', textDecoration: 'none' }}>
+        <Box>
+          <Button component={Link} href="/tasks" size="small">
             ← Back to Jobs
-          </Link>
-        </div>
+          </Button>
+        </Box>
       )}
-    </div>
+    </Box>
   )
 }
 

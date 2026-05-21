@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getJob } from '@/service'
 import { useState, Dispatch, SetStateAction } from 'react'
 import { useRouter } from 'next/router'
+import { Box, Typography, LinearProgress } from '@mui/material'
 
 const UploadProgress = ({
   uploadSuccessDetails,
@@ -28,12 +29,12 @@ const UploadProgress = ({
   })
 
   return (
-    <div data-testid="upload-status">
-      <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)', marginBottom: 8 }}>
+    <Box data-testid="upload-status">
+      <Typography sx={{ fontSize: 13, fontWeight: 500, color: 'text.secondary', mb: 1 }}>
         Processing {uploadSuccessDetails.original_filename}…
-      </div>
-      <div className="rapid-loading-bar" role="progressbar" />
-    </div>
+      </Typography>
+      <LinearProgress color="primary" role="progressbar" />
+    </Box>
   )
 }
 

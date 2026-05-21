@@ -1,4 +1,4 @@
-import AccountLayout from '@/components/Layout/AccountLayout'
+import { AccountLayout, FormCard } from '@/components'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import PermissionsTable from '@/components/PermissionsTable/PermissionsTable'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -16,6 +16,17 @@ import {
   UserCreateResponse
 } from '@/service/types'
 import { ReactNode } from 'react'
+import {
+  Box,
+  Typography,
+  Button,
+  LinearProgress,
+  TextField,
+  Select,
+  FormControl,
+  InputLabel,
+  FormHelperText
+} from '@mui/material'
 
 const userType = ['User', 'Client']
 
@@ -67,7 +78,7 @@ function CreateUserPage() {
   })
 
   if (isPermissionsListLoading) {
-    return <div className="rapid-loading-bar" role="progressbar" />
+    return <LinearProgress color="primary" role="progressbar" />
   }
 
   if (permissionsListError) {
@@ -79,8 +90,9 @@ function CreateUserPage() {
   }
 
   return (
-    <form
-      className="form-wrap-wide"
+    <Box
+      component="form"
+      sx={{ maxWidth: 900, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}
       onSubmit={handleSubmit(async (data: UserCreate) => {
         const permissions = data.permissions.map((permission) =>
           extractPermissionNames(permission, permissionsListData)
@@ -88,95 +100,70 @@ function CreateUserPage() {
         if (data.type === 'User') {
           await mutate({
             path: 'user',
-            data: {
-              permissions: permissions,
-              username: data.name,
-              email: data.email
-            }
+            data: { permissions, username: data.name, email: data.email }
           })
         } else if (data.type === 'Client') {
           await mutate({
             path: 'client',
-            data: {
-              permissions: permissions,
-              client_name: data.name
-            }
+            data: { permissions, client_name: data.name }
           })
         }
       })}
       noValidate
     >
-      {/* Card 1 — Subject info */}
-      <div className="form-card">
-        <div className="form-card-hd">
-          <div className="form-card-num">1</div>
-          <div className="form-card-title">Subject info</div>
-        </div>
-        <div className="form-card-body">
-          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+      <FormCard num={1} title="Subject info">
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Typography variant="body2" sx={{ fontSize: 13 }}>
             Create a new user or client. For more details see the{' '}
-            <a
+            <Box
+              component="a"
               href="https://rapid.readthedocs.io/en/latest/api/routes/user/#create"
-              style={{ color: 'var(--pink)', textDecoration: 'none' }}
+              sx={{ color: 'primary.main', textDecoration: 'none' }}
             >
               documentation
-            </a>
+            </Box>
             .
-          </p>
+          </Typography>
 
           <Controller
             name="type"
             control={control}
             render={({ field, fieldState: { error: fieldError } }) => (
-              <div className="field-row">
-                <label className="f-lbl" htmlFor="field-type">
-                  Type of Subject
-                </label>
-                <select
+              <FormControl size="small" error={!!fieldError} fullWidth>
+                <InputLabel htmlFor="field-type" shrink>Type of Subject</InputLabel>
+                <Select
                   {...field}
-                  id="field-type"
-                  className="f-sel"
-                  data-testid="field-type"
-                  style={fieldError ? { borderColor: 'var(--red)' } : undefined}
+                  native
+                  label="Type of Subject"
+                  notched
+                  inputProps={{ 'data-testid': 'field-type', id: 'field-type' }}
+                  value={field.value ?? ''}
                 >
                   <option value="">Please select</option>
                   {userType.map((type) => (
-                    <option key={type}>{type}</option>
+                    <option key={type} value={type}>{type}</option>
                   ))}
-                </select>
-                {fieldError && (
-                  <span className="f-hint" style={{ color: 'var(--red)' }}>
-                    {fieldError.message}
-                  </span>
-                )}
-              </div>
+                </Select>
+                {fieldError && <FormHelperText>{fieldError.message}</FormHelperText>}
+              </FormControl>
             )}
           />
 
-          {/* eslint-disable-next-line react-hooks/incompatible-library */}
           {watch('type') === 'User' && (
             <Controller
               name="email"
               control={control}
               render={({ field, fieldState: { error: fieldError } }) => (
-                <div className="field-row">
-                  <label className="f-lbl" htmlFor="field-email">
-                    Email
-                  </label>
-                  <input
-                    {...field}
-                    id="field-email"
-                    className="f-sel"
-                    type="email"
-                    data-testid="field-email"
-                    style={fieldError ? { borderColor: 'var(--red)' } : undefined}
-                  />
-                  {fieldError && (
-                    <span className="f-hint" style={{ color: 'var(--red)' }}>
-                      {fieldError.message}
-                    </span>
-                  )}
-                </div>
+                <TextField
+                  {...field}
+                  size="small"
+                  label="Email"
+                  type="email"
+                  error={!!fieldError}
+                  helperText={fieldError?.message}
+                  inputProps={{ 'data-testid': 'field-email', id: 'field-email' }}
+                  InputLabelProps={{ shrink: true }}
+                />
               )}
             />
           )}
@@ -185,57 +172,37 @@ function CreateUserPage() {
             name="name"
             control={control}
             render={({ field, fieldState: { error: fieldError } }) => (
-              <div className="field-row">
-                <label className="f-lbl" htmlFor="field-name">
-                  Name
-                </label>
-                <input
-                  {...field}
-                  id="field-name"
-                  className="f-sel"
-                  data-testid="field-name"
-                  style={fieldError ? { borderColor: 'var(--red)' } : undefined}
-                />
-                {fieldError && (
-                  <span className="f-hint" style={{ color: 'var(--red)' }}>
-                    {fieldError.message}
-                  </span>
-                )}
-              </div>
+              <TextField
+                {...field}
+                size="small"
+                label="Name"
+                error={!!fieldError}
+                helperText={fieldError?.message}
+                inputProps={{ 'data-testid': 'field-name', id: 'field-name' }}
+                InputLabelProps={{ shrink: true }}
+              />
             )}
           />
-        </div>
-      </div>
+        </Box>
+      </FormCard>
 
-      {/* Card 2 — Permissions */}
-      <div className="form-card">
-        <div className="form-card-hd">
-          <div className="form-card-num">2</div>
-          <div className="form-card-title">Select permissions</div>
-        </div>
-        <div className="form-card-body" style={{ padding: 0 }}>
-          <PermissionsTable
-            permissionsListData={permissionsListData}
-            fieldArrayReturn={fieldArrayReturn}
-          />
-        </div>
-        <div className="form-actions">
-          <button
-            className="btn-primary"
-            type="submit"
-            data-testid="submit"
-            disabled={isLoading}
-          >
+      <FormCard
+        num={2}
+        title="Select permissions"
+        bodySx={{ p: 0 }}
+        actionsError={error}
+        actions={
+          <Button variant="contained" type="submit" data-testid="submit" disabled={isLoading}>
             {isLoading ? 'Creating…' : 'Create subject'}
-          </button>
-          {error && (
-            <span className="f-hint" style={{ color: 'var(--red)', marginLeft: '8px' }}>
-              {error?.message}
-            </span>
-          )}
-        </div>
-      </div>
-    </form>
+          </Button>
+        }
+      >
+        <PermissionsTable
+          permissionsListData={permissionsListData}
+          fieldArrayReturn={fieldArrayReturn}
+        />
+      </FormCard>
+    </Box>
   )
 }
 

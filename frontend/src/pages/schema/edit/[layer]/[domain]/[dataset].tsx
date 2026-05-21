@@ -7,6 +7,7 @@ import { GenerateSchemaResponse } from '@/service/types'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/router'
 import { ReactNode } from 'react'
+import { LinearProgress } from '@mui/material'
 
 function EditSchema() {
   const router = useRouter()
@@ -30,7 +31,7 @@ function EditSchema() {
   )
 
   if (isLayersLoading || isInfoLoading) {
-    return <div className="rapid-loading-bar" role="progressbar" />
+    return <LinearProgress color="primary" role="progressbar" />
   }
 
   if (layersError) return <ErrorCard error={layersError as Error} />

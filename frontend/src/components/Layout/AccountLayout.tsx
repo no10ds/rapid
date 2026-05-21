@@ -6,152 +6,31 @@ import { useRouter } from 'next/router'
 import Router from 'next/router'
 import Link from 'next/link'
 import Image from 'next/image'
+import {
+  Box,
+  Drawer,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Typography,
+  Avatar,
+  IconButton,
+  Menu,
+  MenuItem,
+  LinearProgress,
+  Divider
+} from '@mui/material'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import SearchIcon from '@mui/icons-material/Search'
+import TableChartIcon from '@mui/icons-material/TableChart'
+import WorkIcon from '@mui/icons-material/Work'
+import PeopleIcon from '@mui/icons-material/People'
+import AddBoxIcon from '@mui/icons-material/AddBox'
 
-const IconDashboard = () => (
-  <svg className="stroke-icon" viewBox="0 0 24 24">
-    <rect x="3" y="3" width="7" height="7" rx="1" />
-    <rect x="14" y="3" width="7" height="7" rx="1" />
-    <rect x="3" y="14" width="7" height="7" rx="1" />
-    <rect x="14" y="14" width="7" height="7" rx="1" />
-  </svg>
-)
-
-const IconCatalog = () => (
-  <svg className="fill-icon" viewBox="0 0 24 24">
-    <path d="m16 6a1 1 0 0 1 0 2h-8a1 1 0 0 1 0-2zm7.707 17.707a1 1 0 0 1 -1.414 0l-2.407-2.407a4.457 4.457 0 0 1 -2.386.7 4.5 4.5 0 1 1 4.5-4.5 4.457 4.457 0 0 1 -.7 2.386l2.407 2.407a1 1 0 0 1 0 1.414zm-6.207-3.707a2.5 2.5 0 1 0 -2.5-2.5 2.5 2.5 0 0 0 2.5 2.5zm-4.5 2h-6a3 3 0 0 1 -3-3v-14a3 3 0 0 1 3-3h12a1 1 0 0 1 1 1v8a1 1 0 0 0 2 0v-8a3 3 0 0 0 -3-3h-12a5.006 5.006 0 0 0 -5 5v14a5.006 5.006 0 0 0 5 5h6a1 1 0 0 0 0-2z" />
-  </svg>
-)
-
-const IconUpload = () => (
-  <svg className="stroke-icon" viewBox="0 0 24 24">
-    <path d="M17 17H17.01M15.6 14H18C18.9319 14 19.3978 14 19.7654 14.1522C20.2554 14.3552 20.6448 14.7446 20.8478 15.2346C21 15.6022 21 16.0681 21 17C21 17.9319 21 18.3978 20.8478 18.7654C20.6448 19.2554 20.2554 19.6448 19.7654 19.8478C19.3978 20 18.9319 20 18 20H6C5.06812 20 4.60218 20 4.23463 19.8478C3.74458 19.6448 3.35523 19.2554 3.15224 18.7654C3 18.3978 3 17.9319 3 17C3 16.0681 3 15.6022 3.15224 15.2346C3.35523 14.7446 3.74458 14.3552 4.23463 14.1522C4.60218 14 5.06812 14 6 14H8.4M12 15V4M12 4L15 7M12 4L9 7" />
-  </svg>
-)
-
-const IconSchema = () => (
-  <svg className="fill-icon" viewBox="0 0 24 24">
-    <path d="M0,3v8H11V0H3A3,3,0,0,0,0,3ZM9,9H2V3A1,1,0,0,1,3,2H9Z" />
-    <path d="M0,21a3,3,0,0,0,3,3h8V13H0Zm2-6H9v7H3a1,1,0,0,1-1-1Z" />
-    <path d="M13,13V24h8a3,3,0,0,0,3-3V13Zm9,8a1,1,0,0,1-1,1H15V15h7Z" />
-    <polygon points="17 11 19 11 19 7 23 7 23 5 19 5 19 1 17 1 17 5 13 5 13 7 17 7 17 11" />
-  </svg>
-)
-
-const IconJobs = () => (
-  <svg className="fill-icon" viewBox="0 0 24 24">
-    <path d="M4,11H20c5.276-.138,5.272-7.863,0-8H4c-5.276,.138-5.272,7.863,0,8ZM22,7c0,1.103-.897,2-2,2h-4V5h4c1.103,0,2,.897,2,2Zm-2,6H4c-5.276,.138-5.272,7.863,0,8H20c5.276-.138,5.272-7.863,0-8Zm0,6H10v-4h10c2.629,.048,2.627,3.953,0,4Z" />
-  </svg>
-)
-
-const IconUserAdmin = () => (
-  <svg className="stroke-icon" viewBox="0 0 24 24">
-    <path d="M17,21V19a4,4,0,0,0-4-4H5a4,4,0,0,0-4,4v2" />
-    <circle cx="9" cy="7" r="4" />
-    <line x1="17" x2="23" y1="11" y2="11" />
-    <line x1="20" x2="20" y1="8" y2="14" />
-  </svg>
-)
-
-type NavItemProps = {
-  href: string
-  icon: ReactNode
-  label: string
-  badge?: string | number
-  activePaths?: string[]
-}
-
-function NavItem({ href, icon, label, badge, activePaths }: NavItemProps) {
-  const router = useRouter()
-  const { asPath } = router
-  const checkPaths = activePaths ?? [href]
-  const isActive = checkPaths.some((p) => {
-    if (p === '/') return asPath === '/'
-    return asPath.startsWith(p)
-  })
-
-  return (
-    <Link href={href} className={`ni${isActive ? ' act' : ''}`} style={{ textDecoration: 'none' }}>
-      <div className="ni-ico">{icon}</div>
-      <span className="ni-lbl">{label}</span>
-      {badge !== undefined && <span className="ni-badge">{badge}</span>}
-    </Link>
-  )
-}
-
-function SidebarFooter({
-  methods,
-  collapsed
-}: {
-  methods: MethodsResponse | undefined
-  collapsed: boolean
-}) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
-  const username = methods?.username ?? null
-  const initials = username ? username.slice(0, 2).toUpperCase() : null
-
-  return (
-    <div className="sb-foot" ref={ref}>
-      {!collapsed && (
-        <div className="sb-foot-links">
-          <a href="https://rapid.readthedocs.io/en/latest/" className="sb-foot-link" target="_blank" rel="noreferrer" title="Documentation">
-            Docs
-          </a>
-          <a href="/api/docs" className="sb-foot-link" title="API Docs">
-            API Docs
-          </a>
-          <a href="https://github.com/no10ds/rapid" className="sb-foot-link" target="_blank" rel="noreferrer" title="Source Code">
-            Source Code
-          </a>
-          <a href="https://ukgovernmentdigital.slack.com/archives/C03E5GV2LQM" className="sb-foot-link" target="_blank" rel="noreferrer" title="Contact">
-            Contact
-          </a>
-        </div>
-      )}
-      <button
-        type="button"
-        className="usr usr-btn"
-        onClick={() => setOpen((o) => !o)}
-        aria-haspopup="true"
-        aria-expanded={open}
-      >
-        <div className="ava">
-          {initials ?? (
-            <svg viewBox="0 0 24 24" style={{ width: 14, height: 14, fill: 'white' }}>
-              <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
-            </svg>
-          )}
-        </div>
-        {!collapsed && (
-          <div className="usr-info">
-            {username && <div className="usr-name">{username}</div>}
-            <div className="usr-role">
-              {methods?.can_manage_users ? 'User Admin' : 'Data User'}
-            </div>
-          </div>
-        )}
-      </button>
-      {open && (
-        <div className="usr-menu">
-          <a href="/api/oauth2/logout" className="usr-menu-item">
-            Sign out
-          </a>
-        </div>
-      )}
-    </div>
-  )
-}
+const SIDEBAR_WIDTH = 240
+const SIDEBAR_COLLAPSED = 60
 
 type AccountLayoutProps = {
   title?: string
@@ -162,6 +41,8 @@ type AccountLayoutProps = {
 
 const AccountLayout = ({ children, title, topbarActions, noPad }: AccountLayoutProps) => {
   const [collapsed, setCollapsed] = useState(false)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const router = useRouter()
 
   const redirect = () => {
     Router.replace({ pathname: '/login' })
@@ -174,8 +55,6 @@ const AccountLayout = ({ children, title, topbarActions, noPad }: AccountLayoutP
         queryFn: getAuthStatus,
         keepPreviousData: true,
         staleTime: Infinity,
-        cacheTime: 0,
-        refetchInterval: 0,
         refetchOnWindowFocus: false,
         onError: () => redirect(),
         onSuccess: (data: { detail: string }) => {
@@ -195,10 +74,12 @@ const AccountLayout = ({ children, title, topbarActions, noPad }: AccountLayoutP
   const methods: MethodsResponse | undefined = results[1].data
 
   if (results[0].isLoading) {
-    return <div className="rapid-loading-bar" role="progressbar" aria-label="Loading" />
+    return <LinearProgress color="primary" role="progressbar" aria-label="Loading" />
   }
 
-  const toggleCollapse = () => setCollapsed((c) => !c)
+  const sidebarWidth = collapsed ? SIDEBAR_COLLAPSED : SIDEBAR_WIDTH
+  const username = methods?.username ?? null
+  const initials = username ? username.slice(0, 2).toUpperCase() : null
 
   const hasDataSection =
     methods?.can_upload ||
@@ -208,16 +89,40 @@ const AccountLayout = ({ children, title, topbarActions, noPad }: AccountLayoutP
 
   const hasJobsSection = methods?.can_upload || methods?.can_download
 
+  function isActive(paths: string[]) {
+    return paths.some((p) => {
+      if (p === '/') return router.asPath === '/'
+      return router.asPath.startsWith(p)
+    })
+  }
+
   return (
-    <div className="rapid-shell">
-      <aside className={`rapid-sidebar${collapsed ? ' col' : ''}`}>
-        <div className="sb-header">
+    <Box sx={{ display: 'flex', height: '100vh' }}>
+      {/* Sidebar */}
+      <Drawer
+        variant="permanent"
+        sx={{
+          width: sidebarWidth,
+          flexShrink: 0,
+          transition: 'width 0.2s',
+          '& .MuiDrawer-paper': {
+            width: sidebarWidth,
+            transition: 'width 0.2s',
+            bgcolor: 'secondary.main',
+            borderRight: '1px solid',
+            borderColor: 'secondary.light',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column'
+          }
+        }}
+      >
+        {/* Logo + collapse toggle */}
+        <Box sx={{ display: 'flex', alignItems: 'center', height: 56, px: 1 }}>
           <Link
             href="/"
             style={{
               flex: 1,
-              minWidth: 0,
-              height: '100%',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -229,94 +134,174 @@ const AccountLayout = ({ children, title, topbarActions, noPad }: AccountLayoutP
               alt="rAPId"
               width={160}
               height={40}
-              className="logo-img"
               style={{
                 objectFit: 'contain',
-                objectPosition: 'center',
-                padding: '6px 8px',
-                height: '90%',
+                height: '32px',
                 width: 'auto',
-                maxWidth: '100%',
-                transition: 'opacity 0.2s'
+                maxWidth: '100%'
               }}
               priority
             />
           </Link>
-          <button
-            type="button"
-            className="sb-tog"
-            onClick={toggleCollapse}
+          <IconButton
+            size="small"
+            onClick={() => setCollapsed((c) => !c)}
+            sx={{ color: 'rgba(255,255,255,0.6)', '&:hover': { color: '#fff' } }}
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              {collapsed ? (
-                <polyline points="9 18 15 12 9 6" />
-              ) : (
-                <polyline points="15 18 9 12 15 6" />
+            {collapsed ? <ChevronRightIcon fontSize="small" /> : <ChevronLeftIcon fontSize="small" />}
+          </IconButton>
+        </Box>
+
+        {/* Nav sections */}
+        <Box sx={{ flex: 1, overflowY: 'auto', px: 1, mt: 1 }}>
+          {hasDataSection && (
+            <>
+              {!collapsed && (
+                <Typography
+                  variant="body2"
+                  sx={{ px: 1.5, py: 0.5, fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}
+                >
+                  Data
+                </Typography>
               )}
-            </svg>
-          </button>
-        </div>
+              <List disablePadding>
+                {methods?.can_search_catalog && (
+                  <NavItem href="/catalog" icon={<SearchIcon />} label="Catalog" active={isActive(['/catalog'])} collapsed={collapsed} />
+                )}
+                {methods?.can_create_schema && (
+                  <NavItem href="/schema/create" icon={<AddBoxIcon />} label="Add Dataset" active={isActive(['/schema/create'])} collapsed={collapsed} />
+                )}
+              </List>
+            </>
+          )}
 
-        {hasDataSection && (
-          <div className="sb-sec">
-            <div className="sb-sec-lbl">Data</div>
-            {methods?.can_search_catalog && (
-              <NavItem
-                href="/catalog"
-                icon={<IconCatalog />}
-                label="Catalog"
-                activePaths={['/catalog']}
-              />
+          {hasJobsSection && (
+            <>
+              {!collapsed && (
+                <Typography
+                  variant="body2"
+                  sx={{ px: 1.5, py: 0.5, mt: 2, fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}
+                >
+                  Jobs
+                </Typography>
+              )}
+              <List disablePadding>
+                <NavItem href="/tasks" icon={<WorkIcon />} label="Jobs" active={isActive(['/tasks'])} collapsed={collapsed} />
+              </List>
+            </>
+          )}
+
+          {methods?.can_manage_users && (
+            <>
+              {!collapsed && (
+                <Typography
+                  variant="body2"
+                  sx={{ px: 1.5, py: 0.5, mt: 2, fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}
+                >
+                  Admin
+                </Typography>
+              )}
+              <List disablePadding>
+                <NavItem href="/subject" icon={<PeopleIcon />} label="User Admin" active={isActive(['/subject'])} collapsed={collapsed} />
+              </List>
+            </>
+          )}
+        </Box>
+
+        {/* Footer */}
+        <Box sx={{ borderTop: '1px solid', borderColor: 'secondary.light', p: 1 }}>
+          {!collapsed && (
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', px: 1, py: 0.5, mb: 1 }}>
+              {[
+                { label: 'Docs', href: 'https://rapid.readthedocs.io/en/latest/' },
+                { label: 'API', href: '/api/docs' },
+                { label: 'Source', href: 'https://github.com/no10ds/rapid' }
+              ].map((link) => (
+                <Typography
+                  key={link.label}
+                  component="a"
+                  href={link.href}
+                  target={link.href.startsWith('http') ? '_blank' : undefined}
+                  rel={link.href.startsWith('http') ? 'noreferrer' : undefined}
+                  sx={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', textDecoration: 'none', '&:hover': { color: '#fff' } }}
+                >
+                  {link.label}
+                </Typography>
+              ))}
+            </Box>
+          )}
+          <Box
+            sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, py: 0.5, cursor: 'pointer', borderRadius: 1, '&:hover': { bgcolor: 'rgba(255,255,255,0.04)' } }}
+            onClick={(e) => setAnchorEl(e.currentTarget)}
+          >
+            <Avatar sx={{ width: 28, height: 28, bgcolor: 'primary.main', fontSize: 11 }}>
+              {initials ?? '?'}
+            </Avatar>
+            {!collapsed && (
+              <Box sx={{ minWidth: 0 }}>
+                {username && <Typography sx={{ fontSize: 12, color: '#fff', fontWeight: 500, lineHeight: 1.2 }} noWrap>{username}</Typography>}
+                <Typography sx={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', lineHeight: 1.2 }}>
+                  {methods?.can_manage_users ? 'User Admin' : 'Data User'}
+                </Typography>
+              </Box>
             )}
-            {methods?.can_create_schema && (
-              <NavItem
-                href="/schema/create"
-                icon={<IconSchema />}
-                label="Add Dataset"
-                activePaths={['/schema/create']}
-              />
-            )}
-          </div>
-        )}
+          </Box>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={() => setAnchorEl(null)}
+            anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+            transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+          >
+            <MenuItem component="a" href="/api/oauth2/logout" sx={{ fontSize: 13 }}>
+              Sign out
+            </MenuItem>
+          </Menu>
+        </Box>
+      </Drawer>
 
-        {hasJobsSection && (
-          <div className="sb-sec">
-            <div className="sb-sec-lbl">Jobs</div>
-            <NavItem
-              href="/tasks"
-              icon={<IconJobs />}
-              label="Jobs"
-              activePaths={['/tasks']}
-            />
-          </div>
-        )}
-
-        {methods?.can_manage_users && (
-          <div className="sb-sec">
-            <div className="sb-sec-lbl">Admin</div>
-            <NavItem
-              href="/subject"
-              icon={<IconUserAdmin />}
-              label="User Admin"
-              activePaths={['/subject']}
-            />
-          </div>
-        )}
-
-        <SidebarFooter methods={methods} collapsed={collapsed} />
-      </aside>
-
-      <div className="rapid-main">
-        <div className="rapid-topbar">
-          <div className="topbar-title">{title}</div>
-          <div className="topbar-spacer" />
+      {/* Main content */}
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* Topbar */}
+        <Box sx={{ height: 52, display: 'flex', alignItems: 'center', px: 3, borderBottom: '1px solid', borderColor: 'divider', bgcolor: '#fff', flexShrink: 0 }}>
+          <Typography variant="h3" sx={{ fontSize: 15, fontWeight: 600, letterSpacing: '-0.3px' }}>
+            {title}
+          </Typography>
+          <Box sx={{ flex: 1 }} />
           {topbarActions}
-        </div>
+        </Box>
 
-        <div className={`rapid-content${noPad ? ' no-pad' : ''}`}>{children}</div>
-      </div>
-    </div>
+        {/* Content */}
+        <Box sx={{ flex: 1, overflowY: 'auto', p: noPad ? 0 : 3.5, bgcolor: 'background.default' }}>
+          {children}
+        </Box>
+      </Box>
+    </Box>
+  )
+}
+
+function NavItem({ href, icon, label, active, collapsed }: { href: string; icon: ReactNode; label: string; active: boolean; collapsed: boolean }) {
+  return (
+    <ListItemButton
+      component={Link}
+      href={href}
+      selected={active}
+      sx={{
+        mb: 0.5,
+        minHeight: 36,
+        px: collapsed ? 1.5 : 2,
+        justifyContent: collapsed ? 'center' : 'flex-start',
+        color: active ? '#fff' : 'rgba(255,255,255,0.7)',
+        '&:hover': { bgcolor: 'rgba(255,255,255,0.06)', color: '#fff' },
+        '&.Mui-selected': { bgcolor: 'rgba(255,255,255,0.1)', color: '#fff' }
+      }}
+    >
+      <ListItemIcon sx={{ minWidth: collapsed ? 0 : 32, color: 'inherit', '& .MuiSvgIcon-root': { fontSize: 18 } }}>
+        {icon}
+      </ListItemIcon>
+      {!collapsed && <ListItemText primary={label} primaryTypographyProps={{ fontSize: 13, fontWeight: active ? 600 : 400 }} />}
+    </ListItemButton>
   )
 }
 

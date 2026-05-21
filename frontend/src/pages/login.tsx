@@ -3,6 +3,8 @@ import { useQueries } from '@tanstack/react-query'
 import { useRouter } from 'next/router'
 import { getAuthStatus, getLogin } from '@/service'
 import Image from 'next/image'
+import { Box, Typography, Button, LinearProgress } from '@mui/material'
+import { CenteredGradientPage } from '@/components'
 
 const LoginPage = () => {
   const [authUrl, setAuthUrl] = useState('/login')
@@ -38,34 +40,38 @@ const LoginPage = () => {
 
   if (results[0].isLoading || results[1].isLoading) {
     return (
-      <div className="login-page">
-        <div className="login-glow" />
-        <div className="rapid-loading-bar" role="progressbar" />
-      </div>
+      <CenteredGradientPage width={320}>
+        <LinearProgress color="primary" role="progressbar" />
+      </CenteredGradientPage>
     )
   }
 
   return (
-    <div className="login-page">
-      <div className="login-glow" />
-      <div className="login-card">
-        <div className="login-logo">
-          <Image
-            src="/img/logo.png"
-            alt="rAPId"
-            width={140}
-            height={36}
-            style={{ objectFit: 'contain' }}
-            priority
-          />
-        </div>
-        <h1 className="login-title">Welcome back</h1>
-        <p className="login-sub">Sign in to access your datasets and manage your data.</p>
-        <a href={authUrl} className="login-btn" data-testid="login-link">
-          Sign in
-        </a>
-      </div>
-    </div>
+    <CenteredGradientPage>
+      <Box sx={{ mb: 3 }}>
+        <Image
+          src="/img/logo.png"
+          alt="rAPId"
+          width={140}
+          height={36}
+          style={{ objectFit: 'contain' }}
+          priority
+        />
+      </Box>
+      <Typography variant="h1" sx={{ fontSize: 22, mb: 1 }}>Welcome back</Typography>
+      <Typography variant="body2" sx={{ fontSize: 13, mb: 3 }}>
+        Sign in to access your datasets and manage your data.
+      </Typography>
+      <Button
+        component="a"
+        href={authUrl}
+        variant="contained"
+        fullWidth
+        data-testid="login-link"
+      >
+        Sign in
+      </Button>
+    </CenteredGradientPage>
   )
 }
 

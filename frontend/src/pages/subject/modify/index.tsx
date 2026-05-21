@@ -1,10 +1,18 @@
-import AccountLayout from '@/components/Layout/AccountLayout'
+import { AccountLayout, FormCard } from '@/components'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import { getSubjectsListUi } from '@/service'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/router'
 import { useState, useMemo, useEffect, ReactNode } from 'react'
 import { filterSubjectList } from '@/utils/subject'
+import {
+  Box,
+  Button,
+  LinearProgress,
+  Select,
+  FormControl,
+  InputLabel
+} from '@mui/material'
 
 function SubjectModifyPage() {
   const router = useRouter()
@@ -25,7 +33,6 @@ function SubjectModifyPage() {
     [subjectsListData]
   )
 
-  // Set initial selection once data arrives
   useEffect(() => {
     if (!selectedSubjectId && (users.length > 0 || clients.length > 0)) {
       setSelectedSubjectId(users[0]?.subjectId ?? clients[0]?.subjectId ?? '')
@@ -33,52 +40,16 @@ function SubjectModifyPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [users, clients])
 
-  if (isLoading) return <div className="rapid-loading-bar" role="progressbar" />
+  if (isLoading) return <LinearProgress color="primary" role="progressbar" />
   if (error) return <ErrorCard error={error as Error} />
 
   return (
-    <div style={{ maxWidth: 860, margin: '0 auto' }}>
-      <div className="form-card">
-        <div className="form-card-hd">
-          <div className="form-card-num">1</div>
-          <div className="form-card-title">Select subject</div>
-        </div>
-        <div className="form-card-body">
-          <div className="field-row" style={{ marginBottom: 0 }}>
-            <label className="f-lbl" htmlFor="field-user">Subject</label>
-            <select
-              id="field-user"
-              className="f-sel"
-              style={{ maxWidth: 360 }}
-              value={selectedSubjectId}
-              onChange={(e) => setSelectedSubjectId(e.target.value)}
-              data-testid="field-user"
-            >
-              {users.length > 0 && (
-                <optgroup label="Users">
-                  {users.map((item) => (
-                    <option value={item.subjectId} key={item.subjectId}>
-                      {item.subjectName}
-                    </option>
-                  ))}
-                </optgroup>
-              )}
-              {clients.length > 0 && (
-                <optgroup label="Client Apps">
-                  {clients.map((item) => (
-                    <option value={item.subjectId} key={item.subjectId}>
-                      {item.subjectName}
-                    </option>
-                  ))}
-                </optgroup>
-              )}
-            </select>
-          </div>
-        </div>
-        <div className="form-actions">
-          <button
-            className="btn-primary"
-            type="button"
+    <Box sx={{ maxWidth: 860, mx: 'auto' }}>
+      <FormCard
+        title="Select subject"
+        actions={
+          <Button
+            variant="contained"
             data-testid="submit-button"
             disabled={!selectedSubjectId}
             onClick={() => {
@@ -92,10 +63,41 @@ function SubjectModifyPage() {
             }}
           >
             Next →
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        }
+      >
+        <FormControl size="small" sx={{ maxWidth: 360, width: '100%' }}>
+          <InputLabel htmlFor="field-user" shrink>Subject</InputLabel>
+          <Select
+            native
+            label="Subject"
+            notched
+            value={selectedSubjectId}
+            onChange={(e) => setSelectedSubjectId(e.target.value as string)}
+            inputProps={{ 'data-testid': 'field-user', id: 'field-user' }}
+          >
+            {users.length > 0 && (
+              <optgroup label="Users">
+                {users.map((item) => (
+                  <option value={item.subjectId} key={item.subjectId}>
+                    {item.subjectName}
+                  </option>
+                ))}
+              </optgroup>
+            )}
+            {clients.length > 0 && (
+              <optgroup label="Client Apps">
+                {clients.map((item) => (
+                  <option value={item.subjectId} key={item.subjectId}>
+                    {item.subjectName}
+                  </option>
+                ))}
+              </optgroup>
+            )}
+          </Select>
+        </FormControl>
+      </FormCard>
+    </Box>
   )
 }
 

@@ -4,6 +4,18 @@ import { useState } from 'react'
 import { FieldValues } from 'react-hook-form'
 import { cloneDeep } from 'lodash'
 import { z } from 'zod'
+import {
+  Box,
+  Button,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography
+} from '@mui/material'
 
 type ActionType = z.infer<typeof ActionEnum>
 type PermissionType = z.infer<typeof Permission>
@@ -90,172 +102,150 @@ const PermissionsTable = ({
     setAddDomain('')
   }
 
-  return (
-    <div>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-        <thead>
-          <tr style={{ borderBottom: '2px solid #f0f0f0' }}>
-            <th style={thStyle}>Type</th>
-            <th style={thStyle}>Layer</th>
-            <th style={thStyle}>Sensitivity</th>
-            <th style={thStyle}>Domain</th>
-            <th style={{ ...thStyle, width: 80 }}></th>
-          </tr>
-        </thead>
-        <tbody>
-          {(fields as unknown as PermissionType[]).map((perm, idx) => (
-            <tr key={idx} style={{ borderBottom: '1px solid #f9f9f9' }}>
-              <td style={tdStyle}>{perm.type}</td>
-              <td style={tdStyle}>
-                {perm.layer ?? <span style={{ color: 'var(--text-tertiary)' }}>—</span>}
-              </td>
-              <td style={tdStyle}>
-                {perm.sensitivity ?? <span style={{ color: 'var(--text-tertiary)' }}>—</span>}
-              </td>
-              <td style={tdStyle}>
-                {perm.domain ?? <span style={{ color: 'var(--text-tertiary)' }}>—</span>}
-              </td>
-              <td style={tdStyle}>
-                <button
-                  type="button"
-                  onClick={() => remove(idx)}
-                  style={{
-                    fontSize: 11,
-                    color: '#dc2626',
-                    fontWeight: 500,
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    padding: 0
-                  }}
-                >
-                  Remove
-                </button>
-              </td>
-            </tr>
-          ))}
+  const dash = <Typography component="span" sx={{ color: 'text.disabled' }}>—</Typography>
 
-          {availableTypes.length > 0 && (
-            <tr style={{ background: '#f9fafb', borderTop: '2px dashed #e5e7eb' }}>
-              <td style={tdStyle}>
-                <select
-                  className="f-sel"
-                  style={{ height: 30, fontSize: 12, width: '100%' }}
-                  value={addType}
-                  onChange={(e) => {
-                    setAddType(e.target.value as ActionType | '')
-                    setAddLayer('')
-                    setAddSensitivity('')
-                    setAddDomain('')
-                  }}
-                  data-testid="select-type"
-                >
-                  <option value="">Select type…</option>
-                  {availableTypes.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
-              </td>
-              <td style={tdStyle}>
-                {addType && !isAdminType && (
-                  <select
-                    className="f-sel"
-                    style={{ height: 30, fontSize: 12, width: '100%' }}
-                    value={addLayer}
+  return (
+    <Box>
+      <TableContainer>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell>Type</TableCell>
+              <TableCell>Layer</TableCell>
+              <TableCell>Sensitivity</TableCell>
+              <TableCell>Domain</TableCell>
+              <TableCell sx={{ width: 100 }} />
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {(fields as unknown as PermissionType[]).map((perm, idx) => (
+              <TableRow key={idx}>
+                <TableCell sx={{ fontSize: 12 }}>{perm.type}</TableCell>
+                <TableCell sx={{ fontSize: 12 }}>{perm.layer ?? dash}</TableCell>
+                <TableCell sx={{ fontSize: 12 }}>{perm.sensitivity ?? dash}</TableCell>
+                <TableCell sx={{ fontSize: 12 }}>{perm.domain ?? dash}</TableCell>
+                <TableCell>
+                  <Button
+                    type="button"
+                    size="small"
+                    color="error"
+                    onClick={() => remove(idx)}
+                    sx={{ fontSize: 11, minWidth: 0, p: 0 }}
+                  >
+                    Remove
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+
+            {availableTypes.length > 0 && (
+              <TableRow sx={{ bgcolor: 'background.default' }}>
+                <TableCell>
+                  <Select
+                    size="small"
+                    fullWidth
+                    native
+                    value={addType}
                     onChange={(e) => {
-                      setAddLayer(e.target.value)
+                      setAddType(e.target.value as ActionType | '')
+                      setAddLayer('')
                       setAddSensitivity('')
                       setAddDomain('')
                     }}
-                    data-testid="select-layer"
+                    inputProps={{ 'data-testid': 'select-type' }}
+                    sx={{ fontSize: 12 }}
                   >
-                    <option value="">Select layer…</option>
-                    {availableLayers.map((l) => (
-                      <option key={l} value={l}>
-                        {l}
-                      </option>
+                    <option value="">Select type…</option>
+                    {availableTypes.map((t) => (
+                      <option key={t} value={t}>{t}</option>
                     ))}
-                  </select>
-                )}
-              </td>
-              <td style={tdStyle}>
-                {addLayer && !isAdminType && (
-                  <select
-                    className="f-sel"
-                    style={{ height: 30, fontSize: 12, width: '100%' }}
-                    value={addSensitivity}
-                    onChange={(e) => {
-                      setAddSensitivity(e.target.value as SensitivityType | '')
-                      setAddDomain('')
-                    }}
-                    data-testid="select-sensitivity"
+                  </Select>
+                </TableCell>
+                <TableCell>
+                  {addType && !isAdminType && (
+                    <Select
+                      size="small"
+                      fullWidth
+                      native
+                      value={addLayer}
+                      onChange={(e) => {
+                        setAddLayer(e.target.value as string)
+                        setAddSensitivity('')
+                        setAddDomain('')
+                      }}
+                      inputProps={{ 'data-testid': 'select-layer' }}
+                      sx={{ fontSize: 12 }}
+                    >
+                      <option value="">Select layer…</option>
+                      {availableLayers.map((l) => (
+                        <option key={l} value={l}>{l}</option>
+                      ))}
+                    </Select>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {addLayer && !isAdminType && (
+                    <Select
+                      size="small"
+                      fullWidth
+                      native
+                      value={addSensitivity}
+                      onChange={(e) => {
+                        setAddSensitivity(e.target.value as SensitivityType | '')
+                        setAddDomain('')
+                      }}
+                      inputProps={{ 'data-testid': 'select-sensitivity' }}
+                      sx={{ fontSize: 12 }}
+                    >
+                      <option value="">Select sensitivity…</option>
+                      {availableSensitivities.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </Select>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {addSensitivity === 'PROTECTED' && !isAdminType && (
+                    <Select
+                      size="small"
+                      fullWidth
+                      native
+                      value={addDomain}
+                      onChange={(e) => setAddDomain(e.target.value as string)}
+                      inputProps={{ 'data-testid': 'domain' }}
+                      sx={{ fontSize: 12 }}
+                    >
+                      <option value="">Select domain…</option>
+                      {availableDomains.map((d) => (
+                        <option key={d} value={d}>{d}</option>
+                      ))}
+                    </Select>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <Button
+                    type="button"
+                    size="small"
+                    variant="contained"
+                    onClick={handleAdd}
+                    disabled={!canAdd}
+                    data-testid="add-permission"
+                    sx={{ whiteSpace: 'nowrap', fontSize: 11 }}
                   >
-                    <option value="">Select sensitivity…</option>
-                    {availableSensitivities.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </td>
-              <td style={tdStyle}>
-                {addSensitivity === 'PROTECTED' && !isAdminType && (
-                  <select
-                    className="f-sel"
-                    style={{ height: 30, fontSize: 12, width: '100%' }}
-                    value={addDomain}
-                    onChange={(e) => setAddDomain(e.target.value)}
-                    data-testid="domain"
-                  >
-                    <option value="">Select domain…</option>
-                    {availableDomains.map((d) => (
-                      <option key={d} value={d}>
-                        {d}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </td>
-              <td style={tdStyle}>
-                <button
-                  type="button"
-                  className="btn-primary"
-                  style={{ height: 30, fontSize: 11, whiteSpace: 'nowrap' }}
-                  onClick={handleAdd}
-                  data-testid="add-permission"
-                  disabled={!canAdd}
-                >
-                  + Add
-                </button>
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+                    + Add
+                  </Button>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
       {addError && (
-        <div style={{ padding: '8px 16px', fontSize: 12, color: '#dc2626' }}>{addError}</div>
+        <Typography sx={{ p: 1.5, fontSize: 12, color: 'error.main' }}>{addError}</Typography>
       )}
-    </div>
+    </Box>
   )
-}
-
-const thStyle: React.CSSProperties = {
-  padding: '7px 12px',
-  fontSize: 10,
-  fontWeight: 600,
-  letterSpacing: '.06em',
-  textTransform: 'uppercase',
-  color: '#71717a',
-  textAlign: 'left'
-}
-
-const tdStyle: React.CSSProperties = {
-  padding: '8px 12px',
-  fontSize: 12
 }
 
 function removePermOption(

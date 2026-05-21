@@ -1,4 +1,4 @@
-import AccountLayout from '@/components/Layout/AccountLayout'
+import { AccountLayout, FormCard } from '@/components'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import UploadProgress from '@/components/UploadProgress/UploadProgress'
 import { getDatasetInfo, getMethods, queryDataset, uploadDataset } from '@/service'
@@ -6,6 +6,24 @@ import { DataFormats, UploadDatasetResponse, UploadDatasetResponseDetails } from
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/router'
 import { useState, ReactNode } from 'react'
+import {
+  Box,
+  Paper,
+  Typography,
+  Button,
+  Chip,
+  Alert,
+  LinearProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Stack
+} from '@mui/material'
+import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 
 type ActiveTab = 'download' | 'upload' | null
 
@@ -15,6 +33,15 @@ function formatDate(raw: string | undefined): string {
   if (isNaN(d.getTime())) return raw
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
     + ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+}
+
+function layerColor(layer: string): 'info' | 'success' | 'warning' | 'default' {
+  switch (layer?.toLowerCase()) {
+    case 'raw': return 'info'
+    case 'curated': return 'success'
+    case 'processed': return 'warning'
+    default: return 'default'
+  }
 }
 
 function DatasetDetailPage() {
@@ -89,7 +116,7 @@ function DatasetDetailPage() {
   })
 
   if (isLoading) {
-    return <div className="rapid-loading-bar" role="progressbar" />
+    return <LinearProgress color="primary" role="progressbar" />
   }
 
   if (error) {
@@ -115,189 +142,147 @@ function DatasetDetailPage() {
     ...Object.entries(meta.key_value_tags || {}).map(([k, v]) => `${k}: ${v}`)
   ]
 
+  const queryFields = [
+    { key: 'select_columns', label: 'Select Columns', placeholder: 'column1, avg(column2)' },
+    { key: 'filter', label: 'Filter', placeholder: 'column >= 10' },
+    { key: 'group_by_columns', label: 'Group by Columns', placeholder: 'column1, column3' },
+    { key: 'aggregation_conditions', label: 'Aggregation Conditions', placeholder: 'avg(column2) <= 15' },
+    { key: 'limit', label: 'Row Limit', placeholder: '30' }
+  ] as const
+
+  const stats: [string, string][] = [
+    ['Rows', meta.number_of_rows?.toLocaleString() ?? '—'],
+    ['Columns', meta.number_of_columns?.toLocaleString() ?? '—'],
+    ['Version', String(version)],
+    ['Last Updated', formatDate(meta.last_updated)],
+    ['Uploaded By', meta.last_uploaded_by || '—']
+  ]
+
   return (
-    <div className="form-wrap-wide">
-      {/* Actions bar */}
-      <div className="detail-actions">
+    <Box sx={{ maxWidth: 1100, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Stack direction="row" spacing={1} flexWrap="wrap">
         {methods?.can_download && (
-          <button
-            type="button"
-            className={activeTab === 'download' ? 'btn-primary' : 'btn-secondary'}
+          <Button
+            variant={activeTab === 'download' ? 'contained' : 'outlined'}
             onClick={() => setActiveTab(activeTab === 'download' ? null : 'download')}
           >
             Download
-          </button>
+          </Button>
         )}
         {methods?.can_upload && (
-          <button
-            type="button"
-            className={activeTab === 'upload' ? 'btn-primary' : 'btn-secondary'}
+          <Button
+            variant={activeTab === 'upload' ? 'contained' : 'outlined'}
             onClick={() => setActiveTab(activeTab === 'upload' ? null : 'upload')}
           >
             Upload
-          </button>
+          </Button>
         )}
         {methods?.can_create_schema && (
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={() => router.push(
-              `/schema/edit/${layer}/${domain}/${dataset}?version=${version}`
-            )}
+          <Button
+            variant="outlined"
+            onClick={() => router.push(`/schema/edit/${layer}/${domain}/${dataset}?version=${version}`)}
           >
             Edit Schema
-          </button>
+          </Button>
         )}
         {methods?.can_create_schema && (
-          <button
-            type="button"
-            className="act-btn act-btn-del"
+          <Button
+            variant="outlined"
+            color="error"
             onClick={() => router.push({
               pathname: '/data/delete',
               query: { layer: layer as string, domain: domain as string, dataset: dataset as string }
             })}
           >
             Delete
-          </button>
+          </Button>
         )}
-      </div>
+      </Stack>
 
-      {/* Download panel */}
       {activeTab === 'download' && methods?.can_download && (
-        <div className="form-card">
-          <div className="form-card-hd">
-            <div className="form-card-title">Download</div>
-          </div>
-          <div className="form-card-body">
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-              <span style={{ fontSize: '12px', color: 'var(--text-secondary)', alignSelf: 'center', marginRight: '8px' }}>Format:</span>
-              {(['csv', 'json'] as DataFormats[]).map((fmt) => (
-                <button
-                  key={fmt}
-                  type="button"
-                  onClick={() => setDataFormat(fmt)}
-                  className={`fchip${dataFormat === fmt ? ' on' : ''}`}
-                  style={{ textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '11px' }}
-                >
-                  {fmt.toUpperCase()}
-                </button>
-              ))}
-            </div>
-
-            <button
-              type="button"
-              className="detail-query-toggle"
-              onClick={() => setShowQuery(!showQuery)}
+        <FormCard
+          title="Download"
+          actionsError={downloadError}
+          actions={
+            <Button
+              variant="contained"
+              disabled={isDownloading}
+              onClick={() =>
+                mutate({
+                  path: `${layer}/${domain}/${dataset}/query?version=${version}`,
+                  dataFormat,
+                  data: createQueryBodyData()
+                })
+              }
             >
-              {showQuery ? 'Hide query options' : 'Show query options (optional)'}
-            </button>
+              {isDownloading ? 'Downloading…' : 'Download'}
+            </Button>
+          }
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+            <Typography variant="body2" sx={{ fontSize: 12 }}>Format:</Typography>
+            {(['csv', 'json'] as DataFormats[]).map((fmt) => (
+              <Chip
+                key={fmt}
+                label={fmt.toUpperCase()}
+                size="small"
+                onClick={() => setDataFormat(fmt)}
+                variant={dataFormat === fmt ? 'filled' : 'outlined'}
+                color={dataFormat === fmt ? 'primary' : 'default'}
+              />
+            ))}
+          </Box>
 
-            {showQuery && (
-              <div style={{ marginTop: '16px' }}>
-                <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-                  For further information on writing queries consult the{' '}
-                  <a
-                    href="https://rapid.readthedocs.io/en/latest/api/query/"
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{ color: 'var(--pink)', textDecoration: 'none' }}
-                  >
-                    query writing guide
-                  </a>
-                </p>
-                {[
-                  { key: 'select_columns', label: 'Select Columns', placeholder: 'column1, avg(column2)' },
-                  { key: 'filter', label: 'Filter', placeholder: 'column >= 10' },
-                  { key: 'group_by_columns', label: 'Group by Columns', placeholder: 'column1, column3' },
-                  { key: 'aggregation_conditions', label: 'Aggregation Conditions', placeholder: 'avg(column2) <= 15' },
-                  { key: 'limit', label: 'Row Limit', placeholder: '30' }
-                ].map(({ key, label, placeholder }) => (
-                  <div className="field-row" key={key}>
-                    <label className="f-lbl">{label}</label>
-                    <input
-                      className="f-sel"
-                      placeholder={placeholder}
-                      value={queryBody[key as keyof typeof queryBody]}
-                      onChange={(e) => setQueryBody({ ...queryBody, [key]: e.target.value })}
-                    />
-                  </div>
+          <Button size="small" onClick={() => setShowQuery(!showQuery)} sx={{ mb: 1 }}>
+            {showQuery ? 'Hide query options' : 'Show query options (optional)'}
+          </Button>
+
+          {showQuery && (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="body2" sx={{ fontSize: 12, mb: 2 }}>
+                For further information on writing queries consult the{' '}
+                <Box
+                  component="a"
+                  href="https://rapid.readthedocs.io/en/latest/api/query/"
+                  target="_blank"
+                  rel="noreferrer"
+                  sx={{ color: 'primary.main', textDecoration: 'none' }}
+                >
+                  query writing guide
+                </Box>
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                {queryFields.map(({ key, label, placeholder }) => (
+                  <TextField
+                    key={key}
+                    size="small"
+                    label={label}
+                    placeholder={placeholder}
+                    value={queryBody[key as keyof typeof queryBody]}
+                    onChange={(e) => setQueryBody({ ...queryBody, [key]: e.target.value })}
+                    InputLabelProps={{ shrink: true }}
+                  />
                 ))}
-              </div>
-            )}
+              </Box>
+            </Box>
+          )}
 
-            <div className="form-actions" style={{ marginTop: '16px' }}>
-              <button
-                className="btn-primary"
-                type="button"
-                disabled={isDownloading}
-                onClick={() =>
-                  mutate({
-                    path: `${layer}/${domain}/${dataset}/query?version=${version}`,
-                    dataFormat,
-                    data: createQueryBodyData()
-                  })
-                }
-              >
-                {isDownloading ? 'Downloading...' : 'Download'}
-              </button>
-            </div>
-
-            {noContentReturn && (
-              <div className="warn-box" style={{ marginTop: '12px' }}>
-                No data returned for this query. Please ensure that data has been uploaded and the
-                query is not too restrictive.
-              </div>
-            )}
-            {downloadError && <div className="warn-box" style={{ marginTop: '12px' }}>{downloadError?.message}</div>}
-          </div>
-        </div>
+          {noContentReturn && (
+            <Alert severity="warning" variant="outlined" sx={{ mt: 2 }}>
+              No data returned for this query. Please ensure that data has been uploaded and the
+              query is not too restrictive.
+            </Alert>
+          )}
+        </FormCard>
       )}
 
-      {/* Upload panel */}
       {activeTab === 'upload' && methods?.can_upload && (
-        <div className="form-card">
-          <div className="form-card-hd">
-            <div className="form-card-title">Upload</div>
-          </div>
-          <div className="form-card-body">
-            {!uploadDisable && (
-              <label className="upload-zone" htmlFor="detail-upload-file">
-                <div className="upload-ico">↑</div>
-                <div className="upload-text">Drag & drop your CSV file here</div>
-                <div className="upload-sub">or click to browse — CSV only, max 100 MB</div>
-                {uploadFile && (
-                  <div style={{ fontSize: '12px', color: 'var(--pink)', fontWeight: 500 }}>
-                    {uploadFile.name}
-                  </div>
-                )}
-              </label>
-            )}
-            <input
-              id="detail-upload-file"
-              type="file"
-              style={{ display: 'none' }}
-              onChange={(e) => setUploadFile(e.target.files?.[0])}
-            />
-
-            {uploadDetails && (
-              <div style={{ marginTop: '16px' }}>
-                <UploadProgress
-                  uploadSuccessDetails={uploadDetails}
-                  setDisableUpload={setUploadDisable}
-                />
-              </div>
-            )}
-
-            {uploadError && (
-              <div className="warn-box" style={{ marginTop: '12px' }}>
-                {uploadError.message}
-              </div>
-            )}
-          </div>
-          <div className="form-actions">
-            <button
-              className="btn-primary"
-              type="button"
+        <FormCard
+          title="Upload"
+          actionsError={uploadError}
+          actions={
+            <Button
+              variant="contained"
               disabled={!uploadFile || isUploading || uploadDisable}
               onClick={() => {
                 if (uploadFile) {
@@ -310,114 +295,149 @@ function DatasetDetailPage() {
                 }
               }}
             >
-              {isUploading ? 'Uploading...' : 'Upload dataset'}
-            </button>
-          </div>
-        </div>
+              {isUploading ? 'Uploading…' : 'Upload dataset'}
+            </Button>
+          }
+        >
+          {!uploadDisable && (
+            <Box
+              component="label"
+              htmlFor="detail-upload-file"
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 1,
+                p: 4,
+                border: '2px dashed',
+                borderColor: 'divider',
+                borderRadius: 1,
+                cursor: 'pointer',
+                bgcolor: 'background.default',
+                '&:hover': { borderColor: 'primary.main' }
+              }}
+            >
+              <CloudUploadIcon sx={{ fontSize: 32, color: 'text.disabled' }} />
+              <Typography sx={{ fontSize: 13, fontWeight: 500 }}>
+                Drag &amp; drop your CSV file here
+              </Typography>
+              <Typography sx={{ fontSize: 11, color: 'text.disabled' }}>
+                or click to browse — CSV only, max 100 MB
+              </Typography>
+              {uploadFile && (
+                <Typography sx={{ fontSize: 12, color: 'primary.main', fontWeight: 500 }}>
+                  {uploadFile.name}
+                </Typography>
+              )}
+            </Box>
+          )}
+          <input
+            id="detail-upload-file"
+            type="file"
+            style={{ display: 'none' }}
+            onChange={(e) => setUploadFile(e.target.files?.[0])}
+          />
+
+          {uploadDetails && (
+            <Box sx={{ mt: 2 }}>
+              <UploadProgress
+                uploadSuccessDetails={uploadDetails}
+                setDisableUpload={setUploadDisable}
+              />
+            </Box>
+          )}
+        </FormCard>
       )}
 
-      {/* Dataset header */}
-      <div className="ds-header">
-        <div className="ds-header-top">
-          <h1 className="ds-title">{dataset}</h1>
-          <span className={`badge ${({'raw':'raw','curated':'cur','processed':'proc'} as Record<string,string>)[(layer as string)?.toLowerCase()] || ''}`}>
-            {layer}
-          </span>
-          <span className="ds-sensitivity">{meta.sensitivity}</span>
-        </div>
-        <div className="ds-breadcrumb">{layer} / {domain} / {dataset}</div>
-        {meta.description && <p className="ds-description">{meta.description}</p>}
-      </div>
+      <Paper variant="outlined" sx={{ p: 2 }}>
+        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+          <Typography variant="h1" sx={{ fontSize: 22, mr: 1 }}>{dataset}</Typography>
+          <Chip size="small" label={layer as string} color={layerColor(layer as string)} variant="outlined" />
+          {meta.sensitivity && <Chip size="small" label={meta.sensitivity} variant="outlined" />}
+        </Stack>
+        <Typography variant="body2" sx={{ fontSize: 12, color: 'text.secondary', mt: 0.5 }}>
+          {layer} / {domain} / {dataset}
+        </Typography>
+        {meta.description && (
+          <Typography variant="body1" sx={{ fontSize: 13, mt: 1.5 }}>{meta.description}</Typography>
+        )}
+      </Paper>
 
-      {/* Key stats */}
-      <div className="ds-stats">
-        <div className="ds-stat">
-          <div className="ds-stat-value">{meta.number_of_rows?.toLocaleString() ?? '—'}</div>
-          <div className="ds-stat-label">Rows</div>
-        </div>
-        <div className="ds-stat">
-          <div className="ds-stat-value">{meta.number_of_columns?.toLocaleString() ?? '—'}</div>
-          <div className="ds-stat-label">Columns</div>
-        </div>
-        <div className="ds-stat">
-          <div className="ds-stat-value">{version}</div>
-          <div className="ds-stat-label">Version</div>
-        </div>
-        <div className="ds-stat">
-          <div className="ds-stat-value">{formatDate(meta.last_updated)}</div>
-          <div className="ds-stat-label">Last Updated</div>
-        </div>
-        <div className="ds-stat">
-          <div className="ds-stat-value">{meta.last_uploaded_by || '—'}</div>
-          <div className="ds-stat-label">Uploaded By</div>
-        </div>
-      </div>
+      <Paper variant="outlined" sx={{ p: 2, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+        {stats.map(([label, value]) => (
+          <Box key={label}>
+            <Typography sx={{ fontSize: 18, fontWeight: 600 }}>{value}</Typography>
+            <Typography sx={{ fontSize: 11, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '.05em' }}>
+              {label}
+            </Typography>
+          </Box>
+        ))}
+      </Paper>
 
-      {/* Secondary details */}
-      {(meta.owners?.length || tags.length || meta.update_behaviour) && (
-        <div className="ds-details">
+      {(meta.owners?.length || tags.length || meta.update_behaviour) ? (
+        <Paper variant="outlined" sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
           {meta.update_behaviour && (
-            <div className="ds-detail-item">
-              <span className="ds-detail-label">Update Behaviour</span>
-              <span className="ds-detail-value">{meta.update_behaviour}</span>
-            </div>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Typography sx={{ fontSize: 11, fontWeight: 600, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '.05em', minWidth: 140 }}>
+                Update Behaviour
+              </Typography>
+              <Typography sx={{ fontSize: 13 }}>{meta.update_behaviour}</Typography>
+            </Box>
           )}
           {meta.owners && meta.owners.length > 0 && (
-            <div className="ds-detail-item">
-              <span className="ds-detail-label">Owners</span>
-              <span className="ds-detail-value">
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Typography sx={{ fontSize: 11, fontWeight: 600, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '.05em', minWidth: 140 }}>
+                Owners
+              </Typography>
+              <Typography sx={{ fontSize: 13 }}>
                 {meta.owners.map((o) => `${o.name} (${o.email})`).join(', ')}
-              </span>
-            </div>
+              </Typography>
+            </Box>
           )}
           {tags.length > 0 && (
-            <div className="ds-detail-item">
-              <span className="ds-detail-label">Tags</span>
-              <span className="ds-detail-value">
-                {tags.map((t) => (
-                  <span key={t} className="ds-tag">{t}</span>
-                ))}
-              </span>
-            </div>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Typography sx={{ fontSize: 11, fontWeight: 600, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '.05em', minWidth: 140 }}>
+                Tags
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                {tags.map((t) => <Chip key={t} size="small" label={t} variant="outlined" />)}
+              </Box>
+            </Box>
           )}
-        </div>
-      )}
+        </Paper>
+      ) : null}
 
-      {/* Columns */}
-      <div className="form-card">
-        <div className="form-card-hd">
-          <div className="form-card-title">Columns</div>
-        </div>
-        <div className="form-card-body" style={{ padding: 0 }}>
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Data Type</th>
-                <th>Allows Null</th>
-                <th>Unique</th>
-                <th>Format</th>
-                <th>Max</th>
-                <th>Min</th>
-              </tr>
-            </thead>
-            <tbody>
+      <FormCard title="Columns" bodySx={{ p: 0 }}>
+        <TableContainer>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>Name</TableCell>
+                <TableCell>Data Type</TableCell>
+                <TableCell>Allows Null</TableCell>
+                <TableCell>Unique</TableCell>
+                <TableCell>Format</TableCell>
+                <TableCell>Max</TableCell>
+                <TableCell>Min</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
               {info.columns.map((col, idx) => (
-                <tr key={idx}>
-                  <td className="mn">{col.name}</td>
-                  <td>{col.data_type}</td>
-                  <td>{col.allow_null ? 'Yes' : 'No'}</td>
-                  <td>{col.unique ? 'Yes' : 'No'}</td>
-                  <td className="mn">{col.format || '—'}</td>
-                  <td className="mn">{col.statistics?.max || '—'}</td>
-                  <td className="mn">{col.statistics?.min || '—'}</td>
-                </tr>
+                <TableRow key={idx}>
+                  <TableCell sx={{ fontFamily: 'monospace', fontSize: 12 }}>{col.name}</TableCell>
+                  <TableCell>{col.data_type}</TableCell>
+                  <TableCell>{col.allow_null ? 'Yes' : 'No'}</TableCell>
+                  <TableCell>{col.unique ? 'Yes' : 'No'}</TableCell>
+                  <TableCell sx={{ fontFamily: 'monospace', fontSize: 12 }}>{col.format || '—'}</TableCell>
+                  <TableCell sx={{ fontFamily: 'monospace', fontSize: 12 }}>{col.statistics?.max || '—'}</TableCell>
+                  <TableCell sx={{ fontFamily: 'monospace', fontSize: 12 }}>{col.statistics?.min || '—'}</TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </FormCard>
+    </Box>
   )
 }
 

@@ -4,6 +4,18 @@ import { getMethods, getDatasetsUi } from '@/service'
 import { Dataset } from '@/service/types'
 import { ReactNode, useState, useMemo, useRef, useEffect } from 'react'
 import { useRouter } from 'next/router'
+import {
+  Box,
+  Paper,
+  Typography,
+  Button,
+  Chip,
+  TextField,
+  LinearProgress,
+  InputAdornment,
+  ClickAwayListener
+} from '@mui/material'
+import SearchIcon from '@mui/icons-material/Search'
 
 function AccountIndexPage() {
   const router = useRouter()
@@ -62,99 +74,131 @@ function AccountIndexPage() {
   }, [])
 
   if (isLoading) {
-    return <div className="rapid-loading-bar" role="progressbar" />
+    return <LinearProgress color="primary" role="progressbar" />
   }
 
   return (
-    <div className="hp-wrap" data-testid="intro">
-      <div className="hp-hero">
-        <div className="hp-hero-glow" />
-        <div className="hp-hero-wave" />
-        <div className="hp-hero-wave-2" />
-        <div className="hp-hero-inner">
-          <h1 className="hp-hero-title">Welcome to rAPId</h1>
+    <Box data-testid="intro" sx={{ width: '100%' }}>
+      <Box
+        sx={{
+          background: 'linear-gradient(135deg, #1e3a5f 0%, #2a4a72 100%)',
+          color: '#fff',
+          px: 4,
+          py: 8,
+          textAlign: 'center'
+        }}
+      >
+        <Typography variant="h1" sx={{ color: '#fff', fontSize: 32, mb: 4 }}>
+          Welcome to rAPId
+        </Typography>
 
-          <div className="hp-search-wrap" ref={wrapRef}>
-            {/* Layer filter chips */}
-            {datasets.length > 0 && layers.length > 2 && (
-              <div className="hp-filter-chips">
-                {layers.map((l) => (
-                  <button
-                    key={l}
-                    type="button"
-                    className={`hp-chip${layerFilter === l ? ' on' : ''}`}
-                    onClick={() => { setLayerFilter(l); setOpen(true) }}
-                  >
-                    {l}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            <div className="hp-search-form">
-              <input
-                className="hp-search-input"
-                type="text"
-                placeholder="Search datasets by name, domain or layer…"
-                value={search}
-                onChange={(e) => { setSearch(e.target.value); setOpen(true) }}
-                onFocus={() => setOpen(true)}
-              />
-              <button
-                className="hp-search-btn"
-                type="button"
-                onClick={() => {
-                  if (search.trim()) {
-                    router.push({ pathname: '/catalog', query: { q: search.trim() } })
-                  } else {
-                    router.push('/catalog')
+        <Box sx={{ maxWidth: 720, mx: 'auto', position: 'relative' }} ref={wrapRef}>
+          {datasets.length > 0 && layers.length > 2 && (
+            <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', flexWrap: 'wrap', mb: 2 }}>
+              {layers.map((l) => (
+                <Chip
+                  key={l}
+                  label={l}
+                  size="small"
+                  variant={layerFilter === l ? 'filled' : 'outlined'}
+                  color={layerFilter === l ? 'primary' : 'default'}
+                  onClick={() => { setLayerFilter(l); setOpen(true) }}
+                  sx={
+                    layerFilter !== l
+                      ? { color: '#fff', borderColor: 'rgba(255,255,255,0.4)', '&:hover': { borderColor: '#fff' } }
+                      : undefined
                   }
+                />
+              ))}
+            </Box>
+          )}
+
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <TextField
+              fullWidth
+              size="small"
+              placeholder="Search datasets by name, domain or layer…"
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setOpen(true) }}
+              onFocus={() => setOpen(true)}
+              sx={{
+                bgcolor: '#fff',
+                borderRadius: 1,
+                '& .MuiOutlinedInput-root': { fontSize: 14 }
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon sx={{ fontSize: 18, color: 'text.disabled' }} />
+                  </InputAdornment>
+                )
+              }}
+            />
+            <Button
+              variant="contained"
+              onClick={() => {
+                if (search.trim()) {
+                  router.push({ pathname: '/catalog', query: { q: search.trim() } })
+                } else {
+                  router.push('/catalog')
+                }
+              }}
+              sx={{ whiteSpace: 'nowrap' }}
+            >
+              View Catalog
+            </Button>
+          </Box>
+
+          {open && search.trim() && filtered.length > 0 && (
+            <ClickAwayListener onClickAway={() => setOpen(false)}>
+              <Paper
+                elevation={4}
+                sx={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  right: 0,
+                  mt: 0.5,
+                  textAlign: 'left',
+                  zIndex: 10,
+                  maxHeight: 360,
+                  overflowY: 'auto'
                 }}
               >
-                View Catalog
-              </button>
-            </div>
-
-            {/* Dropdown results */}
-            {open && search.trim() && filtered.length > 0 && (
-              <div className="hp-results">
                 {filtered.map((d) => {
                   const key = `${d.layer}/${d.domain}/${d.dataset}`
                   return (
-                    <div
+                    <Box
                       key={key}
-                      className="hp-result-row"
                       onClick={() => router.push(
                         `/dataset/${d.layer}/${d.domain}/${d.dataset}?version=${d.version}`
                       )}
-                      style={{ cursor: 'pointer' }}
+                      sx={{
+                        cursor: 'pointer',
+                        p: 1.5,
+                        borderBottom: '1px solid',
+                        borderColor: 'divider',
+                        '&:hover': { bgcolor: 'background.default' },
+                        '&:last-child': { borderBottom: 0 }
+                      }}
                     >
-                      <div className="hp-result-info">
-                        <span className="hp-result-name">{d.dataset}</span>
-                        <span className="hp-result-meta">
-                          {d.layer} / {d.domain} {d.version ? `v${d.version}` : ''}
-                        </span>
-                      </div>
-                    </div>
+                      <Typography sx={{ fontSize: 13, fontWeight: 500 }}>{d.dataset}</Typography>
+                      <Typography sx={{ fontSize: 11, color: 'text.disabled' }}>
+                        {d.layer} / {d.domain} {d.version ? `v${d.version}` : ''}
+                      </Typography>
+                    </Box>
                   )
                 })}
-              </div>
-            )}
+              </Paper>
+            </ClickAwayListener>
+          )}
+        </Box>
+      </Box>
 
-          </div>
-        </div>
-      </div>
-
-      {(data?.can_upload || data?.can_download) && (
-        <span data-testid="data-management" />
-      )}
-      {data?.can_create_schema && (
-        <span data-testid="schema-management" />
-      )}
-      {data?.can_manage_users && (
-        <span data-testid="user-management" />
-      )}
-    </div>
+      {(data?.can_upload || data?.can_download) && <span data-testid="data-management" />}
+      {data?.can_create_schema && <span data-testid="schema-management" />}
+      {data?.can_manage_users && <span data-testid="user-management" />}
+    </Box>
   )
 }
 

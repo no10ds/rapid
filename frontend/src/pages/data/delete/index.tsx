@@ -1,4 +1,4 @@
-import AccountLayout from '@/components/Layout/AccountLayout'
+import { AccountLayout, FormCard } from '@/components'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import DatasetSelector from '@/components/DatasetSelector/DatasetSelector'
 import { deleteDataset, getDatasetsUi } from '@/service'
@@ -6,6 +6,7 @@ import { Dataset, DeleteDatasetResponse } from '@/service/types'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/router'
 import { useState, ReactNode } from 'react'
+import { Box, Alert, AlertTitle, Button, Chip, LinearProgress } from '@mui/material'
 
 function DeleteDataset({ datasetInput = null }: { datasetInput?: Dataset | null }) {
   const router = useRouter()
@@ -13,11 +14,19 @@ function DeleteDataset({ datasetInput = null }: { datasetInput?: Dataset | null 
 
   const fromQuery: Dataset | null =
     layer && domain && datasetName
-      ? { layer: layer as string, domain: domain as string, dataset: datasetName as string, version: 1, sensitivity: undefined }
+      ? {
+          layer: layer as string,
+          domain: domain as string,
+          dataset: datasetName as string,
+          version: 1,
+          sensitivity: undefined
+        }
       : null
 
   const [dataset, setDataset] = useState<Dataset | null>(datasetInput ?? fromQuery)
-  const [deleteDatasetSuccessDetails, setDeleteDatasetSuccessDetails] = useState<string | undefined>()
+  const [deleteDatasetSuccessDetails, setDeleteDatasetSuccessDetails] = useState<
+    string | undefined
+  >()
 
   const {
     isLoading: isDatasetsListLoading,
@@ -25,120 +34,92 @@ function DeleteDataset({ datasetInput = null }: { datasetInput?: Dataset | null 
     error: datasetsError
   } = useQuery(['datasetsList', 'READ'], getDatasetsUi)
 
-  const { isLoading, mutate, error } = useMutation<DeleteDatasetResponse, Error, { path: string }>({
+  const { isLoading, mutate, error } = useMutation<
+    DeleteDatasetResponse,
+    Error,
+    { path: string }
+  >({
     mutationFn: deleteDataset,
     onMutate: () => setDeleteDatasetSuccessDetails(undefined),
     onSuccess: (data) => setDeleteDatasetSuccessDetails(data.details)
   })
 
   if (isDatasetsListLoading) {
-    return <div className="rapid-loading-bar" role="progressbar" />
+    return <LinearProgress color="primary" role="progressbar" />
   }
 
   if (datasetsError) {
     return <ErrorCard error={datasetsError as Error} />
   }
 
-  const currentDataset = dataset
-
   return (
-    <form
-      className="form-page"
+    <Box
+      component="form"
+      sx={{ maxWidth: 860, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}
       onSubmit={async (event) => {
         event.preventDefault()
-        if (currentDataset) {
-          await mutate({ path: `${currentDataset.layer}/${currentDataset.domain}/${currentDataset.dataset}` })
+        if (dataset) {
+          await mutate({ path: `${dataset.layer}/${dataset.domain}/${dataset.dataset}` })
         }
       }}
     >
-      {/* Warning banner */}
-      <div className="form-card" style={{ marginBottom: '16px' }}>
-        <div className="form-card-hd form-card-hd-danger">
-          <div className="form-card-num form-card-num-danger">!</div>
-          <div className="form-card-title form-card-title-danger">Destructive action</div>
-        </div>
-        <div className="form-card-body">
-          <div className="warn-box" style={{ marginBottom: 0 }}>
-            This action permanently deletes the dataset, its schema, crawlers, and all raw
-            data. This <strong>cannot be undone</strong>.
-          </div>
-        </div>
-      </div>
+      <Alert severity="error" variant="outlined">
+        <AlertTitle sx={{ fontWeight: 600 }}>Destructive action</AlertTitle>
+        This action permanently deletes the dataset, its schema, crawlers, and all raw
+        data. This <strong>cannot be undone</strong>.
+      </Alert>
 
-      {/* Select dataset */}
-      <div className="form-card">
-        <div className="form-card-hd">
-          <div className="form-card-num">1</div>
-          <div className="form-card-title">Select dataset to delete</div>
-        </div>
-        <div className="form-card-body">
-          {fromQuery ? (
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {[['Layer', fromQuery.layer], ['Domain', fromQuery.domain], ['Dataset', fromQuery.dataset]].map(([label, val]) => (
-                <div key={label} style={{ padding: '8px 14px', background: '#f9fafb', border: '1px solid var(--border)', borderRadius: 'var(--radius)', fontSize: 12 }}>
-                  <span style={{ color: 'var(--text-tertiary)', fontWeight: 600, marginRight: 6, textTransform: 'uppercase', fontSize: 10, letterSpacing: '.04em' }}>{label}</span>
-                  <span style={{ fontWeight: 500 }}>{val}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <DatasetSelector
-              datasetsList={datasetsList}
-              setParentDataset={setDataset}
-              enableVersionSelector={false}
-            />
-          )}
-
-          {deleteDatasetSuccessDetails && (
-            <div
-              data-testid="delete-status"
-              style={{
-                marginTop: '14px',
-                padding: '10px 14px',
-                background: 'var(--green-faint)',
-                border: '1px solid rgba(16,185,129,.2)',
-                borderRadius: '6px',
-                fontSize: '12px',
-                color: '#059669',
-                fontWeight: 500
-              }}
+      <FormCard
+        title="Select dataset to delete"
+        actionsError={error}
+        actions={
+          <>
+            <Button
+              variant="contained"
+              color="error"
+              type="submit"
+              data-testid="submit"
+              disabled={!dataset || isLoading}
             >
-              Dataset deleted: {currentDataset
-                ? `${currentDataset.layer}/${currentDataset.domain}/${currentDataset.dataset}`
-                : deleteDatasetSuccessDetails}
-            </div>
-          )}
+              {isLoading ? 'Deleting…' : 'Delete dataset'}
+            </Button>
+            <Button variant="outlined" type="button" onClick={() => router.push('/catalog')}>
+              Cancel
+            </Button>
+            {dataset && !deleteDatasetSuccessDetails && (
+              <Chip
+                size="small"
+                variant="outlined"
+                label={`${dataset.layer} / ${dataset.domain} / ${dataset.dataset}`}
+                sx={{ ml: 'auto' }}
+              />
+            )}
+          </>
+        }
+      >
+        {fromQuery ? (
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            <Chip size="small" variant="outlined" label={`Layer: ${fromQuery.layer}`} />
+            <Chip size="small" variant="outlined" label={`Domain: ${fromQuery.domain}`} />
+            <Chip size="small" variant="outlined" label={`Dataset: ${fromQuery.dataset}`} />
+          </Box>
+        ) : (
+          <DatasetSelector
+            datasetsList={datasetsList}
+            setParentDataset={setDataset}
+            enableVersionSelector={false}
+          />
+        )}
 
-          {error && (
-            <div className="warn-box" style={{ marginTop: '14px', marginBottom: 0 }}>
-              {error.message}
-            </div>
-          )}
-        </div>
-        <div className="form-actions">
-          <button
-            className="btn-danger"
-            type="submit"
-            data-testid="submit"
-            disabled={!currentDataset || isLoading}
-          >
-            {isLoading ? 'Deleting…' : 'Delete dataset'}
-          </button>
-          <button
-            className="btn-secondary"
-            type="button"
-            onClick={() => router.push('/catalog')}
-          >
-            Cancel
-          </button>
-          {currentDataset && !deleteDatasetSuccessDetails && (
-            <span className="info-chip" style={{ marginLeft: 'auto' }}>
-              <span>{currentDataset.layer} / {currentDataset.domain} / {currentDataset.dataset}</span>
-            </span>
-          )}
-        </div>
-      </div>
-    </form>
+        {deleteDatasetSuccessDetails && (
+          <Alert severity="success" variant="outlined" sx={{ mt: 2 }} data-testid="delete-status">
+            Dataset deleted: {dataset
+              ? `${dataset.layer}/${dataset.domain}/${dataset.dataset}`
+              : deleteDatasetSuccessDetails}
+          </Alert>
+        )}
+      </FormCard>
+    </Box>
   )
 }
 

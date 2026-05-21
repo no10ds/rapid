@@ -1,4 +1,4 @@
-import AccountLayout from '@/components/Layout/AccountLayout'
+import { AccountLayout, FormCard } from '@/components'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import DatasetSelector from '@/components/DatasetSelector/DatasetSelector'
 import UploadProgress from '@/components/UploadProgress/UploadProgress'
@@ -11,6 +11,9 @@ import {
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useState, ReactNode } from 'react'
 import Link from 'next/link'
+import { Box, Typography, Button, Chip, Alert, LinearProgress } from '@mui/material'
+import CloudUploadIcon from '@mui/icons-material/CloudUpload'
+import AddIcon from '@mui/icons-material/Add'
 
 function UploadDataset({ datasetInput = null }: { datasetInput?: Dataset | null }) {
   const [file, setFile] = useState<File | undefined>()
@@ -42,7 +45,7 @@ function UploadDataset({ datasetInput = null }: { datasetInput?: Dataset | null 
   })
 
   if (isDatasetsListLoading) {
-    return <div className="rapid-loading-bar" role="progressbar" />
+    return <LinearProgress color="primary" role="progressbar" />
   }
 
   if (datasetsError) {
@@ -54,8 +57,9 @@ function UploadDataset({ datasetInput = null }: { datasetInput?: Dataset | null 
     : null
 
   return (
-    <form
-      className="form-wrap-wide"
+    <Box
+      component="form"
+      sx={{ maxWidth: 860, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}
       onSubmit={async (event) => {
         event.preventDefault()
         if (dataset && file) {
@@ -68,129 +72,131 @@ function UploadDataset({ datasetInput = null }: { datasetInput?: Dataset | null 
         }
       }}
     >
-      {/* Card 1 — Select dataset */}
-      <div className="form-card">
-        <div className="form-card-hd">
-          <div className="form-card-num">1</div>
-          <div className="form-card-title">Select dataset</div>
-        </div>
-        <div className="form-card-body">
-          <DatasetSelector
-            datasetsList={datasetsList}
-            setParentDataset={setDataset}
-          />
-          <div
-            style={{
-              marginTop: '12px',
-              padding: '12px 14px',
-              background: '#fafafa',
-              border: '1px dashed #e4e4e7',
-              borderRadius: '6px',
+      <FormCard num={1} title="Select dataset">
+        <DatasetSelector datasetsList={datasetsList} setParentDataset={setDataset} />
+        <Box
+          sx={{
+            mt: 2,
+            p: 1.5,
+            border: '1px dashed',
+            borderColor: 'divider',
+            borderRadius: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 1.5,
+            bgcolor: 'background.default'
+          }}
+        >
+          <Typography variant="body2" sx={{ fontSize: 12 }}>
+            Can&apos;t find your dataset? You&apos;ll need to add it first.
+          </Typography>
+          <Button
+            component={Link}
+            href="/schema/create"
+            size="small"
+            variant="outlined"
+            startIcon={<AddIcon />}
+          >
+            Add new dataset
+          </Button>
+        </Box>
+      </FormCard>
+
+      <FormCard
+        num={2}
+        title="Upload file"
+        actionsError={error}
+        actions={
+          <>
+            <Button
+              variant="contained"
+              type="submit"
+              disabled={!dataset || !file || isLoading || disable}
+              data-testid="submit"
+            >
+              {isLoading ? 'Uploading…' : 'Upload dataset'}
+            </Button>
+            <Button
+              variant="outlined"
+              type="button"
+              onClick={() => {
+                setFile(undefined)
+                setDataset(null)
+                setDisable(false)
+                setUploadSuccessDetails(undefined)
+              }}
+            >
+              Cancel
+            </Button>
+            {dataset && (
+              <Chip size="small" variant="outlined" label={datasetLabel} sx={{ ml: 'auto' }} />
+            )}
+          </>
+        }
+      >
+        {datasetLabel && (
+          <Alert severity="info" variant="outlined" sx={{ mb: 2 }}>
+            <strong>Selected dataset:</strong> {datasetLabel}
+          </Alert>
+        )}
+
+        {!disable && (
+          <Box
+            component="label"
+            htmlFor="file"
+            sx={{
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '12px'
+              justifyContent: 'center',
+              gap: 1,
+              p: 4,
+              border: '2px dashed',
+              borderColor: 'divider',
+              borderRadius: 1,
+              cursor: 'pointer',
+              bgcolor: 'background.default',
+              '&:hover': { borderColor: 'primary.main' }
             }}
           >
-            <span style={{ fontSize: '12px', color: '#71717a' }}>
-              Can&apos;t find your dataset? You&apos;ll need to add it first.
-            </span>
-            <Link
-              href="/schema/create"
-              className="act-btn"
-              style={{ color: 'var(--pink)', borderColor: 'rgba(236,72,153,.3)', whiteSpace: 'nowrap' }}
-            >
-              + Add new dataset
-            </Link>
-          </div>
-        </div>
-      </div>
+            <CloudUploadIcon sx={{ fontSize: 32, color: 'text.disabled' }} />
+            <Typography variant="body1" sx={{ fontSize: 13, fontWeight: 500 }}>
+              Drag &amp; drop your CSV file here
+            </Typography>
+            <Typography variant="body2" sx={{ fontSize: 11, color: 'text.disabled' }}>
+              or click to browse — CSV only, max 100 MB
+            </Typography>
+            {file && (
+              <Typography
+                variant="body2"
+                sx={{ fontSize: 12, color: 'primary.main', fontWeight: 500 }}
+              >
+                {file.name}
+              </Typography>
+            )}
+          </Box>
+        )}
+        <input
+          name="file"
+          id="file"
+          type="file"
+          data-testid="upload"
+          style={{ display: 'none' }}
+          onChange={(event) => setFile(event.target.files[0])}
+          key={`file-upload-${disable.toString()}`}
+        />
 
-      {/* Card 2 — Upload file */}
-      <div className="form-card">
-        <div className="form-card-hd">
-          <div className="form-card-num">2</div>
-          <div className="form-card-title">Upload file</div>
-        </div>
-        <div className="form-card-body">
-          {datasetLabel && (
-            <div className="selected-dataset">
-              <div>
-                <div className="lbl">Selected dataset</div>
-                <div className="val">{datasetLabel}</div>
-              </div>
-            </div>
-          )}
-
-          {!disable && (
-            <label className="upload-zone" htmlFor="file">
-              <div className="upload-ico">↑</div>
-              <div className="upload-text">Drag &amp; drop your CSV file here</div>
-              <div className="upload-sub">or click to browse — CSV only, max 100 MB</div>
-              {file && (
-                <div style={{ fontSize: '12px', color: 'var(--pink)', fontWeight: 500 }}>
-                  {file.name}
-                </div>
-              )}
-            </label>
-          )}
-          <input
-            name="file"
-            id="file"
-            type="file"
-            data-testid="upload"
-            style={{ display: 'none' }}
-            onChange={(event) => setFile(event.target.files[0])}
-            key={`file-upload-${disable.toString()}`}
-          />
-
-          {uploadSuccessDetails && (
-            <div style={{ marginTop: '16px' }}>
-              <UploadProgress
-                uploadSuccessDetails={uploadSuccessDetails}
-                setDisableUpload={setDisable}
-              />
-            </div>
-          )}
-
-          {error && (
-            <div
-              className="warn-box"
-              style={{ marginTop: '12px', background: 'var(--red-faint)', borderColor: '#fecaca' }}
-            >
-              {error.message}
-            </div>
-          )}
-        </div>
-        <div className="form-actions">
-          <button
-            className="btn-primary"
-            type="submit"
-            disabled={!dataset || !file || isLoading || disable}
-            data-testid="submit"
-          >
-            {isLoading ? 'Uploading…' : 'Upload dataset'}
-          </button>
-          <button
-            className="btn-secondary"
-            type="button"
-            onClick={() => {
-              setFile(undefined)
-              setDataset(null)
-              setDisable(false)
-              setUploadSuccessDetails(undefined)
-            }}
-          >
-            Cancel
-          </button>
-          {dataset && (
-            <span className="info-chip" style={{ marginLeft: 'auto' }}>
-              <span>{datasetLabel}</span>
-            </span>
-          )}
-        </div>
-      </div>
-    </form>
+        {uploadSuccessDetails && (
+          <Box sx={{ mt: 2 }}>
+            <UploadProgress
+              uploadSuccessDetails={uploadSuccessDetails}
+              setDisableUpload={setDisable}
+            />
+          </Box>
+        )}
+      </FormCard>
+    </Box>
   )
 }
 

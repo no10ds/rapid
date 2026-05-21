@@ -1,4 +1,4 @@
-import AccountLayout from '@/components/Layout/AccountLayout'
+import { AccountLayout, FormCard } from '@/components'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import { CreateSchema as CreateSchemaComponent } from '@/components'
 import {
@@ -13,6 +13,18 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useState, useEffect, ReactNode } from 'react'
 import { useForm, Controller } from 'react-hook-form'
+import {
+  Box,
+  Typography,
+  Button,
+  LinearProgress,
+  TextField,
+  Select,
+  FormControl,
+  InputLabel,
+  FormHelperText
+} from '@mui/material'
+import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 
 function CreateSchema() {
   const [file, setFile] = useState<File | undefined>()
@@ -54,7 +66,7 @@ function CreateSchema() {
   }
 
   if (isLayersLoading) {
-    return <div className="rapid-loading-bar" role="progressbar" />
+    return <LinearProgress color="primary" role="progressbar" />
   }
 
   if (layersError) {
@@ -62,51 +74,38 @@ function CreateSchema() {
   }
 
   return (
-    <form
-      className="form-page"
-      onSubmit={handleSubmit(
-        async (data: SchemaGenerate) => {
-          const formData = new FormData()
-          formData.append('file', file)
-          const path = `${data.layer}/${data.sensitivity}/${data.domain}/${data.title}/generate`
-          await mutate({ path, data: formData })
-        }
-      )}
+    <Box
+      component="form"
+      sx={{ maxWidth: 860, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}
+      onSubmit={handleSubmit(async (data: SchemaGenerate) => {
+        const formData = new FormData()
+        formData.append('file', file)
+        const path = `${data.layer}/${data.sensitivity}/${data.domain}/${data.title}/generate`
+        await mutate({ path, data: formData })
+      })}
     >
-      <div className="form-card">
-        <div className="form-card-hd">
-          <div className="form-card-num">1</div>
-          <div className="form-card-title">Dataset properties</div>
-        </div>
-        <div className="form-card-body">
+      <FormCard num={1} title="Dataset properties">
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Controller
             name="sensitivity"
             control={control}
             render={({ field, fieldState: { error: fieldError } }) => (
-              <div className="field-row">
-                <label className="f-lbl" htmlFor="field-level">
-                  Sensitivity Level
-                </label>
-                <select
+              <FormControl size="small" error={!!fieldError} fullWidth>
+                <InputLabel htmlFor="field-level" shrink>Sensitivity Level</InputLabel>
+                <Select
                   {...field}
-                  id="field-level"
-                  className="f-sel"
-                  data-testid="field-level"
-                  style={fieldError ? { borderColor: 'var(--red)' } : undefined}
+                  native
+                  label="Sensitivity Level"
+                  notched
+                  inputProps={{ 'data-testid': 'field-level', id: 'field-level' }}
                 >
-                  <option value="" disabled>
-                    Please select
-                  </option>
+                  <option value="" disabled>Please select</option>
                   {[...GlobalSensitivities, ProtectedSensitivity].map((value) => (
-                    <option key={value}>{value}</option>
+                    <option key={value} value={value}>{value}</option>
                   ))}
-                </select>
-                {fieldError && (
-                  <span className="f-hint" style={{ color: 'var(--red)' }}>
-                    {fieldError.message}
-                  </span>
-                )}
-              </div>
+                </Select>
+                {fieldError && <FormHelperText>{fieldError.message}</FormHelperText>}
+              </FormControl>
             )}
           />
 
@@ -114,30 +113,22 @@ function CreateSchema() {
             name="layer"
             control={control}
             render={({ field, fieldState: { error: fieldError } }) => (
-              <div className="field-row">
-                <label className="f-lbl" htmlFor="field-layer">
-                  Dataset Layer
-                </label>
-                <select
+              <FormControl size="small" error={!!fieldError} fullWidth>
+                <InputLabel htmlFor="field-layer" shrink>Dataset Layer</InputLabel>
+                <Select
                   {...field}
-                  id="field-layer"
-                  className="f-sel"
-                  data-testid="field-layer"
-                  style={fieldError ? { borderColor: 'var(--red)' } : undefined}
+                  native
+                  label="Dataset Layer"
+                  notched
+                  inputProps={{ 'data-testid': 'field-layer', id: 'field-layer' }}
                 >
-                  <option value="" disabled>
-                    Please select
-                  </option>
+                  <option value="" disabled>Please select</option>
                   {layersData.map((value) => (
-                    <option key={value}>{value}</option>
+                    <option key={value} value={value}>{value}</option>
                   ))}
-                </select>
-                {fieldError && (
-                  <span className="f-hint" style={{ color: 'var(--red)' }}>
-                    {fieldError.message}
-                  </span>
-                )}
-              </div>
+                </Select>
+                {fieldError && <FormHelperText>{fieldError.message}</FormHelperText>}
+              </FormControl>
             )}
           />
 
@@ -145,24 +136,16 @@ function CreateSchema() {
             name="domain"
             control={control}
             render={({ field, fieldState: { error: fieldError } }) => (
-              <div className="field-row">
-                <label className="f-lbl" htmlFor="field-domain">
-                  Dataset Domain
-                </label>
-                <input
-                  {...field}
-                  id="field-domain"
-                  className="f-sel"
-                  placeholder="showcase"
-                  data-testid="field-domain"
-                  style={fieldError ? { borderColor: 'var(--red)' } : undefined}
-                />
-                {fieldError && (
-                  <span className="f-hint" style={{ color: 'var(--red)' }}>
-                    {fieldError.message}
-                  </span>
-                )}
-              </div>
+              <TextField
+                {...field}
+                size="small"
+                label="Dataset Domain"
+                placeholder="showcase"
+                error={!!fieldError}
+                helperText={fieldError?.message}
+                inputProps={{ 'data-testid': 'field-domain', id: 'field-domain' }}
+                InputLabelProps={{ shrink: true }}
+              />
             )}
           />
 
@@ -170,87 +153,80 @@ function CreateSchema() {
             name="title"
             control={control}
             render={({ field, fieldState: { error: fieldError } }) => (
-              <div className="field-row">
-                <label className="f-lbl" htmlFor="field-title">
-                  Dataset Title
-                </label>
-                <input
-                  {...field}
-                  id="field-title"
-                  className="f-sel"
-                  placeholder="movies"
-                  data-testid="field-title"
-                  style={fieldError ? { borderColor: 'var(--red)' } : undefined}
-                />
-                {fieldError && (
-                  <span className="f-hint" style={{ color: 'var(--red)' }}>
-                    {fieldError.message}
-                  </span>
-                )}
-              </div>
+              <TextField
+                {...field}
+                size="small"
+                label="Dataset Title"
+                placeholder="movies"
+                error={!!fieldError}
+                helperText={fieldError?.message}
+                inputProps={{ 'data-testid': 'field-title', id: 'field-title' }}
+                InputLabelProps={{ shrink: true }}
+              />
             )}
           />
-        </div>
-      </div>
+        </Box>
+      </FormCard>
 
-      <div className="form-card">
-        <div className="form-card-hd">
-          <div className="form-card-num">2</div>
-          <div className="form-card-title">Upload sample data</div>
-        </div>
-        <div className="form-card-body">
-          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '14px' }}>
-            Upload a sample CSV file so we can detect the column types automatically.
-          </p>
-
-          {!file && (
-            <label className="upload-zone" htmlFor="schema-file">
-              <div className="upload-ico">↑</div>
-              <div className="upload-text">Click to browse or drag &amp; drop</div>
-              <div className="upload-sub">CSV file only</div>
-            </label>
-          )}
-
-          {file && (
-            <div
-              style={{
-                fontSize: '12px',
-                color: 'var(--pink)',
-                fontWeight: 500,
-                marginBottom: '8px'
-              }}
-            >
-              {file.name}
-            </div>
-          )}
-
-          <input
-            name="file"
-            id="schema-file"
-            type="file"
-            data-testid="field-file"
-            style={{ display: 'none' }}
-            onChange={(event) => setFile(event.target.files[0])}
-          />
-
-          {error && (
-            <div className="warn-box" style={{ marginTop: '12px' }}>
-              {error?.message}
-            </div>
-          )}
-        </div>
-        <div className="form-actions">
-          <button
-            className="btn-primary"
+      <FormCard
+        num={2}
+        title="Upload sample data"
+        actionsError={error}
+        actions={
+          <Button
+            variant="contained"
             type="submit"
             data-testid="submit"
             disabled={isLoading || !file}
           >
             {isLoading ? 'Detecting…' : 'Next'}
-          </button>
-        </div>
-      </div>
-    </form>
+          </Button>
+        }
+      >
+        <Typography variant="body2" sx={{ fontSize: 12, mb: 2 }}>
+          Upload a sample CSV file so we can detect the column types automatically.
+        </Typography>
+
+        {!file && (
+          <Box
+            component="label"
+            htmlFor="schema-file"
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 1,
+              p: 4,
+              border: '2px dashed',
+              borderColor: 'divider',
+              borderRadius: 1,
+              cursor: 'pointer',
+              bgcolor: 'background.default',
+              '&:hover': { borderColor: 'primary.main' }
+            }}
+          >
+            <CloudUploadIcon sx={{ fontSize: 32, color: 'text.disabled' }} />
+            <Typography sx={{ fontSize: 13, fontWeight: 500 }}>Click to browse or drag &amp; drop</Typography>
+            <Typography sx={{ fontSize: 11, color: 'text.disabled' }}>CSV file only</Typography>
+          </Box>
+        )}
+
+        {file && (
+          <Typography sx={{ fontSize: 12, color: 'primary.main', fontWeight: 500 }}>
+            {file.name}
+          </Typography>
+        )}
+
+        <input
+          name="file"
+          id="schema-file"
+          type="file"
+          data-testid="field-file"
+          style={{ display: 'none' }}
+          onChange={(event) => setFile(event.target.files[0])}
+        />
+      </FormCard>
+    </Box>
   )
 }
 

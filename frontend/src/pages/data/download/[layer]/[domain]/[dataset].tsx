@@ -1,4 +1,4 @@
-import AccountLayout from '@/components/Layout/AccountLayout'
+import { AccountLayout, FormCard } from '@/components'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import { getDatasetInfo, queryDataset } from '@/service'
 import { DataFormats } from '@/service/types'
@@ -6,6 +6,21 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/router'
 import { useState, ReactNode } from 'react'
 import Link from 'next/link'
+import {
+  Box,
+  Typography,
+  Button,
+  Chip,
+  Alert,
+  LinearProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField
+} from '@mui/material'
 
 function formatDate(raw: string | undefined): string {
   if (!raw) return '—'
@@ -63,7 +78,7 @@ function DownloadDataset() {
   })
 
   if (isDatasetInfoLoading) {
-    return <div className="rapid-loading-bar" role="progressbar" />
+    return <LinearProgress color="primary" role="progressbar" />
   }
 
   if (datasetInfoError) {
@@ -115,188 +130,144 @@ function DownloadDataset() {
     ['Number of columns', datasetInfoData.metadata.number_of_columns?.toString()]
   ]
 
+  const queryFields = [
+    { key: 'select_columns', label: 'Select Columns', placeholder: 'column1, avg(column2)' },
+    { key: 'filter', label: 'Filter', placeholder: 'column >= 10' },
+    { key: 'group_by_columns', label: 'Group by Columns', placeholder: 'column1, column3' },
+    {
+      key: 'aggregation_conditions',
+      label: 'Aggregation Conditions',
+      placeholder: 'avg(column2) <= 15'
+    },
+    { key: 'limit', label: 'Row Limit', placeholder: '30' }
+  ] as const
+
   return (
-    <div className="form-wrap-wide">
-      {/* Card 1 — Dataset overview */}
-      <div className="form-card">
-        <div className="form-card-hd">
-          <div className="form-card-num">1</div>
-          <div className="form-card-title">Dataset overview</div>
-        </div>
-        <div className="form-card-body" style={{ padding: 0 }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <tbody>
+    <Box sx={{ maxWidth: 1000, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <FormCard num={1} title="Dataset overview" bodySx={{ p: 0 }}>
+        <TableContainer>
+          <Table size="small">
+            <TableBody>
               {overviewRows.map(([k, v]) => (
-                <tr key={k} style={{ borderBottom: '1px solid #f9fafb' }}>
-                  <td
-                    style={{
-                      width: '200px',
-                      padding: '10px 16px',
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      color: 'var(--text-tertiary)',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em'
-                    }}
-                  >
+                <TableRow key={k}>
+                  <TableCell sx={{ width: 200, fontWeight: 600, color: 'text.disabled', textTransform: 'uppercase', fontSize: 11, letterSpacing: '0.05em' }}>
                     {k}
-                  </td>
-                  <td className="mn" style={{ padding: '10px 16px' }}>
-                    {v}
-                  </td>
-                </tr>
+                  </TableCell>
+                  <TableCell sx={{ fontFamily: 'monospace', fontSize: 12 }}>{v}</TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </FormCard>
 
-      {/* Card 2 — Columns */}
-      <div className="form-card">
-        <div className="form-card-hd">
-          <div className="form-card-num">2</div>
-          <div className="form-card-title">Columns</div>
-        </div>
-        <div className="form-card-body" style={{ padding: 0 }}>
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Data Type</th>
-                <th>Allows Null</th>
-                <th>Is Unique</th>
-                <th>Max</th>
-                <th>Min</th>
-              </tr>
-            </thead>
-            <tbody>
+      <FormCard num={2} title="Columns" bodySx={{ p: 0 }}>
+        <TableContainer>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>Name</TableCell>
+                <TableCell>Data Type</TableCell>
+                <TableCell>Allows Null</TableCell>
+                <TableCell>Is Unique</TableCell>
+                <TableCell>Max</TableCell>
+                <TableCell>Min</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
               {datasetInfoData.columns.map((column, idx) => (
-                <tr key={idx}>
-                  <td className="mn">{column.name}</td>
-                  <td>{column.data_type}</td>
-                  <td>{column.allow_null ? 'True' : 'False'}</td>
-                  <td>{column.unique ? 'True' : 'False'}</td>
-                  <td className="mn">{column.statistics ? column.statistics.max : '—'}</td>
-                  <td className="mn">{column.statistics ? column.statistics.min : '—'}</td>
-                </tr>
+                <TableRow key={idx}>
+                  <TableCell sx={{ fontFamily: 'monospace', fontSize: 12 }}>{column.name}</TableCell>
+                  <TableCell>{column.data_type}</TableCell>
+                  <TableCell>{column.allow_null ? 'True' : 'False'}</TableCell>
+                  <TableCell>{column.unique ? 'True' : 'False'}</TableCell>
+                  <TableCell sx={{ fontFamily: 'monospace', fontSize: 12 }}>
+                    {column.statistics ? column.statistics.max : '—'}
+                  </TableCell>
+                  <TableCell sx={{ fontFamily: 'monospace', fontSize: 12 }}>
+                    {column.statistics ? column.statistics.min : '—'}
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </FormCard>
 
-      {/* Card 3 — Query (optional) */}
-      <div className="form-card">
-        <div className="form-card-hd">
-          <div className="form-card-num">3</div>
-          <div className="form-card-title">
-            Query
-            <span
-              style={{
-                fontWeight: 400,
-                color: 'var(--text-tertiary)',
-                fontSize: '11px',
-                marginLeft: '6px'
-              }}
-            >
-              (optional)
-            </span>
-          </div>
-        </div>
-        <div className="form-card-body">
-          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-            For further information on writing queries consult the{' '}
-            <a
-              href="https://rapid.readthedocs.io/en/latest/api/query/"
-              target="_blank"
-              rel="noreferrer"
-              style={{ color: 'var(--pink)', textDecoration: 'none' }}
-            >
-              query writing guide
-            </a>
-          </p>
-          {[
-            { key: 'select_columns', label: 'Select Columns', placeholder: 'column1, avg(column2)' },
-            { key: 'filter', label: 'Filter', placeholder: 'column >= 10' },
-            {
-              key: 'group_by_columns',
-              label: 'Group by Columns',
-              placeholder: 'column1, column3'
-            },
-            {
-              key: 'aggregation_conditions',
-              label: 'Aggregation Conditions',
-              placeholder: 'avg(column2) <= 15'
-            },
-            { key: 'limit', label: 'Row Limit', placeholder: '30' }
-          ].map(({ key, label, placeholder }) => (
-            <div className="field-row" key={key}>
-              <label className="f-lbl">{label}</label>
-              <input
-                className="f-sel"
-                placeholder={placeholder}
-                value={queryBody[key as keyof typeof queryBody]}
-                onChange={(e) => setQueryBody({ ...queryBody, [key]: e.target.value })}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Card 4 — Format & Download */}
-      <div className="form-card">
-        <div className="form-card-hd">
-          <div className="form-card-num">4</div>
-          <div className="form-card-title">Output format</div>
-        </div>
-        <div className="form-card-body">
-          <div style={{ display: 'flex', gap: '8px' }}>
-            {(['csv', 'json'] as DataFormats[]).map((fmt) => (
-              <button
-                key={fmt}
-                type="button"
-                onClick={() => setDataFormat(fmt)}
-                className={`fchip${dataFormat === fmt ? ' on' : ''}`}
-                style={{
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                  fontSize: '11px'
-                }}
-              >
-                {fmt.toUpperCase()}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="form-actions">
-          <button
-            className="btn-primary"
-            type="button"
-            disabled={isLoading}
-            onClick={() =>
-              mutate({
-                path: `${layer}/${domain}/${dataset}/query?version=${version}`,
-                dataFormat,
-                data: createQueryBodyData()
-              })
-            }
+      <FormCard num={3} title="Query" optional>
+        <Typography variant="body2" sx={{ fontSize: 12, mb: 2 }}>
+          For further information on writing queries consult the{' '}
+          <Box
+            component="a"
+            href="https://rapid.readthedocs.io/en/latest/api/query/"
+            target="_blank"
+            rel="noreferrer"
+            sx={{ color: 'primary.main', textDecoration: 'none' }}
           >
-            {isLoading ? 'Downloading…' : 'Download'}
-          </button>
-          <Link href="/data/download" className="btn-secondary">
-            Back
-          </Link>
-        </div>
-      </div>
+            query writing guide
+          </Box>
+        </Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          {queryFields.map(({ key, label, placeholder }) => (
+            <TextField
+              key={key}
+              size="small"
+              label={label}
+              placeholder={placeholder}
+              value={queryBody[key as keyof typeof queryBody]}
+              onChange={(e) => setQueryBody({ ...queryBody, [key]: e.target.value })}
+              InputLabelProps={{ shrink: true }}
+            />
+          ))}
+        </Box>
+      </FormCard>
+
+      <FormCard
+        num={4}
+        title="Output format"
+        actions={
+          <>
+            <Button
+              variant="contained"
+              disabled={isLoading}
+              onClick={() =>
+                mutate({
+                  path: `${layer}/${domain}/${dataset}/query?version=${version}`,
+                  dataFormat,
+                  data: createQueryBodyData()
+                })
+              }
+            >
+              {isLoading ? 'Downloading…' : 'Download'}
+            </Button>
+            <Button variant="outlined" component={Link} href="/data/download">
+              Back
+            </Button>
+          </>
+        }
+      >
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          {(['csv', 'json'] as DataFormats[]).map((fmt) => (
+            <Chip
+              key={fmt}
+              label={fmt.toUpperCase()}
+              size="small"
+              onClick={() => setDataFormat(fmt)}
+              variant={dataFormat === fmt ? 'filled' : 'outlined'}
+              color={dataFormat === fmt ? 'primary' : 'default'}
+            />
+          ))}
+        </Box>
+      </FormCard>
 
       {noContentReturn && (
-        <div className="warn-box">
+        <Alert severity="warning" variant="outlined">
           No data returned for this query. Please ensure that data has been uploaded and the
           query is not too restrictive.
-        </div>
+        </Alert>
       )}
-      {error && <div className="warn-box">{error?.message}</div>}
-    </div>
+      {error && <Alert severity="error" variant="outlined">{error?.message}</Alert>}
+    </Box>
   )
 }
 

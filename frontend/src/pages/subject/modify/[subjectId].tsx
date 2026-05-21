@@ -1,4 +1,4 @@
-import AccountLayout from '@/components/Layout/AccountLayout'
+import { AccountLayout, FormCard } from '@/components'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import {
   getPermissionsListUi,
@@ -17,6 +17,21 @@ import { useForm, useFieldArray } from 'react-hook-form'
 import { cloneDeep } from 'lodash'
 import Link from 'next/link'
 import { z } from 'zod'
+import {
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Button,
+  Typography,
+  LinearProgress,
+  Alert,
+  Select,
+  MenuItem
+} from '@mui/material'
 
 type PermissionType = z.infer<typeof Permission>
 type ActionType = z.infer<typeof ActionEnum>
@@ -30,7 +45,6 @@ function SubjectModifyPage() {
   const fieldArrayReturn = useFieldArray({ control, name: 'permissions' })
   const { fields, append, remove } = fieldArrayReturn
 
-  // Add-row local state
   const [addType, setAddType] = useState<ActionType | ''>('')
   const [addLayer, setAddLayer] = useState('')
   const [addSensitivity, setAddSensitivity] = useState<SensitivityType | ''>('')
@@ -84,21 +98,20 @@ function SubjectModifyPage() {
   })
 
   if (isPermissionsListLoading || isSubjectPermsLoading) {
-    return <div className="rapid-loading-bar" role="progressbar" />
+    return <LinearProgress color="primary" role="progressbar" />
   }
 
   if (permissionsListError || subjectPermsError) {
     return <ErrorCard error={(permissionsListError || subjectPermsError) as Error} />
   }
 
-  // Build filtered permissions list (remove already-selected ones)
   let filteredPerms = cloneDeep(permissionsListData)
   try {
     ;(fields as unknown as PermissionType[]).forEach((perm) => {
       filteredPerms = removePermOption(perm, filteredPerms)
     })
   } catch {
-    // on modify page we tolerate conflicts gracefully
+    // tolerate conflicts gracefully
   }
 
   const availableTypes = Object.keys(filteredPerms ?? {})
@@ -133,7 +146,7 @@ function SubjectModifyPage() {
   }
 
   return (
-    <div style={{ maxWidth: 860, margin: '0 auto' }}>
+    <Box sx={{ maxWidth: 860, mx: 'auto' }}>
       <form
         onSubmit={handleSubmit(async (data: { permissions: PermissionType[] }) => {
           const permissions = (data.permissions ?? []).map((p) =>
@@ -143,197 +156,165 @@ function SubjectModifyPage() {
         })}
         noValidate
       >
-        <div className="form-card">
-          <div className="form-card-hd">
-            <div className="form-card-title">
+        <FormCard
+          title={
+            <>
               Edit permissions —{' '}
-              <span style={{ fontWeight: 400, fontFamily: "'DM Mono', monospace", fontSize: 12 }}>
+              <Typography component="span" sx={{ fontWeight: 400, fontFamily: "'DM Mono', monospace", fontSize: 12 }}>
                 {name as string}
-              </span>
-            </div>
-          </div>
-
-          <div className="form-card-body" style={{ padding: 0 }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ borderBottom: '2px solid #f0f0f0' }}>
-                  <th style={thStyle}>Type</th>
-                  <th style={thStyle}>Layer</th>
-                  <th style={thStyle}>Sensitivity</th>
-                  <th style={thStyle}>Domain</th>
-                  <th style={{ ...thStyle, width: 80 }}></th>
-                </tr>
-              </thead>
-              <tbody>
+              </Typography>
+            </>
+          }
+          bodySx={{ p: 0 }}
+          actionsError={saveError}
+          actions={
+            <>
+              <Button variant="contained" type="submit" disabled={isSaving} data-testid="submit">
+                {isSaving ? 'Saving…' : 'Save changes'}
+              </Button>
+              <Button variant="outlined" component={Link} href="/subject">
+                Cancel
+              </Button>
+            </>
+          }
+        >
+          <TableContainer>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Type</TableCell>
+                  <TableCell>Layer</TableCell>
+                  <TableCell>Sensitivity</TableCell>
+                  <TableCell>Domain</TableCell>
+                  <TableCell sx={{ width: 80 }}></TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
                 {(fields as unknown as PermissionType[]).map((perm, idx) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid #f9f9f9' }}>
-                    <td style={tdStyle}>{perm.type}</td>
-                    <td style={tdStyle}>{perm.layer ?? <span style={{ color: 'var(--text-tertiary)' }}>—</span>}</td>
-                    <td style={tdStyle}>{perm.sensitivity ?? <span style={{ color: 'var(--text-tertiary)' }}>—</span>}</td>
-                    <td style={tdStyle}>{perm.domain ?? <span style={{ color: 'var(--text-tertiary)' }}>—</span>}</td>
-                    <td style={tdStyle}>
-                      <button
-                        type="button"
+                  <TableRow key={idx}>
+                    <TableCell sx={{ fontSize: 12 }}>{perm.type}</TableCell>
+                    <TableCell sx={{ fontSize: 12, color: perm.layer ? 'text.primary' : 'text.disabled' }}>{perm.layer ?? '—'}</TableCell>
+                    <TableCell sx={{ fontSize: 12, color: perm.sensitivity ? 'text.primary' : 'text.disabled' }}>{perm.sensitivity ?? '—'}</TableCell>
+                    <TableCell sx={{ fontSize: 12, color: perm.domain ? 'text.primary' : 'text.disabled' }}>{perm.domain ?? '—'}</TableCell>
+                    <TableCell>
+                      <Button
+                        size="small"
+                        color="error"
                         onClick={() => remove(idx)}
-                        style={{ fontSize: 11, color: '#dc2626', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                        sx={{ fontSize: 11, minWidth: 0 }}
                       >
                         Remove
-                      </button>
-                    </td>
-                  </tr>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
                 ))}
 
-                {/* Add row */}
                 {availableTypes.length > 0 && (
-                  <tr style={{ background: '#f9fafb', borderTop: '2px dashed #e5e7eb' }}>
-                    <td style={tdStyle}>
-                      <select
-                        className="f-sel"
-                        style={{ height: 30, fontSize: 12, width: '100%' }}
+                  <TableRow sx={{ bgcolor: '#f9fafb', borderTop: '2px dashed #e5e7eb' }}>
+                    <TableCell>
+                      <Select
+                        size="small"
                         value={addType}
-                        onChange={(e) => {
-                          setAddType(e.target.value as ActionType | '')
-                          setAddLayer('')
-                          setAddSensitivity('')
-                          setAddDomain('')
-                        }}
+                        onChange={(e) => { setAddType(e.target.value as ActionType | ''); setAddLayer(''); setAddSensitivity(''); setAddDomain('') }}
+                        displayEmpty
+                        sx={{ fontSize: 12, width: '100%' }}
                         data-testid="select-type"
                       >
-                        <option value="">Select type…</option>
-                        {availableTypes.map((t) => <option key={t} value={t}>{t}</option>)}
-                      </select>
-                    </td>
-                    <td style={tdStyle}>
+                        <MenuItem value="" sx={{ fontSize: 12 }}>Select type…</MenuItem>
+                        {availableTypes.map((t) => <MenuItem key={t} value={t} sx={{ fontSize: 12 }}>{t}</MenuItem>)}
+                      </Select>
+                    </TableCell>
+                    <TableCell>
                       {addType && !isAdminType && (
-                        <select
-                          className="f-sel"
-                          style={{ height: 30, fontSize: 12, width: '100%' }}
+                        <Select
+                          size="small"
                           value={addLayer}
                           onChange={(e) => { setAddLayer(e.target.value); setAddSensitivity(''); setAddDomain('') }}
+                          displayEmpty
+                          sx={{ fontSize: 12, width: '100%' }}
                           data-testid="select-layer"
                         >
-                          <option value="">Select layer…</option>
-                          {availableLayers.map((l) => <option key={l} value={l}>{l}</option>)}
-                        </select>
+                          <MenuItem value="" sx={{ fontSize: 12 }}>Select layer…</MenuItem>
+                          {availableLayers.map((l) => <MenuItem key={l} value={l} sx={{ fontSize: 12 }}>{l}</MenuItem>)}
+                        </Select>
                       )}
-                    </td>
-                    <td style={tdStyle}>
+                    </TableCell>
+                    <TableCell>
                       {addLayer && !isAdminType && (
-                        <select
-                          className="f-sel"
-                          style={{ height: 30, fontSize: 12, width: '100%' }}
+                        <Select
+                          size="small"
                           value={addSensitivity}
                           onChange={(e) => { setAddSensitivity(e.target.value as SensitivityType | ''); setAddDomain('') }}
+                          displayEmpty
+                          sx={{ fontSize: 12, width: '100%' }}
                           data-testid="select-sensitivity"
                         >
-                          <option value="">Select sensitivity…</option>
-                          {availableSensitivities.map((s) => <option key={s} value={s}>{s}</option>)}
-                        </select>
+                          <MenuItem value="" sx={{ fontSize: 12 }}>Select sensitivity…</MenuItem>
+                          {availableSensitivities.map((s) => <MenuItem key={s} value={s} sx={{ fontSize: 12 }}>{s}</MenuItem>)}
+                        </Select>
                       )}
-                    </td>
-                    <td style={tdStyle}>
+                    </TableCell>
+                    <TableCell>
                       {addSensitivity === 'PROTECTED' && !isAdminType && (
-                        <select
-                          className="f-sel"
-                          style={{ height: 30, fontSize: 12, width: '100%' }}
+                        <Select
+                          size="small"
                           value={addDomain}
                           onChange={(e) => setAddDomain(e.target.value)}
+                          displayEmpty
+                          sx={{ fontSize: 12, width: '100%' }}
                           data-testid="domain"
                         >
-                          <option value="">Select domain…</option>
-                          {availableDomains.map((d) => <option key={d} value={d}>{d}</option>)}
-                        </select>
+                          <MenuItem value="" sx={{ fontSize: 12 }}>Select domain…</MenuItem>
+                          {availableDomains.map((d) => <MenuItem key={d} value={d} sx={{ fontSize: 12 }}>{d}</MenuItem>)}
+                        </Select>
                       )}
-                    </td>
-                    <td style={tdStyle}>
-                      <button
-                        type="button"
-                        className="btn-primary"
-                        style={{ height: 30, fontSize: 11, whiteSpace: 'nowrap' }}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="contained"
+                        size="small"
                         onClick={handleAdd}
-                        data-testid="add-permission"
                         disabled={!canAdd}
+                        data-testid="add-permission"
+                        sx={{ fontSize: 11, whiteSpace: 'nowrap' }}
                       >
                         + Add
-                      </button>
-                    </td>
-                  </tr>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
+          </TableContainer>
 
-            {addError && (
-              <div style={{ padding: '8px 16px', fontSize: 12, color: '#dc2626' }}>{addError}</div>
-            )}
-          </div>
-
-          <div className="form-actions">
-            <button
-              className="btn-primary"
-              type="submit"
-              disabled={isSaving}
-              data-testid="submit"
-            >
-              {isSaving ? 'Saving…' : 'Save changes'}
-            </button>
-            <Link href="/subject" className="btn-secondary" style={{ textDecoration: 'none' }}>
-              Cancel
-            </Link>
-            {saveError && (
-              <span style={{ fontSize: 12, color: '#dc2626', marginLeft: 'auto' }}>
-                {saveError.message}
-              </span>
-            )}
-          </div>
-        </div>
+          {addError && (
+            <Typography sx={{ px: 2, py: 1, fontSize: 12, color: 'error.main' }}>{addError}</Typography>
+          )}
+        </FormCard>
       </form>
 
-      <div className="form-card" style={{ marginTop: 24 }}>
-        <div className="form-card-hd form-card-hd-danger">
-          <div className="form-card-num form-card-num-danger">!</div>
-          <div className="form-card-title form-card-title-danger">Destructive action</div>
-        </div>
-        <div className="form-card-body">
-          <div className="warn-box" style={{ marginBottom: 0 }}>
+      <Box sx={{ mt: 3 }}>
+        <FormCard
+          title={<Box component="span" sx={{ color: 'error.main' }}>Destructive action</Box>}
+          actionsError={deleteError}
+          actions={
+            <>
+              <Button variant="contained" color="error" disabled={isDeleting} onClick={() => doDelete()}>
+                {isDeleting ? 'Deleting…' : 'Delete subject'}
+              </Button>
+              <Button variant="outlined" component={Link} href="/subject">
+                Cancel
+              </Button>
+            </>
+          }
+        >
+          <Alert severity="error" variant="outlined" sx={{ mb: 0 }}>
             Permanently delete <strong>{name as string}</strong> and all their permissions. This <strong>cannot be undone</strong>.
-          </div>
-        </div>
-        <div className="form-actions">
-          <button
-            type="button"
-            className="btn-danger"
-            disabled={isDeleting}
-            onClick={() => doDelete()}
-          >
-            {isDeleting ? 'Deleting…' : 'Delete subject'}
-          </button>
-          <Link href="/subject" className="btn-secondary" style={{ textDecoration: 'none' }}>
-            Cancel
-          </Link>
-          {deleteError && (
-            <span style={{ fontSize: 12, color: '#dc2626', marginLeft: 'auto' }}>
-              {deleteError.message}
-            </span>
-          )}
-        </div>
-      </div>
-    </div>
+          </Alert>
+        </FormCard>
+      </Box>
+    </Box>
   )
-}
-
-const thStyle: React.CSSProperties = {
-  padding: '7px 12px',
-  fontSize: 10,
-  fontWeight: 600,
-  letterSpacing: '.06em',
-  textTransform: 'uppercase',
-  color: '#71717a',
-  textAlign: 'left'
-}
-
-const tdStyle: React.CSSProperties = {
-  padding: '8px 12px',
-  fontSize: 12
 }
 
 function removePermOption(permission: PermissionType, permsList: Record<string, unknown>) {

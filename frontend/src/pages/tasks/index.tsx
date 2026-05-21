@@ -3,15 +3,27 @@ import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import { getAllJobs } from '@/service'
 import { useQuery } from '@tanstack/react-query'
 import { ReactNode, useState, useMemo } from 'react'
+import {
+  Box,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  Typography,
+  LinearProgress,
+  Button
+} from '@mui/material'
+import Link from 'next/link'
 
-function getStatusBadge(status: string) {
-  if (status === 'SUCCESS')
-    return <span className="badge ok"><span className="bdot" />Success</span>
-  if (status === 'IN PROGRESS')
-    return <span className="badge pnd"><span className="bdot" />In Progress</span>
-  if (status === 'FAILED')
-    return <span className="badge err"><span className="bdot" />Failed</span>
-  return <span className="badge">{status}</span>
+function statusChip(status: string) {
+  if (status === 'SUCCESS') return <Chip label="Success" size="small" color="success" variant="outlined" />
+  if (status === 'IN PROGRESS') return <Chip label="In Progress" size="small" color="warning" variant="outlined" />
+  if (status === 'FAILED') return <Chip label="Failed" size="small" color="error" variant="outlined" />
+  return <Chip label={status} size="small" variant="outlined" />
 }
 
 function formatTs(ts: number | string | undefined): string | null {
@@ -43,90 +55,99 @@ function StatusPage() {
     [filtered]
   )
 
-  if (isLoading) return <div className="rapid-loading-bar" role="progressbar" />
+  if (isLoading) return <LinearProgress color="primary" role="progressbar" />
   if (error) return <ErrorCard error={error as Error} />
 
   return (
-    <div data-testid="tasks-content">
-      <div className="tbl-wrap">
-        <div className="tbl-toolbar" style={{ gap: '6px' }}>
-          {typeFilters.map((f) => (
-            <button
-              key={f}
-              className={`fchip${typeFilter === f ? ' on' : ''}`}
-              onClick={() => setTypeFilter(f)}
-              type="button"
-            >
-              {f}
-            </button>
-          ))}
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Job ID</th>
-              <th>Type</th>
-              <th>Layer</th>
-              <th>Domain</th>
-              <th>Dataset</th>
-              <th>Version</th>
-              <th>Status</th>
-              <th>Step</th>
-              {hasCreatedAt && <th>Created At</th>}
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
+    <Paper variant="outlined" data-testid="tasks-content">
+      {/* Toolbar */}
+      <Box sx={{ p: 2, display: 'flex', gap: 0.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+        {typeFilters.map((f) => (
+          <Chip
+            key={f}
+            label={f}
+            size="small"
+            variant={typeFilter === f ? 'filled' : 'outlined'}
+            color={typeFilter === f ? 'primary' : 'default'}
+            onClick={() => setTypeFilter(f)}
+          />
+        ))}
+      </Box>
+
+      {/* Table */}
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Job ID</TableCell>
+              <TableCell>Type</TableCell>
+              <TableCell>Layer</TableCell>
+              <TableCell>Domain</TableCell>
+              <TableCell>Dataset</TableCell>
+              <TableCell>Version</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell>Step</TableCell>
+              {hasCreatedAt && <TableCell>Created At</TableCell>}
+              <TableCell></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {filtered.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={hasCreatedAt ? 10 : 9}
-                  style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-tertiary)', fontSize: '13px' }}
-                >
+              <TableRow>
+                <TableCell colSpan={hasCreatedAt ? 10 : 9} sx={{ textAlign: 'center', py: 5, color: 'text.disabled', fontSize: 13 }}>
                   No {typeFilter !== 'All' ? typeFilter.toLowerCase() : ''} jobs found.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : (
               filtered.map((job, idx) => {
                 const createdAtStr = formatTs(job.createdat as number | string | undefined)
                 return (
-                  <tr key={idx}>
-                    <td className="mn">
-                      <a href={`tasks/${job.job_id}`} style={{ color: 'var(--pink)', textDecoration: 'none' }}>
+                  <TableRow key={idx} hover>
+                    <TableCell sx={{ fontFamily: 'monospace', fontSize: 11 }}>
+                      <Link href={`/tasks/${job.job_id}`} style={{ color: '#ec4899', textDecoration: 'none' }}>
                         {job.job_id}
-                      </a>
-                    </td>
-                    <td>{job.type}</td>
-                    <td>{job.layer}</td>
-                    <td>{job.domain}</td>
-                    <td style={{ fontWeight: 500 }}>{job.dataset}</td>
-                    <td className="mn">{job.version}</td>
-                    <td>{getStatusBadge(job.status as string)}</td>
-                    <td className="mn">{job.step}</td>
+                      </Link>
+                    </TableCell>
+                    <TableCell>{job.type}</TableCell>
+                    <TableCell>{job.layer}</TableCell>
+                    <TableCell>{job.domain}</TableCell>
+                    <TableCell sx={{ fontWeight: 500 }}>{job.dataset}</TableCell>
+                    <TableCell sx={{ fontFamily: 'monospace', fontSize: 11 }}>{job.version}</TableCell>
+                    <TableCell>{statusChip(job.status as string)}</TableCell>
+                    <TableCell sx={{ fontFamily: 'monospace', fontSize: 11 }}>{job.step}</TableCell>
                     {hasCreatedAt && (
-                      <td className="mn">{createdAtStr ?? <span style={{ color: 'var(--text-tertiary)' }}>—</span>}</td>
+                      <TableCell sx={{ fontFamily: 'monospace', fontSize: 11 }}>{createdAtStr ?? '—'}</TableCell>
                     )}
-                    <td>
+                    <TableCell>
                       {job.status === 'FAILED' && (
-                        <a href={`tasks/${job.job_id}`} className="act-btn act-btn-del">
-                          Failure Details
-                        </a>
+                        <Button
+                          component={Link}
+                          href={`/tasks/${job.job_id}`}
+                          size="small"
+                          color="error"
+                          variant="outlined"
+                          sx={{ fontSize: 11 }}
+                        >
+                          Details
+                        </Button>
                       )}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 )
               })
             )}
-          </tbody>
-        </table>
-        <div className="pager">
-          <div className="pg-info">
-            {filtered.length} job{filtered.length !== 1 ? 's' : ''}
-            {typeFilter !== 'All' ? ` (${typeFilter.toLowerCase()})` : ''}
-          </div>
-        </div>
-      </div>
-    </div>
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Footer */}
+      <Box sx={{ px: 2, py: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
+        <Typography variant="body2" sx={{ fontSize: 12 }}>
+          {filtered.length} job{filtered.length !== 1 ? 's' : ''}
+          {typeFilter !== 'All' ? ` (${typeFilter.toLowerCase()})` : ''}
+        </Typography>
+      </Box>
+    </Paper>
   )
 }
 

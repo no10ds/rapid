@@ -1,4 +1,4 @@
-import AccountLayout from '@/components/Layout/AccountLayout'
+import { AccountLayout, FormCard } from '@/components'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import { getSubjectsListUi } from '@/service'
 import { FilteredSubjectList } from '@/service/types'
@@ -6,6 +6,20 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { filterSubjectList } from '@/utils/subject'
 import { useEffect, useState, ReactNode } from 'react'
 import { deleteUser as deleteUserFn, deleteClient as deleteClientFn } from '@/service'
+import {
+  Box,
+  Typography,
+  Button,
+  LinearProgress,
+  TextField,
+  Select,
+  FormControl,
+  InputLabel,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
+} from '@mui/material'
 
 function DeleteSubject() {
   const [selectedSubjectId, setSelectedSubjectId] = useState('')
@@ -82,124 +96,99 @@ function DeleteSubject() {
   }
 
   if (isSubjectsListLoading || !selectedSubjectId) {
-    return <div className="rapid-loading-bar" role="progressbar" />
+    return <LinearProgress color="primary" role="progressbar" />
   }
 
   return (
-    <div className="form-wrap-wide">
-      <div className="form-card">
-        <div className="form-card-hd">
-          <div className="form-card-num">1</div>
-          <div className="form-card-title">Select subject to delete</div>
-        </div>
-        <div className="form-card-body">
-          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-            Delete an existing user or client.
-          </p>
-          <div className="field-row">
-            <label className="f-lbl" htmlFor="field-user">
-              Select a Client or User
-            </label>
-            <select
-              id="field-user"
-              className="subject-sel"
-              onChange={(event) => setSelectedSubjectId(event.target.value)}
-              data-testid="field-user"
-            >
-              <optgroup label="Client Apps">
-                {filteredSubjectListData.ClientApps.map((item) => (
-                  <option value={item.subjectId} key={item.subjectId}>
-                    {item.subjectName}
-                  </option>
-                ))}
-              </optgroup>
-              <optgroup label="Users">
-                {filteredSubjectListData.Users.map((item) => (
-                  <option value={item.subjectId} key={item.subjectId}>
-                    {item.subjectName}
-                  </option>
-                ))}
-              </optgroup>
-            </select>
-          </div>
-        </div>
-        <div className="form-actions">
-          <button
-            className="btn-danger"
-            type="button"
+    <Box sx={{ maxWidth: 860, mx: 'auto' }}>
+      <FormCard
+        title="Select subject to delete"
+        actions={
+          <Button
+            variant="contained"
+            color="error"
             data-testid="delete-button"
             onClick={() => setIsConfirmDeleteDialogOpen(true)}
           >
             Delete
-          </button>
-        </div>
-      </div>
+          </Button>
+        }
+      >
+        <Typography variant="body2" sx={{ fontSize: 13, mb: 2 }}>
+          Delete an existing user or client.
+        </Typography>
+        <FormControl size="small" fullWidth>
+          <InputLabel htmlFor="field-user" shrink>Select a Client or User</InputLabel>
+          <Select
+            native
+            label="Select a Client or User"
+            notched
+            value={selectedSubjectId}
+            onChange={(event) => setSelectedSubjectId(event.target.value as string)}
+            inputProps={{ 'data-testid': 'field-user', id: 'field-user' }}
+          >
+            <optgroup label="Client Apps">
+              {filteredSubjectListData.ClientApps.map((item) => (
+                <option value={item.subjectId} key={item.subjectId}>
+                  {item.subjectName}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="Users">
+              {filteredSubjectListData.Users.map((item) => (
+                <option value={item.subjectId} key={item.subjectId}>
+                  {item.subjectName}
+                </option>
+              ))}
+            </optgroup>
+          </Select>
+        </FormControl>
+      </FormCard>
 
-      {/* Confirmation modal */}
-      {isConfirmDeleteDialogOpen && (
-        <div
-          className="modal-overlay"
-          data-testid="delete-confirmation-dialog"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div className="modal-box">
-            <div className="modal-hd">Confirm Delete</div>
-            <div className="modal-body">
-              <p
-                style={{
-                  fontSize: '13px',
-                  color: 'var(--text-secondary)',
-                  marginBottom: '10px'
-                }}
-              >
-                This action cannot be undone. Please type in the name of the subject to
-                confirm.
-              </p>
-              <p
-                style={{
-                  fontSize: '12px',
-                  fontStyle: 'italic',
-                  color: 'var(--text-primary)',
-                  marginBottom: '12px'
-                }}
-              >
-                {getCurrentSelectedSubjectName()}
-              </p>
-              <input
-                className="f-sel"
-                value={userConfirmation}
-                onChange={(e) => setUserConfirmation(e.target.value)}
-                data-testid="field-user-confirmation"
-                placeholder="Type subject name to confirm"
-              />
-            </div>
-            <div className="modal-foot">
-              <button
-                className="btn-secondary"
-                type="button"
-                onClick={() => setIsConfirmDeleteDialogOpen(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="btn-danger"
-                type="button"
-                onClick={deleteSubject}
-                disabled={
-                  isUserDeleting ||
-                  isClientDeleting ||
-                  userConfirmation !== getCurrentSelectedSubjectName()
-                }
-                data-testid="delete-confirmation-dialog-delete-button"
-              >
-                {isUserDeleting || isClientDeleting ? 'Deleting…' : 'Delete'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+      <Dialog
+        open={isConfirmDeleteDialogOpen}
+        onClose={() => setIsConfirmDeleteDialogOpen(false)}
+        data-testid="delete-confirmation-dialog"
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontSize: 16, fontWeight: 600 }}>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ fontSize: 13, mb: 1 }}>
+            This action cannot be undone. Please type in the name of the subject to confirm.
+          </Typography>
+          <Typography sx={{ fontSize: 12, fontStyle: 'italic', mb: 2 }}>
+            {getCurrentSelectedSubjectName()}
+          </Typography>
+          <TextField
+            size="small"
+            fullWidth
+            value={userConfirmation}
+            onChange={(e) => setUserConfirmation(e.target.value)}
+            placeholder="Type subject name to confirm"
+            inputProps={{ 'data-testid': 'field-user-confirmation' }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button variant="outlined" onClick={() => setIsConfirmDeleteDialogOpen(false)}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={deleteSubject}
+            disabled={
+              isUserDeleting ||
+              isClientDeleting ||
+              userConfirmation !== getCurrentSelectedSubjectName()
+            }
+            data-testid="delete-confirmation-dialog-delete-button"
+          >
+            {isUserDeleting || isClientDeleting ? 'Deleting…' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   )
 }
 

@@ -1,15 +1,17 @@
 import Link from 'next/link'
+import { Button, Typography } from '@mui/material'
+import { CenteredGradientPage } from '@/components'
 
 function FourOhFour() {
   return (
-    <div className="error-boundary">
-      <div className="error-boundary-card">
-        <div className="error-boundary-title">Oops — Page not found</div>
-        <Link href="/" className="btn-primary error-boundary-link">
-          Go Home
-        </Link>
-      </div>
-    </div>
+    <CenteredGradientPage>
+      <Typography variant="h1" sx={{ fontSize: 22, mb: 2 }}>
+        Oops — Page not found
+      </Typography>
+      <Button component={Link} href="/" variant="contained" fullWidth>
+        Go Home
+      </Button>
+    </CenteredGradientPage>
   )
 }
 
