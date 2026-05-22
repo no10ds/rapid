@@ -1,4 +1,4 @@
-import { ComponentProps, ReactNode, useState, useRef, useEffect } from 'react'
+import { ComponentProps, ReactNode, useState } from 'react'
 import { useQueries } from '@tanstack/react-query'
 import { getAuthStatus, getMethods } from '@/service'
 import { MethodsResponse } from '@/service/types'
@@ -118,11 +118,13 @@ const AccountLayout = ({ children, title, topbarActions, noPad }: AccountLayoutP
         }}
       >
         {/* Logo + collapse toggle */}
-        <Box sx={{ display: 'flex', alignItems: 'center', height: 56, px: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', height: 64, pr: '10px', borderBottom: '1px solid', borderColor: 'divider', bgcolor: '#fff', flexShrink: 0, overflow: 'hidden' }}>
           <Link
             href="/"
             style={{
               flex: 1,
+              minWidth: 0,
+              height: '100%',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -136,7 +138,9 @@ const AccountLayout = ({ children, title, topbarActions, noPad }: AccountLayoutP
               height={40}
               style={{
                 objectFit: 'contain',
-                height: '32px',
+                objectPosition: 'center',
+                padding: '8px 12px',
+                height: '100%',
                 width: 'auto',
                 maxWidth: '100%'
               }}
@@ -146,21 +150,27 @@ const AccountLayout = ({ children, title, topbarActions, noPad }: AccountLayoutP
           <IconButton
             size="small"
             onClick={() => setCollapsed((c) => !c)}
-            sx={{ color: 'rgba(255,255,255,0.6)', '&:hover': { color: '#fff' } }}
+            sx={{
+              width: 24,
+              height: 24,
+              ml: 'auto',
+              color: '#6b7280',
+              borderRadius: 1,
+              '&:hover': { bgcolor: 'rgba(0,0,0,0.08)', color: '#374151' }
+            }}
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            {collapsed ? <ChevronRightIcon fontSize="small" /> : <ChevronLeftIcon fontSize="small" />}
+            {collapsed ? <ChevronRightIcon sx={{ fontSize: 14 }} /> : <ChevronLeftIcon sx={{ fontSize: 14 }} />}
           </IconButton>
         </Box>
 
         {/* Nav sections */}
-        <Box sx={{ flex: 1, overflowY: 'auto', px: 1, mt: 1 }}>
+        <Box sx={{ flex: 1, overflowY: 'auto' }}>
           {hasDataSection && (
-            <>
+            <Box sx={{ px: 1, pt: '12px', pb: '4px' }}>
               {!collapsed && (
                 <Typography
-                  variant="body2"
-                  sx={{ px: 1.5, py: 0.5, fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}
+                  sx={{ px: 1, mb: '3px', fontSize: 9, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', whiteSpace: 'nowrap' }}
                 >
                   Data
                 </Typography>
@@ -173,15 +183,14 @@ const AccountLayout = ({ children, title, topbarActions, noPad }: AccountLayoutP
                   <NavItem href="/schema/create" icon={<AddBoxIcon />} label="Add Dataset" active={isActive(['/schema/create'])} collapsed={collapsed} />
                 )}
               </List>
-            </>
+            </Box>
           )}
 
           {hasJobsSection && (
-            <>
+            <Box sx={{ px: 1, pt: '20px', pb: '4px' }}>
               {!collapsed && (
                 <Typography
-                  variant="body2"
-                  sx={{ px: 1.5, py: 0.5, mt: 2, fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}
+                  sx={{ px: 1, mb: '3px', fontSize: 9, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', whiteSpace: 'nowrap' }}
                 >
                   Jobs
                 </Typography>
@@ -189,15 +198,14 @@ const AccountLayout = ({ children, title, topbarActions, noPad }: AccountLayoutP
               <List disablePadding>
                 <NavItem href="/tasks" icon={<WorkIcon />} label="Jobs" active={isActive(['/tasks'])} collapsed={collapsed} />
               </List>
-            </>
+            </Box>
           )}
 
           {methods?.can_manage_users && (
-            <>
+            <Box sx={{ px: 1, pt: '20px', pb: '4px' }}>
               {!collapsed && (
                 <Typography
-                  variant="body2"
-                  sx={{ px: 1.5, py: 0.5, mt: 2, fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}
+                  sx={{ px: 1, mb: '3px', fontSize: 9, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', whiteSpace: 'nowrap' }}
                 >
                   Admin
                 </Typography>
@@ -205,18 +213,18 @@ const AccountLayout = ({ children, title, topbarActions, noPad }: AccountLayoutP
               <List disablePadding>
                 <NavItem href="/subject" icon={<PeopleIcon />} label="User Admin" active={isActive(['/subject'])} collapsed={collapsed} />
               </List>
-            </>
+            </Box>
           )}
         </Box>
 
         {/* Footer */}
-        <Box sx={{ borderTop: '1px solid', borderColor: 'secondary.light', p: 1 }}>
+        <Box sx={{ borderTop: '1px solid', borderColor: 'secondary.light', px: 1, py: '10px' }}>
           {!collapsed && (
-            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', px: 1, py: 0.5, mb: 1 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px', px: '4px', pb: '6px' }}>
               {[
                 { label: 'Docs', href: 'https://rapid.readthedocs.io/en/latest/' },
-                { label: 'API', href: '/api/docs' },
-                { label: 'Source', href: 'https://github.com/no10ds/rapid' }
+                { label: 'API Docs', href: '/api/docs' },
+                { label: 'Source Code', href: 'https://github.com/no10ds/rapid' }
               ].map((link) => (
                 <Typography
                   key={link.label}
@@ -224,7 +232,17 @@ const AccountLayout = ({ children, title, topbarActions, noPad }: AccountLayoutP
                   href={link.href}
                   target={link.href.startsWith('http') ? '_blank' : undefined}
                   rel={link.href.startsWith('http') ? 'noreferrer' : undefined}
-                  sx={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', textDecoration: 'none', '&:hover': { color: '#fff' } }}
+                  sx={{
+                    display: 'block',
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: '#e5e7eb',
+                    textDecoration: 'none',
+                    px: '8px',
+                    py: '6px',
+                    borderRadius: '5px',
+                    '&:hover': { bgcolor: 'rgba(255,255,255,0.04)', color: '#fff' }
+                  }}
                 >
                   {link.label}
                 </Typography>
@@ -232,16 +250,25 @@ const AccountLayout = ({ children, title, topbarActions, noPad }: AccountLayoutP
             </Box>
           )}
           <Box
-            sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, py: 0.5, cursor: 'pointer', borderRadius: 1, '&:hover': { bgcolor: 'rgba(255,255,255,0.04)' } }}
+            sx={{
+              height: 36,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '9px',
+              px: '6px',
+              cursor: 'pointer',
+              borderRadius: '5px',
+              '&:hover': { bgcolor: 'rgba(255,255,255,0.04)' }
+            }}
             onClick={(e) => setAnchorEl(e.currentTarget)}
           >
-            <Avatar sx={{ width: 28, height: 28, bgcolor: 'primary.main', fontSize: 11 }}>
+            <Avatar sx={{ width: 24, height: 24, bgcolor: 'primary.main', fontSize: 9, fontWeight: 700, letterSpacing: '0.02em' }}>
               {initials ?? '?'}
             </Avatar>
             {!collapsed && (
               <Box sx={{ minWidth: 0 }}>
-                {username && <Typography sx={{ fontSize: 12, color: '#fff', fontWeight: 500, lineHeight: 1.2 }} noWrap>{username}</Typography>}
-                <Typography sx={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', lineHeight: 1.2 }}>
+                {username && <Typography sx={{ fontSize: 12, color: '#d1d5db', fontWeight: 500, lineHeight: 1.2 }} noWrap>{username}</Typography>}
+                <Typography sx={{ fontSize: 10, color: '#9ca3af', fontWeight: 400, lineHeight: 1.2 }}>
                   {methods?.can_manage_users ? 'User Admin' : 'Data User'}
                 </Typography>
               </Box>
@@ -264,8 +291,8 @@ const AccountLayout = ({ children, title, topbarActions, noPad }: AccountLayoutP
       {/* Main content */}
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Topbar */}
-        <Box sx={{ height: 52, display: 'flex', alignItems: 'center', px: 3, borderBottom: '1px solid', borderColor: 'divider', bgcolor: '#fff', flexShrink: 0 }}>
-          <Typography variant="h3" sx={{ fontSize: 15, fontWeight: 600, letterSpacing: '-0.3px' }}>
+        <Box sx={{ height: 64, display: 'flex', alignItems: 'center', gap: 1.5, px: '28px', borderBottom: '1px solid', borderColor: 'divider', bgcolor: '#fff', flexShrink: 0 }}>
+          <Typography sx={{ fontSize: 16, fontWeight: 600, color: 'text.primary', letterSpacing: '-0.01em' }}>
             {title}
           </Typography>
           <Box sx={{ flex: 1 }} />
@@ -273,7 +300,7 @@ const AccountLayout = ({ children, title, topbarActions, noPad }: AccountLayoutP
         </Box>
 
         {/* Content */}
-        <Box sx={{ flex: 1, overflowY: 'auto', p: noPad ? 0 : 3.5, bgcolor: 'background.default' }}>
+        <Box sx={{ flex: 1, overflowY: 'auto', p: noPad ? 0 : '28px', bgcolor: 'background.default' }}>
           {children}
         </Box>
       </Box>
@@ -288,19 +315,45 @@ function NavItem({ href, icon, label, active, collapsed }: { href: string; icon:
       href={href}
       selected={active}
       sx={{
-        mb: 0.5,
-        minHeight: 36,
-        px: collapsed ? 1.5 : 2,
+        position: 'relative',
+        height: 38,
+        mb: '2px',
+        px: '10px',
+        gap: '10px',
+        borderRadius: '5px',
         justifyContent: collapsed ? 'center' : 'flex-start',
-        color: active ? '#fff' : 'rgba(255,255,255,0.7)',
-        '&:hover': { bgcolor: 'rgba(255,255,255,0.06)', color: '#fff' },
-        '&.Mui-selected': { bgcolor: 'rgba(255,255,255,0.1)', color: '#fff' }
+        color: active ? '#fff' : '#e5e7eb',
+        '&:hover': { bgcolor: 'rgba(255,255,255,0.04)' },
+        '&.Mui-selected': {
+          bgcolor: 'rgba(236, 72, 153, 0.1)',
+          '&:hover': { bgcolor: 'rgba(236, 72, 153, 0.15)' }
+        },
+        '&.Mui-selected::before': {
+          content: '""',
+          position: 'absolute',
+          left: 0,
+          top: 6,
+          bottom: 6,
+          width: 2,
+          bgcolor: 'primary.main',
+          borderRadius: '0 2px 2px 0'
+        }
       }}
     >
-      <ListItemIcon sx={{ minWidth: collapsed ? 0 : 32, color: 'inherit', '& .MuiSvgIcon-root': { fontSize: 18 } }}>
+      <ListItemIcon sx={{ minWidth: 22, width: 22, height: 22, color: active ? 'primary.main' : '#d1d5db', '& .MuiSvgIcon-root': { fontSize: 19 } }}>
         {icon}
       </ListItemIcon>
-      {!collapsed && <ListItemText primary={label} primaryTypographyProps={{ fontSize: 13, fontWeight: active ? 600 : 400 }} />}
+      {!collapsed && (
+        <ListItemText
+          primary={label}
+          primaryTypographyProps={{
+            fontSize: 13,
+            fontWeight: active ? 500 : 400,
+            color: active ? '#fff' : '#e5e7eb',
+            letterSpacing: '0.01em'
+          }}
+        />
+      )}
     </ListItemButton>
   )
 }

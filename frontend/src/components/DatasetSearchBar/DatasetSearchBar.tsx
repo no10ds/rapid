@@ -56,9 +56,9 @@ const DatasetSearchBar = ({ datasets }: { datasets: Dataset[] }) => {
   }
 
   return (
-    <Box sx={{ maxWidth: 720, mx: 'auto', position: 'relative' }} ref={wrapRef}>
+    <Box sx={{ width: '100%', maxWidth: 720, mx: 'auto', position: 'relative' }} ref={wrapRef}>
       {datasets.length > 0 && layers.length > 2 && (
-        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', flexWrap: 'wrap', mb: 2 }}>
+        <Box sx={{ display: 'flex', gap: 0.75, justifyContent: 'center', flexWrap: 'wrap', mb: 1.25 }}>
           {layers.map((l) => (
             <Chip
               key={l}
@@ -69,7 +69,7 @@ const DatasetSearchBar = ({ datasets }: { datasets: Dataset[] }) => {
               onClick={() => { setLayerFilter(l); setOpen(true) }}
               sx={
                 layerFilter !== l
-                  ? { color: '#fff', borderColor: 'rgba(255,255,255,0.4)', '&:hover': { borderColor: '#fff' } }
+                  ? { color: 'rgba(255,255,255,0.7)', borderColor: 'rgba(255,255,255,0.18)', bgcolor: 'rgba(255,255,255,0.05)', '&:hover': { borderColor: 'rgba(255,255,255,0.3)', color: '#fff' } }
                   : undefined
               }
             />
@@ -77,28 +77,47 @@ const DatasetSearchBar = ({ datasets }: { datasets: Dataset[] }) => {
         </Box>
       )}
 
-      <Box sx={{ display: 'flex', gap: 1 }}>
+      <Box sx={{ display: 'flex' }}>
         <TextField
           fullWidth
-          size="small"
           placeholder="Search datasets by name, domain or layer…"
           value={search}
           onChange={(e) => { setSearch(e.target.value); setOpen(true) }}
           onFocus={() => setOpen(true)}
           sx={{
-            bgcolor: '#fff',
-            borderRadius: 1,
-            '& .MuiOutlinedInput-root': { fontSize: 14 }
+            '& .MuiOutlinedInput-root': {
+              height: 42,
+              fontSize: 13,
+              color: '#f1f3f5',
+              bgcolor: 'rgba(255,255,255,0.06)',
+              borderRadius: '8px 0 0 8px',
+              '& fieldset': { borderColor: 'rgba(255,255,255,0.12)', borderRight: 'none' },
+              '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.25)', borderRight: 'none' },
+              '&.Mui-focused': { bgcolor: 'rgba(255,255,255,0.1)' },
+              '&.Mui-focused fieldset': { borderColor: 'primary.main', borderRight: 'none' }
+            },
+            '& input::placeholder': { color: 'rgba(255,255,255,0.4)', opacity: 1 }
           }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon sx={{ fontSize: 18, color: 'text.disabled' }} />
+                <SearchIcon sx={{ fontSize: 18, color: 'rgba(255,255,255,0.5)' }} />
               </InputAdornment>
             )
           }}
         />
-        <Button variant="contained" onClick={goToCatalog} sx={{ whiteSpace: 'nowrap' }}>
+        <Button
+          variant="contained"
+          onClick={goToCatalog}
+          sx={{
+            whiteSpace: 'nowrap',
+            height: 42,
+            px: 3,
+            fontSize: 13,
+            borderRadius: '0 8px 8px 0',
+            boxShadow: '0 1px 3px rgba(236, 72, 153, 0.35)'
+          }}
+        >
           View Catalog
         </Button>
       </Box>
@@ -129,15 +148,16 @@ const DatasetSearchBar = ({ datasets }: { datasets: Dataset[] }) => {
                   )}
                   sx={{
                     cursor: 'pointer',
-                    p: 1.5,
+                    px: '14px',
+                    py: '10px',
                     borderBottom: '1px solid',
                     borderColor: 'divider',
-                    '&:hover': { bgcolor: 'background.default' },
+                    '&:hover': { bgcolor: '#fafafa' },
                     '&:last-child': { borderBottom: 0 }
                   }}
                 >
-                  <Typography sx={{ fontSize: 13, fontWeight: 500 }}>{d.dataset}</Typography>
-                  <Typography sx={{ fontSize: 11, color: 'text.disabled' }}>
+                  <Typography sx={{ fontSize: 13, fontWeight: 500, color: 'text.primary' }}>{d.dataset}</Typography>
+                  <Typography sx={{ fontSize: 11, color: 'text.disabled', fontFamily: "'DM Mono', monospace", mt: '2px' }}>
                     {d.layer} / {d.domain} {d.version ? `v${d.version}` : ''}
                   </Typography>
                 </Box>

@@ -318,25 +318,25 @@ const tags = [
         </FormCard>
       )}
 
-      <Paper variant="outlined" sx={{ p: 2 }}>
-        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-          <Typography variant="h1" sx={{ fontSize: 22, mr: 1 }}>{dataset}</Typography>
+      <Paper variant="outlined" sx={{ p: '20px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+          <Typography sx={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em' }}>{dataset}</Typography>
           <LayerChip layer={layer as string} />
           {meta.sensitivity && <Chip size="small" label={meta.sensitivity} variant="outlined" />}
-        </Stack>
-        <Typography variant="body2" sx={{ fontSize: 12, color: 'text.secondary', mt: 0.5 }}>
+        </Box>
+        <Typography sx={{ fontSize: 12, color: 'text.secondary', mt: '4px', fontFamily: "'DM Mono', monospace" }}>
           {layer} / {domain} / {dataset}
         </Typography>
         {meta.description && (
-          <Typography variant="body1" sx={{ fontSize: 13, mt: 1.5 }}>{meta.description}</Typography>
+          <Typography sx={{ fontSize: 13, mt: '14px', color: 'text.primary', lineHeight: 1.6 }}>{meta.description}</Typography>
         )}
       </Paper>
 
-      <Paper variant="outlined" sx={{ p: 2, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+      <Paper variant="outlined" sx={{ p: '20px', borderRadius: '8px', display: 'flex', gap: '36px', flexWrap: 'wrap', boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)' }}>
         {stats.map(([label, value]) => (
           <Box key={label}>
-            <Typography sx={{ fontSize: 18, fontWeight: 600 }}>{value}</Typography>
-            <Typography sx={{ fontSize: 11, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '.05em' }}>
+            <Typography sx={{ fontSize: 20, fontWeight: 700, color: 'text.primary', letterSpacing: '-0.02em' }}>{value}</Typography>
+            <Typography sx={{ fontSize: 10, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 600, mt: '4px' }}>
               {label}
             </Typography>
           </Box>
@@ -344,31 +344,31 @@ const tags = [
       </Paper>
 
       {(meta.owners?.length || tags.length || meta.update_behaviour) ? (
-        <Paper variant="outlined" sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+        <Paper variant="outlined" sx={{ p: '20px', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)' }}>
           {meta.update_behaviour && (
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Typography sx={{ fontSize: 11, fontWeight: 600, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '.05em', minWidth: 140 }}>
+            <Box sx={{ display: 'flex', gap: '20px' }}>
+              <Typography sx={{ fontSize: 10, fontWeight: 600, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.07em', minWidth: 140, pt: '2px' }}>
                 Update Behaviour
               </Typography>
-              <Typography sx={{ fontSize: 13 }}>{meta.update_behaviour}</Typography>
+              <Typography sx={{ fontSize: 13, color: 'text.primary' }}>{meta.update_behaviour}</Typography>
             </Box>
           )}
           {meta.owners && meta.owners.length > 0 && (
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Typography sx={{ fontSize: 11, fontWeight: 600, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '.05em', minWidth: 140 }}>
+            <Box sx={{ display: 'flex', gap: '20px' }}>
+              <Typography sx={{ fontSize: 10, fontWeight: 600, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.07em', minWidth: 140, pt: '2px' }}>
                 Owners
               </Typography>
-              <Typography sx={{ fontSize: 13 }}>
+              <Typography sx={{ fontSize: 13, color: 'text.primary' }}>
                 {meta.owners.map((o) => `${o.name} (${o.email})`).join(', ')}
               </Typography>
             </Box>
           )}
           {tags.length > 0 && (
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Typography sx={{ fontSize: 11, fontWeight: 600, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '.05em', minWidth: 140 }}>
+            <Box sx={{ display: 'flex', gap: '20px' }}>
+              <Typography sx={{ fontSize: 10, fontWeight: 600, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.07em', minWidth: 140, pt: '2px' }}>
                 Tags
               </Typography>
-              <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+              <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
                 {tags.map((t) => <Chip key={t} size="small" label={t} variant="outlined" />)}
               </Box>
             </Box>

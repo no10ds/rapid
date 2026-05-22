@@ -34,17 +34,33 @@ function AccountIndexPage() {
   }
 
   return (
-    <Box data-testid="intro" sx={{ width: '100%' }}>
-      <Box
-        sx={{
-          background: 'linear-gradient(135deg, #1e3a5f 0%, #2a4a72 100%)',
-          color: '#fff',
-          px: 4,
-          py: 8,
-          textAlign: 'center'
-        }}
-      >
-        <Typography variant="h1" sx={{ color: '#fff', fontSize: 32, mb: 4 }}>
+    <Box
+      data-testid="intro"
+      sx={{
+        width: '100%',
+        minHeight: '100%',
+        bgcolor: 'secondary.main',
+        color: '#fff',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        px: 3,
+        pt: '80px',
+        pb: '120px'
+      }}
+    >
+      <Box sx={{ width: '100%', maxWidth: 720, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+        <Typography
+          variant="h1"
+          sx={{
+            color: '#f1f3f5',
+            fontSize: 36,
+            fontWeight: 700,
+            letterSpacing: '-0.03em',
+            lineHeight: 1.15,
+            mb: '14px'
+          }}
+        >
           Welcome to rAPId
         </Typography>
         <DatasetSearchBar datasets={datasets} />

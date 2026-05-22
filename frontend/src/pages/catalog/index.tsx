@@ -100,8 +100,8 @@ function CatalogPage() {
   return (
     <Paper variant="outlined">
       {/* Toolbar */}
-      <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+      <Box sx={{ px: '18px', py: '14px', display: 'flex', flexDirection: 'column', gap: '14px', borderBottom: '1px solid', borderColor: 'divider' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
           <Select
             size="small"
             value={domainFilter}
@@ -122,7 +122,7 @@ function CatalogPage() {
             }}
           />
         </Box>
-        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
           {layers.map((f) => (
             <Chip
               key={f}
@@ -139,14 +139,19 @@ function CatalogPage() {
       {/* Table */}
       <TableContainer>
         <Table sx={{ tableLayout: 'fixed' }}>
-          <TableHead>
+          <TableHead
+            sx={{
+              '& .MuiTableSortLabel-icon': { opacity: 0.4 },
+              '& .Mui-active .MuiTableSortLabel-icon': { opacity: 1 }
+            }}
+          >
             <TableRow>
-              <TableCell sx={{ width: '15%' }}>
+              <TableCell sx={{ width: '14%' }}>
                 <TableSortLabel active={sortCol === 'domain'} direction={sortCol === 'domain' ? sortDir : 'asc'} onClick={() => handleSort('domain')}>
                   Domain
                 </TableSortLabel>
               </TableCell>
-              <TableCell sx={{ width: '22%' }}>
+              <TableCell sx={{ width: '26%' }}>
                 <TableSortLabel active={sortCol === 'dataset'} direction={sortCol === 'dataset' ? sortDir : 'asc'} onClick={() => handleSort('dataset')}>
                   Dataset
                 </TableSortLabel>
@@ -158,7 +163,7 @@ function CatalogPage() {
                   Last Updated
                 </TableSortLabel>
               </TableCell>
-              <TableCell sx={{ width: '21%' }}>
+              <TableCell sx={{ width: '18%' }}>
                 <TableSortLabel active={sortCol === 'last_uploaded_by'} direction={sortCol === 'last_uploaded_by' ? sortDir : 'desc'} onClick={() => handleSort('last_uploaded_by')}>
                   Updated By
                 </TableSortLabel>
@@ -188,8 +193,8 @@ function CatalogPage() {
                   onClick={() => router.push(`/dataset/${d.layer}/${d.domain}/${d.dataset}?version=${d.version}`)}
                   sx={{ cursor: 'pointer' }}
                 >
-                  <TableCell>{d.domain}</TableCell>
-                  <TableCell sx={{ fontWeight: 500 }}>
+                  <TableCell sx={{ wordBreak: 'break-word' }}>{d.domain}</TableCell>
+                  <TableCell sx={{ fontWeight: 500, wordBreak: 'break-word' }}>
                     <Link
                       href={`/dataset/${d.layer}/${d.domain}/${d.dataset}?version=${d.version}`}
                       style={{ color: '#ec4899', textDecoration: 'none' }}
@@ -212,7 +217,7 @@ function CatalogPage() {
       </TableContainer>
 
       {/* Pagination */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, py: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: '18px', py: '12px', borderTop: '1px solid', borderColor: 'divider' }}>
         <Typography variant="body2" sx={{ fontSize: 12 }}>
           {!datasetsList
             ? 'Loading...'

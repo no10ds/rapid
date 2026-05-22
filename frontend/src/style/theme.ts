@@ -18,7 +18,8 @@ const colors: Colors = {
 }
 
 const fonts = {
-  default: ['Khula', 'Poppins', 'sans-serif']
+  default: ['Poppins', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+  mono: ['DM Mono', 'monospace']
 }
 
 const theme = createTheme({
@@ -160,13 +161,14 @@ const theme = createTheme({
         root: {
           backgroundColor: '#fafafa',
           '& .MuiTableCell-head': {
-            fontSize: 11,
+            fontSize: 10,
             fontWeight: 600,
-            letterSpacing: '0.05em',
+            letterSpacing: '0.07em',
             textTransform: 'uppercase',
             color: '#9ca3af',
             padding: '10px 16px',
-            borderBottom: '1px solid #f3f4f6'
+            borderBottom: '1px solid #f3f4f6',
+            whiteSpace: 'nowrap'
           }
         }
       }
@@ -176,7 +178,8 @@ const theme = createTheme({
         body: {
           fontSize: 13,
           padding: '11px 16px',
-          borderBottom: '1px solid #f5f5f5'
+          borderBottom: '1px solid #f9fafb',
+          color: '#111827'
         }
       }
     },
@@ -193,11 +196,14 @@ const theme = createTheme({
     MuiChip: {
       styleOverrides: {
         root: {
-          fontWeight: 600
+          fontWeight: 500
         },
         sizeSmall: {
           fontSize: 11,
-          height: 22
+          height: 28,
+          borderRadius: 20,
+          paddingLeft: 4,
+          paddingRight: 4
         }
       }
     },

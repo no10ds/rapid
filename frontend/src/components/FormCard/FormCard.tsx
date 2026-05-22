@@ -23,36 +23,39 @@ const FormCard = ({
   bodySx
 }: Props) => {
   return (
-    <Paper variant="outlined">
+    <Paper variant="outlined" sx={{ borderRadius: '8px', overflow: 'hidden' }}>
       <Box
         sx={{
-          p: 2,
-          borderBottom: '1px solid',
-          borderColor: 'divider',
+          px: '20px',
+          py: '14px',
+          bgcolor: '#fafafa',
+          borderBottom: '1px solid #f3f4f6',
           display: 'flex',
           alignItems: 'center',
-          gap: 1.5
+          gap: '10px'
         }}
       >
         {num !== undefined && (
           <Box
             sx={{
-              width: 24,
-              height: 24,
+              width: 22,
+              height: 22,
               borderRadius: '50%',
               bgcolor: 'primary.main',
-              color: 'primary.contrastText',
+              color: '#fff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: 12,
-              fontWeight: 600
+              fontSize: 10,
+              fontWeight: 700,
+              boxShadow: '0 1px 3px rgba(236, 72, 153, 0.3)',
+              flexShrink: 0
             }}
           >
             {num}
           </Box>
         )}
-        <Typography variant="h3" sx={{ fontSize: 14 }}>
+        <Typography sx={{ fontSize: 13, fontWeight: 600, color: 'text.primary', letterSpacing: '-0.01em' }}>
           {title}
           {optional && (
             <Typography
@@ -65,15 +68,15 @@ const FormCard = ({
         </Typography>
         {headerAction && <Box sx={{ ml: 'auto' }}>{headerAction}</Box>}
       </Box>
-      <Box sx={{ p: 2, ...bodySx }}>{children}</Box>
+      <Box sx={{ p: '20px', ...bodySx }}>{children}</Box>
       {actions && (
         <Box
           sx={{
-            p: 2,
-            borderTop: '1px solid',
-            borderColor: 'divider',
+            px: '20px',
+            py: '14px',
+            borderTop: '1px solid #f3f4f6',
             display: 'flex',
-            gap: 1,
+            gap: '10px',
             alignItems: 'center',
             flexWrap: 'wrap'
           }}

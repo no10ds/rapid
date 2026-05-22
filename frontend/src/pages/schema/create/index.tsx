@@ -85,7 +85,7 @@ function CreateSchema() {
       })}
     >
       <FormCard num={1} title="Dataset properties">
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
           <Controller
             name="sensitivity"
             control={control}

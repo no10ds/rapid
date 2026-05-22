@@ -109,7 +109,7 @@ function CreateSchema({
       })}
     >
       <FormCard num={1} title="Dataset properties">
-        <Stack spacing={2}>
+        <Stack spacing="18px">
           <Controller
             name="sensitivity"
             control={control}
@@ -294,7 +294,7 @@ function CreateSchema({
       </FormCard>
 
       <FormCard num={3} title="Set the data owner">
-        <Stack spacing={2}>
+        <Stack spacing="18px">
           <Controller
             name="ownerEmail"
             control={control}

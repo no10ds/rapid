@@ -133,8 +133,8 @@ function UserAdminPage() {
   return (
     <Paper variant="outlined">
       {/* Toolbar */}
-      <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <Box sx={{ px: '18px', py: '14px', display: 'flex', flexDirection: 'column', gap: '14px', borderBottom: '1px solid', borderColor: 'divider' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <TextField
             size="small"
             placeholder="Search by name…"
@@ -156,8 +156,8 @@ function UserAdminPage() {
             Create subject
           </Button>
         </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-          <Box sx={{ display: 'flex', gap: 0.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap' }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
             {typeFilters.map((f) => (
               <Chip
                 key={f}
@@ -258,7 +258,7 @@ function UserAdminPage() {
       </TableContainer>
 
       {/* Footer */}
-      <Box sx={{ px: 2, py: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
+      <Box sx={{ px: '18px', py: '12px', borderTop: '1px solid', borderColor: 'divider' }}>
         <Typography variant="body2" sx={{ fontSize: 12 }}>
           {filtered.length} subject{filtered.length !== 1 ? 's' : ''}
           {filtered.length !== data?.length ? ` (of ${data?.length})` : ''}

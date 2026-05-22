@@ -47,7 +47,7 @@ function StatusPage() {
   return (
     <Paper variant="outlined" data-testid="tasks-content">
       {/* Toolbar */}
-      <Box sx={{ p: 2, display: 'flex', gap: 0.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+      <Box sx={{ px: '18px', py: '14px', display: 'flex', gap: '10px', borderBottom: '1px solid', borderColor: 'divider' }}>
         {typeFilters.map((f) => (
           <Chip
             key={f}
@@ -127,7 +127,7 @@ function StatusPage() {
       </TableContainer>
 
       {/* Footer */}
-      <Box sx={{ px: 2, py: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
+      <Box sx={{ px: '18px', py: '12px', borderTop: '1px solid', borderColor: 'divider' }}>
         <Typography variant="body2" sx={{ fontSize: 12 }}>
           {filtered.length} job{filtered.length !== 1 ? 's' : ''}
           {typeFilter !== 'All' ? ` (${typeFilter.toLowerCase()})` : ''}
