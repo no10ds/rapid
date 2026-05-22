@@ -3,7 +3,9 @@ resource "aws_dynamodb_table" "schema_table" {
   name         = "${var.resource-name-prefix}_schema_table"
   hash_key     = "PK"
   range_key    = "SK"
-  billing_mode = "PAY_PER_REQUEST"
+  billing_mode                = "PAY_PER_REQUEST"
+  deletion_protection_enabled = true
+
   attribute {
     name = "PK"
     type = "S"
