@@ -1,6 +1,10 @@
 import { AccountLayout, FormCard } from '@/components'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
+import LayerChip from '@/components/Chip/LayerChip'
 import UploadProgress from '@/components/UploadProgress/UploadProgress'
+import { formatDate } from '@/utils/date'
+import { triggerBlobDownload } from '@/utils/download'
+import { buildQueryPayload } from '@/utils/query'
 import { getDatasetInfo, getMethods, queryDataset, uploadDataset } from '@/service'
 import { DataFormats, UploadDatasetResponse, UploadDatasetResponseDetails } from '@/service/types'
 import { useMutation, useQuery } from '@tanstack/react-query'
@@ -26,23 +30,6 @@ import {
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 
 type ActiveTab = 'download' | 'upload' | null
-
-function formatDate(raw: string | undefined): string {
-  if (!raw) return '—'
-  const d = new Date(raw)
-  if (isNaN(d.getTime())) return raw
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-    + ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-}
-
-function layerColor(layer: string): 'info' | 'success' | 'warning' | 'default' {
-  switch (layer?.toLowerCase()) {
-    case 'raw': return 'info'
-    case 'curated': return 'success'
-    case 'processed': return 'warning'
-    default: return 'default'
-  }
-}
 
 function DatasetDetailPage() {
   const router = useRouter()
@@ -87,15 +74,7 @@ function DatasetDetailPage() {
     onSuccess: async (response, { dataFormat: fmt }) => {
       if (response.status === 200) {
         setNoContentReturn(false)
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.style.display = 'none'
-        a.href = url
-        a.download = `${layer}_${domain}_${dataset}_${version}.${fmt}`
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
+        triggerBlobDownload(await response.blob(), `${layer}_${domain}_${dataset}_${version}.${fmt}`)
       } else if (response.status === 204) {
         setNoContentReturn(true)
       }
@@ -127,17 +106,7 @@ function DatasetDetailPage() {
 
   const meta = info.metadata
 
-  const createQueryBodyData = () => {
-    const queryBodyData: Record<string, unknown> = {}
-    if (queryBody.select_columns) queryBodyData.select_columns = queryBody.select_columns.split(',')
-    if (queryBody.filter) queryBodyData.filter = queryBody.filter
-    if (queryBody.group_by_columns) queryBodyData.group_by_columns = queryBody.group_by_columns.split(',')
-    if (queryBody.aggregation_conditions) queryBodyData.aggregation_conditions = queryBody.aggregation_conditions
-    if (queryBody.limit) queryBodyData.limit = queryBody.limit
-    return queryBodyData
-  }
-
-  const tags = [
+const tags = [
     ...(meta.key_only_tags || []),
     ...Object.entries(meta.key_value_tags || {}).map(([k, v]) => `${k}: ${v}`)
   ]
@@ -211,7 +180,7 @@ function DatasetDetailPage() {
                 mutate({
                   path: `${layer}/${domain}/${dataset}/query?version=${version}`,
                   dataFormat,
-                  data: createQueryBodyData()
+                  data: buildQueryPayload(queryBody)
                 })
               }
             >
@@ -352,7 +321,7 @@ function DatasetDetailPage() {
       <Paper variant="outlined" sx={{ p: 2 }}>
         <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
           <Typography variant="h1" sx={{ fontSize: 22, mr: 1 }}>{dataset}</Typography>
-          <Chip size="small" label={layer as string} color={layerColor(layer as string)} variant="outlined" />
+          <LayerChip layer={layer as string} />
           {meta.sensitivity && <Chip size="small" label={meta.sensitivity} variant="outlined" />}
         </Stack>
         <Typography variant="body2" sx={{ fontSize: 12, color: 'text.secondary', mt: 0.5 }}>

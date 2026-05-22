@@ -1,5 +1,7 @@
 import AccountLayout from '@/components/Layout/AccountLayout'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
+import StatusChip from '@/components/Chip/StatusChip'
+import { formatTs } from '@/utils/date'
 import { getAllJobs } from '@/service'
 import { useQuery } from '@tanstack/react-query'
 import { ReactNode, useState, useMemo } from 'react'
@@ -19,22 +21,6 @@ import {
 } from '@mui/material'
 import Link from 'next/link'
 
-function statusChip(status: string) {
-  if (status === 'SUCCESS') return <Chip label="Success" size="small" color="success" variant="outlined" />
-  if (status === 'IN PROGRESS') return <Chip label="In Progress" size="small" color="warning" variant="outlined" />
-  if (status === 'FAILED') return <Chip label="Failed" size="small" color="error" variant="outlined" />
-  return <Chip label={status} size="small" variant="outlined" />
-}
-
-function formatTs(ts: number | string | undefined): string | null {
-  if (!ts) return null
-  const n = typeof ts === 'string' ? parseInt(ts, 10) : ts
-  if (!n || isNaN(n)) return null
-  return new Date(n * 1000).toLocaleString('en-GB', {
-    day: '2-digit', month: 'short', year: 'numeric',
-    hour: '2-digit', minute: '2-digit'
-  })
-}
 
 type TypeFilter = 'All' | 'UPLOAD' | 'QUERY'
 
@@ -113,7 +99,7 @@ function StatusPage() {
                     <TableCell>{job.domain}</TableCell>
                     <TableCell sx={{ fontWeight: 500 }}>{job.dataset}</TableCell>
                     <TableCell sx={{ fontFamily: 'monospace', fontSize: 11 }}>{job.version}</TableCell>
-                    <TableCell>{statusChip(job.status as string)}</TableCell>
+                    <TableCell><StatusChip status={job.status as string} /></TableCell>
                     <TableCell sx={{ fontFamily: 'monospace', fontSize: 11 }}>{job.step}</TableCell>
                     {hasCreatedAt && (
                       <TableCell sx={{ fontFamily: 'monospace', fontSize: 11 }}>{createdAtStr ?? '—'}</TableCell>

@@ -1,5 +1,6 @@
 import AccountLayout from '@/components/Layout/AccountLayout'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
+import { sortByString } from '@/utils/sort'
 import { getSubjectsListUi, getSubjectPermissions } from '@/service'
 import { SubjectPermission } from '@/service/types'
 import { useQuery, useQueries } from '@tanstack/react-query'
@@ -34,14 +35,19 @@ type RoleFilter = 'All' | 'User Admin' | 'Data Admin' | 'Read/Write' | 'Read Onl
 
 const ROLE_FILTERS: RoleFilter[] = ['All', 'User Admin', 'Data Admin', 'Read/Write', 'Read Only', 'No Permissions']
 
+// Roles in descending precedence — the first one the subject has wins.
+const ROLE_PRECEDENCE = ['USER_ADMIN', 'DATA_ADMIN', 'WRITE', 'READ'] as const
+
 function deriveRole(perms: SubjectPermission[] | undefined): RoleFilter {
   if (!perms || perms.length === 0) return 'No Permissions'
-  const types = perms.map((p) => p.type).filter(Boolean)
-  if (types.includes('USER_ADMIN')) return 'User Admin'
-  if (types.includes('DATA_ADMIN')) return 'Data Admin'
-  if (types.includes('WRITE')) return 'Read/Write'
-  if (types.includes('READ')) return 'Read Only'
-  return 'No Permissions'
+  const highest = ROLE_PRECEDENCE.find((type) => perms.some((p) => p.type === type))
+  switch (highest) {
+    case 'USER_ADMIN': return 'User Admin'
+    case 'DATA_ADMIN': return 'Data Admin'
+    case 'WRITE': return 'Read/Write'
+    case 'READ': return 'Read Only'
+    default: return 'No Permissions'
+  }
 }
 
 function UserAdminPage() {
@@ -85,34 +91,30 @@ function UserAdminPage() {
 
   const filtered = useMemo(() => {
     if (!data) return []
+    const query = search.trim().toLowerCase()
+
+    const matchesType = (s: typeof data[number]) =>
+      typeFilter === 'All' || s.type === typeFilter
+
+    const matchesSearch = (s: typeof data[number]) =>
+      !query || String(s.subject_name ?? '').toLowerCase().includes(query)
+
+    const matchesRole = (perms: SubjectPermission[] | undefined) =>
+      roleFilter === 'All' || deriveRole(perms) === roleFilter
+
+    const matchesDomain = (perms: SubjectPermission[] | undefined) =>
+      domainFilter === 'All' || !!perms?.some((p) => p.domain === domainFilter)
+
     return data.filter((s) => {
-      if (typeFilter !== 'All' && s.type !== typeFilter) return false
-      if (search.trim()) {
-        const q = search.trim().toLowerCase()
-        if (!String(s.subject_name ?? '').toLowerCase().includes(q)) return false
-      }
       const perms = permsBySubjectId[s.subject_id as string]
-      if (roleFilter !== 'All') {
-        const role = deriveRole(perms)
-        if (role !== roleFilter) return false
-      }
-      if (domainFilter !== 'All') {
-        if (!perms || !perms.some((p) => p.domain === domainFilter)) return false
-      }
-      return true
+      return matchesType(s) && matchesSearch(s) && matchesRole(perms) && matchesDomain(perms)
     })
   }, [data, typeFilter, roleFilter, domainFilter, search, permsBySubjectId])
 
-  const sorted = useMemo(() => {
-    if (!sortCol) return filtered
-    return [...filtered].sort((a, b) => {
-      const av = (String(a[sortCol] ?? '')).toLowerCase()
-      const bv = (String(b[sortCol] ?? '')).toLowerCase()
-      if (av < bv) return sortDir === 'asc' ? -1 : 1
-      if (av > bv) return sortDir === 'asc' ? 1 : -1
-      return 0
-    })
-  }, [filtered, sortCol, sortDir])
+  const sorted = useMemo(
+    () => sortByString(filtered, sortCol, sortDir),
+    [filtered, sortCol, sortDir]
+  )
 
   function handleSort() {
     if (sortCol === 'subject_name') {

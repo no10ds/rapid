@@ -1,7 +1,7 @@
 import { Permission, ActionEnum, SensitivityEnum } from '@/service'
 import { PermissionUiResponse } from '@/service/types'
 import { useState } from 'react'
-import { FieldValues } from 'react-hook-form'
+import { ArrayPath, FieldValues, UseFieldArrayReturn } from 'react-hook-form'
 import { cloneDeep } from 'lodash'
 import { z } from 'zod'
 import {
@@ -21,16 +21,20 @@ type ActionType = z.infer<typeof ActionEnum>
 type PermissionType = z.infer<typeof Permission>
 type SensitivityType = z.infer<typeof SensitivityEnum>
 
-const PermissionsTable = ({
+const PermissionsTable = <
+  TFieldValues extends FieldValues,
+  TName extends ArrayPath<TFieldValues>
+>({
   permissionsListData,
   fieldArrayReturn,
   isModifyPage = false
 }: {
   permissionsListData: PermissionUiResponse
-  fieldArrayReturn: FieldValues
+  fieldArrayReturn: UseFieldArrayReturn<TFieldValues, TName>
   isModifyPage?: boolean
 }) => {
   const { fields, append, remove } = fieldArrayReturn
+  const permissionFields = fields as unknown as PermissionType[]
 
   const [addType, setAddType] = useState<ActionType | ''>('')
   const [addLayer, setAddLayer] = useState('')
@@ -38,37 +42,32 @@ const PermissionsTable = ({
   const [addDomain, setAddDomain] = useState('')
   const [addError, setAddError] = useState('')
 
-  let filteredPerms = cloneDeep(permissionsListData)
-  try {
-    ;(fields as unknown as PermissionType[]).forEach((perm) => {
-      filteredPerms = removePermOption(perm, filteredPerms)
-    })
-  } catch (error) {
-    if (!isModifyPage) throw error
-  }
+  const filteredPerms = (() => {
+    try {
+      return permissionFields.reduce(
+        (acc, perm) => removePermOption(perm, acc),
+        cloneDeep(permissionsListData)
+      )
+    } catch (error) {
+      if (!isModifyPage) throw error
+      return cloneDeep(permissionsListData)
+    }
+  })()
+
+  const typePerms =
+    addType && filteredPerms?.[addType]
+      ? (filteredPerms[addType] as Record<string, Record<string, Record<string, unknown>>>)
+      : undefined
+  const layerPerms = addLayer && typePerms?.[addLayer] ? typePerms[addLayer] : undefined
+  const domainPerms =
+    addSensitivity === 'PROTECTED' && layerPerms?.['PROTECTED']
+      ? layerPerms['PROTECTED']
+      : undefined
 
   const availableTypes = Object.keys(filteredPerms ?? {})
-  const availableLayers =
-    addType && filteredPerms?.[addType] ? Object.keys(filteredPerms[addType] as object) : []
-  const availableSensitivities =
-    addType && addLayer && (filteredPerms?.[addType] as Record<string, unknown>)?.[addLayer]
-      ? Object.keys(
-          (filteredPerms[addType] as Record<string, Record<string, unknown>>)[addLayer]
-        )
-      : []
-  const availableDomains =
-    addType &&
-    addLayer &&
-    addSensitivity === 'PROTECTED' &&
-    (
-      filteredPerms?.[addType] as Record<string, Record<string, Record<string, unknown>>>
-    )?.[addLayer]?.['PROTECTED']
-      ? Object.keys(
-          (
-            filteredPerms[addType] as Record<string, Record<string, Record<string, unknown>>>
-          )[addLayer]['PROTECTED']
-        )
-      : []
+  const availableLayers = typePerms ? Object.keys(typePerms) : []
+  const availableSensitivities = layerPerms ? Object.keys(layerPerms) : []
+  const availableDomains = domainPerms ? Object.keys(domainPerms) : []
 
   const isAdminType = addType === 'DATA_ADMIN' || addType === 'USER_ADMIN'
   const canAdd =
@@ -95,7 +94,7 @@ const PermissionsTable = ({
           sensitivity: addSensitivity as SensitivityType,
           domain: addSensitivity === 'PROTECTED' ? addDomain : undefined
         }
-    append(perm)
+    append(perm as Parameters<typeof append>[0])
     setAddType('')
     setAddLayer('')
     setAddSensitivity('')
@@ -248,6 +247,9 @@ const PermissionsTable = ({
   )
 }
 
+const isEmpty = (obj: Record<string, unknown> | undefined): boolean =>
+  !!obj && Object.keys(obj).length === 0
+
 function removePermOption(
   permission: PermissionType,
   permsList: Record<string, unknown>
@@ -259,29 +261,37 @@ function removePermOption(
     sensitivity?: string
     domain?: string
   }
-  const typeList = permsList[type] as Record<string, unknown>
 
+  // Admin perms (DATA_ADMIN / USER_ADMIN) have no layer — remove the whole type bucket.
   if (!layer) {
     delete permsList[type]
     return permsList
   }
 
-  const layerList = typeList?.[layer] as Record<string, unknown>
-  if (!sensitivity) return permsList
-  const sensitivityList = layerList?.[sensitivity] as Record<string, unknown>
+  const typeBucket = permsList[type] as Record<string, unknown> | undefined
+  const layerBucket = typeBucket?.[layer] as Record<string, unknown> | undefined
 
+  if (!sensitivity) return permsList
+
+  // PROTECTED perms specify a domain — remove that single domain from the sensitivity bucket.
   if (domain) {
-    if (sensitivityList && domain in sensitivityList) delete sensitivityList[domain]
-    if (sensitivityList && !Object.keys(sensitivityList).length) delete layerList[sensitivity]
-    if (layerList && !Object.keys(layerList).length) delete typeList[layer]
-  } else {
-    if (layerList && sensitivity in layerList) delete layerList[sensitivity]
-    if (layerList && (!Object.keys(layerList).length || sensitivity === 'ALL')) {
-      delete typeList[layer]
-      if (typeList && (!Object.keys(typeList).length || layer === 'ALL')) delete permsList[type]
-    }
+    const sensitivityBucket = layerBucket?.[sensitivity] as
+      | Record<string, unknown>
+      | undefined
+    if (sensitivityBucket && domain in sensitivityBucket) delete sensitivityBucket[domain]
+    if (isEmpty(sensitivityBucket)) delete layerBucket?.[sensitivity]
+    if (isEmpty(layerBucket)) delete typeBucket?.[layer]
+    return permsList
   }
 
+  // Non-PROTECTED perms remove the whole sensitivity. 'ALL' also collapses its parent.
+  if (layerBucket && sensitivity in layerBucket) delete layerBucket[sensitivity]
+  const collapseLayer = isEmpty(layerBucket) || sensitivity === 'ALL'
+  if (collapseLayer) {
+    delete typeBucket?.[layer]
+    const collapseType = isEmpty(typeBucket) || layer === 'ALL'
+    if (collapseType) delete permsList[type]
+  }
   return permsList
 }
 

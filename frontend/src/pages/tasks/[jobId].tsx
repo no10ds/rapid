@@ -1,5 +1,7 @@
 import { AccountLayout, FormCard } from '@/components'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
+import StatusChip from '@/components/Chip/StatusChip'
+import { formatTs } from '@/utils/date'
 import { getJob } from '@/service'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/router'
@@ -21,23 +23,6 @@ import {
   TableRow,
   Stack
 } from '@mui/material'
-
-function statusChip(status: string) {
-  if (status === 'SUCCESS') return <Chip size="small" label="Success" color="success" variant="outlined" />
-  if (status === 'IN PROGRESS') return <Chip size="small" label="In Progress" color="warning" variant="outlined" />
-  if (status === 'FAILED') return <Chip size="small" label="Failed" color="error" variant="outlined" />
-  return <Chip size="small" label={status} variant="outlined" />
-}
-
-function formatTs(ts: number | string | undefined): string | null {
-  if (!ts) return null
-  const n = typeof ts === 'string' ? parseInt(ts, 10) : ts
-  if (!n || isNaN(n)) return null
-  return new Date(n * 1000).toLocaleString('en-GB', {
-    day: 'numeric', month: 'long', year: 'numeric',
-    hour: '2-digit', minute: '2-digit'
-  })
-}
 
 type ParsedError = {
   title: string
@@ -124,7 +109,7 @@ function GetJob() {
 
   const parsedErrors = errors.map(parseError)
   const hasFailed = data.status === 'FAILED'
-  const createdAtStr = formatTs(data.createdat as number | string | undefined)
+  const createdAtStr = formatTs(data.createdat as number | string | undefined, 'long')
 
   const metaRows: [string, ReactNode][] = [
     ['Job ID', <Box key="id" component="span" sx={{ fontFamily: 'monospace', fontSize: 12, userSelect: 'all' }}>{data.job_id as string}</Box>],
@@ -140,7 +125,7 @@ function GetJob() {
     <Box sx={{ maxWidth: 860, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
       <FormCard
         title="Job Detail"
-        headerAction={statusChip(data.status as string)}
+        headerAction={<StatusChip status={data.status as string} />}
         bodySx={{ p: 0 }}
       >
         <TableContainer>

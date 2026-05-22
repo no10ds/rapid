@@ -1,5 +1,8 @@
 import { AccountLayout, FormCard } from '@/components'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
+import { formatDate } from '@/utils/date'
+import { triggerBlobDownload } from '@/utils/download'
+import { buildQueryPayload } from '@/utils/query'
 import { getDatasetInfo, queryDataset } from '@/service'
 import { DataFormats } from '@/service/types'
 import { useMutation, useQuery } from '@tanstack/react-query'
@@ -21,14 +24,6 @@ import {
   TableRow,
   TextField
 } from '@mui/material'
-
-function formatDate(raw: string | undefined): string {
-  if (!raw) return '—'
-  const d = new Date(raw)
-  if (isNaN(d.getTime())) return raw
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-    + ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-}
 
 function DownloadDataset() {
   const router = useRouter()
@@ -62,15 +57,7 @@ function DownloadDataset() {
     onSuccess: async (response, { dataFormat: fmt }) => {
       if (response.status === 200) {
         setNoContentReturn(false)
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.style.display = 'none'
-        a.href = url
-        a.download = `${layer}_${domain}_${dataset}_${version}.${fmt}`
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
+        triggerBlobDownload(await response.blob(), `${layer}_${domain}_${dataset}_${version}.${fmt}`)
       } else if (response.status === 204) {
         setNoContentReturn(true)
       }
@@ -85,41 +72,7 @@ function DownloadDataset() {
     return <ErrorCard error={datasetInfoError as Error} />
   }
 
-  const addListValueToQuery = (
-    queryBodyData: Record<string, unknown>,
-    key: string,
-    value: string
-  ) => {
-    if (value) {
-      queryBodyData[key] = value.split(',')
-    }
-  }
-
-  const addStringValueToQuery = (
-    queryBodyData: Record<string, unknown>,
-    key: string,
-    value: string
-  ) => {
-    if (value) {
-      queryBodyData[key] = value
-    }
-  }
-
-  const createQueryBodyData = () => {
-    const queryBodyData: Record<string, unknown> = {}
-    addListValueToQuery(queryBodyData, 'select_columns', queryBody.select_columns)
-    addStringValueToQuery(queryBodyData, 'filter', queryBody.filter)
-    addListValueToQuery(queryBodyData, 'group_by_columns', queryBody.group_by_columns)
-    addStringValueToQuery(
-      queryBodyData,
-      'aggregation_conditions',
-      queryBody.aggregation_conditions
-    )
-    addStringValueToQuery(queryBodyData, 'limit', queryBody.limit)
-    return queryBodyData
-  }
-
-  const overviewRows: [string, string][] = [
+const overviewRows: [string, string][] = [
     ['Domain', domain as string],
     ['Dataset', dataset as string],
     ['Description', datasetInfoData.metadata.description],
@@ -179,8 +132,8 @@ function DownloadDataset() {
                 <TableRow key={idx}>
                   <TableCell sx={{ fontFamily: 'monospace', fontSize: 12 }}>{column.name}</TableCell>
                   <TableCell>{column.data_type}</TableCell>
-                  <TableCell>{column.allow_null ? 'True' : 'False'}</TableCell>
-                  <TableCell>{column.unique ? 'True' : 'False'}</TableCell>
+                  <TableCell>{column.allow_null ? 'Yes' : 'No'}</TableCell>
+                  <TableCell>{column.unique ? 'Yes' : 'No'}</TableCell>
                   <TableCell sx={{ fontFamily: 'monospace', fontSize: 12 }}>
                     {column.statistics ? column.statistics.max : '—'}
                   </TableCell>
@@ -234,7 +187,7 @@ function DownloadDataset() {
                 mutate({
                   path: `${layer}/${domain}/${dataset}/query?version=${version}`,
                   dataFormat,
-                  data: createQueryBodyData()
+                  data: buildQueryPayload(queryBody)
                 })
               }
             >

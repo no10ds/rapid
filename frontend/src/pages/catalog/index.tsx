@@ -1,5 +1,8 @@
 import AccountLayout from '@/components/Layout/AccountLayout'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
+import LayerChip from '@/components/Chip/LayerChip'
+import { formatDate } from '@/utils/date'
+import { sortByString } from '@/utils/sort'
 import { getDatasetsUi } from '@/service'
 import { Dataset } from '@/service/types'
 import { useQuery } from '@tanstack/react-query'
@@ -28,23 +31,6 @@ import {
 import SearchIcon from '@mui/icons-material/Search'
 
 const PAGE_SIZE = 20
-
-function layerColor(layer: string): 'info' | 'success' | 'warning' | 'default' {
-  switch (layer?.toLowerCase()) {
-    case 'raw': return 'info'
-    case 'curated': return 'success'
-    case 'processed': return 'warning'
-    default: return 'default'
-  }
-}
-
-function formatDate(raw: string | undefined): string {
-  if (!raw) return '—'
-  const d = new Date(raw)
-  if (isNaN(d.getTime())) return raw
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-    + ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-}
 
 type SortCol = 'domain' | 'dataset' | 'last_updated' | 'last_uploaded_by'
 
@@ -90,16 +76,10 @@ function CatalogPage() {
     })
   }, [datasetsList, layerFilter, domainFilter, search])
 
-  const sorted = useMemo(() => {
-    if (!sortCol) return filtered
-    return [...filtered].sort((a, b) => {
-      const av = (a[sortCol] ?? '').toLowerCase()
-      const bv = (b[sortCol] ?? '').toLowerCase()
-      if (av < bv) return sortDir === 'asc' ? -1 : 1
-      if (av > bv) return sortDir === 'asc' ? 1 : -1
-      return 0
-    })
-  }, [filtered, sortCol, sortDir])
+  const sorted = useMemo(
+    () => sortByString(filtered, sortCol, sortDir),
+    [filtered, sortCol, sortDir]
+  )
 
   const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE))
   const safePage = Math.min(page, totalPages)
@@ -220,7 +200,7 @@ function CatalogPage() {
                   </TableCell>
                   <TableCell sx={{ fontFamily: 'monospace', fontSize: 11 }}>{d.version}</TableCell>
                   <TableCell>
-                    <Chip label={d.layer} size="small" color={layerColor(d.layer)} variant="outlined" />
+                    <LayerChip layer={d.layer} />
                   </TableCell>
                   <TableCell sx={{ fontFamily: 'monospace', fontSize: 11 }}>{formatDate(d.last_updated)}</TableCell>
                   <TableCell sx={{ fontFamily: 'monospace', fontSize: 11 }}>{d.last_uploaded_by ?? '—'}</TableCell>
