@@ -20,7 +20,6 @@ test('test', async ({ page }) => {
   await page.locator('[data-testid="field-domain"]').fill('ui_test_domain')
   await page.locator('[data-testid="field-title"]').click()
   await page.locator('[data-testid="field-title"]').fill(datasetName)
-  await page.locator('[data-testid="field-file"]').click()
   await page.locator('[data-testid="field-file"]').setInputFiles(filePath)
   await page.locator('[data-testid="submit"]').click()
   await page.locator('input[name="ownerEmail"]').click()
