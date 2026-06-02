@@ -6,20 +6,14 @@ import { makeAPIRequest, generateRapidAuthToken, domain } from './utils'
 const user = `${process.env.E2E_RESOURCE_PREFIX}_ui_test_user`
 
 test('test', { timeout: 60000 }, async ({ page }) => {
-  await page.goto(domain)
+  await page.goto(`${domain}/subject/modify`)
 
   // Modify user to have data admin permissions
-  await page.locator('div[role="button"]:has-text("Modify User")').click()
   await expect(page).toHaveURL(`${domain}/subject/modify`)
   await page.locator('[data-testid="field-user"]').selectOption({ label: user })
   await page.locator('[data-testid="submit-button"]').click()
-  await page.getByRole('row', { name: 'DATA_ADMIN' }).getByRole('button').click()
   await page.getByTestId('select-type').selectOption('DATA_ADMIN')
-  await page
-    .getByRole('row')
-    .filter({ hasText: 'DATA_ADMIN' })
-    .getByRole('button')
-    .click()
+  await page.getByTestId('add-permission').click()
   await page.getByTestId('submit').click()
   // await expect(page).toHaveURL(/success/)
 
@@ -44,17 +38,19 @@ test('test', { timeout: 60000 }, async ({ page }) => {
     },
     `Bearer ${access_token}`
   )
-  await page.locator('div[role="button"]:has-text("Modify User")').click()
+  await page.goto(`${domain}/subject/modify`)
   await expect(page).toHaveURL(`${domain}/subject/modify`)
   await page.locator('[data-testid="field-user"]').selectOption({ label: user })
   await page.locator('[data-testid="submit-button"]').click()
   await page
-    .getByRole('row', { name: 'READ DEFAULT PROTECTED TEST_E2E_PROTECTED' })
-    .getByRole('button')
+    .getByRole('row')
+    .filter({ hasText: 'TEST_E2E_PROTECTED' })
+    .getByRole('button', { name: 'Remove' })
     .waitFor({ timeout: 30000 })
   await page
-    .getByRole('row', { name: 'READ DEFAULT PROTECTED TEST_E2E_PROTECTED' })
-    .getByRole('button')
+    .getByRole('row')
+    .filter({ hasText: 'TEST_E2E_PROTECTED' })
+    .getByRole('button', { name: 'Remove' })
     .click()
   await page.getByTestId('submit').click()
 })
