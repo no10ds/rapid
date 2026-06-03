@@ -13,7 +13,9 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         // Use prepared auth state.
-        storageState: 'playwright/.auth/user.json'
+        storageState: 'playwright/.auth/user.json',
+        trace: 'retain-on-failure',
+        screenshot: 'only-on-failure'
       },
       dependencies: ['setup']
     }
