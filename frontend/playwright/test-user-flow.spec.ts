@@ -24,9 +24,15 @@ test('test', { timeout: 60000 }, async ({ page }) => {
     `Bearer ${access_token}`
   )
 
-  // Modify user to have data admin permissions
-  await page.goto(`${domain}/subject/modify/${subjectId}?name=${user}`)
-  await page.locator('.MuiSelect-select').click()
+  // Modify user to have data admin permissions.
+  // The reset is eventually consistent and the page only fetches permissions on load,
+  // so reload until the add-permission row (and its type select) renders.
+  const addTypeSelect = page.locator('.MuiSelect-select')
+  await expect(async () => {
+    await page.goto(`${domain}/subject/modify/${subjectId}?name=${user}`)
+    await expect(addTypeSelect).toBeVisible({ timeout: 3000 })
+  }).toPass({ timeout: 30000 })
+  await addTypeSelect.click()
   await page.getByRole('option', { name: 'DATA_ADMIN', exact: true }).click()
   await page.getByTestId('add-permission').click()
   await page.getByTestId('submit').click()
