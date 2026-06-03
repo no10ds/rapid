@@ -1,5 +1,7 @@
+import FormCard from './FormCard/FormCard'
 import {
   createSchema,
+  updateSchema,
   schemaCreateSchema,
   GlobalSensitivities,
   ProtectedSensitivity
@@ -11,40 +13,46 @@ import {
   SensitivityEnum
 } from '@/service/types'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Box, FormControl, Link, Typography } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import Alert from './Alert/Alert'
-import Button from './Button/Button'
-import Card from './Card/Card'
-import Row from './Row'
-import Select from './Select/Select'
-import SimpleTable from './SimpleTable/SimpleTable'
-import TextField from './TextField/TextField'
+import {
+  Box,
+  Typography,
+  Button,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  FormHelperText,
+  Alert,
+  AlertTitle,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Stack,
+  IconButton,
+  Link as MuiLink
+} from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
 
 const dataTypes = [
-  'bigint',
-  'boolean',
-  'char',
-  'date',
-  'decimal',
-  'double',
-  'float',
-  'int',
-  'smallint',
-  'string',
-  'timestamp',
-  'tinyint',
-  'varchar'
+  'bigint', 'boolean', 'char', 'date', 'decimal', 'double',
+  'float', 'int', 'smallint', 'string', 'timestamp', 'tinyint', 'varchar'
 ]
 
 function CreateSchema({
   schemaData,
-  layersData
+  layersData,
+  mode = 'create'
 }: {
   schemaData: GenerateSchemaResponse
   layersData: string[]
+  mode?: 'create' | 'edit'
 }) {
   const [newSchemaData, setNewSchemaData] = useState<GenerateSchemaResponse>(schemaData)
   const [keyValueTag, setKeyValueTag] = useState({ key: '', value: '' })
@@ -59,479 +67,385 @@ function CreateSchema({
     Error,
     GenerateSchemaResponse
   >({
-    mutationFn: createSchema
+    mutationFn: mode === 'edit' ? updateSchema : createSchema
   })
 
-  const setNewSchemaDataMetadata = (key, value) => {
-    setNewSchemaData({
-      ...newSchemaData,
-      metadata: {
-        ...newSchemaData.metadata,
-        [key]: value
-      }
-    })
-  }
+  const setMeta = (key: string, value: unknown) =>
+    setNewSchemaData((prev) => ({ ...prev, metadata: { ...prev.metadata, [key]: value } }))
 
-  const setNewSchemaDataColumn = (name, key, value) => {
-    const newColumns = newSchemaData.columns.map((col) => {
-      if (col.name === name) {
-        return {
-          ...col,
-          [key]: value
-        }
-      }
-      return col
-    })
-    setNewSchemaData({
-      ...newSchemaData,
-      columns: newColumns
-    })
-  }
+  const setCol = (name: string, key: string, value: unknown) =>
+    setNewSchemaData((prev) => ({
+      ...prev,
+      columns: prev.columns.map((c) => c.name === name ? { ...c, [key]: value } : c)
+    }))
 
   if (isSuccess) {
     return (
-      <Card>
-        <Alert severity="success" sx={{ mb: 3 }} title="Schema Created">
-          <Typography variant="body2">{data.details}</Typography>
+      <Box sx={{ maxWidth: 860, mx: 'auto' }}>
+        <Alert severity="success" variant="outlined">
+          <AlertTitle sx={{ fontSize: 14, fontWeight: 600 }}>
+            {mode === 'edit' ? 'Schema updated — a new version has been created' : 'Dataset added successfully'}
+          </AlertTitle>
+          <Typography sx={{ fontSize: 13 }}>{data.details}</Typography>
         </Alert>
-      </Card>
+      </Box>
     )
   }
 
-  // Used to conditionally show the format field if we have a date data type in the table
-  const doesTypesContainData = newSchemaData.columns.some(
-    (cols) => cols.data_type === 'date'
-  )
+  const hasDateColumn = newSchemaData.columns.some((c) => c.data_type === 'date')
 
   return (
-    <form
+    <Box
+      component="form"
+      sx={{ maxWidth: 860, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}
       onSubmit={handleSubmit(async (_data: SchemaCreate) => {
-        const data = { ...newSchemaData }
-        data.metadata.owners = [{ email: _data.ownerEmail, name: _data.ownerName }]
-        data.metadata.sensitivity = _data.sensitivity
-        data.metadata.domain = _data.domain
-        data.metadata.dataset = _data.title
-        data.metadata.description = _data.description
-        await mutate(data)
+        const payload = { ...newSchemaData }
+        payload.metadata.owners = [{ email: _data.ownerEmail, name: _data.ownerName }]
+        payload.metadata.sensitivity = _data.sensitivity
+        payload.metadata.domain = _data.domain
+        payload.metadata.dataset = _data.title
+        payload.metadata.description = _data.description
+        await mutate(payload)
       })}
     >
-      <Card
-        action={
-          <Button color="primary" type="submit" loading={isLoading}>
-            Create Schema
-          </Button>
-        }
-      >
-        <Row>
+      <FormCard num={1} title="Dataset properties">
+        <Stack spacing="18px">
           <Controller
             name="sensitivity"
             control={control}
-            defaultValue={
-              newSchemaData.metadata.sensitivity.toUpperCase() as SensitivityEnum
-            }
-            render={({ field, fieldState: { error } }) => (
-              <>
-                <Typography variant="caption">Sensitivity Level</Typography>
-                <Select
-                  {...field}
-                  data={[...GlobalSensitivities, ProtectedSensitivity]}
-                  error={!!error}
-                  helperText={error?.message}
-                  onChange={(e) => field.onChange(e.target.value)}
-                  inputProps={{ 'data-testid': 'sensitivity' }}
-                />
-              </>
+            defaultValue={newSchemaData.metadata.sensitivity.toUpperCase() as SensitivityEnum}
+            render={({ field, fieldState: { error: fe } }) => (
+              <FormControl size="small" fullWidth error={!!fe}>
+                <InputLabel shrink>Sensitivity Level</InputLabel>
+                <Select {...field} label="Sensitivity Level" notched displayEmpty inputProps={{ 'data-testid': 'sensitivity' }}>
+                  <MenuItem value="" disabled>Please select</MenuItem>
+                  {[...GlobalSensitivities, ProtectedSensitivity].map((v) => (
+                    <MenuItem key={v} value={v}>{v}</MenuItem>
+                  ))}
+                </Select>
+                {fe && <FormHelperText>{fe.message}</FormHelperText>}
+              </FormControl>
             )}
           />
-        </Row>
-
-        <Row>
           <Controller
             name="layer"
             control={control}
             defaultValue={newSchemaData.metadata.layer}
-            render={({ field, fieldState: { error } }) => (
-              <>
-                <Typography variant="caption">Dataset Layer</Typography>
-                <Select
-                  {...field}
-                  data={layersData}
-                  error={!!error}
-                  helperText={error?.message}
-                  onChange={(e) => field.onChange(e.target.value)}
-                  inputProps={{ 'data-testid': 'layer' }}
-                />
-              </>
+            render={({ field, fieldState: { error: fe } }) => (
+              <FormControl size="small" fullWidth error={!!fe}>
+                <InputLabel shrink>Dataset Layer</InputLabel>
+                <Select {...field} label="Dataset Layer" notched displayEmpty inputProps={{ 'data-testid': 'layer' }}>
+                  <MenuItem value="" disabled>Please select</MenuItem>
+                  {layersData.map((v) => (
+                    <MenuItem key={v} value={v}>{v}</MenuItem>
+                  ))}
+                </Select>
+                {fe && <FormHelperText>{fe.message}</FormHelperText>}
+              </FormControl>
             )}
           />
-        </Row>
-
-        <Row>
           <Controller
             name="domain"
             control={control}
             defaultValue={newSchemaData.metadata.domain}
-            render={({ field, fieldState: { error } }) => (
-              <>
-                <Typography variant="caption">Dataset Domain</Typography>
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  error={!!error}
-                  helperText={error?.message}
-                  onChange={(e) => field.onChange(e.target.value)}
-                  inputProps={{ 'data-testid': 'domain' }}
-                />
-              </>
+            render={({ field, fieldState: { error: fe } }) => (
+              <TextField
+                {...field}
+                size="small"
+                fullWidth
+                label="Dataset Domain"
+                placeholder="showcase"
+                InputLabelProps={{ shrink: true }}
+                inputProps={{ 'data-testid': 'domain' }}
+                error={!!fe}
+                helperText={fe?.message}
+              />
             )}
           />
-        </Row>
-
-        <Row>
           <Controller
             name="title"
             control={control}
             defaultValue={newSchemaData.metadata.dataset}
-            render={({ field, fieldState: { error } }) => (
-              <>
-                <Typography variant="caption">Dataset Title</Typography>
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  error={!!error}
-                  helperText={error?.message}
-                  onChange={(e) => field.onChange(e.target.value)}
-                  inputProps={{ 'data-testid': 'dataset' }}
-                />
-              </>
+            render={({ field, fieldState: { error: fe } }) => (
+              <TextField
+                {...field}
+                size="small"
+                fullWidth
+                label="Dataset Title"
+                placeholder="movies"
+                InputLabelProps={{ shrink: true }}
+                inputProps={{ 'data-testid': 'dataset' }}
+                error={!!fe}
+                helperText={fe?.message}
+              />
             )}
           />
-        </Row>
-
-        <Row>
           <Controller
             name="description"
             control={control}
             defaultValue={newSchemaData.metadata.description}
-            render={({ field, fieldState: { error } }) => (
-              <>
-                <Typography variant="caption">Dataset Description</Typography>
-                <TextField
-                  {...field}
-                  fullWidth
-                  multiline
-                  rows={2}
-                  size="small"
-                  variant="outlined"
-                  error={!!error}
-                  helperText={error?.message}
-                  placeholder="Enter a human readable descriptive to describe the dataset..."
-                  onChange={(e) => field.onChange(e.target.value)}
-                  inputProps={{ 'data-testid': 'description' }}
-                />
-              </>
+            render={({ field, fieldState: { error: fe } }) => (
+              <TextField
+                {...field}
+                size="small"
+                fullWidth
+                multiline
+                minRows={2}
+                label="Dataset Description"
+                placeholder="Enter a human readable description of the dataset…"
+                InputLabelProps={{ shrink: true }}
+                inputProps={{ 'data-testid': 'description' }}
+                error={!!fe}
+                helperText={fe?.message}
+              />
             )}
           />
-        </Row>
+        </Stack>
+      </FormCard>
 
-        <Typography variant="h2" gutterBottom>
-          Validate the data types for the schema
-        </Typography>
-
-        <Typography gutterBottom>
+      <FormCard num={2} title="Validate the data types">
+        <Typography sx={{ fontSize: 12, color: 'text.secondary', mb: 1.5 }}>
           Consult the{' '}
-          <Link href="https://rapid.readthedocs.io/en/latest/api/schema/" target="_blank">
+          <MuiLink href="https://rapid.readthedocs.io/en/latest/api/schema/" target="_blank" rel="noreferrer">
             schema writing guide
-          </Link>{' '}
+          </MuiLink>{' '}
           for further information.
         </Typography>
-
-        <SimpleTable
-          sx={{ mb: 5 }}
-          list={newSchemaData.columns.map((item) => {
-            return [
-              { children: item.name },
-              {
-                children: (
-                  <FormControl fullWidth size="small">
+        <TableContainer>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>Name</TableCell>
+                <TableCell>Data Type</TableCell>
+                {hasDateColumn && <TableCell>Date Format</TableCell>}
+                <TableCell>Allows Null</TableCell>
+                <TableCell>Is Unique</TableCell>
+                <TableCell>Partition Index</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {newSchemaData.columns.map((col) => (
+                <TableRow key={col.name}>
+                  <TableCell sx={{ fontSize: 12 }}>{col.name}</TableCell>
+                  <TableCell>
                     <Select
-                      label="Data Type"
-                      data={dataTypes}
-                      value={item.data_type}
-                      onChange={(e) =>
-                        setNewSchemaDataColumn(item.name, 'data_type', e.target.value)
-                      }
-                    />
-                  </FormControl>
-                )
-              },
-              {
-                children:
-                  item.data_type === 'date' ? (
-                    <TextField
-                      inputProps={{ 'data-testid': 'date-format' }}
                       size="small"
-                      variant="outlined"
-                      type="text"
-                      placeholder="%Y-%m-%d"
-                      required
-                      onChange={(e) =>
-                        setNewSchemaDataColumn(item.name, 'format', e.target.value)
-                      }
-                    />
-                  ) : (
-                    ''
-                  )
-              },
-              {
-                children: (
-                  <FormControl fullWidth size="small">
+                      fullWidth
+                      value={col.data_type}
+                      onChange={(e) => setCol(col.name, 'data_type', e.target.value)}
+                      sx={{ fontSize: 12 }}
+                    >
+                      {dataTypes.map((t) => <MenuItem key={t} value={t}>{t}</MenuItem>)}
+                    </Select>
+                  </TableCell>
+                  {hasDateColumn && (
+                    <TableCell>
+                      {col.data_type === 'date' && (
+                        <TextField
+                          size="small"
+                          fullWidth
+                          placeholder="%Y-%m-%d"
+                          required
+                          inputProps={{ 'data-testid': 'date-format', style: { fontSize: 12 } }}
+                          onChange={(e) => setCol(col.name, 'format', e.target.value)}
+                        />
+                      )}
+                    </TableCell>
+                  )}
+                  <TableCell>
                     <Select
-                      label="Allows Null"
-                      data={['true', 'false']}
-                      value={item.allow_null}
-                      onChange={(e) =>
-                        setNewSchemaDataColumn(
-                          item.name,
-                          'allow_null',
-                          e.target.value === 'true'
-                        )
-                      }
-                    />
-                  </FormControl>
-                )
-              },
-              {
-                children: (
-                  <FormControl fullWidth size="small">
+                      size="small"
+                      fullWidth
+                      value={String(col.allow_null)}
+                      onChange={(e) => setCol(col.name, 'allow_null', e.target.value === 'true')}
+                      sx={{ fontSize: 12 }}
+                    >
+                      <MenuItem value="true">true</MenuItem>
+                      <MenuItem value="false">false</MenuItem>
+                    </Select>
+                  </TableCell>
+                  <TableCell>
                     <Select
-                      label="Is Unique"
-                      data={['true', 'false']}
-                      value={item.unique ?? 'false'}
-                      onChange={(e) =>
-                        setNewSchemaDataColumn(
-                          item.name,
-                          'unique',
-                          e.target.value === 'true'
-                        )
-                      }
+                      size="small"
+                      fullWidth
+                      value={String(col.unique ?? false)}
+                      onChange={(e) => setCol(col.name, 'unique', e.target.value === 'true')}
+                      sx={{ fontSize: 12 }}
+                    >
+                      <MenuItem value="true">true</MenuItem>
+                      <MenuItem value="false">false</MenuItem>
+                    </Select>
+                  </TableCell>
+                  <TableCell>
+                    <TextField
+                      size="small"
+                      fullWidth
+                      type="number"
+                      value={col.partition_index ?? ''}
+                      onChange={(e) => setCol(col.name, 'partition_index', parseInt(e.target.value))}
+                      inputProps={{ style: { fontSize: 12 } }}
                     />
-                  </FormControl>
-                )
-              },
-              {
-                children: (
-                  <TextField
-                    size="small"
-                    variant="outlined"
-                    value={item.partition_index}
-                    type="number"
-                    onChange={(e) =>
-                      setNewSchemaDataColumn(
-                        item.name,
-                        'partition_index',
-                        parseInt(e.target.value)
-                      )
-                    }
-                  />
-                )
-              }
-            ]
-          })}
-          headers={[
-            { children: 'Name' },
-            { children: 'Data Type' },
-            { children: doesTypesContainData ? 'Data Format' : '' },
-            { children: 'Allows Null' },
-            { children: 'Is Unique' },
-            { children: 'Partition Index (Optional)' }
-          ]}
-        />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </FormCard>
 
-        <Typography variant="h2" gutterBottom>
-          Set the data owner
-        </Typography>
-
-        <Row>
+      <FormCard num={3} title="Set the data owner">
+        <Stack spacing="18px">
           <Controller
             name="ownerEmail"
             control={control}
             defaultValue={newSchemaData.metadata.owners[0].email}
-            render={({ field, fieldState: { error } }) => (
-              <>
-                <Typography variant="caption">Owner Email</Typography>
-                <TextField
-                  {...field}
-                  size="small"
-                  type="email"
-                  variant="outlined"
-                  helperText={error?.message}
-                  error={!!error}
-                  onChange={(e) => field.onChange(e.target.value)}
-                  fullWidth
-                />
-              </>
+            render={({ field, fieldState: { error: fe } }) => (
+              <TextField
+                {...field}
+                size="small"
+                fullWidth
+                type="email"
+                label="Owner Email"
+                InputLabelProps={{ shrink: true }}
+                error={!!fe}
+                helperText={fe?.message}
+              />
             )}
           />
-        </Row>
-
-        <Row>
           <Controller
             name="ownerName"
             control={control}
             defaultValue={newSchemaData.metadata.owners[0].name}
-            render={({ field, fieldState: { error } }) => (
-              <>
-                <Typography variant="caption">Owner Name</Typography>
-                <TextField
-                  {...field}
-                  size="small"
-                  variant="outlined"
-                  helperText={error?.message}
-                  error={!!error}
-                  onChange={(e) => field.onChange(e.target.value)}
-                  fullWidth
-                />
-              </>
+            render={({ field, fieldState: { error: fe } }) => (
+              <TextField
+                {...field}
+                size="small"
+                fullWidth
+                label="Owner Name"
+                InputLabelProps={{ shrink: true }}
+                error={!!fe}
+                helperText={fe?.message}
+              />
             )}
           />
-        </Row>
+        </Stack>
+      </FormCard>
 
-        <Typography variant="h2" gutterBottom>
-          Set the file upload behaviour
-        </Typography>
+      <FormCard num={4} title="Set the file upload behaviour">
+        <FormControl size="small" fullWidth>
+          <InputLabel shrink>Update Behaviour</InputLabel>
+          <Select
+            label="Update Behaviour"
+            notched
+            value={newSchemaData.metadata.update_behaviour}
+            onChange={(e) => setMeta('update_behaviour', e.target.value)}
+          >
+            <MenuItem value="APPEND">APPEND</MenuItem>
+            <MenuItem value="OVERWRITE">OVERWRITE</MenuItem>
+          </Select>
+        </FormControl>
+      </FormCard>
 
-        <Row>
-          <FormControl fullWidth size="small">
-            <Typography variant="caption">Update Behaviour</Typography>
-            <Select
-              data={['APPEND', 'OVERWRITE']}
-              value={newSchemaData.metadata.update_behaviour}
-              onChange={(e) =>
-                setNewSchemaDataMetadata('update_behaviour', e.target.value)
-              }
-            />
-          </FormControl>
-        </Row>
-
-        <Typography variant="h2" gutterBottom>
-          Optionally set key value tags
-        </Typography>
-
-        {Object.keys(newSchemaData.metadata.key_value_tags).map((key) => (
-          <Box key={key} sx={{ display: 'flex', gap: 3, mb: 1 }}>
-            <TextField value={key} size="small" variant="outlined" fullWidth disabled />
+      <FormCard num={5} title="Tags" optional>
+        <Typography sx={{ fontSize: 12, color: 'text.disabled', mb: 1 }}>Key-value tags</Typography>
+        <Stack spacing={1}>
+          {Object.entries(newSchemaData.metadata.key_value_tags).map(([key, val]) => (
+            <Stack key={key} direction="row" spacing={1} alignItems="center">
+              <TextField size="small" value={key} disabled fullWidth inputProps={{ style: { fontSize: 12 } }} />
+              <TextField size="small" value={val as string} disabled fullWidth inputProps={{ style: { fontSize: 12 } }} />
+              <IconButton
+                size="small"
+                color="error"
+                onClick={() => {
+                  const tags = { ...newSchemaData.metadata.key_value_tags }
+                  delete tags[key]
+                  setMeta('key_value_tags', tags)
+                }}
+              >
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </Stack>
+          ))}
+          <Stack direction="row" spacing={1} alignItems="center">
             <TextField
-              value={newSchemaData.metadata.key_value_tags[key]}
+              size="small"
+              fullWidth
+              value={keyValueTag.key}
+              placeholder="Key"
+              onChange={(e) => setKeyValueTag((t) => ({ ...t, key: e.target.value }))}
+              inputProps={{ style: { fontSize: 12 } }}
+            />
+            <TextField
+              size="small"
+              fullWidth
+              value={keyValueTag.value}
+              placeholder="Value"
+              onChange={(e) => setKeyValueTag((t) => ({ ...t, value: e.target.value }))}
+              inputProps={{ style: { fontSize: 12 } }}
+            />
+            <Button
+              type="button"
               size="small"
               variant="outlined"
+              onClick={() => {
+                setMeta('key_value_tags', { ...newSchemaData.metadata.key_value_tags, [keyValueTag.key]: keyValueTag.value })
+                setKeyValueTag({ key: '', value: '' })
+              }}
+            >
+              Add
+            </Button>
+          </Stack>
+        </Stack>
+
+        <Typography sx={{ fontSize: 12, color: 'text.disabled', mt: 2.5, mb: 1 }}>Key-only tags</Typography>
+        <Stack spacing={1}>
+          {newSchemaData.metadata.key_only_tags.map((tag) => (
+            <Stack key={tag} direction="row" spacing={1} alignItems="center">
+              <TextField size="small" value={tag} disabled fullWidth inputProps={{ style: { fontSize: 12 } }} />
+              <IconButton
+                size="small"
+                color="error"
+                onClick={() => setMeta('key_only_tags', newSchemaData.metadata.key_only_tags.filter((t) => t !== tag))}
+              >
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </Stack>
+          ))}
+          <Stack direction="row" spacing={1} alignItems="center">
+            <TextField
+              size="small"
               fullWidth
-              disabled
+              value={valueTag}
+              placeholder="Tag"
+              onChange={(e) => setValueTag(e.target.value)}
+              inputProps={{ style: { fontSize: 12 } }}
             />
             <Button
-              color="inherit"
-              variant="text"
+              type="button"
+              size="small"
+              variant="outlined"
               onClick={() => {
-                const keyValueTags = { ...newSchemaData.metadata.key_value_tags }
-                delete keyValueTags[key]
-                setNewSchemaDataMetadata('key_value_tags', keyValueTags)
-              }}
-              disableTouchRipple
-            >
-              Remove
-            </Button>
-          </Box>
-        ))}
-
-        <Box sx={{ display: 'flex', gap: 3, mb: 1 }}>
-          <TextField
-            value={keyValueTag.key}
-            onChange={(e) => setKeyValueTag({ ...keyValueTag, key: e.target.value })}
-            size="small"
-            variant="outlined"
-            fullWidth
-          />
-          <TextField
-            value={keyValueTag.value}
-            onChange={(e) => setKeyValueTag({ ...keyValueTag, value: e.target.value })}
-            size="small"
-            variant="outlined"
-            fullWidth
-          />
-          <Button
-            color="secondary"
-            variant="text"
-            onClick={() => {
-              setNewSchemaDataMetadata('key_value_tags', {
-                ...newSchemaData.metadata.key_value_tags,
-                [keyValueTag.key]: keyValueTag.value
-              })
-              setKeyValueTag({ key: '', value: '' })
-            }}
-            disableTouchRipple
-          >
-            Add
-          </Button>
-        </Box>
-
-        <Typography variant="h2" gutterBottom>
-          Optionally set key only tags
-        </Typography>
-
-        {newSchemaData.metadata.key_only_tags.map((tag) => (
-          <Box key={tag} sx={{ display: 'flex', gap: 3, mb: 1 }}>
-            <TextField value={tag} size="small" variant="outlined" fullWidth disabled />
-            <Button
-              color="inherit"
-              variant="text"
-              onClick={() => {
-                const valueTags = [...newSchemaData.metadata.key_only_tags]
-                setNewSchemaDataMetadata(
-                  'key_only_tags',
-                  valueTags.filter((item) => item !== tag)
-                )
+                setMeta('key_only_tags', [...newSchemaData.metadata.key_only_tags, valueTag])
+                setValueTag('')
               }}
             >
-              Remove
+              Add
             </Button>
-          </Box>
-        ))}
+          </Stack>
+        </Stack>
+      </FormCard>
 
-        <Box sx={{ display: 'flex', gap: 3, mb: 1 }}>
-          <TextField
-            value={valueTag}
-            onChange={(e) => setValueTag(e.target.value)}
-            size="small"
-            variant="outlined"
-            fullWidth
-          />
-          <Button
-            color="secondary"
-            variant="text"
-            onClick={() => {
-              setNewSchemaDataMetadata('key_only_tags', [
-                ...newSchemaData.metadata.key_only_tags,
-                valueTag
-              ])
-              setValueTag('')
-            }}
-            disableTouchRipple
-          >
-            Add
-          </Button>
-        </Box>
-
+      <Stack direction="row" spacing={2} alignItems="center" sx={{ pt: 1 }}>
+        <Button type="submit" variant="contained" disabled={isLoading}>
+          {isLoading
+            ? (mode === 'edit' ? 'Saving…' : 'Adding…')
+            : (mode === 'edit' ? 'Update Schema' : 'Add Dataset')}
+        </Button>
         {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {error?.message}
-          </Alert>
+          <Typography sx={{ fontSize: 12, color: 'error.main' }}>{error.message}</Typography>
         )}
-      </Card>
-    </form>
+      </Stack>
+    </Box>
   )
 }
 

@@ -46,11 +46,7 @@ describe('Page: Login page', () => {
 
       expect(screen.getByText(job.step as string)).toBeVisible()
       expect(link).toBeVisible()
-      expect(link).toHaveAttribute('href', `tasks/${job.job_id}`)
+      expect(link).toHaveAttribute('href', `/tasks/${job.job_id}`)
     })
-    // screen.debug()
-
-    expect(screen.getByText('Failure Details')).toBeVisible()
-    expect(screen.getByText('Failure Details')).toHaveAttribute('href', `tasks/job_id_2`)
   })
 })

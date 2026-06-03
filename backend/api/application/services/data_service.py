@@ -1,4 +1,5 @@
 import uuid
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from threading import Thread
 from typing import List, Tuple
@@ -190,6 +191,22 @@ class DataService:
             metadata.dataset_location()
         )
         return last_updated or "Never updated"
+
+    def enrich_datasets_for_ui(self, datasets: List[DatasetMetadata]) -> List[dict]:
+        def enrich(dataset: DatasetMetadata) -> dict:
+            d = dataset.to_dict()
+            try:
+                d["last_updated"] = self.get_last_updated_time(dataset)
+            except Exception:
+                d["last_updated"] = None
+            try:
+                d["last_uploaded_by"] = self.get_last_uploader(dataset)
+            except Exception:
+                d["last_uploaded_by"] = None
+            return d
+
+        with ThreadPoolExecutor(max_workers=10) as pool:
+            return list(pool.map(enrich, datasets))
 
     def get_last_uploader(self, metadata: DatasetMetadata) -> str:
         """

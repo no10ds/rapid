@@ -1,7 +1,7 @@
-import { Card, Row, Button, TextField, Select, Alert } from '@/components'
-import AccountLayout from '@/components/Layout/AccountLayout'
+import { AccountLayout, FormCard } from '@/components'
+import ErrorCard from '@/components/ErrorCard/ErrorCard'
+import PermissionsTable from '@/components/PermissionsTable/PermissionsTable'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Typography, LinearProgress } from '@mui/material'
 import { Controller, useForm, useFieldArray } from 'react-hook-form'
 import { z } from 'zod'
 import { createClient, SubjectCreate } from '@/service'
@@ -15,8 +15,18 @@ import {
   ClientCreateResponse,
   UserCreateResponse
 } from '@/service/types'
-import ErrorCard from '@/components/ErrorCard/ErrorCard'
-import PermissionsTable from '@/components/PermissionsTable/PermissionsTable'
+import { ReactNode } from 'react'
+import {
+  Box,
+  Typography,
+  Button,
+  LinearProgress,
+  TextField,
+  Select,
+  FormControl,
+  InputLabel,
+  FormHelperText
+} from '@mui/material'
 
 const userType = ['User', 'Client']
 
@@ -68,176 +78,136 @@ function CreateUserPage() {
   })
 
   if (isPermissionsListLoading) {
-    return <LinearProgress />
+    return <LinearProgress color="primary" role="progressbar" />
   }
 
   if (permissionsListError) {
     return <ErrorCard error={permissionsListError as Error} />
   }
 
-  if (permissionsListData) {
-    return (
-      <form
-        onSubmit={handleSubmit(async (data: UserCreate) => {
-          const permissions = data.permissions.map((permission) =>
-            extractPermissionNames(permission, permissionsListData)
-          )
-          if (data.type === 'User') {
-            await mutate({
-              path: 'user',
-              data: {
-                permissions: permissions,
-                username: data.name,
-                email: data.email
-              }
-            })
-          } else if (data.type === 'Client') {
-            await mutate({
-              path: 'client',
-              data: {
-                permissions: permissions,
-                client_name: data.name
-              }
-            })
-          }
-        })}
-        noValidate
-      >
-        <Card
-          action={
-            <Button
-              color="primary"
-              type="submit"
-              loading={isLoading}
-              data-testid="submit"
-            >
-              Create subject
-            </Button>
-          }
-        >
-          <Typography variant="body1" gutterBottom>
-            Create a new user or client using the rAPId instance. Simply fill out the form
-            with the required information, which can be found in more detail at the link{' '}
-            <a href="https://rapid.readthedocs.io/en/latest/api/routes/user/#create">
-              provided.
-            </a>
-          </Typography>
-
-          <Typography variant="h2" gutterBottom>
-            Populate User Info
-          </Typography>
-
-          <Row>
-            <Controller
-              name="type"
-              control={control}
-              render={({ field, fieldState: { error } }) => (
-                <>
-                  <Typography variant="caption" gutterBottom>
-                    Type of Subject
-                  </Typography>
-                  <Select
-                    {...field}
-                    error={!!error}
-                    helperText={error?.message}
-                    native
-                    inputProps={{
-                      'data-testid': 'field-type'
-                    }}
-                  >
-                    <option value="">Please select</option>
-                    {userType.map((type) => (
-                      <option key={type}>{type}</option>
-                    ))}
-                  </Select>
-                </>
-              )}
-            />
-          </Row>
-
-          {watch('type') === 'User' ? (
-            <Row>
-              <Controller
-                name="email"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <>
-                    <Typography variant="caption" gutterBottom>
-                      Email
-                    </Typography>
-                    <TextField
-                      {...field}
-                      fullWidth
-                      size="small"
-                      type="email"
-                      inputProps={{
-                        'data-testid': 'field-email'
-                      }}
-                      error={
-                        // eslint-disable-next-line react-hooks/incompatible-library
-                        !!error ? !!error : watch('type') === 'User' && !field.value
-                      }
-                      helperText={
-                        watch('type') === 'User' && !field.value
-                          ? 'Required'
-                          : error?.message
-                      }
-                    />
-                  </>
-                )}
-              />
-            </Row>
-          ) : null}
-
-          <Row>
-            <Controller
-              name="name"
-              control={control}
-              render={({ field, fieldState: { error } }) => (
-                <>
-                  <Typography variant="caption" gutterBottom>
-                    Name
-                  </Typography>
-                  <TextField
-                    {...field}
-                    fullWidth
-                    size="small"
-                    variant="outlined"
-                    error={!!error}
-                    helperText={error?.message}
-                    inputProps={{
-                      'data-testid': 'field-name'
-                    }}
-                  />
-                </>
-              )}
-            />
-          </Row>
-
-          <Typography variant="h2" gutterBottom>
-            Select Permissions
-          </Typography>
-          <Row>
-            <PermissionsTable
-              permissionsListData={permissionsListData}
-              fieldArrayReturn={fieldArrayReturn}
-            />
-          </Row>
-          {error && (
-            <Alert severity="error" sx={{ mb: 3 }}>
-              {error?.message}
-            </Alert>
-          )}
-        </Card>
-      </form>
-    )
+  if (!permissionsListData) {
+    return <></>
   }
 
-  return <></>
+  return (
+    <Box
+      component="form"
+      sx={{ maxWidth: 900, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}
+      onSubmit={handleSubmit(async (data: UserCreate) => {
+        const permissions = data.permissions.map((permission) =>
+          extractPermissionNames(permission, permissionsListData)
+        )
+        if (data.type === 'User') {
+          await mutate({
+            path: 'user',
+            data: { permissions, username: data.name, email: data.email }
+          })
+        } else if (data.type === 'Client') {
+          await mutate({
+            path: 'client',
+            data: { permissions, client_name: data.name }
+          })
+        }
+      })}
+      noValidate
+    >
+      <FormCard num={1} title="Subject info">
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Typography variant="body2" sx={{ fontSize: 13 }}>
+            Create a new user or client. For more details see the{' '}
+            <Box
+              component="a"
+              href="https://rapid.readthedocs.io/en/latest/api/routes/user/#create"
+              sx={{ color: 'primary.main', textDecoration: 'none' }}
+            >
+              documentation
+            </Box>
+            .
+          </Typography>
+
+          <Controller
+            name="type"
+            control={control}
+            render={({ field, fieldState: { error: fieldError } }) => (
+              <FormControl size="small" error={!!fieldError} fullWidth>
+                <InputLabel htmlFor="field-type" shrink>Type of Subject</InputLabel>
+                <Select
+                  {...field}
+                  native
+                  label="Type of Subject"
+                  notched
+                  inputProps={{ 'data-testid': 'field-type', id: 'field-type' }}
+                  value={field.value ?? ''}
+                >
+                  <option value="">Please select</option>
+                  {userType.map((type) => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </Select>
+                {fieldError && <FormHelperText>{fieldError.message}</FormHelperText>}
+              </FormControl>
+            )}
+          />
+
+          {watch('type') === 'User' && (
+            <Controller
+              name="email"
+              control={control}
+              render={({ field, fieldState: { error: fieldError } }) => (
+                <TextField
+                  {...field}
+                  size="small"
+                  label="Email"
+                  type="email"
+                  error={!!fieldError}
+                  helperText={fieldError?.message}
+                  inputProps={{ 'data-testid': 'field-email', id: 'field-email' }}
+                  InputLabelProps={{ shrink: true }}
+                />
+              )}
+            />
+          )}
+
+          <Controller
+            name="name"
+            control={control}
+            render={({ field, fieldState: { error: fieldError } }) => (
+              <TextField
+                {...field}
+                size="small"
+                label="Name"
+                error={!!fieldError}
+                helperText={fieldError?.message}
+                inputProps={{ 'data-testid': 'field-name', id: 'field-name' }}
+                InputLabelProps={{ shrink: true }}
+              />
+            )}
+          />
+        </Box>
+      </FormCard>
+
+      <FormCard
+        num={2}
+        title="Select permissions"
+        bodySx={{ p: 0 }}
+        actionsError={error}
+        actions={
+          <Button variant="contained" type="submit" data-testid="submit" disabled={isLoading}>
+            {isLoading ? 'Creating…' : 'Create subject'}
+          </Button>
+        }
+      >
+        <PermissionsTable
+          permissionsListData={permissionsListData}
+          fieldArrayReturn={fieldArrayReturn}
+        />
+      </FormCard>
+    </Box>
+  )
 }
 
 export default CreateUserPage
 
-CreateUserPage.getLayout = (page) => (
+CreateUserPage.getLayout = (page: ReactNode) => (
   <AccountLayout title="Create User">{page}</AccountLayout>
 )

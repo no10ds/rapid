@@ -1,19 +1,25 @@
-import { AccountLayout, Card, Button, Row, Select, TextField } from '@/components'
+import { AccountLayout, FormCard } from '@/components'
+import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import { getSubjectsListUi } from '@/service'
-import {
-  DialogActions,
-  DialogContent,
-  FormControl,
-  LinearProgress,
-  Typography
-} from '@mui/material'
+import { FilteredSubjectList } from '@/service/types'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { filterSubjectList } from '@/utils/subject'
-import { useEffect, useState } from 'react'
-import { FilteredSubjectList } from '@/service/types'
+import { useEffect, useState, ReactNode } from 'react'
 import { deleteUser as deleteUserFn, deleteClient as deleteClientFn } from '@/service'
-import ErrorCard from '@/components/ErrorCard/ErrorCard'
-import Dialog from '@/components/Dialog/Dialog'
+import {
+  Box,
+  Typography,
+  Button,
+  LinearProgress,
+  TextField,
+  Select,
+  FormControl,
+  InputLabel,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
+} from '@mui/material'
 
 function DeleteSubject() {
   const [selectedSubjectId, setSelectedSubjectId] = useState('')
@@ -77,13 +83,12 @@ function DeleteSubject() {
     )[0]
     const { type, subject_id } = subject
     if (type === 'CLIENT') deleteClient({ clientId: subject_id })
-    if (type === 'USER')
-      deleteUser({ userId: subject_id, username: subject.subject_name })
+    if (type === 'USER') deleteUser({ userId: subject_id, username: subject.subject_name })
   }
 
   const getCurrentSelectedSubjectName = () => {
     return subjectsListData.filter((item) => item.subject_id === selectedSubjectId)[0]
-      .subject_name
+      ?.subject_name ?? ''
   }
 
   if (subjectsListError) {
@@ -91,37 +96,36 @@ function DeleteSubject() {
   }
 
   if (isSubjectsListLoading || !selectedSubjectId) {
-    return <LinearProgress />
+    return <LinearProgress color="primary" role="progressbar" />
   }
 
   return (
-    <Card
-      action={
-        <Button
-          color="primary"
-          data-testid="delete-button"
-          onClick={() => {
-            setIsConfirmDeleteDialogOpen(true)
-          }}
-        >
-          Delete
-        </Button>
-      }
-    >
-      <Typography variant="body1" gutterBottom>
-        Delete an existing user or client.
-      </Typography>
-      <Typography variant="h2" gutterBottom>
-        Select Subject
-      </Typography>
-
-      <Row>
-        <FormControl fullWidth size="small">
+    <Box sx={{ maxWidth: 860, mx: 'auto' }}>
+      <FormCard
+        title="Select subject to delete"
+        actions={
+          <Button
+            variant="contained"
+            color="error"
+            data-testid="delete-button"
+            onClick={() => setIsConfirmDeleteDialogOpen(true)}
+          >
+            Delete
+          </Button>
+        }
+      >
+        <Typography variant="body2" sx={{ fontSize: 13, mb: 2 }}>
+          Delete an existing user or client.
+        </Typography>
+        <FormControl size="small" fullWidth>
+          <InputLabel htmlFor="field-user" shrink>Select a Client or User</InputLabel>
           <Select
-            label="Select a Client or User"
-            onChange={(event) => setSelectedSubjectId(event.target.value as string)}
-            inputProps={{ 'data-testid': 'field-user' }}
             native
+            label="Select a Client or User"
+            notched
+            value={selectedSubjectId}
+            onChange={(event) => setSelectedSubjectId(event.target.value as string)}
+            inputProps={{ 'data-testid': 'field-user', id: 'field-user' }}
           >
             <optgroup label="Client Apps">
               {filteredSubjectListData.ClientApps.map((item) => (
@@ -130,7 +134,6 @@ function DeleteSubject() {
                 </option>
               ))}
             </optgroup>
-
             <optgroup label="Users">
               {filteredSubjectListData.Users.map((item) => (
                 <option value={item.subjectId} key={item.subjectId}>
@@ -140,53 +143,57 @@ function DeleteSubject() {
             </optgroup>
           </Select>
         </FormControl>
-      </Row>
+      </FormCard>
 
       <Dialog
         open={isConfirmDeleteDialogOpen}
-        title="Confirm Delete"
+        onClose={() => setIsConfirmDeleteDialogOpen(false)}
         data-testid="delete-confirmation-dialog"
+        maxWidth="xs"
+        fullWidth
       >
-        <DialogContent dividers>
-          <Typography variant="body1" gutterBottom>
-            This action cannot be undone. Please type in the name of the subject to
-            confirm.
+        <DialogTitle sx={{ fontSize: 16, fontWeight: 600 }}>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ fontSize: 13, mb: 1 }}>
+            This action cannot be undone. Please type in the name of the subject to confirm.
           </Typography>
-          <Typography variant="body2" style={{ fontStyle: 'italic' }} gutterBottom>
+          <Typography sx={{ fontSize: 12, fontStyle: 'italic', mb: 2 }}>
             {getCurrentSelectedSubjectName()}
           </Typography>
           <TextField
-            fullWidth
             size="small"
-            variant="outlined"
-            inputProps={{
-              'data-testid': 'field-user-confirmation'
-            }}
+            fullWidth
             value={userConfirmation}
             onChange={(e) => setUserConfirmation(e.target.value)}
+            placeholder="Type subject name to confirm"
+            inputProps={{ 'data-testid': 'field-user-confirmation' }}
           />
         </DialogContent>
         <DialogActions>
-          <Button color="secondary" onClick={() => setIsConfirmDeleteDialogOpen(false)}>
+          <Button variant="outlined" onClick={() => setIsConfirmDeleteDialogOpen(false)}>
             Cancel
           </Button>
           <Button
-            color="primary"
+            variant="contained"
+            color="error"
             onClick={deleteSubject}
-            loading={isUserDeleting || isClientDeleting}
-            disabled={userConfirmation !== getCurrentSelectedSubjectName()}
+            disabled={
+              isUserDeleting ||
+              isClientDeleting ||
+              userConfirmation !== getCurrentSelectedSubjectName()
+            }
             data-testid="delete-confirmation-dialog-delete-button"
           >
-            Delete
+            {isUserDeleting || isClientDeleting ? 'Deleting…' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>
-    </Card>
+    </Box>
   )
 }
 
 export default DeleteSubject
 
-DeleteSubject.getLayout = (page) => (
+DeleteSubject.getLayout = (page: ReactNode) => (
   <AccountLayout title="Delete User">{page}</AccountLayout>
 )

@@ -84,7 +84,7 @@ describe('Page: Upload page', () => {
       })
     })
 
-    it('upload status failure', async () => {
+    it('upload status failure redirects to job page', async () => {
       const mockSuccess: UploadDatasetResponse = {
         details: {
           dataset_version: 12314,
@@ -109,21 +109,12 @@ describe('Page: Upload page', () => {
 
       await userEvent.click(screen.getByTestId('submit'))
 
-      await waitFor(async () => {
-        expect(screen.getByTestId('upload-status')).toBeInTheDocument()
-      })
-
-      await waitFor(async () => {
-        const trackLink = screen.getByText('See error details')
-        expect(trackLink).toHaveAttribute('href', '/tasks/abc123')
-      })
-
-      await waitFor(async () => {
-        expect(screen.getByText('Status: Data upload error')).toBeInTheDocument()
+      await waitFor(() => {
+        expect(pushSpy).toHaveBeenCalledWith('/tasks/abc123')
       })
     })
 
-    it('upload status success', async () => {
+    it('upload status success redirects to job page', async () => {
       const mockSuccess: UploadDatasetResponse = {
         details: {
           dataset_version: 12314,
@@ -148,21 +139,12 @@ describe('Page: Upload page', () => {
 
       await userEvent.click(screen.getByTestId('submit'))
 
-      await waitFor(async () => {
-        expect(screen.getByTestId('upload-status')).toBeInTheDocument()
-      })
-
-      await waitFor(async () => {
-        const trackLink = screen.getByText('See upload details')
-        expect(trackLink).toHaveAttribute('href', '/tasks/abc123')
-      })
-
-      await waitFor(async () => {
-        expect(screen.getByText('Status: Data uploaded successfully')).toBeInTheDocument()
+      await waitFor(() => {
+        expect(pushSpy).toHaveBeenCalledWith('/tasks/abc123')
       })
     })
 
-    it('upload status in progress', async () => {
+    it('upload status in progress shows processing', async () => {
       const mockSuccess: UploadDatasetResponse = {
         details: {
           dataset_version: 12314,
@@ -187,17 +169,12 @@ describe('Page: Upload page', () => {
 
       await userEvent.click(screen.getByTestId('submit'))
 
-      await waitFor(async () => {
+      await waitFor(() => {
         expect(screen.getByTestId('upload-status')).toBeInTheDocument()
       })
 
-      const trackLink = screen.getByText('See progress details')
-
-      expect(trackLink).toBeInTheDocument()
-      expect(trackLink).toHaveAttribute('href', '/tasks/abc123')
-      await waitFor(async () => {
-        expect(screen.getByText('Status: Data processing')).toBeInTheDocument()
-      })
+      expect(screen.getByText(/Processing/)).toBeInTheDocument()
+      expect(pushSpy).not.toHaveBeenCalledWith('/tasks/abc123')
     })
 
     it('api error upload', async () => {

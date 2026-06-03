@@ -1,14 +1,29 @@
-import { AccountLayout, Alert, Button, Card } from '@/components'
+import { AccountLayout, FormCard } from '@/components'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import DatasetSelector from '@/components/DatasetSelector/DatasetSelector'
 import { deleteDataset, getDatasetsUi } from '@/service'
 import { Dataset, DeleteDatasetResponse } from '@/service/types'
-import { LinearProgress, Typography } from '@mui/material'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useRouter } from 'next/router'
+import { useState, ReactNode } from 'react'
+import { Box, Alert, AlertTitle, Button, Chip, LinearProgress } from '@mui/material'
 
 function DeleteDataset({ datasetInput = null }: { datasetInput?: Dataset | null }) {
-  const [dataset, setDataset] = useState<Dataset | null>(datasetInput)
+  const router = useRouter()
+  const { layer, domain, dataset: datasetName } = router.query ?? {}
+
+  const fromQuery: Dataset | null =
+    layer && domain && datasetName
+      ? {
+          layer: layer as string,
+          domain: domain as string,
+          dataset: datasetName as string,
+          version: 1,
+          sensitivity: undefined
+        }
+      : null
+
+  const [dataset, setDataset] = useState<Dataset | null>(datasetInput ?? fromQuery)
   const [deleteDatasetSuccessDetails, setDeleteDatasetSuccessDetails] = useState<
     string | undefined
   >()
@@ -25,16 +40,12 @@ function DeleteDataset({ datasetInput = null }: { datasetInput?: Dataset | null 
     { path: string }
   >({
     mutationFn: deleteDataset,
-    onMutate: () => {
-      setDeleteDatasetSuccessDetails(undefined)
-    },
-    onSuccess: (data) => {
-      setDeleteDatasetSuccessDetails(data.details)
-    }
+    onMutate: () => setDeleteDatasetSuccessDetails(undefined),
+    onSuccess: (data) => setDeleteDatasetSuccessDetails(data.details)
   })
 
   if (isDatasetsListLoading) {
-    return <LinearProgress />
+    return <LinearProgress color="primary" role="progressbar" />
   }
 
   if (datasetsError) {
@@ -42,7 +53,9 @@ function DeleteDataset({ datasetInput = null }: { datasetInput?: Dataset | null 
   }
 
   return (
-    <form
+    <Box
+      component="form"
+      sx={{ maxWidth: 860, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}
       onSubmit={async (event) => {
         event.preventDefault()
         if (dataset) {
@@ -50,50 +63,68 @@ function DeleteDataset({ datasetInput = null }: { datasetInput?: Dataset | null 
         }
       }}
     >
-      <Card
-        action={
-          <Button
-            data-testid="submit"
-            color="primary"
-            type="submit"
-            loading={isLoading}
-            disabled={!dataset}
-          >
-            Delete
-          </Button>
+      <Alert severity="error" variant="outlined">
+        <AlertTitle sx={{ fontWeight: 600 }}>Destructive action</AlertTitle>
+        This action permanently deletes the dataset, its schema, crawlers, and all raw
+        data. This <strong>cannot be undone</strong>.
+      </Alert>
+
+      <FormCard
+        title="Select dataset to delete"
+        actionsError={error}
+        actions={
+          <>
+            <Button
+              variant="contained"
+              color="error"
+              type="submit"
+              data-testid="submit"
+              disabled={!dataset || isLoading}
+            >
+              {isLoading ? 'Deleting…' : 'Delete dataset'}
+            </Button>
+            <Button variant="outlined" type="button" onClick={() => router.push('/catalog')}>
+              Cancel
+            </Button>
+            {dataset && !deleteDatasetSuccessDetails && (
+              <Chip
+                size="small"
+                variant="outlined"
+                label={`${dataset.layer} / ${dataset.domain} / ${dataset.dataset}`}
+                sx={{ ml: 'auto' }}
+              />
+            )}
+          </>
         }
       >
-        <Typography variant="body1" gutterBottom>
-          Delete all the contents of a datasource from rAPId. Select the relevant dataset
-          you want to delete. Please note this also deletes the schemas relating to this
-          dataset and the underlying crawlers and raw data.
-        </Typography>
+        {fromQuery ? (
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            <Chip size="small" variant="outlined" label={`Layer: ${fromQuery.layer}`} />
+            <Chip size="small" variant="outlined" label={`Domain: ${fromQuery.domain}`} />
+            <Chip size="small" variant="outlined" label={`Dataset: ${fromQuery.dataset}`} />
+          </Box>
+        ) : (
+          <DatasetSelector
+            datasetsList={datasetsList}
+            setParentDataset={setDataset}
+            enableVersionSelector={false}
+          />
+        )}
 
-        <DatasetSelector
-          datasetsList={datasetsList}
-          setParentDataset={setDataset}
-          enableVersionSelector={false}
-        ></DatasetSelector>
-
-        {deleteDatasetSuccessDetails ? (
-          <Alert
-            title={`Dataset deleted: ${dataset.layer}/${dataset.domain}/${dataset.dataset}`}
-            data-testid="delete-status"
-          ></Alert>
-        ) : null}
-
-        {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {error.message}
+        {deleteDatasetSuccessDetails && (
+          <Alert severity="success" variant="outlined" sx={{ mt: 2 }} data-testid="delete-status">
+            Dataset deleted: {dataset
+              ? `${dataset.layer}/${dataset.domain}/${dataset.dataset}`
+              : deleteDatasetSuccessDetails}
           </Alert>
         )}
-      </Card>
-    </form>
+      </FormCard>
+    </Box>
   )
 }
 
 export default DeleteDataset
 
-DeleteDataset.getLayout = (page) => (
+DeleteDataset.getLayout = (page: ReactNode) => (
   <AccountLayout title="Delete Data">{page}</AccountLayout>
 )

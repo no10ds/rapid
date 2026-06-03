@@ -204,6 +204,16 @@ export const createSchema = async (
   return res.json()
 }
 
+export const updateSchema = async (
+  data: GenerateSchemaResponse
+): Promise<CreateSchemaResponse> => {
+  const res = await api(`/api/schema`, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  })
+  return res.json()
+}
+
 export const deleteClient = async ({ clientId }: { clientId: string }) => {
   const res = await api(`/api/client/${clientId}`, {
     method: 'DELETE'

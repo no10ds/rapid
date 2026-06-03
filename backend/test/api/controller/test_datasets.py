@@ -10,6 +10,7 @@ from api.application.services.authorisation.dataset_access_evaluator import (
 )
 from api.application.services.data_service import DataService
 from api.application.services.delete_service import DeleteService
+from api.application.services.job_service import JobService
 from api.application.services.search_service import SearchService
 from api.common.custom_exceptions import (
     UserError,
@@ -819,9 +820,12 @@ class TestQuery(BaseClientTest):
             "details": ["domain -> was required to be lowercase only."]
         }
 
+    @patch.object(JobService, "succeed_query")
+    @patch.object(JobService, "create_query_job")
+    @patch("api.controller.datasets.get_subject_id")
     @patch.object(DataService, "query_data")
     def test_call_service_with_only_domain_dataset_when_no_json_provided(
-        self, mock_query_method
+        self, mock_query_method, mock_get_subject_id, mock_create_query_job, mock_succeed_query
     ):
         query_url = f"{BASE_API_PATH}/datasets/raw/mydomain/mydataset/query?version=1"
 
@@ -833,8 +837,13 @@ class TestQuery(BaseClientTest):
             DatasetMetadata("raw", "mydomain", "mydataset", 1), Query()
         )
 
+    @patch.object(JobService, "succeed_query")
+    @patch.object(JobService, "create_query_job")
+    @patch("api.controller.datasets.get_subject_id")
     @patch.object(DataService, "query_data")
-    def test_call_service_with_sql_query_when_json_provided(self, mock_query_method):
+    def test_call_service_with_sql_query_when_json_provided(
+        self, mock_query_method, mock_get_subject_id, mock_create_query_job, mock_succeed_query
+    ):
         request_json = {"select_columns": ["column1"], "limit": "10"}
 
         query_url = f"{BASE_API_PATH}/datasets/raw/mydomain/mydataset/query?version=1"
@@ -848,10 +857,13 @@ class TestQuery(BaseClientTest):
             Query(select_columns=["column1"], limit="10"),
         )
 
+    @patch.object(JobService, "succeed_query")
+    @patch.object(JobService, "create_query_job")
+    @patch("api.controller.datasets.get_subject_id")
     @patch("api.controller.datasets.construct_dataset_metadata")
     @patch.object(DataService, "query_data")
     def test_call_service_with_latest_version_when_none_provided(
-        self, mock_query_method, mock_construct_metadata
+        self, mock_query_method, mock_construct_metadata, mock_get_subject_id, mock_create_query_job, mock_succeed_query
     ):
         mock_construct_metadata.return_value = DatasetMetadata(
             "raw", "mydomain", "mydataset", 32
@@ -864,9 +876,12 @@ class TestQuery(BaseClientTest):
             DatasetMetadata("raw", "mydomain", "mydataset", 32), Query()
         )
 
+    @patch.object(JobService, "succeed_query")
+    @patch.object(JobService, "create_query_job")
+    @patch("api.controller.datasets.get_subject_id")
     @patch.object(DataService, "query_data")
     def test_calls_service_with_sql_query_when_empty_json_values_provided(
-        self, mock_query_method
+        self, mock_query_method, mock_get_subject_id, mock_create_query_job, mock_succeed_query
     ):
         request_json = {
             "select_columns": ["column1"],
@@ -891,8 +906,13 @@ class TestQuery(BaseClientTest):
             ),
         )
 
+    @patch.object(JobService, "succeed_query")
+    @patch.object(JobService, "create_query_job")
+    @patch("api.controller.datasets.get_subject_id")
     @patch.object(DataService, "query_data")
-    def test_returns_formatted_json_from_query_result(self, mock_query_method):
+    def test_returns_formatted_json_from_query_result(
+        self, mock_query_method, mock_get_subject_id, mock_create_query_job, mock_succeed_query
+    ):
         mock_query_method.return_value = pd.DataFrame(
             {
                 "column1": [1, 2],
@@ -918,8 +938,13 @@ class TestQuery(BaseClientTest):
             "1": {"column1": "2", "column2": "item2", "area": "area_2"},
         }
 
+    @patch.object(JobService, "succeed_query")
+    @patch.object(JobService, "create_query_job")
+    @patch("api.controller.datasets.get_subject_id")
     @patch.object(DataService, "query_data")
-    def test_request_query_in_csv_is_successful(self, mock_query_method):
+    def test_request_query_in_csv_is_successful(
+        self, mock_query_method, mock_get_subject_id, mock_create_query_job, mock_succeed_query
+    ):
         mock_query_method.return_value = pd.DataFrame(
             {
                 "column1": [1, 2],
@@ -937,9 +962,12 @@ class TestQuery(BaseClientTest):
 
         assert response.status_code == 200
 
+    @patch.object(JobService, "succeed_query")
+    @patch.object(JobService, "create_query_job")
+    @patch("api.controller.datasets.get_subject_id")
     @patch.object(DataService, "query_data")
     def test_returns_formatted_json_from_query_if_format_is_not_provided(
-        self, mock_query_method
+        self, mock_query_method, mock_get_subject_id, mock_create_query_job, mock_succeed_query
     ):
         mock_query_method.return_value = pd.DataFrame(
             {
@@ -961,8 +989,13 @@ class TestQuery(BaseClientTest):
             "1": {"column1": "2", "column2": "item2", "area": "area_2"},
         }
 
+    @patch.object(JobService, "succeed_query")
+    @patch.object(JobService, "create_query_job")
+    @patch("api.controller.datasets.get_subject_id")
     @patch.object(DataService, "query_data")
-    def test_returns_204_if_dataframe_is_empty(self, mock_query_method):
+    def test_returns_204_if_dataframe_is_empty(
+        self, mock_query_method, mock_get_subject_id, mock_create_query_job, mock_succeed_query
+    ):
         mock_query_method.return_value = pd.DataFrame(
             {
                 "column1": [],
@@ -983,9 +1016,12 @@ class TestQuery(BaseClientTest):
             == "No rows were returned. Either there is no data or the query is too limiting."
         )
 
+    @patch.object(JobService, "succeed_query")
+    @patch.object(JobService, "create_query_job")
+    @patch("api.controller.datasets.get_subject_id")
     @patch.object(DataService, "query_data")
     def test_returns_error_from_query_request_when_format_is_unsupported(
-        self, mock_query_method
+        self, mock_query_method, mock_get_subject_id, mock_create_query_job, mock_succeed_query
     ):
         mock_query_method.return_value = pd.DataFrame(
             {
@@ -1006,6 +1042,25 @@ class TestQuery(BaseClientTest):
         assert response.json() == {
             "details": "Provided value for Accept header parameter [text/plain] is not supported. Supported formats: application/json, text/csv, application/octet-stream"
         }
+
+    @patch.object(JobService, "succeed_query")
+    @patch.object(JobService, "create_query_job")
+    @patch("api.controller.datasets.get_subject_id")
+    @patch.object(DataService, "query_data")
+    def test_creates_audit_job_on_successful_query(
+        self, mock_query_method, mock_get_subject_id, mock_create_query_job, mock_succeed_query
+    ):
+        mock_query_method.return_value = pd.DataFrame({"col": [1]})
+        mock_get_subject_id.return_value = "subject_id"
+        fake_job = mock_create_query_job.return_value
+
+        query_url = f"{BASE_API_PATH}/datasets/raw/mydomain/mydataset/query?version=1"
+        self.client.post(query_url, headers={"Authorization": "Bearer test-token"})
+
+        mock_create_query_job.assert_called_once_with(
+            "subject_id", DatasetMetadata("raw", "mydomain", "mydataset", 1)
+        )
+        mock_succeed_query.assert_called_once_with(fake_job, url=None)
 
     @pytest.mark.parametrize(
         "input_key", ["select_column", "invalid_key", "another_invalid_key"]

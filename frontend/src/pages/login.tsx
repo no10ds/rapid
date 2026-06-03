@@ -1,11 +1,12 @@
-import { Button, PublicLayout } from '@/components'
-import { Typography } from '@mui/material'
 import { useState } from 'react'
 import { useQueries } from '@tanstack/react-query'
 import { useRouter } from 'next/router'
 import { getAuthStatus, getLogin } from '@/service'
+import Image from 'next/image'
+import { Box, Typography, Button, LinearProgress } from '@mui/material'
+import { CenteredGradientPage } from '@/components'
 
-const IndexPage = () => {
+const LoginPage = () => {
   const [authUrl, setAuthUrl] = useState('/login')
   const router = useRouter()
 
@@ -20,9 +21,7 @@ const IndexPage = () => {
         onSuccess: (data) => {
           const { detail } = data
           if (detail === 'success') {
-            router.replace({
-              pathname: '/'
-            })
+            router.replace({ pathname: '/' })
           }
         }
       },
@@ -40,51 +39,40 @@ const IndexPage = () => {
   })
 
   if (results[0].isLoading || results[1].isLoading) {
-    return <p role="progressbar">Loading...</p>
+    return (
+      <CenteredGradientPage width={320}>
+        <LinearProgress color="primary" role="progressbar" />
+      </CenteredGradientPage>
+    )
   }
 
   return (
-    <>
+    <CenteredGradientPage>
+      <Box sx={{ mb: 3 }}>
+        <Image
+          src="/img/logo.png"
+          alt="rAPId"
+          width={140}
+          height={36}
+          style={{ objectFit: 'contain' }}
+          priority
+        />
+      </Box>
+      <Typography variant="h1" sx={{ fontSize: 22, mb: 1 }}>Welcome back</Typography>
+      <Typography variant="body2" sx={{ fontSize: 13, mb: 3 }}>
+        Sign in to access your datasets and manage your data.
+      </Typography>
       <Button
+        component="a"
         href={authUrl}
-        color="primary"
-        size="large"
+        variant="contained"
         fullWidth
-        disableRoute
         data-testid="login-link"
       >
-        Login
+        Sign in
       </Button>
-    </>
+    </CenteredGradientPage>
   )
 }
 
-export default IndexPage
-IndexPage.getLayout = (page) => (
-  <PublicLayout
-    title="Welcome Back"
-    promo={
-      <>
-        <Typography gutterBottom variant="body1">
-          Project rAPId aims to create consistent, secure, interoperable data storage and
-          sharing interfaces (APIs) that enable departments to discover, manage and share
-          data and metadata amongst themselves.
-        </Typography>
-
-        <Typography gutterBottom variant="body1">
-          This will improve the government's use of data by making it more scalable,
-          secure, and resilient, helping to match the rising demand for good-quality
-          evidence in the design, delivery, and evaluation of public policy.
-        </Typography>
-
-        <Typography gutterBottom variant="body1">
-          The project aims to deliver a replicable template for simple data storage
-          infrastructure in AWS, a RESTful API and custom frontend UI to ingest and share
-          named, standardised datasets.
-        </Typography>
-      </>
-    }
-  >
-    {page}
-  </PublicLayout>
-)
+export default LoginPage

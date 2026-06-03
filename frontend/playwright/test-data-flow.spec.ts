@@ -12,7 +12,7 @@ test('test', async ({ page }) => {
   await page.goto(domain)
 
   // Create a schema
-  await page.locator('div[role="button"]:has-text("Create Schema")').click()
+  await page.getByRole('link', { name: 'Add New Dataset' }).click()
   await expect(page).toHaveURL(`${domain}/schema/create`)
   await page.locator('[data-testid="field-level"]').selectOption('PUBLIC')
   await page.locator('[data-testid="field-layer"]').selectOption('default')
@@ -20,35 +20,33 @@ test('test', async ({ page }) => {
   await page.locator('[data-testid="field-domain"]').fill('ui_test_domain')
   await page.locator('[data-testid="field-title"]').click()
   await page.locator('[data-testid="field-title"]').fill(datasetName)
-  await page.locator('[data-testid="field-file"]').click()
   await page.locator('[data-testid="field-file"]').setInputFiles(filePath)
   await page.locator('[data-testid="submit"]').click()
   await page.locator('input[name="ownerEmail"]').click()
   await page.locator('input[name="ownerEmail"]').fill('ui_test@email.com')
   await page.locator('input[name="ownerName"]').click()
   await page.locator('input[name="ownerName"]').fill('ui_test')
-  await page.locator('button:has-text("Create Schema")').click()
+  await page.locator('button:has-text("Add Dataset")').click()
   const schemaCreatedElement = await page.waitForSelector('.MuiAlertTitle-root')
-  expect(await schemaCreatedElement.innerText()).toEqual('Schema Created')
+  expect(await schemaCreatedElement.innerText()).toEqual('Dataset added successfully')
 
   // Upload a dataset
-  await page.getByRole('button', { name: 'Upload data' }).click()
+  await page.goto(`${domain}/data/upload`)
   await page.getByTestId('select-layer').getByRole('combobox').click()
   await page.getByRole('option', { name: 'default' }).click()
   await page.getByTestId('select-domain').getByRole('combobox').click()
   await page.getByRole('option', { name: 'ui_test_domain' }).click()
   await page.getByTestId('select-dataset').getByRole('combobox').click()
   await page.getByRole('option', { name: datasetName }).click()
-  await page.getByTestId('upload').click()
   await page.getByTestId('upload').setInputFiles(filePath)
   await page.getByTestId('submit').click()
 
-  expect(await page.getByText('Data uploaded successfully').textContent()).toEqual(
-    'Status: Data uploaded successfully'
-  )
+  // Upload now redirects to the job detail page once processing completes
+  await page.waitForURL(`${domain}/tasks/*`, { timeout: 30000 })
+  expect(await page.getByText('Success').textContent()).toContain('Success')
 
   // Download the dataset
-  await page.getByRole('button', { name: 'Download data' }).click()
+  await page.goto(`${domain}/data/download`)
   await page.getByTestId('select-layer').getByRole('combobox').click()
   await page.getByRole('option', { name: 'default' }).click()
   await page.getByTestId('select-domain').getByRole('combobox').click()
@@ -58,11 +56,10 @@ test('test', async ({ page }) => {
   await page.getByTestId('submit').click()
 
   const metadataTable = page.getByRole('table').first()
-  expect(await metadataTable.innerText()).toContain('Last uploaded by')
-  const lastUploadedByValue = await page.getByRole('row', { name: /Last uploaded by/ }).locator('td').last().innerText()
+  expect((await metadataTable.innerText()).toLowerCase()).toContain('last uploaded by')
+  const lastUploadedByValue = await page.getByRole('row', { name: /Last uploaded by/i }).locator('td').last().innerText()
   expect(lastUploadedByValue).not.toEqual('')
 
-  await page.locator('div').filter({ hasText: 'Row Limit' }).locator('div').nth(1).click()
   await page.getByPlaceholder('30').fill('200')
   const downloadPromise = page.waitForEvent('download')
   await page.getByRole('button', { name: 'Download', exact: true }).click()
@@ -76,16 +73,15 @@ test('test', async ({ page }) => {
   })
 
   // Search for dataset
-  await page.getByRole('button', { name: 'Search Catalog' }).click()
-  await page.getByPlaceholder('Catalog Search Term').click()
-  await page.getByPlaceholder('Catalog Search Term').fill(datasetName)
-  await page.getByPlaceholder('Catalog Search Term').press('Enter')
+  await page.getByRole('link', { name: 'Catalog' }).click()
+  await expect(page).toHaveURL(`${domain}/catalog`)
+  await page.getByPlaceholder('Search by dataset name…').click()
+  await page.getByPlaceholder('Search by dataset name…').fill(datasetName)
 
   expect(await page.getByRole('table').innerText()).toContain(datasetName)
 
   // Delete the dataset
-  await page.getByRole('button', { name: 'Delete data' }).click()
-  await page.locator('div[role="button"]:has-text("Delete data")').click()
+  await page.goto(`${domain}/data/delete`)
   await page.getByTestId('select-layer').getByRole('combobox').click()
   await page.getByRole('option', { name: 'default' }).click()
   await page.getByTestId('select-domain').getByRole('combobox').click()

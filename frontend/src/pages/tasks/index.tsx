@@ -1,83 +1,128 @@
-import { Card, Link, SimpleTable, AccountLayout } from '@/components'
-import { getAllJobs } from '@/service'
-import { Typography, LinearProgress } from '@mui/material'
-import { useQuery } from '@tanstack/react-query'
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
-import CancelIcon from '@mui/icons-material/Cancel'
-import QueryBuilderIcon from '@mui/icons-material/QueryBuilder'
+import AccountLayout from '@/components/Layout/AccountLayout'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
+import StatusChip from '@/components/Chip/StatusChip'
+import { formatTs } from '@/utils/date'
+import { getAllJobs } from '@/service'
+import { useQuery } from '@tanstack/react-query'
+import { ReactNode, useState, useMemo } from 'react'
+import {
+  Box,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  Typography,
+  LinearProgress
+} from '@mui/material'
+import Link from 'next/link'
 
-function getStatusSymbol(status: string) {
-  if (status === 'SUCCESS') return <CheckCircleOutlineIcon color="success" />
-  else if (status === 'IN PROGRESS') return <QueryBuilderIcon />
-  else if (status === 'FAILED') return <CancelIcon color="error" />
-}
+
+type TypeFilter = 'All' | 'UPLOAD' | 'QUERY'
 
 function StatusPage() {
   const { isLoading, data, error } = useQuery(['jobs'], getAllJobs)
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>('All')
 
-  if (isLoading) {
-    return <LinearProgress />
-  }
+  const typeFilters: TypeFilter[] = ['All', 'UPLOAD', 'QUERY']
 
-  if (error) {
-    return <ErrorCard error={error as Error} />
-  }
+  const filtered = useMemo(() => {
+    if (!data) return []
+    if (typeFilter === 'All') return data
+    return data.filter((job) => (job.type as string)?.toUpperCase() === typeFilter)
+  }, [data, typeFilter])
+
+  const hasCreatedAt = useMemo(
+    () => filtered.some((job) => job.createdat != null),
+    [filtered]
+  )
+
+  if (isLoading) return <LinearProgress color="primary" role="progressbar" />
+  if (error) return <ErrorCard error={error as Error} />
 
   return (
-    <Card data-testid="tasks-content">
-      <Typography variant="body1" gutterBottom>
-        View all the tracked asynchronous processing jobs and the status of each job.
-        Press the desired job id to get greater details on it's run.
-      </Typography>
+    <Paper variant="outlined" data-testid="tasks-content">
+      {/* Toolbar */}
+      <Box sx={{ px: '18px', py: '14px', display: 'flex', gap: '10px', borderBottom: '1px solid', borderColor: 'divider' }}>
+        {typeFilters.map((f) => (
+          <Chip
+            key={f}
+            label={f}
+            size="small"
+            variant={typeFilter === f ? 'filled' : 'outlined'}
+            color={typeFilter === f ? 'primary' : 'default'}
+            onClick={() => setTypeFilter(f)}
+          />
+        ))}
+      </Box>
 
-      <Typography variant="h2" gutterBottom>
-        Jobs
-      </Typography>
-
-      <SimpleTable
-        list={data.map((job) => {
-          return [
-            { children: <>{job.type}</> },
-            { children: <>{job.layer}</> },
-            { children: <>{job.domain}</> },
-            { children: <>{job.dataset}</> },
-            { children: <>{job.version}</> },
-            { children: getStatusSymbol(job.status as string) },
-            { children: <>{job.step}</> },
-            {
-              children: (
-                <Link color="inherit" href={`tasks/${job.job_id}`}>
-                  {job.job_id}
-                </Link>
-              )
-            },
-            {
-              children:
-                job.status === 'FAILED' ? (
-                  <Link href={`tasks/${job.job_id}`}>Failure Details</Link>
-                ) : (
-                  <></>
+      {/* Table */}
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Job ID</TableCell>
+              <TableCell>Type</TableCell>
+              <TableCell>Layer</TableCell>
+              <TableCell>Domain</TableCell>
+              <TableCell>Dataset</TableCell>
+              <TableCell>Version</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell>Step</TableCell>
+              {hasCreatedAt && <TableCell>Created At</TableCell>}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filtered.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={hasCreatedAt ? 9 : 8} sx={{ textAlign: 'center', py: 5, color: 'text.disabled', fontSize: 13 }}>
+                  No {typeFilter !== 'All' ? typeFilter.toLowerCase() : ''} jobs found.
+                </TableCell>
+              </TableRow>
+            ) : (
+              filtered.map((job, idx) => {
+                const createdAtStr = formatTs(job.createdat as number | string | undefined)
+                return (
+                  <TableRow key={idx} hover>
+                    <TableCell sx={{ fontFamily: 'monospace', fontSize: 11 }}>
+                      <Link href={`/tasks/${job.job_id}`} style={{ color: '#ec4899', textDecoration: 'none' }}>
+                        {job.job_id}
+                      </Link>
+                    </TableCell>
+                    <TableCell>{job.type}</TableCell>
+                    <TableCell>{job.layer}</TableCell>
+                    <TableCell>{job.domain}</TableCell>
+                    <TableCell sx={{ fontWeight: 500 }}>{job.dataset}</TableCell>
+                    <TableCell sx={{ fontFamily: 'monospace', fontSize: 11 }}>{job.version}</TableCell>
+                    <TableCell><StatusChip status={job.status as string} /></TableCell>
+                    <TableCell sx={{ fontFamily: 'monospace', fontSize: 11 }}>{job.step}</TableCell>
+                    {hasCreatedAt && (
+                      <TableCell sx={{ fontFamily: 'monospace', fontSize: 11 }}>{createdAtStr ?? '—'}</TableCell>
+                    )}
+                  </TableRow>
                 )
-            }
-          ]
-        })}
-        headers={[
-          { children: 'Type' },
-          { children: 'Layer' },
-          { children: 'Domain' },
-          { children: 'Dataset' },
-          { children: 'Version' },
-          { children: 'Status' },
-          { children: 'Step' },
-          { children: 'Job ID' },
-          { children: '' }
-        ]}
-      />
-    </Card>
+              })
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Footer */}
+      <Box sx={{ px: '18px', py: '12px', borderTop: '1px solid', borderColor: 'divider' }}>
+        <Typography variant="body2" sx={{ fontSize: 12 }}>
+          {filtered.length} job{filtered.length !== 1 ? 's' : ''}
+          {typeFilter !== 'All' ? ` (${typeFilter.toLowerCase()})` : ''}
+        </Typography>
+      </Box>
+    </Paper>
   )
 }
 
 export default StatusPage
 
-StatusPage.getLayout = (page) => <AccountLayout title="Task Status">{page}</AccountLayout>
+StatusPage.getLayout = (page: ReactNode) => (
+  <AccountLayout title="Jobs">{page}</AccountLayout>
+)

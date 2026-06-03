@@ -1,9 +1,9 @@
-import { AccountLayout } from '@/components'
+import { AccountLayout, Card } from '@/components'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import { getSubjectPermissions } from '@/service'
-import { Card, Stack, Typography, LinearProgress } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/router'
+import { LinearProgress } from '@mui/material'
 
 function SubjectModifyPageSuccess() {
   const router = useRouter()
@@ -18,7 +18,7 @@ function SubjectModifyPageSuccess() {
   })
 
   if (isSubjectPermissionsLoading) {
-    return <LinearProgress />
+    return <LinearProgress color="primary" role="progressbar" />
   }
 
   if (subjectPermissionsError) {
@@ -27,16 +27,14 @@ function SubjectModifyPageSuccess() {
 
   return (
     <Card>
-      <Typography variant="h2" gutterBottom>
-        Success
-      </Typography>
-      <Typography gutterBottom>Permissions modified for {name}</Typography>
+      <h2>Success</h2>
+      <p>Permissions modified for {name}</p>
 
-      <Stack direction="column" spacing={2} sx={{ width: '100%', textAlign: 'center' }}>
+      <ul style={{ listStyle: 'none', padding: 0, textAlign: 'center' }}>
         {subjectPermissionsData.map((item) => (
-          <Typography key={item.name}>{item.name}</Typography>
+          <li key={item.id}>{item.id}</li>
         ))}
-      </Stack>
+      </ul>
     </Card>
   )
 }

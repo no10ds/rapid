@@ -1,13 +1,12 @@
-import { Card, Button } from '@/components'
+import { AccountLayout, FormCard } from '@/components'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
-import AccountLayout from '@/components/Layout/AccountLayout'
+import DatasetSelector from '@/components/DatasetSelector/DatasetSelector'
 import { getDatasetsUi } from '@/service'
-import { Typography, LinearProgress } from '@mui/material'
+import { Dataset } from '@/service/types'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
-import DatasetSelector from '@/components/DatasetSelector/DatasetSelector'
-import { Dataset } from '@/service/types'
+import { useState, ReactNode } from 'react'
+import { Box, Paper, Typography, Button, Chip, LinearProgress } from '@mui/material'
 
 function DownloadData({ datasetInput = null }: { datasetInput?: Dataset | null }) {
   const router = useRouter()
@@ -20,7 +19,7 @@ function DownloadData({ datasetInput = null }: { datasetInput?: Dataset | null }
   } = useQuery(['datasetsList', 'READ'], getDatasetsUi)
 
   if (isDatasetsListLoading) {
-    return <LinearProgress />
+    return <LinearProgress color="primary" role="progressbar" />
   }
 
   if (datasetsError) {
@@ -29,51 +28,60 @@ function DownloadData({ datasetInput = null }: { datasetInput?: Dataset | null }
 
   if (Object.keys(datasetsList).length === 0) {
     return (
-      <Card data-testid="no-data-helper">
-        <Typography variant="body1" gutterBottom>
+      <Paper variant="outlined" sx={{ maxWidth: 860, mx: 'auto', p: 2 }} data-testid="no-data-helper">
+        <Typography variant="body2" sx={{ fontSize: 13, mb: 1 }}>
           You currently do not have any data to download. Get started by creating a schema
           and uploading a dataset that you want to store in rAPId.
         </Typography>
-        <Typography variant="body1" gutterBottom>
+        <Typography variant="body2" sx={{ fontSize: 13 }}>
           All datasets will then become available to be downloaded from here.
         </Typography>
-      </Card>
+      </Paper>
     )
   }
 
+  const datasetLabel = dataset
+    ? `${dataset.layer} / ${dataset.domain} / ${dataset.dataset}`
+    : null
+
   return (
-    <Card
-      action={
-        <Button
-          data-testid="submit"
-          color="primary"
-          disabled={!dataset}
-          onClick={() =>
-            dataset &&
-            router.push(
-              `/data/download/${dataset.layer}/${dataset.domain}/${dataset.dataset}?version=${dataset.version}`
-            )
-          }
-        >
-          Next
-        </Button>
-      }
+    <Box
+      component="form"
+      sx={{ maxWidth: 860, mx: 'auto' }}
+      onSubmit={(event) => {
+        event.preventDefault()
+        if (dataset) {
+          router.push(
+            `/data/download/${dataset.layer}/${dataset.domain}/${dataset.dataset}?version=${dataset.version}`
+          )
+        }
+      }}
     >
-      <Typography variant="body1" gutterBottom>
-        Download the contents of a datasource from rAPId. Select the relevant dataset you
-        want to download and then the version to download from. Please note it might take
-        some time to for the API to query the dataset especially if they are large.
-      </Typography>
-      <DatasetSelector
-        datasetsList={datasetsList}
-        setParentDataset={setDataset}
-      ></DatasetSelector>
-    </Card>
+      <FormCard
+        title="Select dataset"
+        actions={
+          <>
+            <Button variant="contained" type="submit" data-testid="submit" disabled={!dataset}>
+              Next
+            </Button>
+            {datasetLabel && (
+              <Chip size="small" variant="outlined" label={datasetLabel} sx={{ ml: 'auto' }} />
+            )}
+          </>
+        }
+      >
+        <Typography variant="body2" sx={{ fontSize: 13, mb: 2 }}>
+          Download the contents of a datasource from rAPId. Select the relevant dataset
+          and version to download from. Large datasets may take some time to query.
+        </Typography>
+        <DatasetSelector datasetsList={datasetsList} setParentDataset={setDataset} />
+      </FormCard>
+    </Box>
   )
 }
 
 export default DownloadData
 
-DownloadData.getLayout = (page) => (
+DownloadData.getLayout = (page: ReactNode) => (
   <AccountLayout title="Download Data">{page}</AccountLayout>
 )
