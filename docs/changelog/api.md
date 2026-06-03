@@ -1,6 +1,17 @@
 # API Changelog
 
 
+## v8.0.0 - _2026-06-03_
+
+See [v8.0.0] changes
+
+### Features
+
+- Modernised the entire frontend UI with a refreshed Material UI theme
+- Addded 'last uploaded by' 
+
+[v8.0.0]: https://github.com/no10ds/rapid/compare/v7.16.1...v8.0.0
+
 ## v7.16.1 - _2026-03-17_
 
 See [v7.16.1] changes
