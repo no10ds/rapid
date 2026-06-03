@@ -6,12 +6,26 @@ import { makeAPIRequest, generateRapidAuthToken, domain } from './utils'
 const user = `${process.env.E2E_RESOURCE_PREFIX}_ui_test_user`
 
 test('test', { timeout: 60000 }, async ({ page }) => {
-  await page.goto(`${domain}/subject/modify`)
+  const { access_token } = await generateRapidAuthToken()
 
-  // Modify user to have data admin permissions
+  // Land on the modify form for the test user and capture their subject id
+  await page.goto(`${domain}/subject/modify`)
   await expect(page).toHaveURL(`${domain}/subject/modify`)
   await page.locator('[data-testid="field-user"]').selectOption({ label: user })
   await page.locator('[data-testid="submit-button"]').click()
+  await page.waitForURL(`${domain}/subject/modify/*`)
+  const subjectId = page.url().split('/').pop().split('?')[0]
+
+  // Reset to a clean baseline so the add-permission row renders (keeps the test idempotent)
+  await makeAPIRequest(
+    'subjects/permissions',
+    'PUT',
+    { subject_id: subjectId, permissions: [] },
+    `Bearer ${access_token}`
+  )
+
+  // Modify user to have data admin permissions
+  await page.goto(`${domain}/subject/modify/${subjectId}?name=${user}`)
   await page.locator('.MuiSelect-select').click()
   await page.getByRole('option', { name: 'DATA_ADMIN', exact: true }).click()
   await page.getByTestId('add-permission').click()
@@ -20,10 +34,6 @@ test('test', { timeout: 60000 }, async ({ page }) => {
 
   // Test unique condition where we correctly display permissions when modifying a user
   // even though they might have conflicting permissions within the filtering logic
-  const { access_token } = await generateRapidAuthToken()
-  const url = page.url()
-  let subjectId = url.split('/').pop()
-  subjectId = subjectId.split('?')[0]
   await makeAPIRequest(
     'subjects/permissions',
     'PUT',
