@@ -16,8 +16,7 @@ import {
   TableRow,
   Chip,
   Typography,
-  LinearProgress,
-  Button
+  LinearProgress
 } from '@mui/material'
 import Link from 'next/link'
 
@@ -74,13 +73,12 @@ function StatusPage() {
               <TableCell>Status</TableCell>
               <TableCell>Step</TableCell>
               {hasCreatedAt && <TableCell>Created At</TableCell>}
-              <TableCell></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={hasCreatedAt ? 10 : 9} sx={{ textAlign: 'center', py: 5, color: 'text.disabled', fontSize: 13 }}>
+                <TableCell colSpan={hasCreatedAt ? 9 : 8} sx={{ textAlign: 'center', py: 5, color: 'text.disabled', fontSize: 13 }}>
                   No {typeFilter !== 'All' ? typeFilter.toLowerCase() : ''} jobs found.
                 </TableCell>
               </TableRow>
@@ -104,20 +102,6 @@ function StatusPage() {
                     {hasCreatedAt && (
                       <TableCell sx={{ fontFamily: 'monospace', fontSize: 11 }}>{createdAtStr ?? '—'}</TableCell>
                     )}
-                    <TableCell>
-                      {job.status === 'FAILED' && (
-                        <Button
-                          component={Link}
-                          href={`/tasks/${job.job_id}`}
-                          size="small"
-                          color="error"
-                          variant="outlined"
-                          sx={{ fontSize: 11 }}
-                        >
-                          Details
-                        </Button>
-                      )}
-                    </TableCell>
                   </TableRow>
                 )
               })

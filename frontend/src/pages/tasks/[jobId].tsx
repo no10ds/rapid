@@ -148,11 +148,7 @@ function GetJob() {
         <FormCard
           title={
             <Box sx={{ color: 'error.main' }}>
-              <Box>
-                {parsedErrors.length === 1 && parsedErrors[0].title !== 'Validation error'
-                  ? parsedErrors[0].title
-                  : "Your file didn't pass validation"}
-              </Box>
+              <Box>Failure details</Box>
               <Typography sx={{ fontSize: 12, fontWeight: 400, color: 'error.main', mt: 0.5 }}>
                 No data was written. Fix the issues below, then re-upload.
               </Typography>
@@ -184,7 +180,7 @@ function GetJob() {
               <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 1.5 }}>
                 <Paper variant="outlined" sx={{ p: 2, bgcolor: 'background.default' }}>
                   <Typography sx={{ fontSize: 13, fontWeight: 600, mb: 0.5 }}>Fix my file</Typography>
-                  <Typography sx={{ fontSize: 12, color: 'text.secondary', mb: 1.5 }}>
+                  <Typography sx={{ fontSize: 12, color: 'text.secondary', mb: 2.5 }}>
                     Update the values in your file to match what the schema expects, then re-upload.
                   </Typography>
                   <Button component={Link} href="/data/upload" size="small" variant="contained">
@@ -193,7 +189,7 @@ function GetJob() {
                 </Paper>
                 <Paper variant="outlined" sx={{ p: 2, bgcolor: 'background.default' }}>
                   <Typography sx={{ fontSize: 13, fontWeight: 600, mb: 0.5 }}>Update the schema</Typography>
-                  <Typography sx={{ fontSize: 12, color: 'text.secondary', mb: 1.5 }}>
+                  <Typography sx={{ fontSize: 12, color: 'text.secondary', mb: 2.5 }}>
                     If your file is correct, delete the existing dataset first, then create a new schema and re-upload. Requires Data Admin permissions.
                   </Typography>
                   <Button component={Link} href="/catalog" size="small" variant="outlined">

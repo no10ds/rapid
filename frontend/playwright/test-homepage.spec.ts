@@ -9,7 +9,7 @@ test('test', async ({ page }) => {
   await page.getByRole('link', { name: 'Catalog' }).click()
   await expect(page).toHaveURL(`${domain}/catalog`)
 
-  await page.getByRole('link', { name: 'Add Dataset' }).click()
+  await page.getByRole('link', { name: 'Add New Dataset' }).click()
   await expect(page).toHaveURL(`${domain}/schema/create`)
 
   await page.getByRole('link', { name: 'Jobs' }).click()

@@ -180,7 +180,7 @@ const AccountLayout = ({ children, title, topbarActions, noPad }: AccountLayoutP
                   <NavItem href="/catalog" icon={<SearchIcon />} label="Catalog" active={isActive(['/catalog'])} collapsed={collapsed} />
                 )}
                 {methods?.can_create_schema && (
-                  <NavItem href="/schema/create" icon={<AddBoxIcon />} label="Add Dataset" active={isActive(['/schema/create'])} collapsed={collapsed} />
+                  <NavItem href="/schema/create" icon={<AddBoxIcon />} label="Add New Dataset" active={isActive(['/schema/create'])} collapsed={collapsed} />
                 )}
               </List>
             </Box>

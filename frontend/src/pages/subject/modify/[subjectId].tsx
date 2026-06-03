@@ -295,7 +295,7 @@ function SubjectModifyPage() {
 
       <Box sx={{ mt: 3 }}>
         <FormCard
-          title={<Box component="span" sx={{ color: 'error.main' }}>Destructive action</Box>}
+          title={<Box component="span" sx={{ color: 'error.main' }}>Delete User</Box>}
           actionsError={deleteError}
           actions={
             <>

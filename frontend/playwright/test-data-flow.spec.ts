@@ -12,7 +12,7 @@ test('test', async ({ page }) => {
   await page.goto(domain)
 
   // Create a schema
-  await page.getByRole('link', { name: 'Add Dataset' }).click()
+  await page.getByRole('link', { name: 'Add New Dataset' }).click()
   await expect(page).toHaveURL(`${domain}/schema/create`)
   await page.locator('[data-testid="field-level"]').selectOption('PUBLIC')
   await page.locator('[data-testid="field-layer"]').selectOption('default')
