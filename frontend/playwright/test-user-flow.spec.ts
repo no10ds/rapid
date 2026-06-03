@@ -12,7 +12,11 @@ test('test', { timeout: 60000 }, async ({ page }) => {
   await expect(page).toHaveURL(`${domain}/subject/modify`)
   await page.locator('[data-testid="field-user"]').selectOption({ label: user })
   await page.locator('[data-testid="submit-button"]').click()
-  await page.getByTestId('select-type').click()
+  await page
+    .getByRole('row')
+    .filter({ has: page.getByTestId('add-permission') })
+    .getByRole('combobox')
+    .click()
   await page.getByRole('option', { name: 'DATA_ADMIN', exact: true }).click()
   await page.getByTestId('add-permission').click()
   await page.getByTestId('submit').click()

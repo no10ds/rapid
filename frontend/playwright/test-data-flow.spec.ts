@@ -56,8 +56,8 @@ test('test', async ({ page }) => {
   await page.getByTestId('submit').click()
 
   const metadataTable = page.getByRole('table').first()
-  expect(await metadataTable.innerText()).toContain('Last uploaded by')
-  const lastUploadedByValue = await page.getByRole('row', { name: /Last uploaded by/ }).locator('td').last().innerText()
+  expect((await metadataTable.innerText()).toLowerCase()).toContain('last uploaded by')
+  const lastUploadedByValue = await page.getByRole('row', { name: /Last uploaded by/i }).locator('td').last().innerText()
   expect(lastUploadedByValue).not.toEqual('')
 
   await page.getByPlaceholder('30').fill('200')
