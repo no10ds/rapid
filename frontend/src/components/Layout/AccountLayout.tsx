@@ -263,7 +263,7 @@ const AccountLayout = ({ children, title, topbarActions, noPad }: AccountLayoutP
             onClick={(e) => setAnchorEl(e.currentTarget)}
           >
             <Avatar sx={{ width: 24, height: 24, bgcolor: 'primary.main', fontSize: 9, fontWeight: 700, letterSpacing: '0.02em' }}>
-              {initials ?? '?'}
+              {initials}
             </Avatar>
             {!collapsed && (
               <Box sx={{ minWidth: 0 }}>

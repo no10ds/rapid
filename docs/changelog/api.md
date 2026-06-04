@@ -1,5 +1,15 @@
 # API Changelog
 
+## v8.0.1 - _2026-06-04_
+
+See [v8.0.1] changes
+
+### Features
+
+- Removed layer filtering in the homepage
+
+[v8.0.1]: https://github.com/no10ds/rapid/compare/v8.0.0...v8.0.1
+
 
 ## v8.0.0 - _2026-06-03_
 
