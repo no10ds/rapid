@@ -6,7 +6,6 @@ import {
   Paper,
   Typography,
   Button,
-  Chip,
   TextField,
   InputAdornment,
   ClickAwayListener
@@ -18,18 +17,11 @@ const MAX_SUGGESTIONS = 8
 const DatasetSearchBar = ({ datasets }: { datasets: Dataset[] }) => {
   const router = useRouter()
   const [search, setSearch] = useState('')
-  const [layerFilter, setLayerFilter] = useState('All')
   const [open, setOpen] = useState(false)
   const wrapRef = useRef<HTMLDivElement>(null)
 
-  const layers = useMemo(() => {
-    const unique = Array.from(new Set(datasets.map((d) => d.layer).filter(Boolean))).sort()
-    return ['All', ...unique]
-  }, [datasets])
-
   const filtered = useMemo(() => {
     return datasets.filter((d) => {
-      if (layerFilter !== 'All' && d.layer?.toLowerCase() !== layerFilter.toLowerCase()) return false
       if (search.trim()) {
         const q = search.trim().toLowerCase()
         const haystack = `${d.layer} ${d.domain} ${d.dataset}`.toLowerCase()
@@ -37,7 +29,7 @@ const DatasetSearchBar = ({ datasets }: { datasets: Dataset[] }) => {
       }
       return true
     }).slice(0, MAX_SUGGESTIONS)
-  }, [datasets, layerFilter, search])
+  }, [datasets, search])
 
   // Close the suggestions dropdown when the user clicks outside the wrapper.
   useEffect(() => {
@@ -57,26 +49,6 @@ const DatasetSearchBar = ({ datasets }: { datasets: Dataset[] }) => {
 
   return (
     <Box sx={{ width: '100%', maxWidth: 720, mx: 'auto', position: 'relative' }} ref={wrapRef}>
-      {datasets.length > 0 && layers.length > 2 && (
-        <Box sx={{ display: 'flex', gap: 0.75, justifyContent: 'center', flexWrap: 'wrap', mb: 1.25 }}>
-          {layers.map((l) => (
-            <Chip
-              key={l}
-              label={l}
-              size="small"
-              variant={layerFilter === l ? 'filled' : 'outlined'}
-              color={layerFilter === l ? 'primary' : 'default'}
-              onClick={() => { setLayerFilter(l); setOpen(true) }}
-              sx={
-                layerFilter !== l
-                  ? { color: 'rgba(255,255,255,0.7)', borderColor: 'rgba(255,255,255,0.18)', bgcolor: 'rgba(255,255,255,0.05)', '&:hover': { borderColor: 'rgba(255,255,255,0.3)', color: '#fff' } }
-                  : undefined
-              }
-            />
-          ))}
-        </Box>
-      )}
-
       <Box sx={{ display: 'flex' }}>
         <TextField
           fullWidth
