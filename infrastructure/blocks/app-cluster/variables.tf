@@ -102,7 +102,7 @@ variable "project_information" {
 variable "layers" {
   type        = list(string)
   description = "A list of the layers that the rAPId instance will contain"
-  default     = ["default"]
+  default     = ["default", "clean"]
 }
 
 variable "task_memory" {

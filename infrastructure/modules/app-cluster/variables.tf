@@ -200,7 +200,7 @@ variable "ecs_cluster_name" {
 variable "layers" {
   type        = list(string)
   description = "A list of the layers that the rAPId instance will contain"
-  default     = ["default"]
+  default     = ["default", "clean"]
 }
 
 variable "custom_user_name_regex" {

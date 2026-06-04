@@ -16,5 +16,5 @@ variable "resource-name-prefix" {
 variable "layers" {
   type        = list(string)
   description = "A list of the layers that the rAPId instance will contain"
-  default     = ["default"]
+  default     = ["default", "clean"]
 }
