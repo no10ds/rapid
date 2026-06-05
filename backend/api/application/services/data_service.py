@@ -1,5 +1,4 @@
 import uuid
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from threading import Thread
 from typing import List, Tuple
@@ -193,20 +192,21 @@ class DataService:
         return last_updated or "Never updated"
 
     def enrich_datasets_for_ui(self, datasets: List[DatasetMetadata]) -> List[dict]:
+        latest_jobs = self.job_service.db_adapter.get_latest_successful_upload_jobs()
+        subject_names = {
+            subject["subject_id"]: subject["subject_name"]
+            for subject in self.subject_service.cognito_adapter.get_all_subjects()
+        }
+
         def enrich(dataset: DatasetMetadata) -> dict:
             d = dataset.to_dict()
-            try:
-                d["last_updated"] = self.get_last_updated_time(dataset)
-            except Exception:
-                d["last_updated"] = None
-            try:
-                d["last_uploaded_by"] = self.get_last_uploader(dataset)
-            except Exception:
-                d["last_uploaded_by"] = None
+            job = latest_jobs.get((dataset.layer, dataset.domain, dataset.dataset))
+            d["last_updated"] = job.get("createdat") if job else None
+            subject_id = job.get("sk2") if job else None
+            d["last_uploaded_by"] = subject_names.get(subject_id) if subject_id else None
             return d
 
-        with ThreadPoolExecutor(max_workers=10) as pool:
-            return list(pool.map(enrich, datasets))
+        return [enrich(dataset) for dataset in datasets]
 
     def get_last_uploader(self, metadata: DatasetMetadata) -> str:
         """

@@ -92,6 +92,7 @@ class TestDatasetsUI(BaseClientTest):
 
         mock_get_authorised_datasets.assert_called_once_with(subject_id, Action.READ)
         assert response.status_code == 200
+        mock_data_service.enrich_datasets_for_ui.assert_called_once()
 
 
 class TestMethodsUI(BaseClientTest):

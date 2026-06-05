@@ -1,7 +1,7 @@
 import AccountLayout from '@/components/Layout/AccountLayout'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import LayerChip from '@/components/Chip/LayerChip'
-import { formatDate } from '@/utils/date'
+import { formatTs } from '@/utils/date'
 import { sortByString } from '@/utils/sort'
 import { getDatasetsUi } from '@/service'
 import { Dataset } from '@/service/types'
@@ -207,7 +207,7 @@ function CatalogPage() {
                   <TableCell>
                     <LayerChip layer={d.layer} />
                   </TableCell>
-                  <TableCell sx={{ fontFamily: 'monospace', fontSize: 11 }}>{formatDate(d.last_updated)}</TableCell>
+                  <TableCell sx={{ fontFamily: 'monospace', fontSize: 11 }}>{formatTs(d.last_updated) ?? '—'}</TableCell>
                   <TableCell sx={{ fontFamily: 'monospace', fontSize: 11 }}>{d.last_uploaded_by ?? '—'}</TableCell>
                 </TableRow>
               ))

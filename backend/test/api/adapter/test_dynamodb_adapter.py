@@ -756,6 +756,46 @@ class TestDynamoDBAdapterServiceTable:
             IndexName="JOB_SUBJECT_ID",
         )
 
+    def test_get_latest_successful_upload_jobs(self):
+        self.service_table.query.return_value = {
+            "Items": [
+                {
+                    "PK": "JOB",
+                    "SK": "job-old",
+                    "SK2": "subject-1",
+                    "Type": "UPLOAD",
+                    "Status": "SUCCESS",
+                    "Layer": "raw",
+                    "Domain": "domain1",
+                    "Dataset": "dataset1",
+                    "CreatedAt": 1000,
+                },
+                {
+                    "PK": "JOB",
+                    "SK": "job-new",
+                    "SK2": "subject-2",
+                    "Type": "UPLOAD",
+                    "Status": "SUCCESS",
+                    "Layer": "raw",
+                    "Domain": "domain1",
+                    "Dataset": "dataset1",
+                    "CreatedAt": 2000,
+                },
+            ],
+            "Count": 2,
+        }
+
+        result = self.dynamo_adapter.get_latest_successful_upload_jobs()
+
+        assert set(result.keys()) == {("raw", "domain1", "dataset1")}
+        latest = result[("raw", "domain1", "dataset1")]
+        assert latest["createdat"] == 2000
+        assert latest["sk2"] == "subject-2"
+        self.service_table.query.assert_called_once_with(
+            KeyConditionExpression=Key("PK").eq("JOB"),
+            FilterExpression=Attr("Type").eq("UPLOAD") & Attr("Status").eq("SUCCESS"),
+        )
+
     @patch("api.adapter.dynamodb_adapter.time")
     def test_get_jobs_for_no_jobs_returned(self, mock_time):
         mock_time.time.return_value = 19821

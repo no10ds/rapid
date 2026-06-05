@@ -663,6 +663,27 @@ class TestDatasetInfoRetrieval:
         pattern = "[\\d\\w]{8}-[\\d\\w]{4}-[\\d\\w]{4}-[\\d\\w]{4}-[\\d\\w]{12}"
         assert re.match(pattern, filename)
 
+    def test_enrich_datasets_for_ui_uses_bulk_jobs_and_subjects(self):
+        datasets = [
+            DatasetMetadata("raw", "domain1", "dataset1", 1),
+            DatasetMetadata("raw", "domain2", "dataset2", 1),
+        ]
+        self.job_service.db_adapter.get_latest_successful_upload_jobs.return_value = {
+            ("raw", "domain1", "dataset1"): {"sk2": "subject-123", "createdat": 1700000000},
+        }
+        self.subject_service.cognito_adapter.get_all_subjects.return_value = [
+            {"subject_id": "subject-123", "subject_name": "test_user"},
+        ]
+
+        result = self.data_service.enrich_datasets_for_ui(datasets)
+
+        self.job_service.db_adapter.get_latest_successful_upload_jobs.assert_called_once_with()
+        self.subject_service.cognito_adapter.get_all_subjects.assert_called_once_with()
+        assert result[0]["last_updated"] == 1700000000
+        assert result[0]["last_uploaded_by"] == "test_user"
+        assert result[1]["last_updated"] is None
+        assert result[1]["last_uploaded_by"] is None
+
 
 class TestQueryDataset:
     def setup_method(self):

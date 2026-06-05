@@ -2,7 +2,7 @@ import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import reduce
-from typing import Any, Callable, Dict, List, Optional, Type
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 import boto3
 from boto3.dynamodb.conditions import Attr, Key, Or
@@ -415,6 +415,29 @@ class DynamoDBAdapter(DatabaseAdapter):
         except ClientError as error:
             AppLogger.warning(f"Error fetching latest upload job for dataset: {error}")
             return None
+
+    def get_latest_successful_upload_jobs(self) -> Dict[Tuple[str, str, str], Dict]:
+        """
+        Get the most recent successful upload job for every dataset in a single query.
+        Returns a dict keyed by (layer, domain, dataset) with the latest job details.
+        """
+        try:
+            jobs = self.collect_all_items(
+                self.service_table.query,
+                KeyConditionExpression=Key("PK").eq("JOB"),
+                FilterExpression=Attr("Type").eq("UPLOAD") & Attr("Status").eq("SUCCESS"),
+            )
+        except ClientError as error:
+            AppLogger.warning(f"Error fetching latest upload jobs: {error}")
+            return {}
+
+        latest_by_dataset: Dict[Tuple[str, str, str], Dict] = {}
+        for job in jobs:
+            key = (job.get("Layer"), job.get("Domain"), job.get("Dataset"))
+            current = latest_by_dataset.get(key)
+            if current is None or job.get("CreatedAt", 0) > current.get("CreatedAt", 0):
+                latest_by_dataset[key] = job
+        return {key: self._map_job(job) for key, job in latest_by_dataset.items()}
 
     def get_schema(self, dataset: Type[DatasetMetadata]) -> Optional[dict]:
         try:
