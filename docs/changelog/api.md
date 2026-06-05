@@ -1,5 +1,15 @@
 # API Changelog
 
+## v8.0.2 - _2026-06-04_
+
+See [v8.0.2] changes
+
+### Features
+
+- Cached enhanced api calls 
+
+[v8.0.2]: https://github.com/no10ds/rapid/compare/v8.0.0...v8.0.2
+
 ## v8.0.1 - _2026-06-04_
 
 See [v8.0.1] changes
