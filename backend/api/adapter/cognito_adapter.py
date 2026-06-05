@@ -1,3 +1,4 @@
+import time
 from typing import List, Dict, Optional
 
 import boto3
@@ -17,12 +18,17 @@ from api.domain.client import ClientRequest, ClientResponse
 from api.domain.user import UserRequest, UserResponse
 
 
+SUBJECTS_CACHE_TTL_SECONDS = 300
+
+
 class CognitoAdapter:
     def __init__(
         self, cognito_client=boto3.client("cognito-idp", region_name=AWS_REGION)
     ):
         self.cognito_client = cognito_client
         self.placeholder_client_name = "string"
+        self._subjects_cache = None
+        self._subjects_cache_expiry = 0.0
 
     def create_client_app(self, client_request: ClientRequest) -> ClientResponse:
         try:
@@ -44,6 +50,7 @@ class CognitoAdapter:
                 PreventUserExistenceErrors="ENABLED",
             )
 
+            self._invalidate_subjects_cache()
             return self._create_client_response(
                 client_request, cognito_response["UserPoolClient"]
             )
@@ -64,6 +71,7 @@ class CognitoAdapter:
                     "EMAIL",
                 ],
             )
+            self._invalidate_subjects_cache()
             return self._create_user_response(
                 cognito_response, user_request.get_permissions()
             )
@@ -92,6 +100,7 @@ class CognitoAdapter:
             self.cognito_client.delete_user_pool_client(
                 UserPoolId=COGNITO_USER_POOL_ID, ClientId=client_id
             )
+            self._invalidate_subjects_cache()
         except ClientError as error:
             AppLogger.info(f"Deleting client {client_id} failed with: {error.response}")
             if error.response["Error"]["Code"] == "ResourceNotFoundException":
@@ -109,6 +118,7 @@ class CognitoAdapter:
                 UserPoolId=COGNITO_USER_POOL_ID,
                 Username=username,
             )
+            self._invalidate_subjects_cache()
         except ClientError as error:
             AppLogger.info(f"Deleting user {username} failed with: {error.response}")
             if error.response["Error"]["Code"] == "UserNotFoundException":
@@ -118,6 +128,20 @@ class CognitoAdapter:
             )
 
     def get_all_subjects(self) -> List[Dict[str, Optional[str]]]:
+        now = time.monotonic()
+        if self._subjects_cache is not None and now < self._subjects_cache_expiry:
+            return self._subjects_cache
+
+        subjects = self._fetch_all_subjects()
+        self._subjects_cache = subjects
+        self._subjects_cache_expiry = now + SUBJECTS_CACHE_TTL_SECONDS
+        return subjects
+
+    def _invalidate_subjects_cache(self):
+        self._subjects_cache = None
+        self._subjects_cache_expiry = 0.0
+
+    def _fetch_all_subjects(self) -> List[Dict[str, Optional[str]]]:
         try:
             clients = [
                 {

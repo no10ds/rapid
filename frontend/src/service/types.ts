@@ -166,7 +166,7 @@ export type Dataset = {
   dataset: string
   version: number
   sensitivity?: string
-  last_updated?: string
+  last_updated?: number
   last_uploaded_by?: string
 }
 

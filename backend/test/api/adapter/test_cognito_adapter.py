@@ -472,6 +472,32 @@ class TestGetSubjects(BaseCognitoAdapter):
 
         assert result == expected
 
+    def test_caches_subjects_between_calls(self):
+        self.cognito_boto_client.get_paginator.return_value.paginate.side_effect = [
+            [{"UserPoolClients": [{"ClientId": "c1", "ClientName": "client_1"}]}],
+            [{"Users": []}],
+        ]
+
+        first = self.cognito_adapter.get_all_subjects()
+        second = self.cognito_adapter.get_all_subjects()
+
+        assert first == second
+        assert self.cognito_boto_client.get_paginator.return_value.paginate.call_count == 2
+
+    def test_invalidates_subjects_cache_on_delete_user(self):
+        self.cognito_boto_client.get_paginator.return_value.paginate.side_effect = [
+            [{"UserPoolClients": [{"ClientId": "c1", "ClientName": "client_1"}]}],
+            [{"Users": []}],
+            [{"UserPoolClients": [{"ClientId": "c1", "ClientName": "client_1"}]}],
+            [{"Users": []}],
+        ]
+
+        self.cognito_adapter.get_all_subjects()
+        self.cognito_adapter.delete_user("some-user")
+        self.cognito_adapter.get_all_subjects()
+
+        assert self.cognito_boto_client.get_paginator.return_value.paginate.call_count == 4
+
     def test_raises_error_when_listing_clients_fails(self):
         self.cognito_boto_client.get_paginator.return_value.paginate.side_effect = (
             ClientError(
