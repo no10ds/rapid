@@ -345,13 +345,11 @@ class DataService:
         for column in schema.columns:
             statistics = None
             if column in date_columns:
+                max_value = statistics_dataframe.at[0, f"max_{column.name}"]
+                min_value = statistics_dataframe.at[0, f"min_{column.name}"]
                 statistics = {
-                    "max": statistics_dataframe.at[0, f"max_{column.name}"].strftime(
-                        strftime_format
-                    ),
-                    "min": statistics_dataframe.at[0, f"min_{column.name}"].strftime(
-                        strftime_format
-                    ),
+                    "max": None if pd.isna(max_value) else max_value.strftime(strftime_format),
+                    "min": None if pd.isna(min_value) else min_value.strftime(strftime_format),
                 }
             enriched_columns.append(
                 EnrichedColumn(**column.model_dump(), statistics=statistics)
