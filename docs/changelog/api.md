@@ -1,5 +1,15 @@
 # API Changelog
 
+## v8.1.1 - _2026-06-09_
+
+See [v8.1.1] changes
+
+### Features
+
+- Fixed bug formating dates if they are null
+
+[v8.1.1]: https://github.com/no10ds/rapid/compare/v8.1.0...v8.1.1
+
 ## v8.1.0 - _2026-06-04_
 
 See [v8.1.0] changes
