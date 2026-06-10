@@ -186,3 +186,5 @@ docs/_build/
 frontend/playwright/.auth
 frontend/playwright/.downloads
 frontend/test-results/
+
+backend/api/pandera_checks

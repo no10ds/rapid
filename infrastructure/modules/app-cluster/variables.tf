@@ -221,3 +221,10 @@ variable "task_cpu" {
   description = "rAPId ecs task cpu"
   default     = 256
 }
+
+variable "pandera_files" {
+  type        = list(string)
+  description = "Python files paths with pandera custom checks"
+  default     = []
+  nullable    = false
+}

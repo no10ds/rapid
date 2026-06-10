@@ -85,7 +85,9 @@ class DatabaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def get_latest_successful_upload_job(self, dataset: Type[DatasetMetadata]) -> Optional[Dict]:
+    def get_latest_successful_upload_job(
+        self, dataset: Type[DatasetMetadata]
+    ) -> Optional[Dict]:
         pass
 
     @abstractmethod
@@ -177,14 +179,15 @@ class DynamoDBAdapter(DatabaseAdapter):
             AppLogger.info(
                 f"Storing schema for {schema.metadata.string_representation()}"
             )
-            self.schema_table.put_item(
-                Item={
-                    "PK": schema.metadata.dataset_identifier(with_version=False),
-                    "SK": schema.metadata.get_version(),
-                    **schema.metadata.model_dump(),
-                    COLUMNS: [col.model_dump() for col in schema.columns],
-                }
-            )
+            item = {
+                "PK": schema.metadata.dataset_identifier(with_version=False),
+                "SK": schema.metadata.get_version(),
+                **schema.metadata.model_dump(),
+                COLUMNS: [col.model_dump() for col in schema.columns],
+            }
+            if schema.panderaDataFrameSchema is not None:
+                item["panderaDataFrameSchema"] = schema.panderaDataFrameSchema.to_json()
+            self.schema_table.put_item(Item=item)
         except ClientError as error:
             self._handle_client_error(
                 f"Error storing schema for {schema.metadata.string_representation()}",
@@ -389,7 +392,9 @@ class DynamoDBAdapter(DatabaseAdapter):
         except ClientError as error:
             self._handle_client_error("Error fetching job from the database", error)
 
-    def get_latest_successful_upload_job(self, dataset: Type[DatasetMetadata]) -> Optional[Dict]:
+    def get_latest_successful_upload_job(
+        self, dataset: Type[DatasetMetadata]
+    ) -> Optional[Dict]:
         """
         Get the most recent successful upload job for a specific dataset.
         Returns the job details including subject_id (uploader) or None if no successful upload exists.
@@ -404,13 +409,15 @@ class DynamoDBAdapter(DatabaseAdapter):
                     & Attr("Layer").eq(dataset.layer)
                     & Attr("Domain").eq(dataset.domain)
                     & Attr("Dataset").eq(dataset.dataset)
-                )
+                ),
             )
 
             if not jobs:
                 return None
 
-            sorted_jobs = sorted(jobs, key=lambda x: x.get("CreatedAt", 0), reverse=True)
+            sorted_jobs = sorted(
+                jobs, key=lambda x: x.get("CreatedAt", 0), reverse=True
+            )
             return self._map_job(sorted_jobs[0])
         except ClientError as error:
             AppLogger.warning(f"Error fetching latest upload job for dataset: {error}")

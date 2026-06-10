@@ -3,8 +3,11 @@ from typing import List, Dict, Optional, Set
 
 import awswrangler as wr
 from pydantic.main import BaseModel
+from pydantic import field_serializer, field_validator
 import pyarrow as pa
 import pandera
+import pandera.pandas as pandera_pandas
+import pandera.io.pandas_io as pandera_io
 
 from api.domain.schema_metadata import Owner, SchemaMetadata
 from rapid.items.schema import Column, UpdateBehaviour
@@ -16,6 +19,21 @@ COLUMNS = "columns"
 class Schema(BaseModel):
     metadata: SchemaMetadata
     columns: List[Column]
+    panderaDataFrameSchema: Optional[pandera_pandas.DataFrameSchema] = None
+
+    @field_serializer("panderaDataFrameSchema", mode="plain")
+    def pandera_dump(self, value: pandera_pandas.DataFrameSchema) -> str:
+        if value is not None:
+            return value.to_json()
+        else:
+            return value
+
+    @field_validator("panderaDataFrameSchema", mode="before")
+    def pandera_load(cls, value: str) -> pandera_pandas.DataFrameSchema:
+        if type(value) is str:
+            return pandera_io.from_json(value)
+        else:
+            return value
 
     def get_layer(self) -> str:
         return self.metadata.get_layer()
@@ -100,9 +118,14 @@ class Schema(BaseModel):
         )
 
     def pandera_validate(self, df, **kwargs):
-        pandera_columns = {
-            col.name: col.to_pandera_column()
-            for col in self.columns
-        }
-        pandera_schema = pandera.DataFrameSchema(metadata=self.metadata, columns=pandera_columns)
+        pandera_columns = {col.name: col.to_pandera_column() for col in self.columns}
+        pandera_schema = pandera.DataFrameSchema(
+            metadata=self.metadata, columns=pandera_columns
+        )
         return pandera_schema.validate(df, **kwargs)
+
+    def pandera_schema_validate(self, df, **kwargs):
+        if self.panderaDataFrameSchema is not None:
+            return self.panderaDataFrameSchema.validate(df, **kwargs)
+        else:
+            return df

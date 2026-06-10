@@ -1,8 +1,10 @@
 # Note: This class is replicated in the api code, they should be de-duplicated once the external dependencies are removed from the API
 from strenum import StrEnum
 from typing import Dict, List, Optional, Union, Any
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_serializer, field_validator
 import pandera
+import pandera.pandas as pandera_pandas
+import pandera.io.pandas_io as pandera_io
 
 
 class SensitivityLevel(StrEnum):
@@ -48,7 +50,7 @@ class Column(BaseModel):
 
     def is_of_data_type(self, d_type: StrEnum) -> bool:
         return self.data_type in list(d_type)
-    
+
     def to_pandera_column(self) -> pandera.Column:
         """
         Convert Column to Pandera Column for Pandera data validation.
@@ -96,8 +98,10 @@ class Column(BaseModel):
             pattern = params.get("pattern")
             return pandera.Check.str_matches(pattern)
         else:
-            raise ValueError(f"Unsupported check type: {check_type}. Valid types are: "
-                             "in_range, isin, str_length, greater_than, less_than, str_matches.")
+            raise ValueError(
+                f"Unsupported check type: {check_type}. Valid types are: "
+                "in_range, isin, str_length, greater_than, less_than, str_matches."
+            )
 
 
 class Schema(BaseModel):
@@ -143,6 +147,21 @@ class Schema(BaseModel):
 
     metadata: SchemaMetadata
     columns: List[Column]
+    panderaDataFrameSchema: Optional[pandera_pandas.DataFrameSchema] = None
+
+    @field_serializer("panderaDataFrameSchema", mode="plain")
+    def pandera_dump(self, value: pandera_pandas.DataFrameSchema) -> str:
+        if value is not None:
+            return value.to_json()
+        else:
+            return value
+
+    @field_validator("panderaDataFrameSchema", mode="before")
+    def pandera_load(cls, value: str) -> pandera_pandas.DataFrameSchema:
+        if type(value) is str:
+            return pandera_io.from_json(value)
+        else:
+            return value
 
     def are_columns_the_same(
         self, new_columns: Union[List[Column], List[dict]]
@@ -179,9 +198,8 @@ class Schema(BaseModel):
         Raises:
             pandera.errors.SchemaErrors: If validation fails
         """
-        pandera_columns = {
-            col.name: col.to_pandera_column()
-            for col in self.columns
-        }
-        pandera_schema = pandera.DataFrameSchema(metadata=self.metadata, columns=pandera_columns)
+        pandera_columns = {col.name: col.to_pandera_column() for col in self.columns}
+        pandera_schema = pandera.DataFrameSchema(
+            metadata=self.metadata, columns=pandera_columns
+        )
         return pandera_schema.validate(df, **kwargs)

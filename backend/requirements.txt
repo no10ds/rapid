@@ -6,7 +6,7 @@ gunicorn
 httpx
 jinja2
 pandas
-pandera
+pandera[io]
 psutil
 pyarrow
 pyjwt
@@ -17,4 +17,3 @@ uvicorn
 requests
 strenum
 pytest-order
-

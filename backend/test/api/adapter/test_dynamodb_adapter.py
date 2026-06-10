@@ -21,6 +21,8 @@ from api.domain.schema import Schema
 from rapid.items.schema import Column
 from api.domain.schema_metadata import SchemaMetadata, Owner
 
+import pandera.pandas as pandera_pandas
+
 
 class TestDynamoDBAdapterGeneric:
     def setup_method(self):
@@ -1074,6 +1076,40 @@ class TestDynamoDBAdapterSchemaTable:
             ],
         )
 
+        self.schema_pandera = Schema(
+            metadata=SchemaMetadata(
+                layer="raw",
+                domain="some",
+                dataset="other",
+                version=2,
+                sensitivity="PUBLIC",
+                description="This is a test schema",
+                owners=[Owner(name="owner", email="owner@email.com")],
+                key_only_tags=["key"],
+                key_value_tags={"key": "value"},
+            ),
+            columns=[
+                Column(
+                    name="colname1",
+                    partition_index=0,
+                    data_type="int",
+                    allow_null=False,
+                ),
+                Column(
+                    name="colname2",
+                    partition_index=None,
+                    data_type="string",
+                    allow_null=True,
+                ),
+            ],
+            panderaDataFrameSchema=pandera_pandas.DataFrameSchema(
+                columns={
+                    "colname1": pandera_pandas.Column(int),
+                    "colname2": pandera_pandas.Column(str),
+                },
+            ),
+        )
+
     def test_store_schema(self):
         self.dynamo_adapter.store_schema(self.schema)
 
@@ -1112,6 +1148,48 @@ class TestDynamoDBAdapterSchemaTable:
                         "checks": {},
                     },
                 ],
+            }
+        )
+
+    def test_store_schema_pandera(self):
+        self.dynamo_adapter.store_schema(self.schema_pandera)
+
+        self.schema_table.put_item.assert_called_once_with(
+            Item={
+                "PK": "raw/some/other",
+                "SK": 2,
+                "layer": "raw",
+                "domain": "some",
+                "dataset": "other",
+                "version": 2,
+                "sensitivity": "PUBLIC",
+                "description": "This is a test schema",
+                "update_behaviour": "APPEND",
+                "key_value_tags": {"key": "value"},
+                "key_only_tags": ["key"],
+                "owners": [{"name": "owner", "email": "owner@email.com"}],
+                "is_latest_version": True,
+                "columns": [
+                    {
+                        "name": "colname1",
+                        "partition_index": 0,
+                        "data_type": "int",
+                        "allow_null": False,
+                        "format": None,
+                        "unique": False,
+                        "checks": {},
+                    },
+                    {
+                        "name": "colname2",
+                        "partition_index": None,
+                        "data_type": "string",
+                        "allow_null": True,
+                        "format": None,
+                        "unique": False,
+                        "checks": {},
+                    },
+                ],
+                "panderaDataFrameSchema": '{"schema_type": "dataframe", "columns": {"colname1": {"dtype": "int64"}, "colname2": {"dtype": "str"}}}',
             }
         )
 

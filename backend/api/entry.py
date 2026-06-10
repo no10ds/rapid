@@ -44,6 +44,7 @@ from api.controller.schema import schema_router
 from api.controller.subjects import subjects_router
 from api.controller.user import user_router
 from api.exception_handler import add_exception_handlers
+from api.pandera_custom_checks_load import pandera_custom_checks_load
 
 try:
     load_dotenv()
@@ -61,9 +62,7 @@ permissions_service = PermissionsService()
 upload_service = DatasetAccessEvaluator()
 data_service = DataService()
 
-app = FastAPI(
-    openapi_url=f"{BASE_API_PATH}/openapi.json", docs_url=None
-)
+app = FastAPI(openapi_url=f"{BASE_API_PATH}/openapi.json", docs_url=None)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.openapi = custom_openapi_docs_generator(app)
 add_exception_handlers(app)
@@ -82,6 +81,10 @@ app.include_router(layers_router)
 @app.on_event("startup")
 async def startup_event():
     init_logger()
+    try:
+        pandera_custom_checks_load()
+    except Exception as e:
+        AppLogger.info(f"Failed to load pandera custom checks due to: {str(e)}")
 
 
 @app.middleware("http")
@@ -250,9 +253,9 @@ def _set_security_headers(response) -> None:
         "img-src 'self' data: "
         "fastapi.tiangolo.com/img/favicon.png;"
     )
-    response.headers[
-        "Strict-Transport-Security"
-    ] = "max-age=31536000 ; includeSubDomains"
+    response.headers["Strict-Transport-Security"] = (
+        "max-age=31536000 ; includeSubDomains"
+    )
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
     response.headers["Referrer-Policy"] = "strict-origin"

@@ -1,6 +1,6 @@
 import re
 from typing import Tuple
-
+import json
 import pandas as pd
 from pandas import Timestamp
 import pandera
@@ -18,6 +18,7 @@ from api.domain.data_types import (
 )
 from api.domain.schema import Schema
 from api.domain.validation_context import ValidationContext
+from api.common.logger import AppLogger
 
 
 def build_validated_dataframe(schema: Schema, dataframe: pd.DataFrame) -> pd.DataFrame:
@@ -35,6 +36,7 @@ def transform_and_validate(schema: Schema, data: pd.DataFrame) -> pd.DataFrame:
         .pipe(dataset_has_correct_data_types, schema)
         .pipe(dataset_has_no_illegal_characters_in_partition_columns, schema)
         .pipe(validate_with_pandera, schema)
+        .pipe(validate_with_pandera_schema, schema)
     )
 
     if validation_context.has_errors():
@@ -120,7 +122,9 @@ def dataset_has_no_illegal_characters_in_partition_columns(
     error_list = []
     for column in schema.get_partition_columns():
         series = data_frame[column.name]
-        if not column.is_of_data_type(DateType) and pd.api.types.is_string_dtype(series):
+        if not column.is_of_data_type(DateType) and pd.api.types.is_string_dtype(
+            series
+        ):
             any_illegal_characters = series.str.contains("/", na=False).any()
             if any_illegal_characters:
                 error_list.append(
@@ -183,7 +187,7 @@ def parse_pandera_errors(exc: pandera.errors.SchemaErrors) -> list[str]:
 
     # Creating a list of singular (json like) entries from the pandera error string
     # For example: {'check': 'pandera_check', 'error': 'error message', ...}
-    failure_object_pattern = r'\{\s*(?:[^{}]*?)\}'
+    failure_object_pattern = r"\{\s*(?:[^{}]*?)\}"
     failure_objects = re.findall(failure_object_pattern, error_str)
 
     # Extracting and cleaning each error statement
@@ -195,15 +199,15 @@ def parse_pandera_errors(exc: pandera.errors.SchemaErrors) -> list[str]:
             continue
 
         error_msg = error_match.group(1)
-        error_msg = error_msg.replace(r"\'", "'").replace(r'\"', '"')
+        error_msg = error_msg.replace(r"\'", "'").replace(r"\"", '"')
 
         check_match = re.search(r'"check":\s*"([^"]*)"', obj)
         check_name = check_match.group(1) if check_match else None
 
-        if ':' in error_msg and ('Name:' in error_msg or 'dtype:' in error_msg):
-            error_msg = error_msg.split(':')[0]
+        if ":" in error_msg and ("Name:" in error_msg or "dtype:" in error_msg):
+            error_msg = error_msg.split(":")[0]
 
-        if check_name and check_name not in ['not_nullable', 'field_uniqueness']:
+        if check_name and check_name not in ["not_nullable", "field_uniqueness"]:
             error_msg = f"[{check_name}] {error_msg}"
 
         error_messages.append(error_msg)
@@ -220,4 +224,38 @@ def validate_with_pandera(
         return validated_df, []
     except pandera.errors.SchemaErrors as exc:
         error_list = parse_pandera_errors(exc)
+        return data_frame, error_list
+
+
+def parse_pandera_schema_errors(exc: pandera.errors.SchemaErrors) -> list[str]:
+
+    error_messages = []
+
+    for error_reason in exc.message["DATA"]:
+        if error_reason == "CHECK_ERROR":
+            for error_entry in exc.message["DATA"][error_reason]:
+                if error_entry["column"] is not None:
+                    error_messages.append(
+                        f"Column '{error_entry['column']}' internal error in check: {error_entry['check']}"
+                    )
+                else:
+                    error_messages.append(
+                        f"Internal error in check: {error_entry['check']}"
+                    )
+        else:
+            for error_entry in exc.message["DATA"][error_reason]:
+                error_messages.append(error_entry["error"])
+
+    return error_messages
+
+
+def validate_with_pandera_schema(
+    data_frame: pd.DataFrame, schema: Schema
+) -> Tuple[pd.DataFrame, list[str]]:
+    try:
+        validated_df = schema.pandera_schema_validate(data_frame, lazy=True)
+        return validated_df, []
+    except pandera.errors.SchemaErrors as exc:
+        AppLogger.info(f"    Pandera schema entire error: {exc.message}")
+        error_list = parse_pandera_schema_errors(exc)
         return data_frame, error_list

@@ -19,6 +19,8 @@ from api.domain.schema import Schema
 from rapid.items.schema import Column, Owner
 from api.domain.schema_metadata import SchemaMetadata
 
+import pandera.pandas as pandera_pandas
+
 
 class TestUploadSchema:
     def setup_method(self):
@@ -54,6 +56,36 @@ class TestUploadSchema:
             ],
         )
 
+        self.valid_schema_pandera = Schema(
+            metadata=SchemaMetadata(
+                layer="raw",
+                domain="some",
+                dataset="other",
+                sensitivity="PUBLIC",
+                owners=[Owner(name="owner", email="owner@email.com")],
+            ),
+            columns=[
+                Column(
+                    name="colname1",
+                    partition_index=0,
+                    data_type="int",
+                    allow_null=False,
+                ),
+                Column(
+                    name="colname2",
+                    partition_index=None,
+                    data_type="string",
+                    allow_null=True,
+                ),
+            ],
+            panderaDataFrameSchema=pandera_pandas.DataFrameSchema(
+                columns={
+                    "colname1": pandera_pandas.Column(int),
+                    "colname2": pandera_pandas.Column(str),
+                },
+            ),
+        )
+
     def test_upload_schema(self):
         self.schema_service.get_schema = Mock(return_value=None)
 
@@ -62,6 +94,19 @@ class TestUploadSchema:
         self.dynamodb_adapter.store_schema.assert_called_once_with(self.valid_schema)
         self.glue_adapter.create_table.assert_called_once_with(self.valid_schema)
         assert result == self.valid_schema.metadata.glue_table_name()
+
+    def test_upload_schema_pandera(self):
+        self.schema_service.get_schema = Mock(return_value=None)
+
+        result = self.schema_service.upload_schema(self.valid_schema_pandera)
+
+        self.dynamodb_adapter.store_schema.assert_called_once_with(
+            self.valid_schema_pandera
+        )
+        self.glue_adapter.create_table.assert_called_once_with(
+            self.valid_schema_pandera
+        )
+        assert result == self.valid_schema_pandera.metadata.glue_table_name()
 
     def test_upload_schema_uppercase_domain(self):
         self.schema_service.get_schema = Mock(return_value=None)
@@ -384,12 +429,34 @@ class TestGetSchema:
             "key_only_tags": [],
         }
 
+        pandera_schema = pandera_pandas.DataFrameSchema(
+            columns={
+                "colname1": pandera_pandas.Column(int),
+                "colname2": pandera_pandas.Column(str),
+            },
+        )
+        self.schema_pandera = Schema(
+            metadata=self.metadata,
+            columns=self.columns,
+            panderaDataFrameSchema=pandera_schema,
+        )
+        self.schema_pandera_dict = self.schema_dict.copy()
+        self.schema_pandera_dict["panderaDataFrameSchema"] = pandera_schema.to_json()
+
     def test_get_schema_success(self):
         self.dynamodb_adapter.get_schema = Mock(return_value=self.schema_dict)
 
         res = self.schema_service.get_schema(self.metadata)
 
         assert res == self.schema
+        self.dynamodb_adapter.get_schema.assert_called_once_with(self.metadata)
+
+    def test_get_schema_pandera_success(self):
+        self.dynamodb_adapter.get_schema = Mock(return_value=self.schema_pandera_dict)
+
+        res = self.schema_service.get_schema(self.metadata)
+
+        assert res == self.schema_pandera
         self.dynamodb_adapter.get_schema.assert_called_once_with(self.metadata)
 
     def test_get_schema_success_latest(self):

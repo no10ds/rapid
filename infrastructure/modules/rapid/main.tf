@@ -34,6 +34,7 @@ module "app_cluster" {
   custom_user_name_regex                          = var.custom_user_name_regex
   task_cpu                                        = var.task_cpu
   task_memory                                     = var.task_memory
+  pandera_files                                   = var.pandera_files
 }
 
 module "auth" {
