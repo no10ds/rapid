@@ -158,6 +158,10 @@ resource "aws_secretsmanager_secret_version" "e2e_test_client_write_all_secrets_
 # UI_TEST_USER
 resource "random_password" "password" {
   length           = 16
+  min_lower        = 1
+  min_numeric      = 1
+  min_special      = 1
+  min_upper        = 1
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
