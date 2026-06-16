@@ -24,7 +24,7 @@ data "aws_iam_policy_document" "access_logs_key_policy" {
     ]
 
     resources = [
-      "arn:aws:kms:${data.aws_region.region.name}:${data.aws_caller_identity.current.account_id}:key/*",
+      "arn:aws:kms:${data.aws_region.region.region}:${data.aws_caller_identity.current.account_id}:key/*",
     ]
   }
 
@@ -47,14 +47,14 @@ data "aws_iam_policy_document" "access_logs_key_policy" {
     ]
 
     resources = [
-      "arn:aws:kms:${data.aws_region.region.name}:${data.aws_caller_identity.current.account_id}:key/*",
+      "arn:aws:kms:${data.aws_region.region.region}:${data.aws_caller_identity.current.account_id}:key/*",
     ]
 
     condition {
       test     = "ArnEquals"
       variable = "kms:EncryptionContext:aws:logs:arn"
       values = [
-        "arn:aws:logs:${data.aws_region.region.name}:${data.aws_caller_identity.current.account_id}:log-group:${var.resource-name-prefix}_access_logs"
+        "arn:aws:logs:${data.aws_region.region.region}:${data.aws_caller_identity.current.account_id}:log-group:${var.resource-name-prefix}_access_logs"
       ]
     }
   }
@@ -78,7 +78,7 @@ data "aws_iam_policy_document" "access_logs_key_policy" {
     ]
 
     resources = [
-      "arn:aws:kms:${data.aws_region.region.name}:${data.aws_caller_identity.current.account_id}:key/*",
+      "arn:aws:kms:${data.aws_region.region.region}:${data.aws_caller_identity.current.account_id}:key/*",
     ]
   }
 }
