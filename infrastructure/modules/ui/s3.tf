@@ -126,6 +126,8 @@ resource "aws_s3_object" "static_ui" {
       terraform_data.static_ui.output.bucket
     ]
   }
+
+  depends_on = [terraform_data.static_ui]
 }
 
 /*
