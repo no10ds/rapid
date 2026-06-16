@@ -66,6 +66,12 @@ variable "hosted_zone_id" {
   default     = ""
 }
 
+variable "parent_hosted_zone_id" {
+  type        = string
+  description = "Parent hosted Zone ID, if domain you use is aws subdomain. This will copy NS records to parent hosted zone"
+  default     = ""
+}
+
 variable "ip_whitelist" {
   type        = list(string)
   description = "A list of IPs to whitelist for access to the service"

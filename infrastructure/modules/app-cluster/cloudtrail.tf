@@ -35,7 +35,7 @@ data "aws_iam_policy_document" "access_logs_key_policy" {
 
     principals {
       type        = "Service"
-      identifiers = ["logs.${data.aws_region.region.name}.amazonaws.com"]
+      identifiers = ["logs.${data.aws_region.region.region}.amazonaws.com"]
     }
 
     actions = [

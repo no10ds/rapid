@@ -19,6 +19,7 @@ module "app_cluster" {
   rapid_ecr_url                                   = var.rapid_ecr_url
   certificate_validation_arn                      = var.certificate_validation_arn
   hosted_zone_id                                  = var.hosted_zone_id
+  parent_hosted_zone_id                           = var.parent_hosted_zone_id
   aws_account                                     = var.aws_account
   aws_region                                      = var.aws_region
   data_s3_bucket_arn                              = aws_s3_bucket.this.arn
