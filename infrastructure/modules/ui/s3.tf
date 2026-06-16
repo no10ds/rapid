@@ -65,10 +65,10 @@ data "github_release" "this" {
 }
 
 data "github_release_asset" "router_lambda" {
-  repository    = "rapid"
-  owner         = "no10ds"
-  asset_id      = data.github_release.this.assets[index(data.github_release.this.assets.*.name, "${var.ui_version}-router-lambda.zip")]
-  download_file = true
+  repository             = "rapid"
+  owner                  = "no10ds"
+  asset_id               = data.github_release.this.assets[index(data.github_release.this.assets.*.name, "${var.ui_version}-router-lambda.zip")].id
+  download_file_contents = true
 }
 
 resource "local_file" "router_lambda" {
@@ -77,10 +77,10 @@ resource "local_file" "router_lambda" {
 }
 
 data "github_release_asset" "static_ui" {
-  repository    = "rapid"
-  owner         = "no10ds"
-  asset_id      = data.github_release.this.assets[index(data.github_release.this.assets.*.name, "${var.ui_version}.zip")]
-  download_file = true
+  repository             = "rapid"
+  owner                  = "no10ds"
+  asset_id               = data.github_release.this.assets[index(data.github_release.this.assets.*.name, "${var.ui_version}.zip")].id
+  download_file_contents = true
 }
 
 resource "local_file" "static_ui" {
@@ -100,7 +100,6 @@ resource "terraform_data" "static_ui" {
   ]
 
   provisioner "local-exec" {
-    interpreter = local.interpreter
 
     command = <<-EOT
     unzip -o "${var.ui_version}.zip"
