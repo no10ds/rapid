@@ -72,7 +72,7 @@ data "github_release_asset" "router_lambda" {
 }
 
 resource "local_file" "router_lambda" {
-  content_base64 = github_release_asset.router_lambda.file_contents
+  content_base64 = data.github_release_asset.router_lambda.file_contents
   filename       = "${var.ui_version}-router-lambda.zip"
 }
 
@@ -84,7 +84,7 @@ data "github_release_asset" "static_ui" {
 }
 
 resource "local_file" "static_ui" {
-  content_base64 = github_release_asset.static_ui.file_contents
+  content_base64 = data.github_release_asset.static_ui.file_contents
   filename       = "${var.ui_version}.zip"
 }
 

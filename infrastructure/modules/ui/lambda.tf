@@ -61,6 +61,6 @@ resource "aws_lambda_function" "this" {
   publish = true
 
   depends_on = [
-    null_resource.download_static_ui
+    local_file.router_lambda
   ]
 }
