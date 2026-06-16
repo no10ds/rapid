@@ -57,6 +57,79 @@ resource "aws_s3_bucket_website_configuration" "rapid_ui_website" {
   }
 }
 
+data "github_release" "this" {
+  repository  = "rapid"
+  owner       = "no10ds"
+  retrieve_by = "tag"
+  release_tag = var.ui_version
+}
+
+data "github_release_asset" "router_lambda" {
+  repository    = "rapid"
+  owner         = "no10ds"
+  asset_id      = data.github_release.this.assets[index(data.github_release.this.assets.*.name, "${var.ui_version}-router-lambda.zip")]
+  download_file = true
+}
+
+resource "local_file" "router_lambda" {
+  content_base64 = github_release_asset.router_lambda.file_contents
+  filename       = "${var.ui_version}-router-lambda.zip"
+}
+
+data "github_release_asset" "static_ui" {
+  repository    = "rapid"
+  owner         = "no10ds"
+  asset_id      = data.github_release.this.assets[index(data.github_release.this.assets.*.name, "${var.ui_version}.zip")]
+  download_file = true
+}
+
+resource "local_file" "static_ui" {
+  content_base64 = github_release_asset.static_ui.file_contents
+  filename       = "${var.ui_version}.zip"
+}
+
+resource "terraform_data" "static_ui" {
+  input = {
+    version = var.ui_version,
+    bucket  = aws_s3_bucket.rapid_ui.id
+  }
+
+  triggers_replace = [
+    var.ui_version,
+    aws_s3_bucket.rapid_ui.id
+  ]
+
+  provisioner "local-exec" {
+    interpreter = local.interpreter
+
+    command = <<-EOT
+    unzip -o "${var.ui_version}.zip"
+    EOT
+
+  }
+
+}
+
+resource "aws_s3_object" "static_ui" {
+  for_each = fileset("out", "**")
+
+  key    = each.value
+  bucket = aws_s3_bucket.rapid_ui.id
+  source = "out/${each.value}"
+  etag   = filemd5("out/${each.value}")
+
+  lifecycle {
+    ignore_changes = [
+      source, etag
+    ]
+    replace_triggered_by = [
+      terraform_data.static_ui.output.version,
+      terraform_data.static_ui.output.bucket
+    ]
+  }
+}
+
+/*
 locals {
   ui_registry_url = "https://github.com/no10ds/rapid/releases/download/${var.ui_version}"
 }
@@ -79,6 +152,7 @@ resource "null_resource" "download_static_ui" {
     })
   }
 }
+*/
 
 data "aws_iam_policy_document" "s3" {
   statement {
