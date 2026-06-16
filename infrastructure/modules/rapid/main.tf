@@ -1,4 +1,7 @@
 module "app_cluster" {
+  providers = {
+    aws = aws.default
+  }
   source                                          = "../app-cluster"
   app-replica-count-desired                       = var.app-replica-count-desired
   app-replica-count-max                           = var.app-replica-count-max
@@ -37,6 +40,9 @@ module "app_cluster" {
 }
 
 module "auth" {
+  providers = {
+    aws = aws.default
+  }
   source                  = "../auth"
   tags                    = var.tags
   domain_name             = var.domain_name
@@ -48,6 +54,9 @@ module "auth" {
 }
 
 module "data_workflow" {
+  providers = {
+    aws = aws.default
+  }
   source               = "../data-workflow"
   resource-name-prefix = var.resource-name-prefix
   aws_account          = var.aws_account
@@ -55,6 +64,10 @@ module "data_workflow" {
 }
 
 module "ui" {
+  providers = {
+    aws.default = aws.default
+    aws.us_east = aws.us_east
+  }
   source                             = "../ui"
   tags                               = var.tags
   log_bucket_name                    = aws_s3_bucket.logs.id
@@ -77,6 +90,8 @@ resource "aws_s3_bucket" "this" {
   #checkov:skip=CKV2_AWS_62:No need for event notifications
   #checkov:skip=CKV2_AWS_61:No need for lifecycle configuration
 
+  provider = aws.default
+
   bucket        = var.resource-name-prefix
   force_destroy = false
 
@@ -85,6 +100,8 @@ resource "aws_s3_bucket" "this" {
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
+  provider = aws.default
+
   bucket = aws_s3_bucket.this.id
 
   rule {
@@ -96,6 +113,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
 }
 
 resource "aws_s3_bucket_versioning" "this" {
+  provider = aws.default
+
   bucket = aws_s3_bucket.this.id
   versioning_configuration {
     status = "Enabled"
@@ -103,6 +122,8 @@ resource "aws_s3_bucket_versioning" "this" {
 }
 
 resource "aws_s3_bucket_logging" "this" {
+  provider = aws.default
+
   bucket = aws_s3_bucket.this.id
 
   target_bucket = aws_s3_bucket.logs.bucket
@@ -110,11 +131,15 @@ resource "aws_s3_bucket_logging" "this" {
 }
 
 resource "aws_s3_bucket_notification" "this" {
+  provider = aws.default
+
   bucket      = aws_s3_bucket.this.id
   eventbridge = true
 }
 
 resource "aws_s3_bucket_public_access_block" "this" {
+  provider = aws.default
+
   bucket                  = aws_s3_bucket.this.id
   ignore_public_acls      = true
   block_public_acls       = true
@@ -129,6 +154,8 @@ resource "aws_s3_bucket" "logs" {
   #checkov:skip=CKV_AWS_21:No need to version log bucket
   #checkov:skip=CKV2_AWS_62:No need for event notifications
   #checkov:skip=CKV2_AWS_61:No need for lifecycle configuration
+  provider = aws.default
+
   bucket        = "${var.resource-name-prefix}-logs"
   force_destroy = false
 
@@ -136,11 +163,15 @@ resource "aws_s3_bucket" "logs" {
 }
 
 resource "aws_s3_bucket_acl" "logs" {
+  provider = aws.default
+
   bucket = aws_s3_bucket.logs.id
   acl    = "private"
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
+  provider = aws.default
+
   bucket = aws_s3_bucket.logs.id
 
   rule {
@@ -153,6 +184,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
 
 # Resource to avoid error "AccessControlListNotSupported: The bucket does not allow ACLs"
 resource "aws_s3_bucket_ownership_controls" "logs" {
+  provider = aws.default
+
   bucket = aws_s3_bucket.logs.id
   rule {
     object_ownership = "BucketOwnerPreferred"
@@ -160,6 +193,8 @@ resource "aws_s3_bucket_ownership_controls" "logs" {
 }
 
 resource "aws_s3_bucket_public_access_block" "logs" {
+  provider = aws.default
+
   bucket                  = aws_s3_bucket.logs.id
   ignore_public_acls      = true
   block_public_acls       = true
@@ -169,6 +204,8 @@ resource "aws_s3_bucket_public_access_block" "logs" {
 }
 
 resource "aws_s3_bucket_policy" "log_bucket_policy" {
+  provider = aws.default
+
   bucket = aws_s3_bucket.this.id
   policy = <<POLICY
     {

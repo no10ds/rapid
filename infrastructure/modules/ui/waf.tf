@@ -1,12 +1,3 @@
-provider "aws" {
-  alias  = "us_east"
-  region = "us-east-1"
-
-  default_tags {
-    tags = var.tags
-  }
-}
-
 resource "aws_wafv2_web_acl" "rapid_acl" {
   #checkov:skip=CKV2_AWS_31:Already have a logging configuration
   name     = "${var.resource-name-prefix}-acl"
