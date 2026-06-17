@@ -123,6 +123,12 @@ resource "terraform_data" "static_ui" {
 
 }
 
+resource "time_sleep" "wait_5_seconds" {
+  depends_on = [terraform_data.static_ui]
+
+  create_duration = "5s"
+}
+
 resource "aws_s3_object" "static_ui" {
   for_each = fileset("out", "**")
 
@@ -141,7 +147,7 @@ resource "aws_s3_object" "static_ui" {
     ]
   }
 
-  depends_on = [terraform_data.static_ui]
+  depends_on = [time_sleep.wait_5_seconds]
 }
 
 /*
