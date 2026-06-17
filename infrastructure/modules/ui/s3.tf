@@ -57,6 +57,7 @@ resource "aws_s3_bucket_website_configuration" "rapid_ui_website" {
   }
 }
 
+/*
 data "github_release" "this" {
   repository  = "rapid"
   owner       = "no10ds"
@@ -70,22 +71,31 @@ data "github_release_asset" "router_lambda" {
   asset_id               = data.github_release.this.assets[index(data.github_release.this.assets.*.name, "${var.ui_version}-router-lambda.zip")].id
   download_file_contents = true
 }
-
+*/
 resource "local_file" "router_lambda" {
   content_base64 = data.github_release_asset.router_lambda.file_contents
   filename       = "${var.ui_version}-router-lambda.zip"
-}
 
+  depends_on = [terraform_data.static_ui]
+}
+/*
 data "github_release_asset" "static_ui" {
   repository             = "rapid"
   owner                  = "no10ds"
   asset_id               = data.github_release.this.assets[index(data.github_release.this.assets.*.name, "${var.ui_version}.zip")].id
   download_file_contents = true
 }
+*/
 
 resource "local_file" "static_ui" {
   content_base64 = data.github_release_asset.static_ui.file_contents
   filename       = "${var.ui_version}.zip"
+
+  depends_on = [terraform_data.static_ui]
+}
+
+locals {
+  ui_registry_url = "https://github.com/no10ds/rapid/releases/download/${var.ui_version}"
 }
 
 resource "terraform_data" "static_ui" {
@@ -102,6 +112,12 @@ resource "terraform_data" "static_ui" {
   provisioner "local-exec" {
 
     command = <<-EOT
+    url="${local.ui_registry_url}/${var.ui_version}.zip"
+    router_url="${local.ui_registry_url}/${var.ui_version}-router-lambda.zip"
+
+    wget $url
+    wget $router_url
+
     unzip -o "${var.ui_version}.zip"
     EOT
 
