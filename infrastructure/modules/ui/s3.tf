@@ -74,10 +74,10 @@ resource "terraform_data" "static_ui" {
 
   provisioner "local-exec" {
     command = templatefile("${path.module}/scripts/ui.sh.tpl", {
-      REGISTRY_URL   = local.ui_registry_url,
-      VERSION        = var.ui_version,
-      BUCKET_ID      = aws_s3_bucket.rapid_ui.id
-      ROLE_TO_ASSUME = var.aws_role_arn_to_assume
+      REGISTRY_URL           = local.ui_registry_url,
+      VERSION                = var.ui_version,
+      BUCKET_ID              = aws_s3_bucket.rapid_ui.id
+      AWS_ROLE_ARN_TO_ASSUME = var.aws_role_arn_to_assume
     })
   }
 
