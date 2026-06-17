@@ -72,9 +72,8 @@ data "github_release_asset" "router_lambda" {
   download_file_contents = true
 }
 */
-resource "local_file" "router_lambda" {
-  content_base64 = data.github_release_asset.router_lambda.file_contents
-  filename       = "${var.ui_version}-router-lambda.zip"
+data "local_file" "router_lambda" {
+  filename = "${var.ui_version}-router-lambda.zip"
 
   depends_on = [terraform_data.static_ui]
 }
@@ -85,14 +84,13 @@ data "github_release_asset" "static_ui" {
   asset_id               = data.github_release.this.assets[index(data.github_release.this.assets.*.name, "${var.ui_version}.zip")].id
   download_file_contents = true
 }
-*/
 
-resource "local_file" "static_ui" {
-  content_base64 = data.github_release_asset.static_ui.file_contents
+data "local_file" "static_ui" {
   filename       = "${var.ui_version}.zip"
 
   depends_on = [terraform_data.static_ui]
 }
+*/
 
 locals {
   ui_registry_url = "https://github.com/no10ds/rapid/releases/download/${var.ui_version}"
