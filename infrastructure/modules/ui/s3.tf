@@ -83,12 +83,6 @@ resource "terraform_data" "static_ui" {
 
 }
 
-data "local_file" "router_lambda" {
-  filename = "${var.ui_version}-router-lambda.zip"
-
-  depends_on = [terraform_data.static_ui]
-}
-
 data "aws_iam_policy_document" "s3" {
   statement {
     effect = "Allow"
