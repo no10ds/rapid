@@ -62,11 +62,6 @@ locals {
 }
 
 resource "terraform_data" "static_ui" {
-  input = {
-    version = var.ui_version,
-    bucket  = aws_s3_bucket.rapid_ui.id
-  }
-
   triggers_replace = [
     var.ui_version,
     aws_s3_bucket.rapid_ui.id
