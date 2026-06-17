@@ -57,41 +57,6 @@ resource "aws_s3_bucket_website_configuration" "rapid_ui_website" {
   }
 }
 
-/*
-data "github_release" "this" {
-  repository  = "rapid"
-  owner       = "no10ds"
-  retrieve_by = "tag"
-  release_tag = var.ui_version
-}
-
-data "github_release_asset" "router_lambda" {
-  repository             = "rapid"
-  owner                  = "no10ds"
-  asset_id               = data.github_release.this.assets[index(data.github_release.this.assets.*.name, "${var.ui_version}-router-lambda.zip")].id
-  download_file_contents = true
-}
-*/
-data "local_file" "router_lambda" {
-  filename = "${var.ui_version}-router-lambda.zip"
-
-  depends_on = [terraform_data.static_ui]
-}
-/*
-data "github_release_asset" "static_ui" {
-  repository             = "rapid"
-  owner                  = "no10ds"
-  asset_id               = data.github_release.this.assets[index(data.github_release.this.assets.*.name, "${var.ui_version}.zip")].id
-  download_file_contents = true
-}
-
-data "local_file" "static_ui" {
-  filename       = "${var.ui_version}.zip"
-
-  depends_on = [terraform_data.static_ui]
-}
-*/
-
 locals {
   ui_registry_url = "https://github.com/no10ds/rapid/releases/download/${var.ui_version}"
 }
@@ -108,72 +73,21 @@ resource "terraform_data" "static_ui" {
   ]
 
   provisioner "local-exec" {
-
-    command = <<-EOT
-    url="${local.ui_registry_url}/${var.ui_version}.zip"
-    router_url="${local.ui_registry_url}/${var.ui_version}-router-lambda.zip"
-
-    wget $url
-    wget $router_url
-
-    unzip -o "${var.ui_version}.zip"
-    EOT
-
-  }
-
-}
-
-resource "time_sleep" "wait_5_seconds" {
-  depends_on = [terraform_data.static_ui]
-
-  create_duration = "5s"
-}
-
-resource "aws_s3_object" "static_ui" {
-  for_each = fileset("out", "**")
-
-  key    = each.value
-  bucket = aws_s3_bucket.rapid_ui.id
-  source = "out/${each.value}"
-  etag   = filemd5("out/${each.value}")
-
-  lifecycle {
-    ignore_changes = [
-      source, etag
-    ]
-    replace_triggered_by = [
-      terraform_data.static_ui.output.version,
-      terraform_data.static_ui.output.bucket
-    ]
-  }
-
-  depends_on = [time_sleep.wait_5_seconds]
-}
-
-/*
-locals {
-  ui_registry_url = "https://github.com/no10ds/rapid/releases/download/${var.ui_version}"
-}
-
-resource "null_resource" "download_static_ui" {
-  depends_on = [
-    aws_s3_bucket.rapid_ui
-  ]
-
-  triggers = {
-    ui_version = var.ui_version
-    bucket     = aws_s3_bucket.rapid_ui.id
-  }
-
-  provisioner "local-exec" {
     command = templatefile("${path.module}/scripts/ui.sh.tpl", {
-      REGISTRY_URL = local.ui_registry_url,
-      VERSION      = var.ui_version,
-      BUCKET_ID    = aws_s3_bucket.rapid_ui.id
+      REGISTRY_URL   = local.ui_registry_url,
+      VERSION        = var.ui_version,
+      BUCKET_ID      = aws_s3_bucket.rapid_ui.id
+      ROLE_TO_ASSUME = var.aws_role_arn_to_assume
     })
   }
+
 }
-*/
+
+data "local_file" "router_lambda" {
+  filename = "${var.ui_version}-router-lambda.zip"
+
+  depends_on = [terraform_data.static_ui]
+}
 
 data "aws_iam_policy_document" "s3" {
   statement {

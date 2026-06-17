@@ -208,3 +208,9 @@ variable "task_cpu" {
   description = "rAPId ecs task cpu"
   default     = 256
 }
+
+variable "aws_role_arn_to_assume" {
+  description = "AWS Role ARN to assume for aws cli commands"
+  type        = string
+  default     = ""
+}

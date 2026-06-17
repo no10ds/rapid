@@ -65,3 +65,9 @@ variable "sql_injection_protection" {
   type        = bool
   default     = true
 }
+
+variable "aws_role_arn_to_assume" {
+  description = "AWS Role ARN to assume for aws cli commands"
+  type        = string
+  default     = ""
+}
