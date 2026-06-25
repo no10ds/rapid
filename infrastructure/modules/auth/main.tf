@@ -37,6 +37,14 @@ resource "aws_cognito_user_pool" "rapid_user_pool" {
       source_arn            = var.ses_domain_identity_arn
     }
   }
+
+  verification_message_template {
+    default_email_option  = var.verification_message_email_option
+    email_message         = var.verification_message_email_message_by_code == "" ? null : var.verification_message_email_message_by_code
+    email_subject         = var.verification_message_email_subject_by_code
+    email_message_by_link = var.verification_message_email_message_by_link == "" ? null : var.verification_message_email_message_by_link
+    email_subject_by_link = var.verification_message_email_subject_by_link
+  }
 }
 
 resource "aws_cognito_resource_server" "rapid_resource_server" {

@@ -214,3 +214,45 @@ variable "aws_role_arn_to_assume" {
   type        = string
   default     = ""
 }
+
+variable "verification_message_email_option" {
+  description = "Verification message email option"
+  type        = string
+  validation {
+    condition     = contains(["CONFIRM_WITH_CODE", "CONFIRM_WITH_LINK"], var.verification_message_email_option)
+    error_message = "Must be either CONFIRM_WITH_CODE or CONFIRM_WITH_LINK. Defaults to CONFIRM_WITH_CODE."
+  }
+  default = "CONFIRM_WITH_CODE"
+}
+
+variable "verification_message_email_message_by_code" {
+  description = "Verification message email message by code"
+  type        = string
+  validation {
+    condition     = var.verification_message_email_message_by_code == "" || strcontains(var.verification_message_email_message_by_code, "{####}")
+    error_message = "Email message template. Must contain the {####} placeholder. Conflicts with email_verification_message argument."
+  }
+  default = ""
+}
+
+variable "verification_message_email_subject_by_code" {
+  description = "Verification message email subject by code"
+  type        = string
+  default     = null
+}
+
+variable "verification_message_email_message_by_link" {
+  description = "Verification message email message by link"
+  type        = string
+  validation {
+    condition     = var.verification_message_email_message_by_link == "" || strcontains(var.verification_message_email_message_by_link, "{##Click Here##}")
+    error_message = "Email message template for sending a confirmation link to the user, it must contain the {##Click Here##} placeholder."
+  }
+  default = ""
+}
+
+variable "verification_message_email_subject_by_link" {
+  description = "Verification message email subject by link"
+  type        = string
+  default     = null
+}
