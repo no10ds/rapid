@@ -40,7 +40,7 @@ resource "aws_cognito_user_pool" "rapid_user_pool" {
     from_email_address = (
       var.ses_domain_identity_arn != null ?
       "\"${var.sender_display_name}\" <no-reply@${coalesce(var.ses_email_domain, var.domain_name)}>" :
-      "\"${var.sender_display_name}\" <no-reply@verificationemail.com>"
+      null
     )
     source_arn             = var.ses_domain_identity_arn
     reply_to_email_address = var.reply_to_email_address
