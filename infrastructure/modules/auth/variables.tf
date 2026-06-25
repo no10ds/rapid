@@ -137,7 +137,7 @@ variable "invite_message_email_subject" {
 }
 
 variable "sender_display_name" {
-  description = "Email sender display name"
+  description = "Email sender display name. Applicable only if ses_domain_identity_arn is configured."
   type        = string
   default     = ""
 }
