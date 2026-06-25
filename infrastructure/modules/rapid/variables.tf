@@ -222,23 +222,23 @@ variable "invite_message_email_message" {
     condition     = strcontains(var.invite_message_email_message, "{username}") && strcontains(var.invite_message_email_message, "{####}")
     error_message = "Email message template. Must contain {username} and {####} placeholders, for username and temporary password, respectively."
   }
-  default = null
+  default = "Your username is {username} and temporary password is {####}."
 }
 
 variable "invite_message_email_subject" {
   description = "Invite message email subject"
   type        = string
-  default     = null
+  default     = "Your temporary password"
 }
 
 variable "sender_display_name" {
   description = "Email sender display name"
   type        = string
-  default     = null
+  default     = ""
 }
 
 variable "reply_to_email_address" {
   description = "Email REPLY-TO email address"
   type        = string
-  default     = null
+  default     = ""
 }

@@ -10,6 +10,7 @@ resource "aws_cognito_user_pool" "rapid_user_pool" {
     invite_message_template {
       email_message = var.invite_message_email_message
       email_subject = var.invite_message_email_subject
+      sms_message   = "Your username is {username} and temporary password is {####}."
     }
   }
 
