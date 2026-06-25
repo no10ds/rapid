@@ -137,12 +137,6 @@ variable "invite_message_email_subject" {
 }
 
 variable "sender_display_name" {
-  description = "Invite message email sender display name"
-  type        = string
-  default     = null
-}
-
-variable "sender_display_name" {
   description = "Email sender display name"
   type        = string
   default     = null
