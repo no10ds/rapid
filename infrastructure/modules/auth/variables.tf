@@ -120,44 +120,36 @@ variable "ses_email_domain" {
   default     = null
 }
 
-variable "verification_message_email_option" {
-  description = "Verification message email option"
+variable "invite_message_email_message" {
+  description = "Invite message email message"
   type        = string
   validation {
-    condition     = contains(["CONFIRM_WITH_CODE", "CONFIRM_WITH_LINK"], var.verification_message_email_option)
-    error_message = "Must be either CONFIRM_WITH_CODE or CONFIRM_WITH_LINK. Defaults to CONFIRM_WITH_CODE."
+    condition     = strcontains(var.invite_message_email_message, "{username}") && strcontains(var.invite_message_email_message, "{####}")
+    error_message = "Email message template. Must contain {username} and {####} placeholders, for username and temporary password, respectively."
   }
-  default = "CONFIRM_WITH_CODE"
+  default = null
 }
 
-variable "verification_message_email_message_by_code" {
-  description = "Verification message email message by code"
-  type        = string
-  validation {
-    condition     = var.verification_message_email_message_by_code == "" || strcontains(var.verification_message_email_message_by_code, "{####}")
-    error_message = "Email message template. Must contain the {####} placeholder. Conflicts with email_verification_message argument."
-  }
-  default = ""
-}
-
-variable "verification_message_email_subject_by_code" {
-  description = "Verification message email subject by code"
+variable "invite_message_email_subject" {
+  description = "Invite message email subject"
   type        = string
   default     = null
 }
 
-variable "verification_message_email_message_by_link" {
-  description = "Verification message email message by link"
+variable "sender_display_name" {
+  description = "Invite message email sender display name"
   type        = string
-  validation {
-    condition     = var.verification_message_email_message_by_link == "" || strcontains(var.verification_message_email_message_by_link, "{##Click Here##}")
-    error_message = "Email message template for sending a confirmation link to the user, it must contain the {##Click Here##} placeholder."
-  }
-  default = ""
+  default     = null
 }
 
-variable "verification_message_email_subject_by_link" {
-  description = "Verification message email subject by link"
+variable "sender_display_name" {
+  description = "Email sender display name"
+  type        = string
+  default     = null
+}
+
+variable "reply_to_email_address" {
+  description = "Email REPLY-TO email address"
   type        = string
   default     = null
 }

@@ -6,6 +6,11 @@ resource "aws_cognito_user_pool" "rapid_user_pool" {
 
   admin_create_user_config {
     allow_admin_create_user_only = true
+
+    invite_message_template {
+      email_message = var.invite_message_email_message
+      email_subject = var.invite_message_email_subject
+    }
   }
 
   mfa_configuration = "OPTIONAL"
@@ -29,22 +34,17 @@ resource "aws_cognito_user_pool" "rapid_user_pool" {
     advanced_security_mode = "ENFORCED"
   }
 
-  dynamic "email_configuration" {
-    for_each = var.ses_domain_identity_arn != null ? [1] : []
-    content {
-      email_sending_account = "DEVELOPER"
-      from_email_address    = "no-reply@${coalesce(var.ses_email_domain, var.domain_name)}"
-      source_arn            = var.ses_domain_identity_arn
-    }
+  email_configuration {
+    email_sending_account = var.ses_domain_identity_arn != null ? "DEVELOPER" : "COGNITO_DEFAULT"
+    from_email_address = (
+      var.ses_domain_identity_arn != null ?
+      "\"${var.sender_display_name}\" <no-reply@${coalesce(var.ses_email_domain, var.domain_name)}>" :
+      "\"${var.sender_display_name}\" <no-reply@verificationemail.com>"
+    )
+    source_arn             = var.ses_domain_identity_arn
+    reply_to_email_address = var.reply_to_email_address
   }
 
-  verification_message_template {
-    default_email_option  = var.verification_message_email_option
-    email_message         = var.verification_message_email_message_by_code == "" ? null : var.verification_message_email_message_by_code
-    email_subject         = var.verification_message_email_subject_by_code
-    email_message_by_link = var.verification_message_email_message_by_link == "" ? null : var.verification_message_email_message_by_link
-    email_subject_by_link = var.verification_message_email_subject_by_link
-  }
 }
 
 resource "aws_cognito_resource_server" "rapid_resource_server" {

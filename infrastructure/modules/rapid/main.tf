@@ -44,19 +44,18 @@ module "auth" {
   providers = {
     aws = aws.default
   }
-  source                                     = "../auth"
-  tags                                       = var.tags
-  domain_name                                = var.domain_name
-  resource-name-prefix                       = var.resource-name-prefix
-  password_policy                            = var.password_policy
-  layers                                     = var.layers
-  ses_domain_identity_arn                    = var.ses_domain_identity_arn
-  ses_email_domain                           = var.ses_email_domain
-  verification_message_email_option          = var.verification_message_email_option
-  verification_message_email_subject_by_code = var.verification_message_email_subject_by_code
-  verification_message_email_message_by_code = var.verification_message_email_message_by_code
-  verification_message_email_subject_by_link = var.verification_message_email_subject_by_link
-  verification_message_email_message_by_link = var.verification_message_email_message_by_link
+  source                       = "../auth"
+  tags                         = var.tags
+  domain_name                  = var.domain_name
+  resource-name-prefix         = var.resource-name-prefix
+  password_policy              = var.password_policy
+  layers                       = var.layers
+  ses_domain_identity_arn      = var.ses_domain_identity_arn
+  ses_email_domain             = var.ses_email_domain
+  invite_message_email_subject = var.invite_message_email_subject
+  invite_message_email_message = var.invite_message_email_message
+  sender_display_name          = var.sender_display_name
+  reply_to_email_address       = var.reply_to_email_address
 }
 
 module "data_workflow" {
