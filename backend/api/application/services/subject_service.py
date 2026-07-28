@@ -2,6 +2,7 @@ from typing import List, Dict, Optional
 
 from api.adapter.cognito_adapter import CognitoAdapter
 from api.adapter.dynamodb_adapter import DynamoDBAdapter
+from api.application.services.permissions_service import PermissionsService
 from api.common.config.auth import SubjectType
 from api.common.custom_exceptions import UserError
 from api.domain.client import ClientResponse, ClientRequest
@@ -11,10 +12,14 @@ from api.domain.user import UserRequest, UserResponse, UserDeleteRequest
 
 class SubjectService:
     def __init__(
-        self, cognito_adapter=CognitoAdapter(), dynamodb_adapter=DynamoDBAdapter()
+        self,
+        cognito_adapter=CognitoAdapter(),
+        dynamodb_adapter=DynamoDBAdapter(),
+        permissions_service=PermissionsService(),
     ):
         self.cognito_adapter = cognito_adapter
         self.dynamodb_adapter = dynamodb_adapter
+        self.permissions_service = permissions_service
 
     def create_client(self, client_request: ClientRequest) -> ClientResponse:
         self.dynamodb_adapter.validate_permissions(client_request.get_permissions())
@@ -80,4 +85,19 @@ class SubjectService:
         raise UserError(f"Subject with ID {subject_id} does not exist")
 
     def list_subjects(self) -> List[Dict[str, Optional[str]]]:
-        return self.cognito_adapter.get_all_subjects()
+        subjects = self.cognito_adapter.get_all_subjects()
+        permissions_by_subject = (
+            self.permissions_service.get_all_subjects_permissions()
+        )
+        return [
+            {
+                **subject,
+                "permissions": [
+                    permission.model_dump()
+                    for permission in permissions_by_subject.get(
+                        subject["subject_id"], []
+                    )
+                ],
+            }
+            for subject in subjects
+        ]

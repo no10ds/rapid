@@ -59,6 +59,10 @@ class DatabaseAdapter(ABC):
         pass
 
     @abstractmethod
+    def get_all_subject_permission_keys(self) -> Dict[str, List[str]]:
+        pass
+
+    @abstractmethod
     def update_subject_permissions(
         self, subject_permissions: SubjectPermissions
     ) -> None:
@@ -267,6 +271,26 @@ class DynamoDBAdapter(DatabaseAdapter):
         except IndexError:
             AppLogger.info(f"Subject {subject_id} not found")
             raise UserError(f"Subject {subject_id} not found in database")
+
+    def get_all_subject_permission_keys(self) -> Dict[str, List[str]]:
+        try:
+            subjects = self.collect_all_items(
+                self.permissions_table.query,
+                KeyConditionExpression=Key("PK").eq(PermissionsTableItem.SUBJECT),
+            )
+            return {
+                subject["Id"]: [
+                    permission
+                    for permission in subject.get("Permissions", [])
+                    if permission is not None and permission != ""
+                ]
+                for subject in subjects
+            }
+        except ClientError:
+            AppLogger.info("Error retrieving permissions for all subjects")
+            raise AWSServiceError(
+                "Error fetching permissions, please contact your system administrator"
+            )
 
     def update_subject_permissions(
         self, subject_permissions: SubjectPermissions

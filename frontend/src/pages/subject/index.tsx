@@ -1,9 +1,9 @@
 import AccountLayout from '@/components/Layout/AccountLayout'
 import ErrorCard from '@/components/ErrorCard/ErrorCard'
 import { sortByString } from '@/utils/sort'
-import { getSubjectsListUi, getSubjectPermissions } from '@/service'
+import { getSubjectsListUi } from '@/service'
 import { SubjectPermission } from '@/service/types'
-import { useQuery, useQueries } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { ReactNode, useState, useMemo } from 'react'
@@ -64,30 +64,13 @@ function UserAdminPage() {
     keepPreviousData: true
   })
 
-  const permissionQueries = useQueries({
-    queries: (data ?? []).map((s) => ({
-      queryKey: ['subjectPermissions', s.subject_id],
-      queryFn: getSubjectPermissions,
-      enabled: !!s.subject_id,
-      staleTime: Infinity,
-      keepPreviousData: true
-    }))
-  })
-
-  const permsBySubjectId = useMemo(() => {
-    if (!data) return {}
-    return Object.fromEntries(
-      data.map((s, i) => [s.subject_id, permissionQueries[i]?.data as SubjectPermission[] | undefined])
-    )
-  }, [data, permissionQueries])
-
   const allDomains = useMemo(() => {
     const domains = new Set<string>()
-    Object.values(permsBySubjectId).forEach((perms) => {
-      perms?.forEach((p) => { if (p.domain) domains.add(p.domain) })
+    data?.forEach((s) => {
+      s.permissions?.forEach((p) => { if (p.domain) domains.add(p.domain) })
     })
     return ['All', ...Array.from(domains).sort()]
-  }, [permsBySubjectId])
+  }, [data])
 
   const filtered = useMemo(() => {
     if (!data) return []
@@ -106,10 +89,10 @@ function UserAdminPage() {
       domainFilter === 'All' || !!perms?.some((p) => p.domain === domainFilter)
 
     return data.filter((s) => {
-      const perms = permsBySubjectId[s.subject_id as string]
+      const perms = s.permissions
       return matchesType(s) && matchesSearch(s) && matchesRole(perms) && matchesDomain(perms)
     })
-  }, [data, typeFilter, roleFilter, domainFilter, search, permsBySubjectId])
+  }, [data, typeFilter, roleFilter, domainFilter, search])
 
   const sorted = useMemo(
     () => sortByString(filtered, sortCol, sortDir),
@@ -210,9 +193,7 @@ function UserAdminPage() {
           <TableBody>
             {sorted.length > 0 ? (
               sorted.map((subject, idx) => {
-                const perms = permsBySubjectId[subject.subject_id as string]
-                const role = deriveRole(perms)
-                const isLoadingPerms = !perms && permissionQueries[data.indexOf(subject)]?.isLoading
+                const role = deriveRole(subject.permissions)
                 return (
                   <TableRow
                     key={idx}
@@ -235,10 +216,7 @@ function UserAdminPage() {
                       />
                     </TableCell>
                     <TableCell>
-                      {isLoadingPerms
-                        ? <Typography variant="body2" sx={{ fontSize: 11, color: 'text.disabled' }}>…</Typography>
-                        : <Typography variant="body2" sx={{ fontSize: 12 }}>{role}</Typography>
-                      }
+                      <Typography variant="body2" sx={{ fontSize: 12 }}>{role}</Typography>
                     </TableCell>
                     <TableCell sx={{ fontFamily: 'monospace', fontSize: 11 }}>{subject.subject_id}</TableCell>
                   </TableRow>

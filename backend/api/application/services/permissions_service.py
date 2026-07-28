@@ -25,6 +25,23 @@ class PermissionsService:
             if permission.id in permission_keys
         ]
 
+    def get_all_subjects_permissions(self) -> Dict[str, List[PermissionItem]]:
+        permissions_by_id = {
+            permission.id: permission
+            for permission in self.dynamodb_adapter.get_all_permissions()
+        }
+        subject_permission_keys = (
+            self.dynamodb_adapter.get_all_subject_permission_keys()
+        )
+        return {
+            subject_id: [
+                permissions_by_id[key]
+                for key in permission_keys
+                if key in permissions_by_id
+            ]
+            for subject_id, permission_keys in subject_permission_keys.items()
+        }
+
     def get_all_permissions_ui(self) -> List[dict]:
         all_permissions = self.dynamodb_adapter.get_all_permissions()
         return self.format_permissions_for_the_ui(all_permissions)
