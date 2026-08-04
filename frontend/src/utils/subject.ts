@@ -1,5 +1,7 @@
+import { SubjectListItem } from '@/service/types'
+
 export const filterSubjectList = (
-  subjectsList: Array<Record<string, string | undefined>>,
+  subjectsList: SubjectListItem[],
   subjectType: string
 ) => {
   return subjectsList

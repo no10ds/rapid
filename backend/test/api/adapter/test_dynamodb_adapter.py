@@ -476,6 +476,57 @@ class TestDynamoDBAdapterPermissionsTable:
 
         self.service_table.assert_not_called()
 
+    def test_get_all_subject_permission_keys(self):
+        self.permissions_table.query.return_value = {
+            "Items": [
+                {
+                    "PK": "SUBJECT",
+                    "SK": "subject-1",
+                    "Id": "subject-1",
+                    "Type": "CLIENT",
+                    "Permissions": {"READ_ALL", "WRITE_ALL"},
+                },
+                {
+                    "PK": "SUBJECT",
+                    "SK": "subject-2",
+                    "Id": "subject-2",
+                    "Type": "USER",
+                    "Permissions": {"", "DATA_ADMIN"},
+                },
+                {
+                    "PK": "SUBJECT",
+                    "SK": "subject-3",
+                    "Id": "subject-3",
+                    "Type": "USER",
+                },
+            ]
+        }
+
+        response = self.dynamo_adapter.get_all_subject_permission_keys()
+
+        assert sorted(response["subject-1"]) == ["READ_ALL", "WRITE_ALL"]
+        assert response["subject-2"] == ["DATA_ADMIN"]
+        assert response["subject-3"] == []
+
+        self.permissions_table.query.assert_called_once_with(
+            KeyConditionExpression=Key("PK").eq("SUBJECT"),
+        )
+        self.service_table.assert_not_called()
+
+    def test_get_all_subject_permission_keys_throws_aws_service_error(self):
+        self.permissions_table.query.side_effect = ClientError(
+            error_response={"Error": {"Code": "QueryFailedException"}},
+            operation_name="Query",
+        )
+
+        with pytest.raises(
+            AWSServiceError,
+            match="Error fetching permissions, please contact your system administrator",
+        ):
+            self.dynamo_adapter.get_all_subject_permission_keys()
+
+        self.service_table.assert_not_called()
+
     def test_get_all_protected_permissions(self):
         expected_db_query_response = {
             "Items": [

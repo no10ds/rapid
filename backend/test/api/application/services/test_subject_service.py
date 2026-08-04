@@ -6,6 +6,7 @@ from api.application.services.subject_service import SubjectService
 from api.common.config.auth import SubjectType
 from api.common.custom_exceptions import AWSServiceError, UserError
 from api.domain.client import ClientRequest, ClientResponse
+from api.domain.permission_item import PermissionItem
 from api.domain.subject_permissions import SubjectPermissions
 from api.domain.user import UserResponse, UserRequest, UserDeleteRequest
 
@@ -333,13 +334,43 @@ class TestListSubjects:
     def setup_method(self):
         self.cognito_adapter = Mock()
         self.dynamo_adapter = Mock()
-        self.subject_service = SubjectService(self.cognito_adapter, self.dynamo_adapter)
+        self.permissions_service = Mock()
+        self.subject_service = SubjectService(
+            self.cognito_adapter, self.dynamo_adapter, self.permissions_service
+        )
 
-    def test_list_subjects(self):
-        expected = [{"key": "value"}]
+    def test_list_subjects_embeds_permissions(self):
+        read_all = PermissionItem(id="READ_ALL", type="READ", sensitivity="ALL")
 
-        self.cognito_adapter.get_all_subjects.return_value = expected
+        self.cognito_adapter.get_all_subjects.return_value = [
+            {
+                "subject_id": "the-user-id",
+                "subject_name": "the_user_name",
+                "type": "USER",
+            },
+            {
+                "subject_id": "no-perms-id",
+                "subject_name": "no_perms",
+                "type": "CLIENT",
+            },
+        ]
+        self.permissions_service.get_all_subjects_permissions.return_value = {
+            "the-user-id": [read_all]
+        }
 
         result = self.subject_service.list_subjects()
 
-        assert result == expected
+        assert result == [
+            {
+                "subject_id": "the-user-id",
+                "subject_name": "the_user_name",
+                "type": "USER",
+                "permissions": [read_all.model_dump()],
+            },
+            {
+                "subject_id": "no-perms-id",
+                "subject_name": "no_perms",
+                "type": "CLIENT",
+                "permissions": [],
+            },
+        ]
