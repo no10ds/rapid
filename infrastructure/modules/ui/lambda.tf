@@ -30,6 +30,8 @@ data "aws_iam_policy_document" "this" {
 }
 
 resource "aws_iam_policy" "cloudfront_router_policy" {
+  provider = aws.default
+
   name        = "${var.resource-name-prefix}-cloudfront-router-policy"
   description = "Managed policy for CloudFront Lambda@Edge router logging"
   policy      = data.aws_iam_policy_document.this.json
@@ -58,7 +60,5 @@ resource "aws_lambda_function" "this" {
 
   publish = true
 
-  depends_on = [
-    null_resource.download_static_ui
-  ]
+  depends_on = [terraform_data.static_ui]
 }

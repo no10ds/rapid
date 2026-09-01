@@ -409,4 +409,8 @@ resource "aws_security_group" "service_security_group" {
   }
 
   tags = var.tags
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }

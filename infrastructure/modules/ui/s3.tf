@@ -61,23 +61,21 @@ locals {
   ui_registry_url = "https://github.com/no10ds/rapid/releases/download/${var.ui_version}"
 }
 
-resource "null_resource" "download_static_ui" {
-  depends_on = [
-    aws_s3_bucket.rapid_ui
+resource "terraform_data" "static_ui" {
+  triggers_replace = [
+    var.ui_version,
+    aws_s3_bucket.rapid_ui.id
   ]
-
-  triggers = {
-    ui_version = var.ui_version
-    bucket     = aws_s3_bucket.rapid_ui.id
-  }
 
   provisioner "local-exec" {
     command = templatefile("${path.module}/scripts/ui.sh.tpl", {
-      REGISTRY_URL = local.ui_registry_url,
-      VERSION      = var.ui_version,
-      BUCKET_ID    = aws_s3_bucket.rapid_ui.id
+      REGISTRY_URL           = local.ui_registry_url,
+      VERSION                = var.ui_version,
+      BUCKET_ID              = aws_s3_bucket.rapid_ui.id
+      AWS_ROLE_ARN_TO_ASSUME = var.aws_role_arn_to_assume
     })
   }
+
 }
 
 data "aws_iam_policy_document" "s3" {

@@ -66,6 +66,12 @@ variable "hosted_zone_id" {
   default     = ""
 }
 
+variable "parent_hosted_zone_id" {
+  type        = string
+  description = "Parent hosted Zone ID, if domain you use is aws subdomain. This will copy NS records to parent hosted zone"
+  default     = ""
+}
+
 variable "ip_whitelist" {
   type        = list(string)
   description = "A list of IPs to whitelist for access to the service"
@@ -201,4 +207,38 @@ variable "task_cpu" {
   type        = number
   description = "rAPId ecs task cpu"
   default     = 256
+}
+
+variable "aws_role_arn_to_assume" {
+  description = "AWS Role ARN to assume for aws cli commands"
+  type        = string
+  default     = ""
+}
+
+variable "invite_message_email_message" {
+  description = "Invite message email message"
+  type        = string
+  validation {
+    condition     = strcontains(var.invite_message_email_message, "{username}") && strcontains(var.invite_message_email_message, "{####}")
+    error_message = "Email message template. Must contain {username} and {####} placeholders, for username and temporary password, respectively."
+  }
+  default = "Your username is {username} and temporary password is {####}."
+}
+
+variable "invite_message_email_subject" {
+  description = "Invite message email subject"
+  type        = string
+  default     = "Your temporary password"
+}
+
+variable "sender_display_name" {
+  description = "Email sender display name"
+  type        = string
+  default     = ""
+}
+
+variable "reply_to_email_address" {
+  description = "Email REPLY-TO email address"
+  type        = string
+  default     = ""
 }

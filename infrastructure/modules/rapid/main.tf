@@ -1,4 +1,7 @@
 module "app_cluster" {
+  providers = {
+    aws = aws.default
+  }
   source                                          = "../app-cluster"
   app-replica-count-desired                       = var.app-replica-count-desired
   app-replica-count-max                           = var.app-replica-count-max
@@ -16,6 +19,7 @@ module "app_cluster" {
   rapid_ecr_url                                   = var.rapid_ecr_url
   certificate_validation_arn                      = var.certificate_validation_arn
   hosted_zone_id                                  = var.hosted_zone_id
+  parent_hosted_zone_id                           = var.parent_hosted_zone_id
   aws_account                                     = var.aws_account
   aws_region                                      = var.aws_region
   data_s3_bucket_arn                              = aws_s3_bucket.this.arn
@@ -37,17 +41,27 @@ module "app_cluster" {
 }
 
 module "auth" {
-  source                  = "../auth"
-  tags                    = var.tags
-  domain_name             = var.domain_name
-  resource-name-prefix    = var.resource-name-prefix
-  password_policy         = var.password_policy
-  layers                  = var.layers
-  ses_domain_identity_arn = var.ses_domain_identity_arn
-  ses_email_domain        = var.ses_email_domain
+  providers = {
+    aws = aws.default
+  }
+  source                       = "../auth"
+  tags                         = var.tags
+  domain_name                  = var.domain_name
+  resource-name-prefix         = var.resource-name-prefix
+  password_policy              = var.password_policy
+  layers                       = var.layers
+  ses_domain_identity_arn      = var.ses_domain_identity_arn
+  ses_email_domain             = var.ses_email_domain
+  invite_message_email_subject = var.invite_message_email_subject
+  invite_message_email_message = var.invite_message_email_message
+  sender_display_name          = var.sender_display_name
+  reply_to_email_address       = var.reply_to_email_address
 }
 
 module "data_workflow" {
+  providers = {
+    aws = aws.default
+  }
   source               = "../data-workflow"
   resource-name-prefix = var.resource-name-prefix
   aws_account          = var.aws_account
@@ -55,6 +69,10 @@ module "data_workflow" {
 }
 
 module "ui" {
+  providers = {
+    aws.default = aws.default
+    aws.us_east = aws.us_east
+  }
   source                             = "../ui"
   tags                               = var.tags
   log_bucket_name                    = aws_s3_bucket.logs.id
@@ -69,6 +87,7 @@ module "ui" {
   route_53_validation_record_fqdns   = module.app_cluster.route_53_validation_record_fqdns
   geo_restriction_locations          = var.geo_restriction_locations
   sql_injection_protection           = var.sql_injection_protection
+  aws_role_arn_to_assume             = var.aws_role_arn_to_assume
 }
 
 resource "aws_s3_bucket" "this" {
@@ -76,6 +95,8 @@ resource "aws_s3_bucket" "this" {
   #checkov:skip=CKV_AWS_145:No need for non default key
   #checkov:skip=CKV2_AWS_62:No need for event notifications
   #checkov:skip=CKV2_AWS_61:No need for lifecycle configuration
+
+  provider = aws.default
 
   bucket        = var.resource-name-prefix
   force_destroy = false
@@ -85,9 +106,16 @@ resource "aws_s3_bucket" "this" {
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
+  provider = aws.default
+
   bucket = aws_s3_bucket.this.id
 
   rule {
+    blocked_encryption_types = [
+      "SSE-C",
+    ]
+    bucket_key_enabled = false
+
     apply_server_side_encryption_by_default {
       kms_master_key_id = "" # use default
       sse_algorithm     = "AES256"
@@ -96,6 +124,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
 }
 
 resource "aws_s3_bucket_versioning" "this" {
+  provider = aws.default
+
   bucket = aws_s3_bucket.this.id
   versioning_configuration {
     status = "Enabled"
@@ -103,6 +133,8 @@ resource "aws_s3_bucket_versioning" "this" {
 }
 
 resource "aws_s3_bucket_logging" "this" {
+  provider = aws.default
+
   bucket = aws_s3_bucket.this.id
 
   target_bucket = aws_s3_bucket.logs.bucket
@@ -110,11 +142,15 @@ resource "aws_s3_bucket_logging" "this" {
 }
 
 resource "aws_s3_bucket_notification" "this" {
+  provider = aws.default
+
   bucket      = aws_s3_bucket.this.id
   eventbridge = true
 }
 
 resource "aws_s3_bucket_public_access_block" "this" {
+  provider = aws.default
+
   bucket                  = aws_s3_bucket.this.id
   ignore_public_acls      = true
   block_public_acls       = true
@@ -129,6 +165,8 @@ resource "aws_s3_bucket" "logs" {
   #checkov:skip=CKV_AWS_21:No need to version log bucket
   #checkov:skip=CKV2_AWS_62:No need for event notifications
   #checkov:skip=CKV2_AWS_61:No need for lifecycle configuration
+  provider = aws.default
+
   bucket        = "${var.resource-name-prefix}-logs"
   force_destroy = false
 
@@ -136,23 +174,33 @@ resource "aws_s3_bucket" "logs" {
 }
 
 resource "aws_s3_bucket_acl" "logs" {
+  provider = aws.default
+
   bucket = aws_s3_bucket.logs.id
   acl    = "private"
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
+  provider = aws.default
+
   bucket = aws_s3_bucket.logs.id
 
   rule {
+    blocked_encryption_types = [
+      "SSE-C",
+    ]
+    bucket_key_enabled = false
+
     apply_server_side_encryption_by_default {
-      kms_master_key_id = "" # use default
-      sse_algorithm     = "AES256"
+      sse_algorithm = "AES256"
     }
   }
 }
 
 # Resource to avoid error "AccessControlListNotSupported: The bucket does not allow ACLs"
 resource "aws_s3_bucket_ownership_controls" "logs" {
+  provider = aws.default
+
   bucket = aws_s3_bucket.logs.id
   rule {
     object_ownership = "BucketOwnerPreferred"
@@ -160,6 +208,8 @@ resource "aws_s3_bucket_ownership_controls" "logs" {
 }
 
 resource "aws_s3_bucket_public_access_block" "logs" {
+  provider = aws.default
+
   bucket                  = aws_s3_bucket.logs.id
   ignore_public_acls      = true
   block_public_acls       = true
@@ -169,6 +219,8 @@ resource "aws_s3_bucket_public_access_block" "logs" {
 }
 
 resource "aws_s3_bucket_policy" "log_bucket_policy" {
+  provider = aws.default
+
   bucket = aws_s3_bucket.this.id
   policy = <<POLICY
     {

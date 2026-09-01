@@ -102,6 +102,12 @@ variable "hosted_zone_id" {
   description = "Hosted Zone ID with the domain Name Servers, pass quotes to create a new one from scratch"
 }
 
+variable "parent_hosted_zone_id" {
+  type        = string
+  description = "Parent hosted Zone ID, if domain you use is aws subdomain. This will copy NS records to parent hosted zone"
+  default     = ""
+}
+
 variable "certificate_validation_arn" {
   type        = string
   description = "Arn of the certificate used by the domain"

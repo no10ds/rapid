@@ -1,4 +1,5 @@
-resource "aws_cloudfront_origin_access_identity" "rapid_ui" {}
+resource "aws_cloudfront_origin_access_identity" "rapid_ui" {
+}
 
 resource "random_string" "random_cloudfront_header" {
   length           = 16

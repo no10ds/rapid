@@ -119,3 +119,31 @@ variable "ses_email_domain" {
   description = "The domain to use for the SES email 'from' address (e.g., no-reply@<domain>). Defaults to domain_name if not specified."
   default     = null
 }
+
+variable "invite_message_email_message" {
+  description = "Invite message email message"
+  type        = string
+  validation {
+    condition     = strcontains(var.invite_message_email_message, "{username}") && strcontains(var.invite_message_email_message, "{####}")
+    error_message = "Email message template. Must contain {username} and {####} placeholders, for username and temporary password, respectively."
+  }
+  default = "Your username is {username} and temporary password is {####}."
+}
+
+variable "invite_message_email_subject" {
+  description = "Invite message email subject"
+  type        = string
+  default     = "Your temporary password"
+}
+
+variable "sender_display_name" {
+  description = "Email sender display name. Applicable only if ses_domain_identity_arn is configured."
+  type        = string
+  default     = ""
+}
+
+variable "reply_to_email_address" {
+  description = "Email REPLY-TO email address"
+  type        = string
+  default     = ""
+}
