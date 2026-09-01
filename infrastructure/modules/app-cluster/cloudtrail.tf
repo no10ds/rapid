@@ -281,6 +281,11 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "access_logs_s3_en
   bucket     = aws_s3_bucket.access_logs[0].bucket
 
   rule {
+    blocked_encryption_types = [
+      "SSE-C",
+    ]
+    bucket_key_enabled = false
+
     apply_server_side_encryption_by_default {
       kms_master_key_id = aws_kms_key.access_logs_key[0].arn
       sse_algorithm     = "aws:kms"
