@@ -178,6 +178,14 @@ export type SubjectPermission = {
   domain: string | undefined
 }
 
+export type SubjectListItem = {
+  subject_id: string
+  subject_name: string
+  type: string
+  email?: string
+  permissions: SubjectPermission[]
+}
+
 export type PermissionUiResponse = {
   [key: string]:
     | string

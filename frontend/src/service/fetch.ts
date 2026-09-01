@@ -16,6 +16,7 @@ import {
   MethodsResponse,
   PermissionUiResponse,
   SubjectPermission,
+  SubjectListItem,
   AccessTokenResponse
 } from './types'
 import { api } from '@/utils/data'
@@ -58,9 +59,7 @@ export const getPermissionsListUi = async (): Promise<PermissionUiResponse> => {
 }
 
 // TODO Rename this to just getSubjectList
-export const getSubjectsListUi = async (): Promise<
-  Array<Record<string, string | undefined>>
-> => {
+export const getSubjectsListUi = async (): Promise<SubjectListItem[]> => {
   const res = await api(`/api/subjects`, {
     method: 'GET'
   })

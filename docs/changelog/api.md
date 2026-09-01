@@ -1,5 +1,15 @@
 # API Changelog
 
+## v8.1.2 - _2026-08-04_
+
+See [v8.1.2] changes
+
+### Features
+
+- Embed permissions in list_subjects response to reduce DynamoDB load
+
+[v8.1.2]: https://github.com/no10ds/rapid/compare/v8.1.1...v8.1.2
+
 ## v8.1.1 - _2026-06-09_
 
 See [v8.1.1] changes

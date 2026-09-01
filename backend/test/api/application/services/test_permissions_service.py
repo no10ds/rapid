@@ -91,6 +91,40 @@ class TestGetSubjectPermissions:
         assert [item.model_dump() for item in actual_response] == expected_response
 
 
+class TestGetAllSubjectsPermissions:
+    def setup_method(self):
+        self.dynamo_adapter = Mock()
+        self.permissions_service = PermissionsService(self.dynamo_adapter)
+
+    def test_get_all_subjects_permissions(self):
+        write_public = PermissionItem(
+            id="WRITE_ALL_PUBLIC", type="WRITE", layer="ALL", sensitivity="PUBLIC"
+        )
+        read_private = PermissionItem(
+            id="READ_ALL_PRIVATE", type="READ", layer="ALL", sensitivity="PRIVATE"
+        )
+        self.dynamo_adapter.get_all_permissions.return_value = [
+            write_public,
+            read_private,
+            PermissionItem(id="DATA_ADMIN", type="DATA_ADMIN"),
+        ]
+        self.dynamo_adapter.get_all_subject_permission_keys.return_value = {
+            "subject-1": ["WRITE_ALL_PUBLIC", "READ_ALL_PRIVATE"],
+            "subject-2": [],
+            "subject-3": ["UNKNOWN_KEY"],
+        }
+
+        result = self.permissions_service.get_all_subjects_permissions()
+
+        assert result == {
+            "subject-1": [write_public, read_private],
+            "subject-2": [],
+            "subject-3": [],
+        }
+        self.dynamo_adapter.get_all_permissions.assert_called_once()
+        self.dynamo_adapter.get_all_subject_permission_keys.assert_called_once()
+
+
 class TestGetUIPermissions:
     def setup_method(self):
         self.dynamo_adapter = Mock()
