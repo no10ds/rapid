@@ -19,6 +19,9 @@ data "aws_iam_policy_document" "access_logs_key_policy" {
       "kms:Encrypt",
       "kms:Decrypt",
       "kms:ReEncrypt*",
+      "kms:ScheduleKeyDeletion",
+      "kms:EnableKeyRotation",
+      "kms:TagResource"
     ]
 
     resources = [

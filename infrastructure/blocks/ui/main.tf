@@ -7,6 +7,11 @@ terraform {
 module "ui" {
   source = "../../modules/ui"
 
+  providers = {
+    aws         = aws
+    aws.us_east = aws.us_east
+  }
+
   resource-name-prefix = var.resource-name-prefix
 
   load_balancer_dns = data.terraform_remote_state.app-cluster-state.outputs.load_balancer_dns

@@ -58,7 +58,5 @@ resource "aws_lambda_function" "this" {
 
   publish = true
 
-  depends_on = [
-    null_resource.download_static_ui
-  ]
+  depends_on = [terraform_data.static_ui]
 }
