@@ -1,5 +1,44 @@
 # Migration
 
+## Migrating to v9 from v8
+
+v9 changes how the `rapid` Terraform module gets its AWS providers. There is no data migration.
+
+1. Define two AWS providers in your root module, one for your main region and one for `us-east-1`, which CloudFront needs:
+
+   ```
+   provider "aws" {
+     alias  = "default"
+     region = "eu-west-2"
+   }
+
+   provider "aws" {
+     alias  = "us_east"
+     region = "us-east-1"
+   }
+   ```
+
+2. Pass them to the module:
+
+   ```
+   module "rapid" {
+     source = "git@github.com:no10ds/rapid.git//infrastructure/modules/rapid"
+
+     providers = {
+       aws.default = aws.default
+       aws.us_east = aws.us_east
+     }
+
+     ...
+   }
+   ```
+
+   If you previously defined a provider with `alias = "us_east"` for this module, reuse it. The module no longer defines its own.
+
+3. Update both `application_version` and `ui_version` to `v9.0.0` (or leave them unset to use the module default).
+4. Run `terraform plan` before applying. The UI upload step runs once more because its resource was renamed. Check the plan for any unexpected target group, load balancer or CloudFront distribution replacement.
+
+
 ## Migrating to v7 from v6
 
 All of the datasets need to be moved to a layer as part of the v7 migration.
