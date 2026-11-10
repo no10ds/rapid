@@ -6,6 +6,16 @@ resource "aws_route53_zone" "primary-hosted-zone" {
   tags  = var.tags
 }
 
+resource "aws_route53_record" "copy-ns-records" {
+  count = var.parent_hosted_zone_id != "" && var.hosted_zone_id == "" ? 1 : 0
+
+  zone_id = var.parent_hosted_zone_id
+  name    = aws_route53_zone.primary-hosted-zone[0].name
+  type    = "NS"
+  ttl     = "30"
+  records = aws_route53_zone.primary-hosted-zone[0].name_servers
+}
+
 # Create the certificate
 resource "aws_acm_certificate" "rapid-certificate" {
   count             = var.certificate_validation_arn == "" ? 1 : 0

@@ -66,6 +66,18 @@ variable "hosted_zone_id" {
   default     = ""
 }
 
+variable "parent_hosted_zone_id" {
+  type        = string
+  description = "Parent hosted Zone ID, if domain you use is aws subdomain. This will copy NS records to parent hosted zone"
+  default     = ""
+}
+
+variable "target_group_name" {
+  type        = string
+  description = "Override the load balancer target group name. Defaults to <resource-name-prefix>-tg. Changing it forces the target group to be replaced"
+  default     = ""
+}
+
 variable "ip_whitelist" {
   type        = list(string)
   description = "A list of IPs to whitelist for access to the service"
@@ -201,4 +213,10 @@ variable "task_cpu" {
   type        = number
   description = "rAPId ecs task cpu"
   default     = 256
+}
+
+variable "aws_role_arn_to_assume" {
+  description = "AWS Role ARN to assume for aws cli commands"
+  type        = string
+  default     = ""
 }
