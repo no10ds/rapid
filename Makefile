@@ -259,11 +259,11 @@ frontend/create-static-out:
 
 frontend/zip-contents:		## Zip contents of the built static html files
 ifdef tag
-	@cd frontend/; zip -r "${tag}.zip" ./out
-	@cd frontend/; zip -r "${tag}-router-lambda.zip" ./lambda/lambda.js
+	@cd frontend/; python3 -m zipfile -c "${tag}.zip" ./out
+	@cd frontend/; python3 -m zipfile -c "${tag}-router-lambda.zip" ./lambda
 else
-	@cd frontend/; zip -r "$(FRONTEND_ZIP_PATH).zip" ./out
-	@cd frontend/; zip -r "$(FRONTEND_ZIP_PATH)-router-lambda.zip" ./lambda/lambda.js
+	@cd frontend/; python3 -m zipfile -c "$(FRONTEND_ZIP_PATH).zip" ./out
+	@cd frontend/; python3 -m zipfile -c "$(FRONTEND_ZIP_PATH)-router-lambda.zip" ./lambda
 endif
 
 frontend/release:		## Upload the zipped built static files to a production Github release
