@@ -1,5 +1,34 @@
 # API Changelog
 
+## v8.2.0 - _2026-11-11_
+
+See [v8.2.0] changes
+
+### Features
+
+- Optional `parent_hosted_zone_id` infrastructure variable copies the NS records of a newly created subdomain hosted zone into the parent zone, replacing the manual step. It only applies when `hosted_zone_id` is not set.
+- Optional `target_group_name` infrastructure variable to override the load balancer target group name. It defaults to `<resource-name-prefix>-tg`, as before.
+- Optional `aws_role_arn_to_assume` infrastructure variable lets the UI upload step run under an assumed role. The upload script now needs `jq` when this is set.
+
+### Fixes
+
+- The default network ACL for the VPC created by the `vpc` block now only allows HTTP/HTTPS, return traffic and traffic from within the VPC, instead of all traffic.
+- CloudFront now connects to the load balancer using TLS 1.2 only. TLS 1.0 and 1.1 are no longer allowed.
+- The CloudTrail KMS key policy includes `kms:ScheduleKeyDeletion`, `kms:EnableKeyRotation` and `kms:TagResource`, so a failed deployment can be recreated.
+- The generated Cognito test user password now always meets the password policy.
+- `backend_setup.sh` blocks public access and enforces HTTPS on newly created Terraform state buckets. Existing state buckets are not changed.
+- Upgraded `uuid` from 13 to 14 and the babel packages to 7.29 in the frontend.
+
+### Breaking Changes
+
+- The `rapid` module now takes its AWS providers from the caller. You must pass `aws.default` and `aws.us_east` (the `us-east-1` provider used for CloudFront) in a `providers` map. The `us-east-1` provider is no longer defined inside the module.
+
+### Migration
+
+- See the [migration doc](../migration.md) for details on how to migrate to v8.2 from v8.1.
+
+[v8.2.0]: https://github.com/no10ds/rapid/compare/v8.1.2...v8.2.0
+
 ## v8.1.2 - _2026-08-04_
 
 See [v8.1.2] changes
