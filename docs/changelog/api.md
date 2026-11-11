@@ -25,8 +25,6 @@ See [v8.2.0] changes
 
 ### Migration
 
-- See the [migration doc](../migration.md) for details on how to migrate to v8.2 from v8.1.
-
 [v8.2.0]: https://github.com/no10ds/rapid/compare/v8.1.2...v8.2.0
 
 ## v8.1.2 - _2026-08-04_
